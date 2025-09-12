@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import brandsData from '../../../data/brands.json'
 import fs from 'fs'
 import path from 'path'
@@ -93,10 +93,9 @@ export async function PUT(request: Request) {
 }
 
 // DELETE - 브랜드 삭제
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const brandId = searchParams.get('id')
+    const brandId = request.nextUrl.searchParams.get('id')
     
     if (!brandId) {
       return NextResponse.json(

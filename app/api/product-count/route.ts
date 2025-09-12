@@ -39,8 +39,7 @@ function writeProductCounts(counts: Record<string, number>) {
 // GET: Retrieve count for a specific product
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const productName = searchParams.get('productName')
+    const productName = request.nextUrl.searchParams.get('productName')
     
     if (!productName) {
       return NextResponse.json({ error: 'Product name is required' }, { status: 400 })

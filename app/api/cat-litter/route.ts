@@ -1,13 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import { promises as fs } from 'fs'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const litterType = searchParams.get('litterType')
-    const features = searchParams.get('features')?.split(',') || []
-    const sortBy = searchParams.get('sortBy') || 'recommended'
+    const litterType = request.nextUrl.searchParams.get('litterType')
+    const features = request.nextUrl.searchParams.get('features')?.split(',') || []
+    const sortBy = request.nextUrl.searchParams.get('sortBy') || 'recommended'
 
     // Read products data
     const jsonDirectory = path.join(process.cwd(), 'data')

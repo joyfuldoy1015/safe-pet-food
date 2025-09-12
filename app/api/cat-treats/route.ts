@@ -1,12 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import treatProducts from '@/data/cat-treats-products.json'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const treatType = searchParams.get('treatType')
-    const functionality = searchParams.get('functionality')
-    const sortBy = searchParams.get('sortBy') || 'recommended'
+    const treatType = request.nextUrl.searchParams.get('treatType')
+    const functionality = request.nextUrl.searchParams.get('functionality')
+    const sortBy = request.nextUrl.searchParams.get('sortBy') || 'recommended'
 
     let filteredProducts = [...treatProducts]
 
