@@ -3,6 +3,9 @@ import brandsData from '../../../data/brands.json'
 import fs from 'fs'
 import path from 'path'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 // GET - 브랜드 목록 조회
 export async function GET() {
   try {

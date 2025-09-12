@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import treatProducts from '@/data/cat-treats-products.json'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const treatType = request.nextUrl.searchParams.get('treatType')
