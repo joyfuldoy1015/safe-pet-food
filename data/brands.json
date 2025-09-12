@@ -1,0 +1,102 @@
+[
+  {
+    "id": "1",
+    "name": "로얄캐닌",
+    "manufacturer": "마스 펫케어 코리아",
+    "recall_history": [
+      {
+        "date": "2019-03-15",
+        "reason": "비타민D 과다 함유",
+        "severity": "medium",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.2,
+    "product_lines": ["성견용", "퍼피", "소형견", "대형견", "처방식"],
+    "established_year": 1968,
+    "country": "프랑스",
+    "certifications": ["AAFCO", "ISO 9001"],
+    "image": "/brands/royal-canin.jpg"
+  },
+  {
+    "id": "2", 
+    "name": "힐스",
+    "manufacturer": "힐스 펫 뉴트리션",
+    "recall_history": [
+      {
+        "date": "2019-01-31",
+        "reason": "비타민D 독성 수준",
+        "severity": "high",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.0,
+    "product_lines": ["사이언스 다이어트", "프리스크립션 다이어트"],
+    "established_year": 1939,
+    "country": "미국",
+    "certifications": ["AAFCO", "FDA"],
+    "image": "/brands/hills.jpg"
+  },
+  {
+    "id": "3",
+    "name": "오리젠",
+    "manufacturer": "챔피언 펫푸드",
+    "recall_history": [],
+    "overall_rating": 4.7,
+    "product_lines": ["오리지널", "식스 피쉬", "퍼피", "시니어"],
+    "established_year": 1985,
+    "country": "캐나다",
+    "certifications": ["CFIA", "AAFCO"],
+    "image": "/brands/orijen.jpg"
+  },
+  {
+    "id": "4",
+    "name": "아카나",
+    "manufacturer": "챔피언 펫푸드",
+    "recall_history": [],
+    "overall_rating": 4.5,
+    "product_lines": ["클래식", "레지오날", "싱글즈"],
+    "established_year": 1985,
+    "country": "캐나다", 
+    "certifications": ["CFIA", "AAFCO"],
+    "image": "/brands/acana.jpg"
+  },
+  {
+    "id": "5",
+    "name": "퓨리나 프로플랜",
+    "manufacturer": "네슬레 퓨리나",
+    "recall_history": [
+      {
+        "date": "2016-03-18",
+        "reason": "비타민/미네랄 불충분",
+        "severity": "low",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 3.8,
+    "product_lines": ["옵티라이프", "옵티웨이트", "포커스"],
+    "established_year": 1986,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/purina-proplan.jpg"
+  },
+  {
+    "id": "6",
+    "name": "내추럴발란스",
+    "manufacturer": "Dick Van Patten's Natural Balance Pet Foods",
+    "recall_history": [
+      {
+        "date": "2018-08-15", 
+        "reason": "살모넬라 오염 가능성",
+        "severity": "high",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 3.9,
+    "product_lines": ["울트라 프리미엄", "리미티드 인그리디언트"],
+    "established_year": 1989,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/natural-balance.jpg"
+  }
+] 

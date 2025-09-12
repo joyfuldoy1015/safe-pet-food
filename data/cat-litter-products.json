@@ -1,0 +1,374 @@
+[
+  {
+    "id": "everclean-unscented-01",
+    "name": "에버클린 무향 고양이 모래",
+    "brand": "에버클린",
+    "imageUrl": "/images/cat-litter/everclean-unscented.jpg",
+    "litterType": "벤토나이트",
+    "keyFeatures": ["강력한 응고력", "먼지 적음", "탈취력 우수"],
+    "priceInfo": 18000,
+    "priceUnit": "10L당",
+    "overallRating": 4.8,
+    "reviewCount": 1204,
+    "detailedRatings": {
+      "dust": 4.7,
+      "clumping": 4.9,
+      "odorControl": 4.6,
+      "tracking": 4.2
+    },
+    "aiSummary": {
+      "pros": ["#먼지없음", "#강력응고", "#대용량"],
+      "cons": ["#비싼가격", "#무거움"],
+      "summary": "대부분의 사용자들이 먼지가 거의 없고 응고력이 뛰어나다는 점에 매우 만족하지만, 가격이 다소 비싸고 무겁다는 점을 단점으로 꼽았습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 1028,
+      "recommendationRate": 85.4
+    },
+    "usageStats": {
+      "averageUsageDays": 28,
+      "repurchaseRate": 89.2
+    }
+  },
+  {
+    "id": "dr-elseys-precious-cat",
+    "name": "닥터 엘시 프레셔스 캣",
+    "brand": "닥터 엘시",
+    "imageUrl": "/images/cat-litter/dr-elseys.jpg",
+    "litterType": "벤토나이트",
+    "keyFeatures": ["먼지 적음", "탈취력 우수", "천연 성분"],
+    "priceInfo": 22000,
+    "priceUnit": "10L당",
+    "overallRating": 4.6,
+    "reviewCount": 856,
+    "detailedRatings": {
+      "dust": 4.9,
+      "clumping": 4.5,
+      "odorControl": 4.7,
+      "tracking": 4.3
+    },
+    "aiSummary": {
+      "pros": ["#완전무먼지", "#천연성분", "#탈취우수"],
+      "cons": ["#가격높음", "#사막화있음"],
+      "summary": "완전 무먼지와 뛰어난 탈취력으로 호평받지만, 높은 가격과 약간의 사막화 현상이 아쉽다는 의견이 많습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 732,
+      "recommendationRate": 85.5
+    },
+    "usageStats": {
+      "averageUsageDays": 32,
+      "repurchaseRate": 91.7
+    }
+  },
+  {
+    "id": "worlds-best-corn",
+    "name": "월즈베스트 옥수수 모래",
+    "brand": "월즈베스트",
+    "imageUrl": "/images/cat-litter/worlds-best.jpg",
+    "litterType": "옥수수",
+    "keyFeatures": ["변기 배출 가능", "천연 성분", "먼지 적음"],
+    "priceInfo": 25000,
+    "priceUnit": "10L당",
+    "overallRating": 4.4,
+    "reviewCount": 623,
+    "detailedRatings": {
+      "dust": 4.5,
+      "clumping": 4.2,
+      "odorControl": 4.1,
+      "tracking": 4.6
+    },
+    "aiSummary": {
+      "pros": ["#변기배출", "#친환경", "#가벼움"],
+      "cons": ["#약한응고", "#냄새흡수부족"],
+      "summary": "변기 배출이 가능하고 친환경적이라는 장점이 있지만, 응고력과 냄새 흡수력이 다소 아쉽다는 평가입니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 421,
+      "recommendationRate": 67.6
+    },
+    "usageStats": {
+      "averageUsageDays": 21,
+      "repurchaseRate": 72.4
+    }
+  },
+  {
+    "id": "tofu-cat-litter",
+    "name": "프리미엄 두부 모래",
+    "brand": "네이처",
+    "imageUrl": "/images/cat-litter/tofu-litter.jpg",
+    "litterType": "두부",
+    "keyFeatures": ["변기 배출 가능", "천연 성분", "먼지 적음"],
+    "priceInfo": 15000,
+    "priceUnit": "10L당",
+    "overallRating": 4.2,
+    "reviewCount": 445,
+    "detailedRatings": {
+      "dust": 4.3,
+      "clumping": 3.9,
+      "odorControl": 3.8,
+      "tracking": 4.4
+    },
+    "aiSummary": {
+      "pros": ["#저렴함", "#변기배출", "#안전함"],
+      "cons": ["#약한탈취", "#빠른소모"],
+      "summary": "저렴하고 안전한 천연 성분이지만, 탈취력이 약하고 소모가 빨라 자주 교체해야 한다는 의견이 많습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 267,
+      "recommendationRate": 60.0
+    },
+    "usageStats": {
+      "averageUsageDays": 18,
+      "repurchaseRate": 65.8
+    }
+  },
+  {
+    "id": "silica-gel-premium",
+    "name": "실리카겔 프리미엄",
+    "brand": "크리스탈",
+    "imageUrl": "/images/cat-litter/silica-gel.jpg",
+    "litterType": "실리카겔",
+    "keyFeatures": ["탈취력 우수", "대용량", "먼지 적음"],
+    "priceInfo": 20000,
+    "priceUnit": "10L당",
+    "overallRating": 4.3,
+    "reviewCount": 378,
+    "detailedRatings": {
+      "dust": 4.6,
+      "clumping": 3.5,
+      "odorControl": 4.8,
+      "tracking": 4.1
+    },
+    "aiSummary": {
+      "pros": ["#강력탈취", "#오래사용", "#먼지없음"],
+      "cons": ["#응고안됨", "#소음발생"],
+      "summary": "뛰어난 탈취력과 오래 사용할 수 있다는 장점이 있지만, 응고되지 않고 걸을 때 소음이 발생한다는 단점이 있습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 251,
+      "recommendationRate": 66.4
+    },
+    "usageStats": {
+      "averageUsageDays": 35,
+      "repurchaseRate": 78.3
+    }
+  },
+  {
+    "id": "wood-pellet-natural",
+    "name": "천연 우드펠렛",
+    "brand": "포레스트",
+    "imageUrl": "/images/cat-litter/wood-pellet.jpg",
+    "litterType": "우드펠렛",
+    "keyFeatures": ["천연 성분", "변기 배출 가능", "대용량"],
+    "priceInfo": 12000,
+    "priceUnit": "10L당",
+    "overallRating": 3.9,
+    "reviewCount": 267,
+    "detailedRatings": {
+      "dust": 4.2,
+      "clumping": 3.2,
+      "odorControl": 3.6,
+      "tracking": 4.3
+    },
+    "aiSummary": {
+      "pros": ["#경제적", "#친환경", "#안전함"],
+      "cons": ["#응고안됨", "#냄새흡수약함"],
+      "summary": "경제적이고 친환경적인 선택이지만, 응고되지 않고 냄새 흡수력이 약해 관리가 어렵다는 의견이 많습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 104,
+      "recommendationRate": 38.9
+    },
+    "usageStats": {
+      "averageUsageDays": 25,
+      "repurchaseRate": 42.7
+    }
+  },
+  {
+    "id": "everclean-unscented-01",
+    "name": "에버클린 무향 고양이 모래",
+    "brand": "에버클린",
+    "imageUrl": "/images/cat-litter/everclean-unscented.jpg",
+    "litterType": "벤토나이트",
+    "keyFeatures": ["강력한 응고력", "먼지 적음", "탈취력 우수"],
+    "priceInfo": 18000,
+    "priceUnit": "10L당",
+    "overallRating": 4.8,
+    "reviewCount": 1204,
+    "detailedRatings": {
+      "dust": 4.7,
+      "clumping": 4.9,
+      "odorControl": 4.6,
+      "tracking": 4.2
+    },
+    "aiSummary": {
+      "pros": ["#먼지없음", "#강력응고", "#대용량"],
+      "cons": ["#비싼가격", "#무거움"],
+      "summary": "대부분의 사용자들이 먼지가 거의 없고 응고력이 뛰어나다는 점에 매우 만족하지만, 가격이 다소 비싸고 무겁다는 점을 단점으로 꼽았습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 1028,
+      "recommendationRate": 85.4
+    },
+    "usageStats": {
+      "averageUsageDays": 28,
+      "repurchaseRate": 89.2
+    }
+  },
+  {
+    "id": "dr-elseys-precious-cat",
+    "name": "닥터 엘시 프레셔스 캣",
+    "brand": "닥터 엘시",
+    "imageUrl": "/images/cat-litter/dr-elseys.jpg",
+    "litterType": "벤토나이트",
+    "keyFeatures": ["먼지 적음", "탈취력 우수", "천연 성분"],
+    "priceInfo": 22000,
+    "priceUnit": "10L당",
+    "overallRating": 4.6,
+    "reviewCount": 856,
+    "detailedRatings": {
+      "dust": 4.9,
+      "clumping": 4.5,
+      "odorControl": 4.7,
+      "tracking": 4.3
+    },
+    "aiSummary": {
+      "pros": ["#완전무먼지", "#천연성분", "#탈취우수"],
+      "cons": ["#가격높음", "#사막화있음"],
+      "summary": "완전 무먼지와 뛰어난 탈취력으로 호평받지만, 높은 가격과 약간의 사막화 현상이 아쉽다는 의견이 많습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 732,
+      "recommendationRate": 85.5
+    },
+    "usageStats": {
+      "averageUsageDays": 32,
+      "repurchaseRate": 91.7
+    }
+  },
+  {
+    "id": "worlds-best-corn",
+    "name": "월즈베스트 옥수수 모래",
+    "brand": "월즈베스트",
+    "imageUrl": "/images/cat-litter/worlds-best.jpg",
+    "litterType": "옥수수",
+    "keyFeatures": ["변기 배출 가능", "천연 성분", "먼지 적음"],
+    "priceInfo": 25000,
+    "priceUnit": "10L당",
+    "overallRating": 4.4,
+    "reviewCount": 623,
+    "detailedRatings": {
+      "dust": 4.5,
+      "clumping": 4.2,
+      "odorControl": 4.1,
+      "tracking": 4.6
+    },
+    "aiSummary": {
+      "pros": ["#변기배출", "#친환경", "#가벼움"],
+      "cons": ["#약한응고", "#냄새흡수부족"],
+      "summary": "변기 배출이 가능하고 친환경적이라는 장점이 있지만, 응고력과 냄새 흡수력이 다소 아쉽다는 평가입니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 421,
+      "recommendationRate": 67.6
+    },
+    "usageStats": {
+      "averageUsageDays": 21,
+      "repurchaseRate": 72.4
+    }
+  },
+  {
+    "id": "tofu-cat-litter",
+    "name": "프리미엄 두부 모래",
+    "brand": "네이처",
+    "imageUrl": "/images/cat-litter/tofu-litter.jpg",
+    "litterType": "두부",
+    "keyFeatures": ["변기 배출 가능", "천연 성분", "먼지 적음"],
+    "priceInfo": 15000,
+    "priceUnit": "10L당",
+    "overallRating": 4.2,
+    "reviewCount": 445,
+    "detailedRatings": {
+      "dust": 4.3,
+      "clumping": 3.9,
+      "odorControl": 3.8,
+      "tracking": 4.4
+    },
+    "aiSummary": {
+      "pros": ["#저렴함", "#변기배출", "#안전함"],
+      "cons": ["#약한탈취", "#빠른소모"],
+      "summary": "저렴하고 안전한 천연 성분이지만, 탈취력이 약하고 소모가 빨라 자주 교체해야 한다는 의견이 많습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 267,
+      "recommendationRate": 60.0
+    },
+    "usageStats": {
+      "averageUsageDays": 18,
+      "repurchaseRate": 65.8
+    }
+  },
+  {
+    "id": "silica-gel-premium",
+    "name": "실리카겔 프리미엄",
+    "brand": "크리스탈",
+    "imageUrl": "/images/cat-litter/silica-gel.jpg",
+    "litterType": "실리카겔",
+    "keyFeatures": ["탈취력 우수", "대용량", "먼지 적음"],
+    "priceInfo": 20000,
+    "priceUnit": "10L당",
+    "overallRating": 4.3,
+    "reviewCount": 378,
+    "detailedRatings": {
+      "dust": 4.6,
+      "clumping": 3.5,
+      "odorControl": 4.8,
+      "tracking": 4.1
+    },
+    "aiSummary": {
+      "pros": ["#강력탈취", "#오래사용", "#먼지없음"],
+      "cons": ["#응고안됨", "#소음발생"],
+      "summary": "뛰어난 탈취력과 오래 사용할 수 있다는 장점이 있지만, 응고되지 않고 걸을 때 소음이 발생한다는 단점이 있습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 251,
+      "recommendationRate": 66.4
+    },
+    "usageStats": {
+      "averageUsageDays": 35,
+      "repurchaseRate": 78.3
+    }
+  },
+  {
+    "id": "wood-pellet-natural",
+    "name": "천연 우드펠렛",
+    "brand": "포레스트",
+    "imageUrl": "/images/cat-litter/wood-pellet.jpg",
+    "litterType": "우드펠렛",
+    "keyFeatures": ["천연 성분", "변기 배출 가능", "대용량"],
+    "priceInfo": 12000,
+    "priceUnit": "10L당",
+    "overallRating": 3.9,
+    "reviewCount": 267,
+    "detailedRatings": {
+      "dust": 4.2,
+      "clumping": 3.2,
+      "odorControl": 3.6,
+      "tracking": 4.3
+    },
+    "aiSummary": {
+      "pros": ["#경제적", "#친환경", "#안전함"],
+      "cons": ["#응고안됨", "#냄새흡수약함"],
+      "summary": "경제적이고 친환경적인 선택이지만, 응고되지 않고 냄새 흡수력이 약해 관리가 어렵다는 의견이 많습니다."
+    },
+    "recommendationStats": {
+      "totalRecommendations": 104,
+      "recommendationRate": 38.9
+    },
+    "usageStats": {
+      "averageUsageDays": 25,
+      "repurchaseRate": 42.7
+    }
+  }
+] 

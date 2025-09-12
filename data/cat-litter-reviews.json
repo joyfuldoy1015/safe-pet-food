@@ -1,0 +1,202 @@
+[
+  {
+    "id": "review-001",
+    "productId": "everclean-unscented-01",
+    "userId": "user-001",
+    "userName": "냥집사김씨",
+    "userAvatar": "/images/avatars/user1.jpg",
+    "overallRating": 5,
+    "detailedRatings": {
+      "dust": 5,
+      "clumping": 5,
+      "odorControl": 4,
+      "tracking": 4
+    },
+    "title": "정말 먼지가 하나도 안 날려요!",
+    "content": "3마리 고양이와 함께 살면서 여러 모래를 써봤는데, 이 제품이 정말 최고입니다. 먼지가 전혀 날리지 않아서 알레르기 있는 저에게 딱이에요. 응고력도 뛰어나서 뭉친 덩어리가 부서지지 않고 깔끔하게 제거됩니다. 다만 가격이 조금 비싸긴 하지만 그만한 가치가 있다고 생각해요.",
+    "media": ["/images/reviews/review1-1.jpg", "/images/reviews/review1-2.jpg"],
+    "petProfile": {
+      "numberOfCats": 3,
+      "litterBoxType": "후드형"
+    },
+    "helpfulCount": 47,
+    "createdAt": "2024-01-15",
+    "hasPhotos": true,
+    "wouldRecommend": true
+  },
+  {
+    "id": "review-002",
+    "productId": "everclean-unscented-01",
+    "userId": "user-002",
+    "userName": "러시안블루맘",
+    "userAvatar": "/images/avatars/user2.jpg",
+    "overallRating": 4,
+    "detailedRatings": {
+      "dust": 5,
+      "clumping": 5,
+      "odorControl": 4,
+      "tracking": 3
+    },
+    "title": "응고력 최고, 하지만 사막화가 조금...",
+    "content": "응고력은 정말 뛰어납니다. 덩어리가 단단하게 뭉쳐서 제거하기 쉬워요. 먼지도 거의 없고요. 다만 고양이가 화장실을 나올 때 발가락 사이에 끼어서 조금씩 밖으로 나오는 게 아쉬워요. 전체적으로는 만족스러운 제품입니다.",
+    "media": [],
+    "petProfile": {
+      "numberOfCats": 1,
+      "litterBoxType": "일반형"
+    },
+    "helpfulCount": 23,
+    "createdAt": "2024-01-10",
+    "hasPhotos": false,
+    "wouldRecommend": true
+  },
+  {
+    "id": "review-003",
+    "productId": "dr-elseys-precious-cat",
+    "userId": "user-003",
+    "userName": "페르시안집사",
+    "userAvatar": "/images/avatars/user3.jpg",
+    "overallRating": 5,
+    "detailedRatings": {
+      "dust": 5,
+      "clumping": 4,
+      "odorControl": 5,
+      "tracking": 4
+    },
+    "title": "완전 무먼지! 장모종 고양이에게 최적",
+    "content": "페르시안 고양이를 키우는데 털이 길어서 먼지에 특히 민감해요. 이 제품은 정말 먼지가 전혀 안 나와서 고양이 털에도 묻지 않고 깔끔합니다. 냄새 제거 효과도 뛰어나고요. 가격이 비싸긴 하지만 품질을 생각하면 합리적이라고 생각해요.",
+    "media": ["/images/reviews/review3-1.jpg"],
+    "petProfile": {
+      "numberOfCats": 2,
+      "litterBoxType": "후드형"
+    },
+    "helpfulCount": 31,
+    "createdAt": "2024-01-08",
+    "hasPhotos": true,
+    "wouldRecommend": true
+  },
+  {
+    "id": "review-004",
+    "productId": "worlds-best-corn",
+    "userId": "user-004",
+    "userName": "친환경집사",
+    "userAvatar": "/images/avatars/user4.jpg",
+    "overallRating": 4,
+    "detailedRatings": {
+      "dust": 4,
+      "clumping": 3,
+      "odorControl": 3,
+      "tracking": 5
+    },
+    "title": "변기에 버릴 수 있어서 편해요",
+    "content": "아파트 살면서 쓰레기 버리는 게 항상 고민이었는데, 이 제품은 변기에 버릴 수 있어서 정말 편해요. 옥수수로 만들어져서 안전하고 친환경적이에요. 다만 응고력이 벤토나이트만큼 강하지는 않고, 냄새 제거도 조금 아쉬워요. 그래도 편의성 때문에 계속 쓸 것 같아요.",
+    "media": ["/images/reviews/review4-1.jpg", "/images/reviews/review4-2.jpg"],
+    "petProfile": {
+      "numberOfCats": 1,
+      "litterBoxType": "탑엔트리형"
+    },
+    "helpfulCount": 18,
+    "createdAt": "2024-01-05",
+    "hasPhotos": true,
+    "wouldRecommend": false
+  },
+  {
+    "id": "review-005",
+    "productId": "tofu-cat-litter",
+    "userId": "user-005",
+    "userName": "새끼고양이맘",
+    "userAvatar": "/images/avatars/user5.jpg",
+    "overallRating": 4,
+    "detailedRatings": {
+      "dust": 4,
+      "clumping": 3,
+      "odorControl": 3,
+      "tracking": 4
+    },
+    "title": "새끼 고양이에게 안전한 선택",
+    "content": "3개월 된 새끼 고양이를 키우는데, 혹시 모래를 먹을 수도 있어서 안전한 두부 모래를 선택했어요. 먹어도 안전하고 먼지도 적어서 만족해요. 응고력은 조금 아쉽지만 새끼 고양이 용으로는 충분해요. 가격도 저렴해서 부담 없이 쓸 수 있어요.",
+    "media": [],
+    "petProfile": {
+      "numberOfCats": 1,
+      "litterBoxType": "일반형"
+    },
+    "helpfulCount": 12,
+    "createdAt": "2024-01-03",
+    "hasPhotos": false,
+    "wouldRecommend": true
+  },
+  {
+    "id": "review-006",
+    "productId": "silica-gel-litter",
+    "userId": "user-006",
+    "userName": "다묘가정집사",
+    "userAvatar": "/images/avatars/user6.jpg",
+    "overallRating": 4,
+    "detailedRatings": {
+      "dust": 5,
+      "clumping": 1,
+      "odorControl": 5,
+      "tracking": 3
+    },
+    "title": "탈취력은 최고, 하지만 응고되지 않아요",
+    "content": "5마리 고양이를 키우는데 냄새 때문에 고민이 많았어요. 실리카겔 모래로 바꾼 후 냄새가 확실히 줄어들었어요. 먼지도 전혀 없고 오래 사용할 수 있어서 경제적이에요. 다만 응고되지 않아서 소변 제거가 조금 번거로워요. 그래도 탈취력 때문에 계속 사용할 예정이에요.",
+    "media": ["/images/reviews/review6-1.jpg"],
+    "petProfile": {
+      "numberOfCats": 5,
+      "litterBoxType": "대형 일반형"
+    },
+    "helpfulCount": 28,
+    "createdAt": "2024-01-02",
+    "hasPhotos": true,
+    "wouldRecommend": true
+  },
+  {
+    "id": "review-007",
+    "productId": "wood-pellet-litter",
+    "userId": "user-007",
+    "userName": "경제적집사",
+    "userAvatar": "/images/avatars/user7.jpg",
+    "overallRating": 3,
+    "detailedRatings": {
+      "dust": 4,
+      "clumping": 1,
+      "odorControl": 2,
+      "tracking": 5
+    },
+    "title": "가격은 저렴하지만 냄새 제거가...",
+    "content": "가격이 저렴해서 선택했는데, 냄새 제거 효과가 많이 아쉬워요. 나무 향이 처음에는 좋지만 시간이 지나면 암모니아 냄새가 올라와요. 사막화는 전혀 없어서 좋지만 전체적으로는 아쉬운 제품이에요.",
+    "media": [],
+    "petProfile": {
+      "numberOfCats": 2,
+      "litterBoxType": "일반형"
+    },
+    "helpfulCount": 8,
+    "createdAt": "2024-01-01",
+    "hasPhotos": false,
+    "wouldRecommend": false
+  },
+  {
+    "id": "review-008",
+    "productId": "everclean-unscented-01",
+    "userId": "user-008",
+    "userName": "알레르기집사",
+    "userAvatar": "/images/avatars/user8.jpg",
+    "overallRating": 5,
+    "detailedRatings": {
+      "dust": 5,
+      "clumping": 5,
+      "odorControl": 5,
+      "tracking": 3
+    },
+    "title": "알레르기 있어도 안심하고 사용",
+    "content": "먼지 알레르기가 심한데 이 제품은 정말 먼지가 없어서 안심하고 사용할 수 있어요. 응고력도 뛰어나고 냄새 제거도 완벽해요. 가격이 비싸긴 하지만 건강을 생각하면 투자할 가치가 있다고 생각해요.",
+    "media": [],
+    "petProfile": {
+      "numberOfCats": 1,
+      "litterBoxType": "후드형"
+    },
+    "helpfulCount": 35,
+    "createdAt": "2023-12-28",
+    "hasPhotos": false,
+    "wouldRecommend": true
+  }
+] 

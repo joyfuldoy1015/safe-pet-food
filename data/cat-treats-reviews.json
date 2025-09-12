@@ -1,0 +1,92 @@
+[
+  {
+    "id": "treat-review-001",
+    "productId": "ciao-chu-ru-tuna",
+    "userId": "user-001",
+    "userName": "츄르중독집사",
+    "userAvatar": "/images/avatars/user1.jpg",
+    "overallRating": 5,
+    "detailedRatings": {
+      "palatability": 5,
+      "ingredientSatisfaction": 4,
+      "priceSatisfaction": 3
+    },
+    "recommendation": true,
+    "repurchaseIntention": "willBuyAgain",
+    "palatabilityDetail": "ateEagerly",
+    "feedingPeriod": "6개월 이상",
+    "title": "우리 고양이 최애 간식!",
+    "pros": "기호성이 정말 좋아요. 물도 잘 안 마시는 아이인데 이걸로 수분 보충도 되고 일석이조예요.",
+    "cons": "가격이 좀 부담스러워요. 매일 주기엔 부담스럽고 특별한 날에만 줘요.",
+    "content": "3마리 고양이 모두 츄르만 보면 달려와요. 특히 막내는 포장지 소리만 들어도 어디서든 달려옵니다. 수의사 선생님도 수분 보충에 도움이 된다고 하셔서 안심하고 주고 있어요. 다만 가격이 조금 부담스러워서 평소엔 다른 간식 주고 특별한 날에만 츄르 줍니다.",
+    "media": ["/images/reviews/treat1-1.jpg", "/images/reviews/treat1-2.jpg"],
+    "petProfile": {
+      "age": "3세",
+      "taste": "까다로움",
+      "allergies": "없음"
+    },
+    "helpfulCount": 89,
+    "createdAt": "2024-01-20",
+    "hasPhotos": true
+  },
+  {
+    "id": "treat-review-002",
+    "productId": "ciao-chu-ru-tuna",
+    "userId": "user-002",
+    "userName": "건강집사",
+    "userAvatar": "/images/avatars/user2.jpg",
+    "overallRating": 4,
+    "detailedRatings": {
+      "palatability": 5,
+      "ingredientSatisfaction": 3,
+      "priceSatisfaction": 4
+    },
+    "recommendation": true,
+    "repurchaseIntention": "considering",
+    "palatabilityDetail": "ateEagerly",
+    "feedingPeriod": "1~6개월",
+    "title": "맛은 좋지만 성분이 걱정",
+    "pros": "기호성 최고, 투약할 때 정말 유용해요",
+    "cons": "첨가물이 많아서 자주 주기엔 걱정돼요",
+    "content": "약 먹이기 힘든 우리 고양이에게 츄르는 구세주예요. 츄르에 약 섞어주면 잘 먹어서 투약이 쉬워졌어요. 다만 성분표를 보니 첨가물이 좀 많아서 매일 주기엔 걱정이 되네요. 가끔씩 특별한 날에만 주려고 해요.",
+    "media": [],
+    "petProfile": {
+      "age": "7세",
+      "taste": "보통",
+      "allergies": "없음"
+    },
+    "helpfulCount": 56,
+    "createdAt": "2024-01-18",
+    "hasPhotos": false
+  },
+  {
+    "id": "treat-review-003",
+    "productId": "freeze-dried-chicken",
+    "userId": "user-003",
+    "userName": "자연식집사",
+    "userAvatar": "/images/avatars/user3.jpg",
+    "overallRating": 5,
+    "detailedRatings": {
+      "palatability": 4,
+      "ingredientSatisfaction": 5,
+      "priceSatisfaction": 3
+    },
+    "recommendation": true,
+    "repurchaseIntention": "willBuyAgain",
+    "palatabilityDetail": "ateWell",
+    "feedingPeriod": "1~6개월",
+    "title": "단일 원료의 힘!",
+    "pros": "첨가물 없는 순수 닭가슴살, 알러지 걱정 없어요",
+    "cons": "가격이 비싸고 양이 적어요",
+    "content": "알러지가 있는 우리 아이를 위해 단일 원료 간식을 찾다가 발견했어요. 닭가슴살만 들어있어서 안심하고 줄 수 있고, 아이도 잘 먹어요. 가격은 비싸지만 건강을 생각하면 투자할 가치가 있다고 봅니다. 작은 조각으로 나누어서 조금씩 줘요.",
+    "media": ["/images/reviews/treat3-1.jpg"],
+    "petProfile": {
+      "age": "5세",
+      "taste": "까다로움",
+      "allergies": "곡물 알러지"
+    },
+    "helpfulCount": 72,
+    "createdAt": "2024-01-15",
+    "hasPhotos": true
+  }
+] 

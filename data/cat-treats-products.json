@@ -1,0 +1,257 @@
+[
+  {
+    "id": "ciao-chu-ru-tuna",
+    "name": "챠오 츄르 참치",
+    "brand": "챠오",
+    "imageUrl": "/images/cat-treats/ciao-churu-tuna.jpg",
+    "treatType": "액상간식",
+    "mainIngredient": "참치",
+    "functionality": ["수분보충", "기호성"],
+    "nutritionInfo": {
+      "protein": 7.0,
+      "fat": 0.2,
+      "fiber": 0.1,
+      "moisture": 91.0,
+      "calories": "약 14kcal/개"
+    },
+    "priceInfo": {
+      "price": 12000,
+      "unit": "20개입",
+      "pricePerPiece": 600
+    },
+    "overallRating": 4.7,
+    "reviewCount": 2847,
+    "detailedRatings": {
+      "palatability": 4.8,
+      "ingredientSatisfaction": 4.5,
+      "priceSatisfaction": 4.2
+    },
+    "recommendationStats": {
+      "totalRecommendations": 2563,
+      "recommendationRate": 90.0
+    },
+    "repurchaseStats": {
+      "willBuyAgain": 2278,
+      "considering": 341,
+      "wontBuyAgain": 228,
+      "repurchaseRate": 80.0
+    },
+    "palatabilityStats": {
+      "ateEagerly": 2134,
+      "ateWell": 512,
+      "ateWhenGiven": 156,
+      "smelledOnly": 35,
+      "ignored": 10,
+      "successRate": 92.9
+    },
+    "aiSummary": {
+      "pros": ["#기호성최고", "#수분보충", "#휴대편리"],
+      "cons": ["#가격부담", "#첨가물우려"],
+      "summary": "전체 집사 중 90%가 추천할 만큼 기호성이 뛰어난 제품입니다. 대부분의 고양이가 허겁지겁 먹을 정도로 맛있어하지만, 지속적인 구매에는 가격 부담을 느끼는 집사들이 많습니다."
+    }
+  },
+  {
+    "id": "freeze-dried-chicken",
+    "name": "프리즈드라이 닭가슴살",
+    "brand": "네이처",
+    "imageUrl": "/images/cat-treats/freeze-dried-chicken.jpg",
+    "treatType": "건조간식",
+    "mainIngredient": "닭가슴살",
+    "functionality": ["단일원료", "고단백"],
+    "nutritionInfo": {
+      "protein": 82.0,
+      "fat": 8.5,
+      "fiber": 1.0,
+      "moisture": 5.0,
+      "calories": "약 380kcal/100g"
+    },
+    "priceInfo": {
+      "price": 18000,
+      "unit": "100g",
+      "pricePerPiece": 180
+    },
+    "overallRating": 4.5,
+    "reviewCount": 1623,
+    "detailedRatings": {
+      "palatability": 4.3,
+      "ingredientSatisfaction": 4.8,
+      "priceSatisfaction": 3.9
+    },
+    "recommendationStats": {
+      "totalRecommendations": 1394,
+      "recommendationRate": 85.9
+    },
+    "repurchaseStats": {
+      "willBuyAgain": 1168,
+      "considering": 325,
+      "wontBuyAgain": 130,
+      "repurchaseRate": 72.0
+    },
+    "palatabilityStats": {
+      "ateEagerly": 1056,
+      "ateWell": 421,
+      "ateWhenGiven": 113,
+      "smelledOnly": 25,
+      "ignored": 8,
+      "successRate": 91.1
+    },
+    "aiSummary": {
+      "pros": ["#단일원료", "#고단백", "#첨가물없음"],
+      "cons": ["#높은가격", "#딱딱함"],
+      "summary": "단일 원료로 만든 프리미엄 간식으로 성분에 대한 만족도가 매우 높습니다. 85.9%의 집사가 추천하지만, 높은 가격으로 인해 재구매율은 72%로 다소 낮은 편입니다."
+    }
+  },
+  {
+    "id": "temptations-seafood",
+    "name": "템테이션 해산물 믹스",
+    "brand": "템테이션",
+    "imageUrl": "/images/cat-treats/temptations-seafood.jpg",
+    "treatType": "건조간식",
+    "mainIngredient": "해산물믹스",
+    "functionality": ["기호성", "치아건강"],
+    "nutritionInfo": {
+      "protein": 30.0,
+      "fat": 12.0,
+      "fiber": 4.5,
+      "moisture": 12.0,
+      "calories": "약 2kcal/개"
+    },
+    "priceInfo": {
+      "price": 8500,
+      "unit": "180g",
+      "pricePerPiece": 47
+    },
+    "overallRating": 4.3,
+    "reviewCount": 1456,
+    "detailedRatings": {
+      "palatability": 4.6,
+      "ingredientSatisfaction": 3.8,
+      "priceSatisfaction": 4.5
+    },
+    "recommendationStats": {
+      "totalRecommendations": 1047,
+      "recommendationRate": 71.9
+    },
+    "repurchaseStats": {
+      "willBuyAgain": 1019,
+      "considering": 291,
+      "wontBuyAgain": 146,
+      "repurchaseRate": 70.0
+    },
+    "palatabilityStats": {
+      "ateEagerly": 1165,
+      "ateWell": 203,
+      "ateWhenGiven": 67,
+      "smelledOnly": 15,
+      "ignored": 6,
+      "successRate": 93.9
+    },
+    "aiSummary": {
+      "pros": ["#저렴한가격", "#높은기호성", "#대용량"],
+      "cons": ["#첨가물많음", "#영양불균형"],
+      "summary": "가성비가 뛰어나고 대부분의 고양이가 좋아하는 간식입니다. 71.9%의 집사가 추천하며 재구매율도 70%로 안정적입니다."
+    }
+  },
+  {
+    "id": "catnip-cookies",
+    "name": "캣닢 쿠키",
+    "brand": "펫츠원",
+    "imageUrl": "/images/cat-treats/catnip-cookies.jpg",
+    "treatType": "구운간식",
+    "mainIngredient": "연어, 캣닢",
+    "functionality": ["스트레스완화", "기호성"],
+    "nutritionInfo": {
+      "protein": 25.0,
+      "fat": 8.0,
+      "fiber": 3.0,
+      "moisture": 10.0,
+      "calories": "약 3kcal/개"
+    },
+    "priceInfo": {
+      "price": 15000,
+      "unit": "200g",
+      "pricePerPiece": 75
+    },
+    "overallRating": 4.1,
+    "reviewCount": 892,
+    "detailedRatings": {
+      "palatability": 4.0,
+      "ingredientSatisfaction": 4.3,
+      "priceSatisfaction": 3.8
+    },
+    "recommendationStats": {
+      "totalRecommendations": 589,
+      "recommendationRate": 66.0
+    },
+    "repurchaseStats": {
+      "willBuyAgain": 498,
+      "considering": 267,
+      "wontBuyAgain": 127,
+      "repurchaseRate": 55.8
+    },
+    "palatabilityStats": {
+      "ateEagerly": 445,
+      "ateWell": 267,
+      "ateWhenGiven": 134,
+      "smelledOnly": 35,
+      "ignored": 11,
+      "successRate": 79.8
+    },
+    "aiSummary": {
+      "pros": ["#캣닢효과", "#자연원료", "#스트레스완화"],
+      "cons": ["#개체차이", "#가격부담"],
+      "summary": "캣닢이 들어간 특별한 간식으로 66%의 집사가 추천합니다. 스트레스 완화 효과가 있지만 고양이마다 반응이 다르며, 재구매율은 55.8%로 보통 수준입니다."
+    }
+  },
+  {
+    "id": "salmon-jerky",
+    "name": "연어 져키",
+    "brand": "프리미엄펫",
+    "imageUrl": "/images/cat-treats/salmon-jerky.jpg",
+    "treatType": "건조간식",
+    "mainIngredient": "연어",
+    "functionality": ["오메가3", "단일원료"],
+    "nutritionInfo": {
+      "protein": 75.0,
+      "fat": 15.0,
+      "fiber": 2.0,
+      "moisture": 8.0,
+      "calories": "약 350kcal/100g"
+    },
+    "priceInfo": {
+      "price": 25000,
+      "unit": "80g",
+      "pricePerPiece": 312
+    },
+    "overallRating": 4.4,
+    "reviewCount": 567,
+    "detailedRatings": {
+      "palatability": 4.2,
+      "ingredientSatisfaction": 4.7,
+      "priceSatisfaction": 3.5
+    },
+    "recommendationStats": {
+      "totalRecommendations": 454,
+      "recommendationRate": 80.1
+    },
+    "repurchaseStats": {
+      "willBuyAgain": 340,
+      "considering": 136,
+      "wontBuyAgain": 91,
+      "repurchaseRate": 60.0
+    },
+    "palatabilityStats": {
+      "ateEagerly": 340,
+      "ateWell": 170,
+      "ateWhenGiven": 45,
+      "smelledOnly": 9,
+      "ignored": 3,
+      "successRate": 89.9
+    },
+    "aiSummary": {
+      "pros": ["#프리미엄원료", "#오메가3", "#단일원료"],
+      "cons": ["#매우비쌈", "#소량포장"],
+      "summary": "프리미엄 연어로 만든 고급 간식으로 80.1%의 집사가 추천합니다. 성분과 품질에 대한 만족도는 매우 높지만, 높은 가격으로 인해 재구매율은 60%로 제한적입니다."
+    }
+  }
+] 
