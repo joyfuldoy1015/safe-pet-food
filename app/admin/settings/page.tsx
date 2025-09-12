@@ -42,7 +42,7 @@ const initialSettings: SystemSettings = {
   emailNotifications: true,
   reviewAutoApproval: false,
   maxFileSize: 10,
-  apiKey: 'OPENAI_API_KEY_PLACEHOLDER',
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
   databaseStatus: 'connected',
   backupFrequency: 'daily'
 }
