@@ -3,12 +3,19 @@ import treatProducts from '@/data/cat-treats-products.json'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const revalidate = 0
 
 export async function GET(request: NextRequest) {
+  // Force runtime evaluation
+  const timestamp = new Date().getTime()
+  console.log(`[${timestamp}] Processing cat-treats request`)
+  
   try {
-    const treatType = request.nextUrl.searchParams.get('treatType')
-    const functionality = request.nextUrl.searchParams.get('functionality')
-    const sortBy = request.nextUrl.searchParams.get('sortBy') || 'recommended'
+    const searchParams = request.nextUrl.searchParams
+    const treatType = searchParams.get('treatType')
+    const functionality = searchParams.get('functionality')
+    const sortBy = searchParams.get('sortBy') || 'recommended'
 
     let filteredProducts = [...treatProducts]
 

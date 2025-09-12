@@ -4,12 +4,19 @@ import { promises as fs } from 'fs'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const revalidate = 0
 
 export async function GET(request: NextRequest) {
+  // Force runtime evaluation
+  const timestamp = new Date().getTime()
+  console.log(`[${timestamp}] Processing cat-litter request`)
+  
   try {
-    const litterType = request.nextUrl.searchParams.get('litterType')
-    const features = request.nextUrl.searchParams.get('features')?.split(',') || []
-    const sortBy = request.nextUrl.searchParams.get('sortBy') || 'recommended'
+    const searchParams = request.nextUrl.searchParams
+    const litterType = searchParams.get('litterType')
+    const features = searchParams.get('features')?.split(',') || []
+    const sortBy = searchParams.get('sortBy') || 'recommended'
 
     // Read products data
     const jsonDirectory = path.join(process.cwd(), 'data')
