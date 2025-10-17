@@ -588,12 +588,12 @@ export default function PetLogPostDetail() {
 
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          <div className="md:flex md:items-start md:justify-between">
+            <div className="mb-4 md:mb-0">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
                 {post.petName}의 급여 기록
               </h1>
-              <div className="flex items-center text-sm text-gray-500 space-x-6">
+              <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-500 sm:space-x-6 space-y-1 sm:space-y-0">
                 <span className="flex items-center">
                   🐕 {post.petBreed} · {post.petAge} · {post.petWeight}
                 </span>
@@ -606,7 +606,9 @@ export default function PetLogPostDetail() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop: 오른쪽에 표시 */}
+            <div className="hidden md:flex items-center space-x-4">
               <div className="text-right">
                 <div className="bg-blue-50 rounded-lg p-3">
                   <div className="text-2xl font-bold text-blue-600">{post.totalRecords}</div>
@@ -627,6 +629,27 @@ export default function PetLogPostDetail() {
                 <span>내 경험 공유하기</span>
               </button>
             </div>
+          </div>
+          
+          {/* Mobile: 아래쪽에 표시 (767px 이하) */}
+          <div className="flex md:hidden items-center justify-between mt-4 pt-4 border-t border-gray-100">
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="text-xl font-bold text-blue-600">{post.totalRecords}</div>
+              <div className="text-xs text-blue-600">총 기록</div>
+            </div>
+            <button
+              onClick={() => {
+                if (isLoggedIn) {
+                  window.location.href = '/pet-log/posts/write'
+                } else {
+                  setShowLoginModal(true)
+                }
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+            >
+              <Award className="h-4 w-4" />
+              <span>내 경험 공유하기</span>
+            </button>
           </div>
         </div>
 

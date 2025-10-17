@@ -48,20 +48,12 @@ const categories = {
       { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이가 하루에 마셔야 할 적정 물의 양을 계산해보세요.' }
     ]
   },
-  '제품 후기': {
-    icon: Star,
-    color: 'from-yellow-500 to-orange-500',
-    items: [
-      { name: '고양이 모래 후기 모음', href: '/reviews/cat-litter', icon: ClipboardList, description: '실제 집사들의 솔직한 고양이 모래 사용 후기를 확인해보세요.' },
-      { name: '고양이 간식 리얼 후기', href: '/reviews/cat-treats', icon: Heart, description: '우리 아이가 좋아하는 간식을 찾기 위한 실제 후기들을 모았어요.' }
-    ]
-  },
   '커뮤니티': {
     icon: Users,
     color: 'from-blue-500 to-purple-500',
     items: [
-      { name: '집사 Q&A 게시판', href: '/community/qna', icon: HelpCircle, description: '궁금한 것들을 다른 집사들과 함께 해결해보세요.' },
-      { name: '집사 정보 마당', href: '/community/blog', icon: Info, description: '유용한 반려동물 정보와 팁들을 공유하는 공간이에요.' }
+      { name: '펫 로그', href: '/pet-log', icon: FileTextIcon, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
+      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
     ]
   }
 }
@@ -92,20 +84,20 @@ const adminMenuItems = [
     stats: { total: 2845, new: 28 }
   },
   {
-    title: '리뷰 관리',
-    description: '제품 리뷰 승인 및 부적절한 내용 관리',
-    icon: Star,
-    href: '/admin/reviews',
-    color: 'from-yellow-500 to-orange-500',
-    stats: { total: 3421, pending: 15 }
-  },
-  {
     title: '통계 분석',
     description: '사이트 이용 통계 및 인기 제품 분석',
     icon: BarChart3,
     href: '/admin/analytics',
     color: 'from-indigo-500 to-blue-500',
     stats: { visitors: '12.4K', growth: '+15%' }
+  },
+  {
+    title: '커뮤니티 관리',
+    description: 'Q&A 포럼 및 펫 로그 게시물 관리',
+    icon: MessageCircle,
+    href: '/admin/community',
+    color: 'from-purple-500 to-pink-500',
+    stats: { posts: 487, questions: 156 }
   },
   {
     title: '시스템 설정',
@@ -201,9 +193,6 @@ export default function AdminPanel() {
                   {item.stats.new && (
                     <p className="text-xs text-green-600">신규 {item.stats.new}개</p>
                   )}
-                  {item.stats.pending && (
-                    <p className="text-xs text-orange-600">대기 {item.stats.pending}개</p>
-                  )}
                   {item.stats.visitors && (
                     <p className="text-sm text-gray-500">{item.stats.visitors}</p>
                   )}
@@ -215,6 +204,12 @@ export default function AdminPanel() {
                   )}
                   {item.stats.status && (
                     <p className="text-xs text-green-600">{item.stats.status}</p>
+                  )}
+                  {item.stats.posts && (
+                    <p className="text-sm text-gray-500">포스트: {item.stats.posts}</p>
+                  )}
+                  {item.stats.questions && (
+                    <p className="text-xs text-blue-600">질문: {item.stats.questions}</p>
                   )}
                 </div>
               </div>
@@ -246,17 +241,17 @@ export default function AdminPanel() {
             </div>
             
             <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <Star className="h-5 w-5 text-yellow-500" />
+              <MessageCircle className="h-5 w-5 text-blue-500" />
               <div className="flex-1">
-                <p className="text-sm text-gray-900">새로운 리뷰가 <strong>로얄캐닌 사료</strong>에 등록되었습니다.</p>
+                <p className="text-sm text-gray-900">새로운 Q&A 질문이 <strong>사료 급여량</strong>에 대해 등록되었습니다.</p>
                 <p className="text-xs text-gray-500">12분 전</p>
               </div>
             </div>
             
             <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <FileTextIcon className="h-5 w-5 text-purple-500" />
               <div className="flex-1">
-                <p className="text-sm text-gray-900">부적절한 리뷰가 신고되었습니다. 검토가 필요합니다.</p>
+                <p className="text-sm text-gray-900">새로운 펫 로그 포스트가 <strong>급여 경험 공유</strong>로 등록되었습니다.</p>
                 <p className="text-xs text-gray-500">1시간 전</p>
               </div>
             </div>

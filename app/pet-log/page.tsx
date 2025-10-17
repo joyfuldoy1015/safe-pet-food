@@ -301,6 +301,7 @@ const getAverageRating = (records: FeedingRecord[], type: 'palatability' | 'sati
 
 export default function PetLogPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchQuery, setSearchQuery] = useState('') // 실제 검색에 사용할 쿼리
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showLoginModal, setShowLoginModal] = useState(false)
   
@@ -309,16 +310,34 @@ export default function PetLogPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<string>('all')
 
-  // 필터링된 포스트들
+  // 검색 실행 함수
+  const handleSearch = () => {
+    setSearchQuery(searchTerm)
+  }
+
+  // Enter 키 입력 처리
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+  // 검색 초기화 함수
+  const handleClearSearch = () => {
+    setSearchTerm('')
+    setSearchQuery('')
+  }
+
+  // 필터링된 포스트들 (searchQuery 사용)
   const filteredPosts = detailedPosts.filter(post => {
     const mainRecord = getMainFeedingRecord(post)
-    const matchesSearch = 
-      post.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (mainRecord && mainRecord.productName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    const matchesSearch = searchQuery === '' || 
+      post.petName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.ownerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (mainRecord && mainRecord.productName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       post.feedingRecords.some(record => 
-        record.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.brand.toLowerCase().includes(searchTerm.toLowerCase())
+        record.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.brand.toLowerCase().includes(searchQuery.toLowerCase())
       )
     
     const matchesCategory = selectedCategory === 'all' || 
@@ -371,16 +390,39 @@ export default function PetLogPage() {
           
           <div className="flex flex-col gap-4">
             <div className="w-full">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <button
+                  onClick={handleSearch}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Search className="h-4 w-4" />
+                  검색
+                </button>
+                {searchQuery && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg font-medium transition-colors whitespace-nowrap"
+                  >
+                    초기화
+                  </button>
+                )}
               </div>
+              {searchQuery && (
+                <div className="mt-2 text-sm text-gray-600">
+                  <span className="font-medium">&ldquo;{searchQuery}&rdquo;</span>에 대한 검색 결과 {filteredPosts.length}개
+                </div>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <select
@@ -499,7 +541,7 @@ export default function PetLogPage() {
                         </p>
                         {mainRecord?.comment && (
                           <p className="text-gray-700 text-sm break-words line-clamp-2">
-                            "{mainRecord.comment}"
+                            &ldquo;{mainRecord.comment}&rdquo;
                           </p>
                         )}
                       </div>
@@ -645,7 +687,7 @@ export default function PetLogPage() {
                               {mainRecord.brand} • {mainRecord.duration} 급여
                             </p>
                             {mainRecord.comment && (
-                              <p className="text-sm text-gray-700 italic break-words">"{mainRecord.comment}"</p>
+                              <p className="text-sm text-gray-700 italic break-words">&ldquo;{mainRecord.comment}&rdquo;</p>
                             )}
                           </div>
                           <div className="lg:ml-4 space-y-2">

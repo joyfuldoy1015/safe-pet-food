@@ -24,7 +24,7 @@ interface Brand {
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState<'rating' | 'name' | 'safety'>('rating')
+  const [sortBy, setSortBy] = useState<'rating' | 'name' | 'transparency'>('rating')
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function BrandsPage() {
     }
   }
 
-  const getSafetyScore = (brand: Brand) => {
+  const getTransparencyScore = (brand: Brand) => {
     const recallCount = brand.recall_history.length
     const highSeverityCount = brand.recall_history.filter(r => r.severity === 'high').length
     const unresolvedCount = brand.recall_history.filter(r => !r.resolved).length
@@ -67,8 +67,8 @@ export default function BrandsPage() {
           return b.overall_rating - a.overall_rating
         case 'name':
           return a.name.localeCompare(b.name)
-        case 'safety':
-          return getSafetyScore(b) - getSafetyScore(a)
+        case 'transparency':
+          return getTransparencyScore(b) - getTransparencyScore(a)
         default:
           return 0
       }
@@ -89,14 +89,14 @@ export default function BrandsPage() {
     ))
   }
 
-  const getSafetyBadge = (brand: Brand) => {
-    const safetyScore = getSafetyScore(brand)
-    if (safetyScore >= 4.5) {
-      return { color: 'bg-green-100 text-green-800 border border-green-200', icon: CheckCircle, text: '안전' }
-    } else if (safetyScore >= 3) {
+  const getTransparencyBadge = (brand: Brand) => {
+    const transparencyScore = getTransparencyScore(brand)
+    if (transparencyScore >= 4.5) {
+      return { color: 'bg-green-100 text-green-800 border border-green-200', icon: CheckCircle, text: '투명' }
+    } else if (transparencyScore >= 3) {
       return { color: 'bg-yellow-100 text-yellow-800 border border-yellow-200', icon: Shield, text: '보통' }
     } else {
-      return { color: 'bg-red-100 text-red-800 border border-red-200', icon: AlertTriangle, text: '주의' }
+      return { color: 'bg-red-100 text-red-800 border border-red-200', icon: AlertTriangle, text: '불투명' }
     }
   }
 
@@ -120,10 +120,10 @@ export default function BrandsPage() {
         {/* Title Section */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            사료 브랜드 안전성 평가 🏆
+            사료 브랜드 투명성 평가 🏆
           </h2>
           <p className="text-lg text-gray-600 mb-6">
-            다양한 브랜드의 안전성과 품질을 비교하고 신뢰할 수 있는 선택을 하세요
+            다양한 브랜드의 투명성과 품질을 비교하고 신뢰할 수 있는 선택을 하세요
           </p>
           
           {/* 새로운 기능 링크 */}
@@ -180,12 +180,12 @@ export default function BrandsPage() {
                   <div className="space-y-2">
                     {[
                       { value: 'rating', label: '평점 높은 순' },
-                      { value: 'safety', label: '안전성 높은 순' },
+                      { value: 'transparency', label: '투명성 높은 순' },
                       { value: 'name', label: '이름 순' }
                     ].map((option) => (
                       <button
                         key={option.value}
-                        onClick={() => setSortBy(option.value as 'rating' | 'name' | 'safety')}
+                        onClick={() => setSortBy(option.value as 'rating' | 'name' | 'transparency')}
                         className={`w-full text-left px-4 py-3 rounded-xl transition-colors ${
                           sortBy === option.value
                             ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
@@ -222,9 +222,9 @@ export default function BrandsPage() {
             ) : (
               <div className="grid md:grid-cols-2 gap-6">
                 {filteredAndSortedBrands.map((brand) => {
-                  const safetyBadge = getSafetyBadge(brand)
-                  const SafetyIcon = safetyBadge.icon
-                  const safetyScore = getSafetyScore(brand)
+                  const transparencyBadge = getTransparencyBadge(brand)
+                  const TransparencyIcon = transparencyBadge.icon
+                  const transparencyScore = getTransparencyScore(brand)
                   
                   return (
                     <Link
@@ -241,9 +241,9 @@ export default function BrandsPage() {
                             </h3>
                             <p className="text-sm text-gray-600">{brand.manufacturer}</p>
                           </div>
-                          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${safetyBadge.color}`}>
-                            <SafetyIcon className="h-3 w-3" />
-                            <span>{safetyBadge.text}</span>
+                          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${transparencyBadge.color}`}>
+                            <TransparencyIcon className="h-3 w-3" />
+                            <span>{transparencyBadge.text}</span>
                           </div>
                         </div>
 
@@ -275,8 +275,8 @@ export default function BrandsPage() {
                             <div className="font-semibold text-gray-900">{brand.product_lines.length}개</div>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="text-xs text-gray-500 mb-1">안전성 점수</div>
-                            <div className="font-semibold text-gray-900">{safetyScore.toFixed(1)}/5.0</div>
+                            <div className="text-xs text-gray-500 mb-1">투명성 점수</div>
+                            <div className="font-semibold text-gray-900">{transparencyScore.toFixed(1)}/5.0</div>
                           </div>
                         </div>
 

@@ -37,20 +37,12 @@ const categories = {
       { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이의 적정 하루 물 섭취량을 계산해보세요.' }
     ]
   },
-  '제품 후기': {
-    icon: Users,
-    color: 'from-blue-500 to-purple-500',
-    items: [
-      { name: '고양이 모래 후기 모음', href: '/reviews/cat-litter', icon: Shield, description: '실제 집사들의 고양이 모래 사용 후기를 모아봤어요.' },
-      { name: '고양이 간식 리얼 후기', href: '/reviews/cat-treats', icon: Heart, description: '우리 아이들이 좋아하는 간식들의 솔직한 후기를 확인하세요.' }
-    ]
-  },
   '커뮤니티': {
     icon: Users,
     color: 'from-purple-500 to-indigo-500',
     items: [
-      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' },
-      { name: '펫 로그', href: '/pet-log', icon: BookOpen, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' }
+      { name: '펫 로그', href: '/pet-log', icon: BookOpen, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
+      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
     ]
   }
 }
