@@ -100,6 +100,14 @@ const adminMenuItems = [
     stats: { posts: 487, questions: 156 }
   },
   {
+    title: '배포 관리',
+    description: '버전 히스토리 및 배포 상태 모니터링',
+    icon: Zap,
+    href: '/admin/deployments',
+    color: 'from-green-500 to-emerald-500',
+    stats: { total: 12, status: 'Live' }
+  },
+  {
     title: '시스템 설정',
     description: '사이트 전반적인 설정 및 환경 관리',
     icon: Settings,
