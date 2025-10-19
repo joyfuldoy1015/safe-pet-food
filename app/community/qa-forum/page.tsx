@@ -258,7 +258,7 @@ export default function CommunityQAForumPage() {
           {sortedQuestions.length > 0 ? (
             sortedQuestions.map(question => (
               <div key={question.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
-                {/* Status and Category */}
+                {/* Category */}
                 <div className="flex items-center space-x-2 mb-3">
                   {getStatusIcon(question.status)}
                   <span className="text-xs text-gray-500 uppercase tracking-wide">
@@ -266,31 +266,36 @@ export default function CommunityQAForumPage() {
                   </span>
                 </div>
 
-                {/* Title and Content */}
-                <Link 
-                  href={`/community/qa-forum/${question.id}`}
-                  className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer block"
-                >
-                  {question.title}
-                </Link>
-                <p className="text-sm sm:text-base text-gray-600 line-clamp-2 mb-4">
-                  {question.content}
-                </p>
-
-                {/* Author Info - Mobile Optimized */}
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm border-t pt-3">
-                  {/* Author */}
-                  <div className="flex items-center space-x-1.5">
-                    <User className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                    <span className="text-gray-700 font-medium">{question.author}</span>
+                {/* Author and Date */}
+                <div className="flex items-center justify-between mb-3">
+                  {/* Left: Author */}
+                  <div className="flex items-center space-x-2">
+                    <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 font-medium">{question.author}</span>
                     {getAuthorBadge(question.authorLevel)}
                   </div>
                   
-                  {/* Date */}
-                  <span className="text-gray-500">
+                  {/* Right: Date */}
+                  <span className="text-xs text-gray-500">
                     {question.createdAt}
                   </span>
-                  
+                </div>
+
+                {/* Title */}
+                <Link 
+                  href={`/community/qa-forum/${question.id}`}
+                  className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer block"
+                >
+                  {question.title}
+                </Link>
+
+                {/* Content Summary */}
+                <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                  {question.content}
+                </p>
+
+                {/* Stats - Right Aligned */}
+                <div className="flex items-center justify-end gap-4 text-sm text-gray-500">
                   {/* Votes */}
                   <div className="flex items-center space-x-1">
                     <button 
@@ -301,7 +306,7 @@ export default function CommunityQAForumPage() {
                       }}
                       className="p-1 text-gray-400 hover:text-green-500 transition-colors"
                     >
-                      <ThumbsUp className="h-3.5 w-3.5" />
+                      <ThumbsUp className="h-4 w-4" />
                     </button>
                     <span className="text-gray-700 font-medium min-w-[1.5rem] text-center">{question.votes}</span>
                     <button 
@@ -312,15 +317,21 @@ export default function CommunityQAForumPage() {
                       }}
                       className="p-1 text-gray-400 hover:text-red-500 transition-colors"
                     >
-                      <ThumbsDown className="h-3.5 w-3.5" />
+                      <ThumbsDown className="h-4 w-4" />
                     </button>
                   </div>
                   
                   {/* Comments */}
                   <div className="flex items-center space-x-1.5">
-                    <MessageSquare className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                    <MessageSquare className="h-4 w-4 text-gray-400 flex-shrink-0" />
                     <span className="text-gray-700 font-medium">{question.answerCount}</span>
                   </div>
+
+                  {/* Views (if available) */}
+                  {/* <div className="flex items-center space-x-1.5">
+                    <Eye className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-700 font-medium">123</span>
+                  </div> */}
                 </div>
 
                 {/* Answers Preview */}
