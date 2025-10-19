@@ -54,6 +54,40 @@ interface BrandFormData {
   certifications: string
 }
 
+// 에러 메시지 컴포넌트
+function ErrorMessage({ error }: { error?: string }) {
+  if (!error) return null
+  return (
+    <p className="mt-1 text-sm text-red-600 flex items-center">
+      <AlertTriangle className="h-3 w-3 mr-1" />
+      {error}
+    </p>
+  )
+}
+
+// 입력 필드 래퍼 컴포넌트
+function FormField({ 
+  label, 
+  error, 
+  required, 
+  children 
+}: { 
+  label: string
+  error?: string
+  required?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+      <ErrorMessage error={error} />
+    </div>
+  )
+}
+
 export default function BrandAdminPage() {
   const [brands, setBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
@@ -71,6 +105,8 @@ export default function BrandAdminPage() {
     country: '',
     certifications: ''
   })
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     fetchBrands()
@@ -113,11 +149,14 @@ export default function BrandAdminPage() {
   }
 
   const handleAddBrand = async () => {
+    setValidationErrors({})
+    setIsSubmitting(true)
+    
     try {
       const newBrandData = {
         ...formData,
-        product_lines: formData.product_lines.split(',').map(s => s.trim()),
-        certifications: formData.certifications.split(',').map(s => s.trim()),
+        product_lines: formData.product_lines.split(',').map(s => s.trim()).filter(s => s),
+        certifications: formData.certifications.split(',').map(s => s.trim()).filter(s => s),
         recall_history: []
       }
       
@@ -129,29 +168,50 @@ export default function BrandAdminPage() {
         body: JSON.stringify(newBrandData),
       })
       
+      const data = await response.json()
+      
       if (!response.ok) {
-        throw new Error('Failed to add brand')
+        // 검증 에러 처리
+        if (data.details && Array.isArray(data.details)) {
+          const errors: Record<string, string> = {}
+          data.details.forEach((err: any) => {
+            errors[err.field] = err.message
+          })
+          setValidationErrors(errors)
+          
+          // 에러 요약 메시지
+          const errorCount = data.details.length
+          alert(`입력한 정보에 ${errorCount}개의 오류가 있습니다.\n\n${data.details.map((e: any) => `• ${e.message}`).join('\n')}`)
+        } else {
+          alert(data.error || '브랜드 추가에 실패했습니다.')
+        }
+        return
       }
       
-      const newBrand = await response.json()
-      setBrands([...brands, newBrand])
+      setBrands([...brands, data])
       setShowAddModal(false)
       resetForm()
+      alert(`✅ "${data.name}" 브랜드가 성공적으로 등록되었습니다.`)
     } catch (error) {
       console.error('Failed to add brand:', error)
-      alert('브랜드 추가에 실패했습니다.')
+      alert('네트워크 오류가 발생했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleEditBrand = async () => {
     if (!editingBrand) return
     
+    setValidationErrors({})
+    setIsSubmitting(true)
+    
     try {
       const updatedBrandData = {
         id: editingBrand.id,
         ...formData,
-        product_lines: formData.product_lines.split(',').map(s => s.trim()),
-        certifications: formData.certifications.split(',').map(s => s.trim())
+        product_lines: formData.product_lines.split(',').map(s => s.trim()).filter(s => s),
+        certifications: formData.certifications.split(',').map(s => s.trim()).filter(s => s)
       }
       
       const response = await fetch('/api/brands', {
@@ -162,18 +222,35 @@ export default function BrandAdminPage() {
         body: JSON.stringify(updatedBrandData),
       })
       
+      const data = await response.json()
+      
       if (!response.ok) {
-        throw new Error('Failed to update brand')
+        // 검증 에러 처리
+        if (data.details && Array.isArray(data.details)) {
+          const errors: Record<string, string> = {}
+          data.details.forEach((err: any) => {
+            errors[err.field] = err.message
+          })
+          setValidationErrors(errors)
+          
+          const errorCount = data.details.length
+          alert(`입력한 정보에 ${errorCount}개의 오류가 있습니다.\n\n${data.details.map((e: any) => `• ${e.message}`).join('\n')}`)
+        } else {
+          alert(data.error || '브랜드 수정에 실패했습니다.')
+        }
+        return
       }
       
-      const updatedBrand = await response.json()
-      setBrands(brands.map(b => b.id === editingBrand.id ? updatedBrand : b))
+      setBrands(brands.map(b => b.id === editingBrand.id ? data : b))
       setShowEditModal(false)
       setEditingBrand(null)
       resetForm()
+      alert(`✅ "${data.name}" 브랜드가 성공적으로 수정되었습니다.`)
     } catch (error) {
       console.error('Failed to update brand:', error)
-      alert('브랜드 수정에 실패했습니다.')
+      alert('네트워크 오류가 발생했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -253,6 +330,8 @@ export default function BrandAdminPage() {
       country: '',
       certifications: ''
     })
+    setValidationErrors({})
+    setIsSubmitting(false)
   }
 
   const openEditModal = (brand: Brand) => {
@@ -544,115 +623,141 @@ export default function BrandAdminPage() {
             
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    브랜드명 *
-                  </label>
+                <FormField label="브랜드명" error={validationErrors.name} required>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                      validationErrors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
                     placeholder="브랜드명을 입력하세요"
+                    disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    제조사 *
-                  </label>
+                <FormField label="제조사" error={validationErrors.manufacturer} required>
                   <input
                     type="text"
                     value={formData.manufacturer}
                     onChange={(e) => setFormData({...formData, manufacturer: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                      validationErrors.manufacturer ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
                     placeholder="제조사를 입력하세요"
+                    disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    평점 (0-5)
-                  </label>
+                <FormField label="평점 (0-5)" error={validationErrors.overall_rating}>
                   <input
                     type="number"
                     min="0"
                     max="5"
                     step="0.1"
                     value={formData.overall_rating}
-                    onChange={(e) => setFormData({...formData, overall_rating: parseFloat(e.target.value)})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    onChange={(e) => setFormData({...formData, overall_rating: parseFloat(e.target.value) || 0})}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                      validationErrors.overall_rating ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
+                    disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    설립년도
-                  </label>
+                <FormField label="설립년도" error={validationErrors.established_year} required>
                   <input
                     type="number"
                     min="1800"
                     max={new Date().getFullYear()}
                     value={formData.established_year}
-                    onChange={(e) => setFormData({...formData, established_year: parseInt(e.target.value)})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    onChange={(e) => setFormData({...formData, established_year: parseInt(e.target.value) || new Date().getFullYear()})}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                      validationErrors.established_year ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
+                    disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    국가
-                  </label>
+                <FormField label="국가" error={validationErrors.country} required>
                   <input
                     type="text"
                     value={formData.country}
                     onChange={(e) => setFormData({...formData, country: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    placeholder="국가를 입력하세요"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                      validationErrors.country ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
+                    placeholder="예: 대한민국, 미국, 프랑스"
+                    disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    제품 라인 (쉼표로 구분)
-                  </label>
+                <FormField label="제품 라인 (쉼표로 구분)" error={validationErrors.product_lines} required>
                   <input
                     type="text"
                     value={formData.product_lines}
                     onChange={(e) => setFormData({...formData, product_lines: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                      validationErrors.product_lines ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    }`}
                     placeholder="성견용, 퍼피, 소형견"
+                    disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  인증 (쉼표로 구분)
-                </label>
+              <FormField label="인증 (쉼표로 구분)" error={validationErrors.certifications}>
                 <input
                   type="text"
                   value={formData.certifications}
                   onChange={(e) => setFormData({...formData, certifications: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    validationErrors.certifications ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                   placeholder="AAFCO, ISO 9001, FDA"
+                  disabled={isSubmitting}
                 />
-              </div>
+              </FormField>
+              
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-5 w-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-medium text-red-800 mb-1">입력 오류</h4>
+                      <p className="text-sm text-red-700">
+                        {Object.keys(validationErrors).length}개의 필드에 오류가 있습니다. 위의 빨간색 필드를 확인해주세요.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="p-6 border-t bg-gray-50">
               <div className="flex justify-end space-x-3">
                 <button
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    setShowAddModal(false)
+                    resetForm()
+                  }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  disabled={isSubmitting}
                 >
                   취소
                 </button>
                 <button
                   onClick={handleAddBrand}
-                  className="px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
-                  추가
+                  {isSubmitting ? (
+                    <>
+                      <RefreshCw className="animate-spin h-4 w-4 mr-2" />
+                      처리 중...
+                    </>
+                  ) : (
+                    '추가'
+                  )}
                 </button>
               </div>
             </div>
