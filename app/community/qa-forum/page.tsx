@@ -199,10 +199,10 @@ export default function CommunityQAForumPage() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Controls */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
+          <div className="space-y-4">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
@@ -213,12 +213,12 @@ export default function CommunityQAForumPage() {
               />
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap items-center space-x-4">
+            {/* Filters Row */}
+            <div className="flex items-center gap-2">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               >
                 {Object.entries(categoryLabels).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
@@ -228,27 +228,28 @@ export default function CommunityQAForumPage() {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               >
                 {Object.entries(statusLabels).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
-
-              <button
-                onClick={() => {
-                  if (isLoggedIn) {
-                    setShowQuestionModal(true)
-                  } else {
-                    setShowLoginModal(true)
-                  }
-                }}
-                className="inline-flex items-center space-x-2 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                <span>질문하기</span>
-              </button>
             </div>
+
+            {/* Question Button - Full Width on Mobile */}
+            <button
+              onClick={() => {
+                if (isLoggedIn) {
+                  setShowQuestionModal(true)
+                } else {
+                  setShowLoginModal(true)
+                }
+              }}
+              className="w-full inline-flex items-center justify-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+            >
+              <Plus className="h-4 w-4" />
+              <span>질문하기</span>
+            </button>
           </div>
         </div>
 
@@ -256,65 +257,69 @@ export default function CommunityQAForumPage() {
         <div className="space-y-6">
           {sortedQuestions.length > 0 ? (
             sortedQuestions.map(question => (
-              <div key={question.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      {getStatusIcon(question.status)}
-                      <span className="text-xs text-gray-500 uppercase tracking-wide">
-                        {categoryLabels[question.category as keyof typeof categoryLabels]}
-                      </span>
-                    </div>
-                    <Link 
-                      href={`/community/qa-forum/${question.id}`}
-                      className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer block"
-                    >
-                      {question.title}
-                    </Link>
-                    <p className="text-gray-600 line-clamp-2 mb-3">
-                      {question.content}
-                    </p>
-                  </div>
+              <div key={question.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+                {/* Status and Category */}
+                <div className="flex items-center space-x-2 mb-3">
+                  {getStatusIcon(question.status)}
+                  <span className="text-xs text-gray-500 uppercase tracking-wide">
+                    {categoryLabels[question.category as keyof typeof categoryLabels]}
+                  </span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{question.author}</span>
-                      {getAuthorBadge(question.authorLevel)}
-                    </div>
-                    <span className="text-sm text-gray-500">{question.createdAt}</span>
-                  </div>
+                {/* Title and Content */}
+                <Link 
+                  href={`/community/qa-forum/${question.id}`}
+                  className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer block"
+                >
+                  {question.title}
+                </Link>
+                <p className="text-sm sm:text-base text-gray-600 line-clamp-2 mb-4">
+                  {question.content}
+                </p>
 
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-1">
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleVote(question.id, 'up')
-                        }}
-                        className="p-1 text-gray-400 hover:text-green-500 transition-colors"
-                      >
-                        <ThumbsUp className="h-4 w-4" />
-                      </button>
-                      <span className="text-sm text-gray-600">{question.votes}</span>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleVote(question.id, 'down')
-                        }}
-                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <ThumbsDown className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <MessageSquare className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{question.answerCount}</span>
-                    </div>
+                {/* Author Info - Mobile Optimized */}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm border-t pt-3">
+                  {/* Author */}
+                  <div className="flex items-center space-x-1.5">
+                    <User className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-700 font-medium">{question.author}</span>
+                    {getAuthorBadge(question.authorLevel)}
+                  </div>
+                  
+                  {/* Date */}
+                  <span className="text-gray-500">
+                    {question.createdAt}
+                  </span>
+                  
+                  {/* Votes */}
+                  <div className="flex items-center space-x-1">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleVote(question.id, 'up')
+                      }}
+                      className="p-1 text-gray-400 hover:text-green-500 transition-colors"
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="text-gray-700 font-medium min-w-[1.5rem] text-center">{question.votes}</span>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleVote(question.id, 'down')
+                      }}
+                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <ThumbsDown className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  
+                  {/* Comments */}
+                  <div className="flex items-center space-x-1.5">
+                    <MessageSquare className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-700 font-medium">{question.answerCount}</span>
                   </div>
                 </div>
 
