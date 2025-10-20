@@ -68,14 +68,6 @@ const adminMenuItems = [
     stats: { total: 156, new: 3 }
   },
   {
-    title: '제품 관리',
-    description: '사료, 간식, 모래 등 제품 정보 관리',
-    icon: Package,
-    href: '/admin/products',
-    color: 'from-green-500 to-emerald-500',
-    stats: { total: 1247, new: 12 }
-  },
-  {
     title: '사용자 관리',
     description: '회원 정보 및 권한 관리',
     icon: Users,
@@ -150,23 +142,23 @@ export default function AdminPanel() {
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">총 제품</p>
-                  <p className="text-2xl font-bold text-gray-900">1,247</p>
+                  <p className="text-sm text-gray-600">총 브랜드</p>
+                  <p className="text-2xl font-bold text-gray-900">156</p>
                 </div>
-                <Package className="h-8 w-8 text-green-500" />
+                <Shield className="h-8 w-8 text-blue-500" />
               </div>
-              <p className="text-xs text-green-600 mt-2">↗ +5% 이번 달</p>
+              <p className="text-xs text-green-600 mt-2">↗ +3개 이번 달</p>
             </div>
             
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">총 리뷰</p>
-                  <p className="text-2xl font-bold text-gray-900">3,421</p>
+                  <p className="text-sm text-gray-600">커뮤니티 활동</p>
+                  <p className="text-2xl font-bold text-gray-900">643</p>
                 </div>
-                <Star className="h-8 w-8 text-yellow-500" />
+                <MessageCircle className="h-8 w-8 text-purple-500" />
               </div>
-              <p className="text-xs text-orange-600 mt-2">15개 승인 대기</p>
+              <p className="text-xs text-green-600 mt-2">질문 156 · 펫로그 487</p>
             </div>
             
             <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
