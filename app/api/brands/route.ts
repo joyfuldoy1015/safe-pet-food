@@ -179,10 +179,10 @@ export async function PUT(request: Request) {
     }
 
     // 🔒 이름 중복 체크 (다른 브랜드와)
-    if (validatedData.name) {
+    if (validatedData.name && typeof validatedData.name === 'string') {
       const duplicateBrand = brands.find(
         b => b.id !== validatedData.id && 
-             b.name.toLowerCase() === validatedData.name.toLowerCase()
+             b.name.toLowerCase() === validatedData.name!.toLowerCase()
       )
       
       if (duplicateBrand) {
