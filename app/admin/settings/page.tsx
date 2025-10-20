@@ -16,8 +16,20 @@ import {
   AlertTriangle,
   CheckCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  FileText,
+  Type,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Bold,
+  Italic
 } from 'lucide-react'
+
+interface ServiceContent {
+  title: string
+  description: string
+}
 
 interface SystemSettings {
   siteName: string
@@ -31,6 +43,16 @@ interface SystemSettings {
   apiKey: string
   databaseStatus: 'connected' | 'disconnected' | 'error'
   backupFrequency: 'daily' | 'weekly' | 'monthly'
+  serviceContents: {
+    categoryDescriptions: {
+      '사료/급여': string
+      '건강/케어': string
+      '커뮤니티': string
+    }
+    services: {
+      [key: string]: ServiceContent
+    }
+  }
 }
 
 const initialSettings: SystemSettings = {
@@ -44,7 +66,44 @@ const initialSettings: SystemSettings = {
   maxFileSize: 10,
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
   databaseStatus: 'connected',
-  backupFrequency: 'daily'
+  backupFrequency: 'daily',
+  serviceContents: {
+    categoryDescriptions: {
+      '사료/급여': '우리 아이의 영양과 급여에 관한 모든 것',
+      '건강/케어': '반려동물의 건강 관리를 위한 도구들',
+      '커뮤니티': '집사들과 함께 나누는 정보와 소통의 공간'
+    },
+    services: {
+      'nutrition-calculator': {
+        title: '사료 성분 계산기',
+        description: '사료의 보장성분표를 입력하면 건물기준으로 영양 점수를 계산해드려요.'
+      },
+      'calorie-calculator': {
+        title: '사료 칼로리&급여량 계산기',
+        description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.'
+      },
+      'brands': {
+        title: '브랜드 평가',
+        description: '다양한 사료 브랜드의 안전성과 사용자 리뷰를 확인해보세요.'
+      },
+      'health-analyzer': {
+        title: '건강검진표 분석기',
+        description: '건강검진 결과를 업로드하면 AI가 상세하게 분석해드려요.'
+      },
+      'water-calculator': {
+        title: '일일 음수량 계산기',
+        description: '우리 아이의 적정 하루 물 섭취량을 계산해보세요.'
+      },
+      'pet-log': {
+        title: '펫 로그',
+        description: '우리 아이의 사료/간식 급여 이력을 기록하고 다른 집사들과 공유해보세요.'
+      },
+      'qa-forum': {
+        title: 'Q&A 포럼',
+        description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.'
+      }
+    }
+  }
 }
 
 export default function AdminSettingsPage() {
@@ -283,6 +342,118 @@ export default function AdminSettingsPage() {
                       <Eye className="h-4 w-4 text-gray-400" />
                     )}
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Service Contents Settings */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="h-5 w-5 text-indigo-500" />
+              <h3 className="text-lg font-medium text-gray-900">서비스 콘텐츠 관리</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              메인 페이지에 표시되는 카테고리 설명과 각 서비스의 제목 및 설명을 편집할 수 있습니다.
+            </p>
+            
+            <div className="space-y-6">
+              {/* Category Descriptions */}
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="text-md font-medium text-gray-900 mb-4">카테고리 설명</h4>
+                <div className="space-y-4">
+                  {Object.entries(settings.serviceContents.categoryDescriptions).map(([category, description]) => (
+                    <div key={category}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {category}
+                      </label>
+                      <input
+                        type="text"
+                        value={description}
+                        onChange={(e) => {
+                          setSettings(prev => ({
+                            ...prev,
+                            serviceContents: {
+                              ...prev.serviceContents,
+                              categoryDescriptions: {
+                                ...prev.serviceContents.categoryDescriptions,
+                                [category]: e.target.value
+                              }
+                            }
+                          }))
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        placeholder="카테고리 설명을 입력하세요"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Service Descriptions */}
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="text-md font-medium text-gray-900 mb-4">서비스 설명</h4>
+                <div className="space-y-6">
+                  {Object.entries(settings.serviceContents.services).map(([serviceKey, service]) => (
+                    <div key={serviceKey} className="p-4 bg-gray-50 rounded-lg">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            제목
+                          </label>
+                          <input
+                            type="text"
+                            value={service.title}
+                            onChange={(e) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                serviceContents: {
+                                  ...prev.serviceContents,
+                                  services: {
+                                    ...prev.serviceContents.services,
+                                    [serviceKey]: {
+                                      ...prev.serviceContents.services[serviceKey],
+                                      title: e.target.value
+                                    }
+                                  }
+                                }
+                              }))
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            설명
+                          </label>
+                          <textarea
+                            value={service.description}
+                            onChange={(e) => {
+                              setSettings(prev => ({
+                                ...prev,
+                                serviceContents: {
+                                  ...prev.serviceContents,
+                                  services: {
+                                    ...prev.serviceContents.services,
+                                    [serviceKey]: {
+                                      ...prev.serviceContents.services[serviceKey],
+                                      description: e.target.value
+                                    }
+                                  }
+                                }
+                              }))
+                            }}
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            placeholder="서비스 설명을 입력하세요"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span className="font-mono bg-gray-200 px-2 py-1 rounded">{serviceKey}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

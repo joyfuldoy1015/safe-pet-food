@@ -348,9 +348,18 @@ export default function PetLogPage() {
     return matchesSearch && matchesCategory && matchesSpecies
   })
 
-  // 인기 포스트 (조회수 기준 상위 3개)
+  // 인기도 점수 계산 함수 (조회수 + 좋아요*10 + 댓글*5)
+  const getPopularityScore = (post: DetailedPetLogPost) => {
+    return (
+      post.views * 1 +        // 조회수
+      post.likes * 10 +       // 좋아요 (가중치 10배)
+      post.comments * 5       // 댓글 (가중치 5배)
+    )
+  }
+
+  // 인기 포스트 (복합 점수 기준 상위 3개)
   const topPosts = [...detailedPosts]
-    .sort((a, b) => b.views - a.views)
+    .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
     .slice(0, 3)
 
   // 최신 포스트들
@@ -454,7 +463,7 @@ export default function PetLogPage() {
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="h-5 w-5 text-orange-500" />
             <h2 className="text-xl font-bold text-gray-900">인기 급여 후기 TOP 3</h2>
-            <span className="text-sm text-gray-500">조회수 기준</span>
+            <span className="text-sm text-gray-500">참여도 기준 (조회수 + 좋아요 + 댓글)</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {topPosts.map((post, index) => {
