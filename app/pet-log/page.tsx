@@ -499,7 +499,7 @@ export default function PetLogPage() {
                         </p>
                         {mainRecord?.comment && (
                           <p className="text-gray-700 text-sm break-words line-clamp-2">
-                            "{mainRecord.comment}"
+                            &ldquo;{mainRecord.comment}&rdquo;
                           </p>
                         )}
                       </div>
@@ -645,7 +645,7 @@ export default function PetLogPage() {
                               {mainRecord.brand} • {mainRecord.duration} 급여
                             </p>
                             {mainRecord.comment && (
-                              <p className="text-sm text-gray-700 italic break-words">"{mainRecord.comment}"</p>
+                              <p className="text-sm text-gray-700 italic break-words">&ldquo;{mainRecord.comment}&rdquo;</p>
                             )}
                           </div>
                           <div className="lg:ml-4 space-y-2">
