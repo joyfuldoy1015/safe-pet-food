@@ -119,13 +119,37 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
+  // LocalStorage에서 설정 불러오기
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('admin-settings')
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings)
+        setSettings(parsed)
+      } catch (e) {
+        console.error('Failed to load settings:', e)
+      }
+    }
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
-    // 실제로는 API 호출
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    try {
+      // LocalStorage에 저장
+      localStorage.setItem('admin-settings', JSON.stringify(settings))
+      
+      // 메인 페이지 데이터도 업데이트
+      localStorage.setItem('service-contents', JSON.stringify(settings.serviceContents))
+      
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setSaving(false)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (e) {
+      console.error('Failed to save settings:', e)
+      setSaving(false)
+      alert('저장에 실패했습니다.')
+    }
   }
 
   const handleInputChange = (field: keyof SystemSettings, value: any) => {

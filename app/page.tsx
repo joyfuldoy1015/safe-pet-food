@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 import { 
@@ -17,7 +17,7 @@ import {
   BookOpen
 } from 'lucide-react'
 
-const categories = {
+const defaultCategories = {
   '사료/급여': {
     icon: Coffee,
     color: 'from-orange-500 to-pink-500',
@@ -48,6 +48,49 @@ const categories = {
 export default function Home() {
   // 임시로 관리자 계정 여부를 설정 (실제로는 로그인 상태에서 가져와야 함)
   const isAdmin = true // 실제 구현 시 로그인 상태에서 관리자 권한 확인
+  
+  const [categories, setCategories] = useState(defaultCategories)
+
+  // LocalStorage에서 저장된 서비스 콘텐츠 불러오기
+  useEffect(() => {
+    const savedContents = localStorage.getItem('service-contents')
+    if (savedContents) {
+      try {
+        const parsed = JSON.parse(savedContents)
+        
+        // 카테고리 설명과 서비스 설명 업데이트
+        const updatedCategories = { ...defaultCategories }
+        
+        // 카테고리 설명 업데이트
+        Object.keys(updatedCategories).forEach((categoryName) => {
+          const key = categoryName as keyof typeof parsed.categoryDescriptions
+          if (parsed.categoryDescriptions[key]) {
+            // 카테고리 설명은 그대로 사용 (HTML 아님)
+          }
+        })
+        
+        // 서비스 설명 업데이트
+        Object.keys(updatedCategories).forEach((categoryName) => {
+          updatedCategories[categoryName as keyof typeof updatedCategories].items = 
+            updatedCategories[categoryName as keyof typeof updatedCategories].items.map((item: any) => {
+              const serviceKey = item.href.substring(1) // '/nutrition-calculator' -> 'nutrition-calculator'
+              if (parsed.services[serviceKey]) {
+                return {
+                  ...item,
+                  name: parsed.services[serviceKey].title,
+                  description: parsed.services[serviceKey].description
+                }
+              }
+              return item
+            })
+        })
+        
+        setCategories(updatedCategories)
+      } catch (e) {
+        console.error('Failed to load service contents:', e)
+      }
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-white">
