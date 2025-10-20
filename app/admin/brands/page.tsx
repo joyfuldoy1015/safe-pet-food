@@ -22,7 +22,10 @@ import {
   Users,
   Calendar,
   ArrowLeft,
-  RefreshCw
+  RefreshCw,
+  Sparkles,
+  Clock,
+  CheckCircle2
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -43,6 +46,15 @@ interface Brand {
   country: string
   certifications: string[]
   image?: string
+  brand_description?: string
+  manufacturing_info?: string
+  brand_pros?: string[]
+  brand_cons?: string[]
+  ai_summary_status?: 'pending' | 'draft' | 'approved'
+  ai_summary_review_count?: number
+  ai_summary_last_generated?: string
+  ai_summary_draft_pros?: string[]
+  ai_summary_draft_cons?: string[]
 }
 
 interface BrandFormData {
@@ -53,6 +65,10 @@ interface BrandFormData {
   established_year: number
   country: string
   certifications: string
+  brand_description: string
+  manufacturing_info: string
+  brand_pros: string
+  brand_cons: string
 }
 
 // 에러 메시지 컴포넌트
@@ -101,10 +117,14 @@ export default function BrandAdminPage() {
     name: '',
     manufacturer: '',
     overall_rating: 0,
-    product_lines: '',
+    product_lines: '건식사료',  // 기본값 추가
     established_year: new Date().getFullYear(),
     country: '',
-    certifications: ''
+    certifications: 'AAFCO',  // 기본값 추가
+    brand_description: '',
+    manufacturing_info: '',
+    brand_pros: '',
+    brand_cons: ''
   })
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -158,6 +178,8 @@ export default function BrandAdminPage() {
         ...formData,
         product_lines: formData.product_lines.split(',').map(s => s.trim()).filter(s => s),
         certifications: formData.certifications.split(',').map(s => s.trim()).filter(s => s),
+        brand_pros: formData.brand_pros.split('\n').map(s => s.trim()).filter(s => s),
+        brand_cons: formData.brand_cons.split('\n').map(s => s.trim()).filter(s => s),
         recall_history: []
       }
       
@@ -212,7 +234,9 @@ export default function BrandAdminPage() {
         id: editingBrand.id,
         ...formData,
         product_lines: formData.product_lines.split(',').map(s => s.trim()).filter(s => s),
-        certifications: formData.certifications.split(',').map(s => s.trim()).filter(s => s)
+        certifications: formData.certifications.split(',').map(s => s.trim()).filter(s => s),
+        brand_pros: formData.brand_pros.split('\n').map(s => s.trim()).filter(s => s),
+        brand_cons: formData.brand_cons.split('\n').map(s => s.trim()).filter(s => s)
       }
       
       const response = await fetch('/api/brands', {
@@ -326,10 +350,14 @@ export default function BrandAdminPage() {
       name: '',
       manufacturer: '',
       overall_rating: 0,
-      product_lines: '',
+      product_lines: '건식사료',
       established_year: new Date().getFullYear(),
       country: '',
-      certifications: ''
+      certifications: 'AAFCO',
+      brand_description: '',
+      manufacturing_info: '',
+      brand_pros: '',
+      brand_cons: ''
     })
     setValidationErrors({})
     setIsSubmitting(false)
@@ -344,7 +372,11 @@ export default function BrandAdminPage() {
       product_lines: brand.product_lines.join(', '),
       established_year: brand.established_year,
       country: brand.country,
-      certifications: brand.certifications.join(', ')
+      certifications: brand.certifications.join(', '),
+      brand_description: brand.brand_description || '',
+      manufacturing_info: brand.manufacturing_info || '',
+      brand_pros: brand.brand_pros?.join('\n') || '',
+      brand_cons: brand.brand_cons?.join('\n') || ''
     })
     setShowEditModal(true)
   }
@@ -511,6 +543,9 @@ export default function BrandAdminPage() {
                     리콜 이력
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    AI 요약
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     작업
                   </th>
                 </tr>
@@ -580,6 +615,34 @@ export default function BrandAdminPage() {
                         }`}>
                           {brand.recall_history.length === 0 ? '없음' : `${brand.recall_history.length}건`}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-2">
+                          {brand.ai_summary_status === 'approved' ? (
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              승인됨
+                            </span>
+                          ) : brand.ai_summary_status === 'draft' ? (
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                              <Clock className="h-3 w-3 mr-1" />
+                              검토 대기
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              미생성
+                            </span>
+                          )}
+                          <button
+                            onClick={() => {/* TODO: AI 요약 생성/검토 */}}
+                            className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded transition-colors"
+                            title="AI 요약 생성"
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            {brand.ai_summary_status === 'draft' ? '검토' : '생성'}
+                          </button>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-sm font-medium">
                         <div className="flex items-center space-x-2">
@@ -715,6 +778,58 @@ export default function BrandAdminPage() {
                     validationErrors.certifications ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="AAFCO, ISO 9001, FDA"
+                  disabled={isSubmitting}
+                />
+              </FormField>
+              
+              <FormField label="브랜드 설명" error={validationErrors.brand_description}>
+                <textarea
+                  value={formData.brand_description}
+                  onChange={(e) => setFormData({...formData, brand_description: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    validationErrors.brand_description ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  rows={4}
+                  placeholder="브랜드에 대한 설명을 입력하세요"
+                  disabled={isSubmitting}
+                />
+              </FormField>
+              
+              <FormField label="제조 및 소싱 정보" error={validationErrors.manufacturing_info}>
+                <textarea
+                  value={formData.manufacturing_info}
+                  onChange={(e) => setFormData({...formData, manufacturing_info: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    validationErrors.manufacturing_info ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  rows={4}
+                  placeholder="제조 공장 및 원료 소싱에 대한 정보를 입력하세요"
+                  disabled={isSubmitting}
+                />
+              </FormField>
+              
+              <FormField label="신뢰하는 이유 (한 줄에 하나씩)" error={validationErrors.brand_pros}>
+                <textarea
+                  value={formData.brand_pros}
+                  onChange={(e) => setFormData({...formData, brand_pros: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    validationErrors.brand_pros ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  rows={4}
+                  placeholder="엄격한 품질 관리&#10;투명한 원료 공개&#10;다양한 제품 라인업"
+                  disabled={isSubmitting}
+                />
+              </FormField>
+              
+              <FormField label="보완하면 좋은 점 (한 줄에 하나씩)" error={validationErrors.brand_cons}>
+                <textarea
+                  value={formData.brand_cons}
+                  onChange={(e) => setFormData({...formData, brand_cons: e.target.value})}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    validationErrors.brand_cons ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
+                  rows={4}
+                  placeholder="가격이 다소 높음&#10;구매처가 제한적&#10;특정 제품의 재고 부족"
                   disabled={isSubmitting}
                 />
               </FormField>
@@ -876,6 +991,58 @@ export default function BrandAdminPage() {
                   onChange={(e) => setFormData({...formData, certifications: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   placeholder="AAFCO, ISO 9001, FDA"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  브랜드 설명
+                </label>
+                <textarea
+                  value={formData.brand_description}
+                  onChange={(e) => setFormData({...formData, brand_description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="브랜드에 대한 설명을 입력하세요"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  제조 및 소싱 정보
+                </label>
+                <textarea
+                  value={formData.manufacturing_info}
+                  onChange={(e) => setFormData({...formData, manufacturing_info: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="제조 공장 및 원료 소싱에 대한 정보를 입력하세요"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  신뢰하는 이유 (한 줄에 하나씩)
+                </label>
+                <textarea
+                  value={formData.brand_pros}
+                  onChange={(e) => setFormData({...formData, brand_pros: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="엄격한 품질 관리&#10;투명한 원료 공개&#10;다양한 제품 라인업"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  보완하면 좋은 점 (한 줄에 하나씩)
+                </label>
+                <textarea
+                  value={formData.brand_cons}
+                  onChange={(e) => setFormData({...formData, brand_cons: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  rows={4}
+                  placeholder="가격이 다소 높음&#10;구매처가 제한적&#10;특정 제품의 재고 부족"
                 />
               </div>
             </div>

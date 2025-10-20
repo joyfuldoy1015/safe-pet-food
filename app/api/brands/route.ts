@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { kv } from '@vercel/kv'
-import brandsData from '../../../data/brands.json'
+import { supabase } from '@/lib/supabase'
 import { 
   validateBrandCreate, 
   validateBrandUpdate,
@@ -10,29 +9,42 @@ import {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-const BRANDS_KEY = 'brands:all'
-
-// KV 초기화 (첫 실행 시 JSON 데이터 로드)
-async function initializeData() {
-  try {
-    const existing = await kv.get(BRANDS_KEY)
-    if (!existing || (Array.isArray(existing) && existing.length === 0)) {
-      await kv.set(BRANDS_KEY, brandsData)
-      console.log('✅ Initialized KV with JSON data')
-      return brandsData
-    }
-    return existing
-  } catch (error) {
-    console.error('❌ Failed to initialize KV, falling back to JSON:', error)
-    return brandsData
-  }
-}
-
 // GET - 브랜드 목록 조회
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const brands = await initializeData()
-    
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const country = searchParams.get('country')
+    const sortBy = searchParams.get('sortBy') || 'name'
+    const order = searchParams.get('order') || 'asc'
+
+    let query = supabase
+      .from('brands')
+      .select('*')
+
+    // 검색 필터
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,manufacturer.ilike.%${search}%`)
+    }
+
+    // 국가 필터
+    if (country) {
+      query = query.eq('country', country)
+    }
+
+    // 정렬
+    query = query.order(sortBy, { ascending: order === 'asc' })
+
+    const { data: brands, error } = await query
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch brands', details: error.message },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json(brands, {
       status: 200,
       headers: {
@@ -51,62 +63,60 @@ export async function GET() {
   }
 }
 
-// POST - 새 브랜드 추가
-export async function POST(request: Request) {
+// POST - 브랜드 생성
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
     // 🔒 데이터 검증
     const validation = validateBrandCreate(body)
-    
     if (!validation.success) {
+      const errors = formatValidationErrors(validation.error)
       return NextResponse.json(
         { 
           error: 'Validation failed',
-          details: formatValidationErrors(validation.error)
+          details: errors
         },
         { status: 400 }
       )
     }
 
     const validatedData = validation.data
-    
-    // 기존 브랜드 조회
-    const brands = await kv.get(BRANDS_KEY) as any[] || []
-    
-    // 🔒 중복 체크
-    const existingBrand = brands.find(
-      b => b.name.toLowerCase() === validatedData.name.toLowerCase()
-    )
-    
+
+    // 🔒 이름 중복 체크
+    const { data: existingBrand } = await supabase
+      .from('brands')
+      .select('id')
+      .eq('name', validatedData.name)
+      .single()
+
     if (existingBrand) {
       return NextResponse.json(
         { 
-          error: 'Brand already exists',
+          error: 'Brand name already exists',
           details: [{ 
             field: 'name', 
-            message: `브랜드 "${validatedData.name}"은(는) 이미 등록되어 있습니다` 
+            message: `브랜드명 "${validatedData.name}"은(는) 이미 사용 중입니다` 
           }]
         },
         { status: 409 }
       )
     }
 
-    // ID 생성 (더 안전한 방식)
-    const maxId = brands.length > 0 
-      ? Math.max(...brands.map(b => parseInt(b.id) || 0), 0)
-      : 0
-    
-    const newBrand = {
-      id: (maxId + 1).toString(),
-      ...validatedData,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
+    // 브랜드 생성
+    const { data: newBrand, error } = await supabase
+      .from('brands')
+      .insert([validatedData])
+      .select()
+      .single()
 
-    // KV에 저장
-    brands.push(newBrand)
-    await kv.set(BRANDS_KEY, brands)
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json(
+        { error: 'Failed to create brand', details: error.message },
+        { status: 500 }
+      )
+    }
 
     console.log(`✅ Created brand: ${newBrand.name} (ID: ${newBrand.id})`)
 
@@ -114,7 +124,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Failed to create brand:', error)
     
-    // JSON 파싱 에러 처리
     if (error instanceof SyntaxError) {
       return NextResponse.json(
         { 
@@ -135,27 +144,27 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT - 브랜드 업데이트
-export async function PUT(request: Request) {
+// PUT - 브랜드 수정
+export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     
     // 🔒 데이터 검증
     const validation = validateBrandUpdate(body)
-    
     if (!validation.success) {
+      const errors = formatValidationErrors(validation.error)
       return NextResponse.json(
         { 
           error: 'Validation failed',
-          details: formatValidationErrors(validation.error)
+          details: errors
         },
         { status: 400 }
       )
     }
 
-    const validatedData = validation.data
-    
-    if (!validatedData.id) {
+    const { id, ...validatedData } = validation.data
+
+    if (!id) {
       return NextResponse.json(
         { 
           error: 'Brand ID is required',
@@ -165,26 +174,32 @@ export async function PUT(request: Request) {
       )
     }
 
-    const brands = await kv.get(BRANDS_KEY) as any[] || []
-    const brandIndex = brands.findIndex(b => b.id === validatedData.id)
-    
-    if (brandIndex === -1) {
+    // 🔒 브랜드 존재 확인
+    const { data: existingBrand } = await supabase
+      .from('brands')
+      .select('id')
+      .eq('id', id)
+      .single()
+
+    if (!existingBrand) {
       return NextResponse.json(
         { 
           error: 'Brand not found',
-          details: [{ field: 'id', message: `ID ${validatedData.id}에 해당하는 브랜드를 찾을 수 없습니다` }]
+          details: [{ field: 'id', message: `ID ${id}에 해당하는 브랜드를 찾을 수 없습니다` }]
         },
         { status: 404 }
       )
     }
 
     // 🔒 이름 중복 체크 (다른 브랜드와)
-    if (validatedData.name && typeof validatedData.name === 'string') {
-      const duplicateBrand = brands.find(
-        b => b.id !== validatedData.id && 
-             b.name.toLowerCase() === validatedData.name!.toLowerCase()
-      )
-      
+    if (validatedData.name) {
+      const { data: duplicateBrand } = await supabase
+        .from('brands')
+        .select('id')
+        .eq('name', validatedData.name)
+        .neq('id', id)
+        .single()
+
       if (duplicateBrand) {
         return NextResponse.json(
           { 
@@ -199,17 +214,21 @@ export async function PUT(request: Request) {
       }
     }
 
-    // 업데이트
-    const updatedBrand = {
-      ...brands[brandIndex],
-      ...validatedData,
-      id: brands[brandIndex].id, // ID는 변경 불가
-      created_at: brands[brandIndex].created_at, // 생성일 유지
-      updated_at: new Date().toISOString()
+    // 브랜드 업데이트
+    const { data: updatedBrand, error } = await supabase
+      .from('brands')
+      .update(validatedData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json(
+        { error: 'Failed to update brand', details: error.message },
+        { status: 500 }
+      )
     }
-    
-    brands[brandIndex] = updatedBrand
-    await kv.set(BRANDS_KEY, brands)
 
     console.log(`✅ Updated brand: ${updatedBrand.name} (ID: ${updatedBrand.id})`)
 
@@ -252,33 +271,31 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // 🔒 ID 형식 검증
-    if (!/^[0-9a-zA-Z_-]+$/.test(brandId)) {
+    // 브랜드 삭제
+    const { data: deletedBrand, error } = await supabase
+      .from('brands')
+      .delete()
+      .eq('id', brandId)
+      .select()
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { 
+            error: 'Brand not found',
+            details: [{ field: 'id', message: `ID ${brandId}에 해당하는 브랜드를 찾을 수 없습니다` }]
+          },
+          { status: 404 }
+        )
+      }
+
+      console.error('Supabase error:', error)
       return NextResponse.json(
-        { 
-          error: 'Invalid brand ID',
-          details: [{ field: 'id', message: '유효하지 않은 브랜드 ID 형식입니다' }]
-        },
-        { status: 400 }
+        { error: 'Failed to delete brand', details: error.message },
+        { status: 500 }
       )
     }
-
-    const brands = await kv.get(BRANDS_KEY) as any[] || []
-    const brandIndex = brands.findIndex(b => b.id === brandId)
-    
-    if (brandIndex === -1) {
-      return NextResponse.json(
-        { 
-          error: 'Brand not found',
-          details: [{ field: 'id', message: `ID ${brandId}에 해당하는 브랜드를 찾을 수 없습니다` }]
-        },
-        { status: 404 }
-      )
-    }
-
-    // 삭제
-    const deletedBrand = brands.splice(brandIndex, 1)[0]
-    await kv.set(BRANDS_KEY, brands)
 
     console.log(`✅ Deleted brand: ${deletedBrand.name} (ID: ${deletedBrand.id})`)
 
@@ -297,3 +314,4 @@ export async function DELETE(request: NextRequest) {
     )
   }
 }
+
