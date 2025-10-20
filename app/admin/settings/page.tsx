@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { 
   Settings, 
   Save, 
@@ -25,6 +26,12 @@ import {
   Bold,
   Italic
 } from 'lucide-react'
+
+// RichTextEditor를 동적으로 import (SSR 방지)
+const RichTextEditor = dynamic(() => import('@/app/components/RichTextEditor'), { 
+  ssr: false,
+  loading: () => <div className="h-32 bg-gray-50 rounded-lg animate-pulse" />
+})
 
 interface ServiceContent {
   title: string
@@ -423,12 +430,12 @@ export default function AdminSettingsPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
                             설명
                           </label>
-                          <textarea
+                          <RichTextEditor
                             value={service.description}
-                            onChange={(e) => {
+                            onChange={(value) => {
                               setSettings(prev => ({
                                 ...prev,
                                 serviceContents: {
@@ -437,14 +444,12 @@ export default function AdminSettingsPage() {
                                     ...prev.serviceContents.services,
                                     [serviceKey]: {
                                       ...prev.serviceContents.services[serviceKey],
-                                      description: e.target.value
+                                      description: value
                                     }
                                   }
                                 }
                               }))
                             }}
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             placeholder="서비스 설명을 입력하세요"
                           />
                         </div>

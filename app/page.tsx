@@ -162,9 +162,10 @@ function FeatureCard({ feature, categoryColor }: FeatureCardProps) {
         <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-gray-700 transition-colors">
           {feature.name}
         </h3>
-        <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors flex-grow">
-          {feature.description}
-        </p>
+        <div 
+          className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors flex-grow"
+          dangerouslySetInnerHTML={{ __html: feature.description }}
+        />
         <div className="mt-4 flex items-center text-sm font-medium text-gray-500 group-hover:text-gray-700 transition-colors">
           <span>자세히 보기</span>
           <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
