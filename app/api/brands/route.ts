@@ -9,9 +9,24 @@ import {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
+// 환경 변수 체크 헬퍼 함수
+function checkSupabaseConfig() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return false
+  }
+  return true
+}
+
 // GET - 브랜드 목록 조회
 export async function GET(request: NextRequest) {
   try {
+    // 런타임에 환경 변수 체크
+    if (!checkSupabaseConfig()) {
+      return NextResponse.json(
+        { error: 'Supabase configuration is missing. Please check environment variables.' },
+        { status: 500 }
+      )
+    }
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
     const country = searchParams.get('country')
@@ -66,6 +81,12 @@ export async function GET(request: NextRequest) {
 // POST - 브랜드 생성
 export async function POST(request: NextRequest) {
   try {
+    if (!checkSupabaseConfig()) {
+      return NextResponse.json(
+        { error: 'Supabase configuration is missing. Please check environment variables.' },
+        { status: 500 }
+      )
+    }
     const body = await request.json()
     
     // 🔒 데이터 검증
@@ -147,6 +168,12 @@ export async function POST(request: NextRequest) {
 // PUT - 브랜드 수정
 export async function PUT(request: NextRequest) {
   try {
+    if (!checkSupabaseConfig()) {
+      return NextResponse.json(
+        { error: 'Supabase configuration is missing. Please check environment variables.' },
+        { status: 500 }
+      )
+    }
     const body = await request.json()
     
     // 🔒 데이터 검증
@@ -259,6 +286,12 @@ export async function PUT(request: NextRequest) {
 // DELETE - 브랜드 삭제
 export async function DELETE(request: NextRequest) {
   try {
+    if (!checkSupabaseConfig()) {
+      return NextResponse.json(
+        { error: 'Supabase configuration is missing. Please check environment variables.' },
+        { status: 500 }
+      )
+    }
     const brandId = request.nextUrl.searchParams.get('id')
     
     if (!brandId) {
