@@ -153,7 +153,8 @@ interface Brand {
   products: ProductInfo[]
 }
 
-const getBrandData = (brandName: string): Brand => {
+// 이 함수는 더 이상 사용되지 않습니다 - API에서 데이터를 가져옵니다
+const getBrandDataLegacy = (brandName: string): Brand => {
   const brands: Record<string, Brand> = {
     'royal-canin': {
       id: 'royal-canin',
@@ -718,8 +719,53 @@ export default function BrandDetailPage() {
   const [defaultVote, setDefaultVote] = useState<'yes' | 'no'>('yes')
 
   useEffect(() => {
-    const brandData = getBrandData(brandName)
+    // API에서 브랜드 데이터 가져오기
+    const fetchBrandData = async () => {
+      try {
+        const response = await fetch(`/api/brands?search=${encodeURIComponent(brandName)}`)
+        if (response.ok) {
+          const brands = await response.json()
+          if (brands && brands.length > 0) {
+            // Supabase에서 가져온 데이터를 Brand 형식으로 변환
+            const apiData = brands[0]
+            const brandData: Brand = {
+              id: apiData.id || brandName.toLowerCase().replace(/\s+/g, '-'),
+              name: apiData.name,
+              logo: '🐾', // 기본 로고
+              manufacturer: apiData.manufacturer,
+              country_of_origin: apiData.country,
+              manufacturing_locations: [], // TODO: 추후 추가
+              established_year: apiData.established_year,
+              certifications: apiData.certifications || [],
+              brand_description: apiData.brand_description || '',
+              manufacturing_info: apiData.manufacturing_info || '',
+              brand_pros: apiData.brand_pros || [],
+              brand_cons: apiData.brand_cons || [],
+              transparency_score: 75, // 기본 점수
+              recall_history: apiData.recall_history || [],
+              qa_section: [], // TODO: 추후 추가
+              products: [] // TODO: 추후 추가
+            }
     setBrand(brandData)
+          } else {
+            // API에 데이터가 없으면 레거시 데이터 사용
+            const legacyData = getBrandDataLegacy(brandName)
+            setBrand(legacyData)
+          }
+        } else {
+          // API 오류 시 레거시 데이터 사용
+          const legacyData = getBrandDataLegacy(brandName)
+          setBrand(legacyData)
+        }
+      } catch (error) {
+        console.error('브랜드 데이터 로딩 오류:', error)
+        // 에러 시 레거시 데이터 사용
+        const legacyData = getBrandDataLegacy(brandName)
+        setBrand(legacyData)
+      }
+    }
+
+    fetchBrandData()
     
     // 투표 데이터 가져오기
     fetchVoteData()
@@ -917,7 +963,7 @@ export default function BrandDetailPage() {
           <div className="mt-6 pt-6 border-t border-gray-100">
             <h3 className="text-sm font-medium text-gray-900 mb-3">📖 {brand.name}에 대해서</h3>
             <p className="text-sm text-gray-600 leading-relaxed">{brand.brand_description}</p>
-          </div>
+      </div>
 
           {/* 제조 및 소싱 정보 */}
           <div className="mt-6 pt-6 border-t border-gray-100">
@@ -1089,7 +1135,7 @@ export default function BrandDetailPage() {
                             {cert}
                           </span>
                         ))}
-                      </div>
+                  </div>
                     </div>
                     <p className="text-gray-600 leading-relaxed">{product.description}</p>
                   </div>
@@ -1248,7 +1294,7 @@ export default function BrandDetailPage() {
                       <div className="flex items-center space-x-2">
                         <ThumbsDown className="h-5 w-5 text-red-600" />
                         <span className="font-medium text-gray-900">비추천 이유</span>
-                      </div>
+                </div>
                       {expandedProducts[product.id]?.cons ? 
                         <ChevronUp className="h-5 w-5 text-gray-400" /> : 
                         <ChevronDown className="h-5 w-5 text-gray-400" />
@@ -1266,10 +1312,10 @@ export default function BrandDetailPage() {
                         </div>
                       </div>
                     )}
-                  </div>
                 </div>
+              </div>
 
-                {/* 소비자 평가 */}
+          {/* 소비자 평가 */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <Star className="h-5 w-5 text-yellow-500 mr-2" />
@@ -1281,60 +1327,60 @@ export default function BrandDetailPage() {
                     <div>
                       <div className="space-y-3">
                         {Object.entries(product.consumer_ratings).map(([key, rating]) => {
-                          const labels: Record<string, string> = {
-                            palatability: '기호성',
-                            digestibility: '소화력', 
-                            coat_quality: '모질 개선',
-                            stool_quality: '변 상태',
-                            overall_satisfaction: '전체 만족도'
-                          }
-                          
-                          return (
-                            <div key={key} className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">{labels[key]}</span>
-                              <div className="flex items-center space-x-2">
-                                <div className="flex items-center">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star 
-                                      key={star} 
-                                      className={`h-4 w-4 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
-                              </div>
-                            </div>
-                          )
-                        })}
+                const labels: Record<string, string> = {
+                  palatability: '기호성',
+                  digestibility: '소화력', 
+                  coat_quality: '모질 개선',
+                  stool_quality: '변 상태',
+                  overall_satisfaction: '전체 만족도'
+                }
+                
+                return (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{labels[key]}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            className={`h-4 w-4 ${star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                          />
+                        ))}
                       </div>
-                    </div>
-
-                    {/* 커뮤니티 추천 */}
-                    <div className="flex flex-col justify-center">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600 mb-1">
-                          {Math.round((product.community_feedback.recommend_yes / product.community_feedback.total_votes) * 100)}%
-                        </div>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {product.community_feedback.total_votes}명이 평가
-                        </p>
-                        <div className="flex items-center justify-center space-x-4">
-                          <div className="flex items-center space-x-1">
-                            <ThumbsUp className="h-4 w-4 text-green-500" />
-                            <span className="text-sm text-green-600">
-                              {product.community_feedback.recommend_yes}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <ThumbsDown className="h-4 w-4 text-red-500" />
-                            <span className="text-sm text-red-600">
-                              {product.community_feedback.recommend_no}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      <span className="text-sm font-medium text-gray-900">{rating.toFixed(1)}</span>
                     </div>
                   </div>
+                )
+              })}
+                      </div>
+                </div>
+
+            {/* 커뮤니티 추천 */}
+                    <div className="flex flex-col justify-center">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600 mb-1">
+                          {Math.round((product.community_feedback.recommend_yes / product.community_feedback.total_votes) * 100)}%
+                </div>
+                <p className="text-sm text-gray-600 mb-3">
+                          {product.community_feedback.total_votes}명이 평가
+                </p>
+                <div className="flex items-center justify-center space-x-4">
+                  <div className="flex items-center space-x-1">
+                    <ThumbsUp className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-green-600">
+                              {product.community_feedback.recommend_yes}
+                    </span>
+            </div>
+                  <div className="flex items-center space-x-1">
+                    <ThumbsDown className="h-4 w-4 text-red-500" />
+                    <span className="text-sm text-red-600">
+                              {product.community_feedback.recommend_no}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
                   {/* 소비자 리뷰 */}
                   <div className="mt-6 pt-6 border-t border-gray-200">
@@ -1342,13 +1388,13 @@ export default function BrandDetailPage() {
                       <MessageSquare className="h-4 w-4 text-blue-500 mr-2" />
                       소비자 리뷰 ({product.consumer_reviews.length})
                     </h5>
-                    
-                    <div className="space-y-4">
+            
+            <div className="space-y-4">
                       {product.consumer_reviews.map((review) => (
                         <div key={review.id} className="bg-gray-50 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <User className="h-4 w-4 text-gray-400" />
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-gray-400" />
                               <span className="text-sm font-medium text-gray-700">{review.user_name}</span>
                               <div className="flex items-center">
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -1357,10 +1403,10 @@ export default function BrandDetailPage() {
                                     className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
                                   />
                                 ))}
-                              </div>
-                            </div>
+                    </div>
+                    </div>
                             <span className="text-xs text-gray-500">{review.date}</span>
-                          </div>
+                  </div>
                           <p className="text-sm text-gray-700 mb-2 leading-relaxed">{review.comment}</p>
                           <div className="flex items-center justify-between">
                             <button className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors">
@@ -1368,15 +1414,15 @@ export default function BrandDetailPage() {
                               <span>도움됨 {review.helpful_count}</span>
                             </button>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+              </div>
+              ))}
+            </div>
                   </div>
                 </div>
               </div>
             ))}
-                </div>
-              </div>
+          </div>
+        </div>
 
 
         {/* 브랜드 질문하기 섹션 */}
@@ -1474,7 +1520,7 @@ export default function BrandDetailPage() {
               <span className="font-medium text-red-600">문제 신고하기</span>
             </button>
 
-            {/* 투표 위젯 */}
+          {/* 투표 위젯 */}
             <div className="flex items-center justify-center space-x-2">
               <button 
                 onClick={() => handleVote('yes')}
