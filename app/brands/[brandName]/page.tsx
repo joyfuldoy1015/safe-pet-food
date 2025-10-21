@@ -743,6 +743,33 @@ export default function BrandDetailPage() {
               brand_cons: apiData.brand_cons || [],
               transparency_score: 75, // 기본 점수
               recall_history: apiData.recall_history || [],
+              ingredient_disclosure: {
+                fully_disclosed: 0,
+                partially_disclosed: 0,
+                not_disclosed: 0
+              },
+              nutrition_analysis: {
+                protein: 0,
+                fat: 0,
+                carbohydrates: 0,
+                fiber: 0,
+                moisture: 0,
+                calories_per_100g: 0
+              },
+              consumer_ratings: {
+                palatability: 0,
+                digestibility: 0,
+                coat_quality: 0,
+                stool_quality: 0,
+                overall_satisfaction: 0
+              },
+              expert_reviews: [],
+              ingredients: [],
+              community_feedback: {
+                recommend_yes: 0,
+                recommend_no: 0,
+                total_votes: 0
+              },
               qa_section: [], // TODO: 추후 추가
               products: [] // TODO: 추후 추가
             }
