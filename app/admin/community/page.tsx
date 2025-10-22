@@ -299,7 +299,7 @@ export default function CommunityAdminPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">전체 콘텐츠</p>
@@ -309,7 +309,7 @@ export default function CommunityAdminPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">답변 대기</p>
@@ -319,7 +319,7 @@ export default function CommunityAdminPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">신고 콘텐츠</p>
@@ -329,7 +329,7 @@ export default function CommunityAdminPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">활성 펫 로그</p>
@@ -409,7 +409,7 @@ export default function CommunityAdminPage() {
         </div>
 
         {/* Content List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           {activeTab === 'questions' ? (
             <div className="divide-y divide-gray-200">
               {filteredQuestions.length === 0 ? (

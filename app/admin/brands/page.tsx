@@ -429,7 +429,7 @@ export default function BrandAdminPage() {
         </div>
         {/* Dashboard Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-lg border">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">총 브랜드</p>
@@ -441,7 +441,7 @@ export default function BrandAdminPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-lg border">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">안전 브랜드</p>
@@ -453,7 +453,7 @@ export default function BrandAdminPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-lg border">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">보통 브랜드</p>
@@ -465,7 +465,7 @@ export default function BrandAdminPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="bg-white rounded-xl p-6 shadow-lg border">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">주의 브랜드</p>
@@ -479,7 +479,7 @@ export default function BrandAdminPage() {
         </div>
 
         {/* Search and Actions */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border mb-8">
+        <div className="bg-white rounded-xl p-6 shadow-lg border mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -505,7 +505,7 @@ export default function BrandAdminPage() {
         </div>
 
         {/* Brands Table */}
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

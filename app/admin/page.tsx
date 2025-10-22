@@ -128,7 +128,7 @@ export default function AdminPanel() {
           
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">총 사용자</p>
@@ -139,7 +139,7 @@ export default function AdminPanel() {
               <p className="text-xs text-green-600 mt-2">↗ +12% 이번 달</p>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">총 브랜드</p>
@@ -150,7 +150,7 @@ export default function AdminPanel() {
               <p className="text-xs text-green-600 mt-2">↗ +3개 이번 달</p>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">커뮤니티 활동</p>
@@ -161,7 +161,7 @@ export default function AdminPanel() {
               <p className="text-xs text-green-600 mt-2">질문 156 · 펫로그 487</p>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">월 방문자</p>
@@ -180,7 +180,7 @@ export default function AdminPanel() {
             <Link
               key={item.title}
               href={item.href}
-              className="group bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+              className="group bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 bg-gradient-to-r ${item.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
@@ -229,7 +229,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Recent Activity */}
-        <div className="mt-12 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="mt-12 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
           <h2 className="text-xl font-bold text-gray-900 mb-6">최근 활동</h2>
           <div className="space-y-4">
             <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">

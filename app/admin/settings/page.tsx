@@ -180,7 +180,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
+      <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -218,7 +218,7 @@ export default function AdminSettingsPage() {
 
         <div className="space-y-8">
           {/* Site Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Globe className="h-5 w-5 text-blue-500" />
               <h3 className="text-lg font-medium text-gray-900">사이트 설정</h3>
@@ -255,7 +255,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* System Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Server className="h-5 w-5 text-green-500" />
               <h3 className="text-lg font-medium text-gray-900">시스템 설정</h3>
@@ -306,7 +306,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Notification Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Bell className="h-5 w-5 text-yellow-500" />
               <h3 className="text-lg font-medium text-gray-900">알림 설정</h3>
@@ -347,7 +347,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* API Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Key className="h-5 w-5 text-purple-500" />
               <h3 className="text-lg font-medium text-gray-900">API 설정</h3>
@@ -379,7 +379,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Service Contents Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="h-5 w-5 text-indigo-500" />
               <h3 className="text-lg font-medium text-gray-900">서비스 콘텐츠 관리</h3>
@@ -489,7 +489,7 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Database Settings */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Database className="h-5 w-5 text-blue-500" />
               <h3 className="text-lg font-medium text-gray-900">데이터베이스 설정</h3>

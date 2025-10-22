@@ -113,7 +113,7 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
+      <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -154,7 +154,7 @@ export default function AdminAnalyticsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">총 방문자</p>
@@ -168,7 +168,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">신규 사용자</p>
@@ -179,7 +179,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">활성 사용자</p>
@@ -190,7 +190,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
           
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">사용자 유지율</p>
@@ -204,7 +204,7 @@ export default function AdminAnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Visitor Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <h3 className="text-lg font-medium text-gray-900 mb-4">일별 방문자 수</h3>
             <div className="h-64 flex items-end justify-between gap-2">
               {data.visitors.data.map((item, index) => (
@@ -222,7 +222,7 @@ export default function AdminAnalyticsPage() {
           </div>
 
           {/* Popular Products */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <h3 className="text-lg font-medium text-gray-900 mb-4">인기 제품</h3>
             <div className="space-y-4">
               {data.popularProducts.map((product, index) => (
@@ -254,7 +254,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Page Views */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">페이지별 조회수</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

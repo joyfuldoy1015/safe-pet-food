@@ -179,27 +179,20 @@ export default function CommunityQAForumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center space-x-4 mb-4">
-            <Link href="/" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Q&A 포럼 💬</h1>
-              <p className="text-lg text-gray-600 mt-2">
-                반려동물에 대한 궁금한 점을 질문하고, 경험을 나눠보세요.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Q&A 포럼 💬
+        </h1>
+        <p className="text-lg text-gray-600">
+          반려동물에 대한 궁금한 점을 질문하고, 경험을 나눠보세요.
+        </p>
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Controls */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 mb-8">
           <div className="space-y-4">
             {/* Search */}
             <div className="relative w-full">
@@ -257,7 +250,7 @@ export default function CommunityQAForumPage() {
         <div className="space-y-6">
           {sortedQuestions.length > 0 ? (
             sortedQuestions.map(question => (
-              <div key={question.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow">
+              <div key={question.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-shadow">
                 {/* Category */}
                 <div className="flex items-center space-x-2 mb-3">
                   {getStatusIcon(question.status)}
