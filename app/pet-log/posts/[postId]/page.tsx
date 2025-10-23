@@ -480,9 +480,9 @@ export default function PetLogPostDetail() {
     <div key={record.id} className={`border border-gray-200 rounded-xl p-6 ${categoryConfig[record.category].bgColor}`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <div className="flex items-center mb-2">
-            <span className="text-xl mr-2">{categoryConfig[record.category].icon}</span>
-            <h3 className="font-semibold text-gray-900 text-lg">{record.productName}</h3>
+          <div className="flex items-start mb-2">
+            <span className="text-xl mr-2 flex-shrink-0">{categoryConfig[record.category].icon}</span>
+            <h3 className="font-semibold text-gray-900 text-lg leading-tight break-words">{record.productName}</h3>
           </div>
           <p className="text-sm text-gray-600 mb-1">{record.brand}</p>
           {record.price && (
@@ -501,22 +501,22 @@ export default function PetLogPostDetail() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <p className="text-xs text-gray-500 mb-1">급여 기간</p>
-          <p className="text-sm font-medium">
+        <div className="bg-white/50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-1 font-medium">급여 기간</p>
+          <p className="text-sm font-semibold text-gray-900">
             {record.startDate} ~ {record.endDate || '현재'}
           </p>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">재구매 의향</p>
+        <div className="bg-white/50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-1 font-medium">재구매 의향</p>
           <div className="flex items-center">
             {record.repurchaseIntent ? (
-              <span className="text-green-600 flex items-center">
+              <span className="text-green-700 flex items-center font-medium">
                 <Heart className="h-4 w-4 mr-1 fill-current" />
                 있음
               </span>
             ) : (
-              <span className="text-gray-500 flex items-center">
+              <span className="text-gray-600 flex items-center font-medium">
                 <Heart className="h-4 w-4 mr-1" />
                 없음
               </span>
@@ -526,15 +526,25 @@ export default function PetLogPostDetail() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <p className="text-xs text-gray-500 mb-2">
+        <div className="bg-white/50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-2 font-medium">
             {record.category === '화장실' ? '사용성' : '기호성'}
           </p>
-          {renderStars(record.palatability)}
+          <div className="flex items-center justify-between">
+            {renderStars(record.palatability)}
+            <span className="text-xs text-gray-600 ml-2">
+              {record.palatability}/5점
+            </span>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-2">만족도</p>
-          {renderStars(record.satisfaction)}
+        <div className="bg-white/50 rounded-lg p-3">
+          <p className="text-xs text-gray-500 mb-2 font-medium">만족도</p>
+          <div className="flex items-center justify-between">
+            {renderStars(record.satisfaction)}
+            <span className="text-xs text-gray-600 ml-2">
+              {record.satisfaction}/5점
+            </span>
+          </div>
         </div>
       </div>
 
@@ -645,9 +655,9 @@ export default function PetLogPostDetail() {
                   setShowLoginModal(true)
                 }
               }}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm min-h-[44px] touch-manipulation"
             >
-              <Award className="h-4 w-4" />
+              <Award className="h-5 w-5" />
               <span>내 경험 공유하기</span>
             </button>
           </div>
@@ -742,13 +752,13 @@ export default function PetLogPostDetail() {
                   <button
                     onClick={handleSubmitComment}
                     disabled={!newComment.trim() || !isLoggedIn}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation ${
                       isLoggedIn && newComment.trim()
-                        ? 'bg-blue-500 text-white hover:bg-blue-600'
+                        ? 'bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5" />
                     <span>질문하기</span>
                   </button>
                 </div>
@@ -783,17 +793,19 @@ export default function PetLogPostDetail() {
                     <div className="flex items-center space-x-4">
                       <button
                         onClick={() => handleToggleLike(comment.id)}
-                        className={`flex items-center space-x-1 text-sm transition-colors ${
-                          comment.isLiked ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
+                        className={`flex items-center space-x-1 text-sm transition-colors px-3 py-2 rounded-lg min-h-[36px] touch-manipulation ${
+                          comment.isLiked 
+                            ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' 
+                            : 'text-gray-500 hover:text-blue-600 hover:bg-gray-50'
                         }`}
                       >
                         <ThumbsUp className={`h-4 w-4 ${comment.isLiked ? 'fill-current' : ''}`} />
-                        <span>{comment.likes}</span>
+                        <span className="font-medium">{comment.likes}</span>
                       </button>
                       
                       <button
                         onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                        className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                        className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600 hover:bg-gray-50 transition-colors px-3 py-2 rounded-lg min-h-[36px] touch-manipulation"
                       >
                         <Reply className="h-4 w-4" />
                         <span>답글</span>
