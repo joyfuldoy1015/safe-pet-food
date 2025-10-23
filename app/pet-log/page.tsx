@@ -18,7 +18,11 @@ import {
   ThumbsUp,
   Filter,
   Search,
-  User
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Bookmark,
+  BookmarkCheck
 } from 'lucide-react'
 
 // 제품 카테고리 타입
@@ -308,6 +312,9 @@ export default function PetLogPage() {
   // 예: const { data: session } = useSession() 또는 const { user } = useAuth()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const postsPerPage = 6
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())
 
   // 필터링된 포스트들
   const filteredPosts = detailedPosts.filter(post => {
@@ -334,9 +341,42 @@ export default function PetLogPage() {
     .sort((a, b) => b.views - a.views)
     .slice(0, 3)
 
-  // 최신 포스트들
+  // 최신 포스트들 (페이지네이션 적용)
   const recentPosts = [...detailedPosts]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+  
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
+  const startIndex = (currentPage - 1) * postsPerPage
+  const endIndex = startIndex + postsPerPage
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex)
+  
+  // 페이지 변경 시 스크롤을 맨 위로
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // 즐겨찾기 토글 함수
+  const handleBookmarkToggle = (postId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isLoggedIn) {
+      setShowLoginModal(true)
+      return
+    }
+    
+    setBookmarkedPosts(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(postId)) {
+        newSet.delete(postId)
+      } else {
+        newSet.add(postId)
+      }
+      return newSet
+    })
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
@@ -377,7 +417,10 @@ export default function PetLogPage() {
                   type="text"
                   placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setCurrentPage(1)
+                  }}
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
@@ -385,7 +428,10 @@ export default function PetLogPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value)
+                  setCurrentPage(1)
+                }}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex-1"
               >
                 <option value="all">전체 카테고리</option>
@@ -396,7 +442,10 @@ export default function PetLogPage() {
               </select>
               <select
                 value={selectedSpecies}
-                onChange={(e) => setSelectedSpecies(e.target.value)}
+                onChange={(e) => {
+                  setSelectedSpecies(e.target.value)
+                  setCurrentPage(1)
+                }}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex-1"
               >
                 <option value="all">전체 반려동물</option>
@@ -431,9 +480,25 @@ export default function PetLogPage() {
                         }`}>
                           {index + 1}
                         </div>
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <Eye className="h-4 w-4" />
-                          <span>{post.views.toLocaleString()}</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <Eye className="h-4 w-4" />
+                            <span>{post.views.toLocaleString()}</span>
+                          </div>
+                          <button
+                            onClick={(e) => handleBookmarkToggle(post.id, e)}
+                            className={`p-2 rounded-lg transition-colors min-h-[36px] touch-manipulation ${
+                              bookmarkedPosts.has(post.id)
+                                ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100'
+                                : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+                            }`}
+                          >
+                            {bookmarkedPosts.has(post.id) ? (
+                              <BookmarkCheck className="h-4 w-4" />
+                            ) : (
+                              <Bookmark className="h-4 w-4" />
+                            )}
+                          </button>
                         </div>
                       </div>
 
@@ -459,7 +524,7 @@ export default function PetLogPage() {
                         <div className="mb-4">
                           <div className="flex items-start space-x-2 mb-2">
                             <span className="text-lg flex-shrink-0">{categoryConfig[mainRecord.category].icon}</span>
-                            <h3 className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors break-words flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors break-words flex-1 min-w-0 line-clamp-2">
                               {mainRecord.productName}
                             </h3>
                           </div>
@@ -517,15 +582,15 @@ export default function PetLogPage() {
 
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
                             <ThumbsUp className={`h-4 w-4 ${post.isLiked ? 'text-blue-500' : ''}`} />
-                            <span>{post.likes}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
+                            <span className="font-medium">{post.likes}</span>
+                          </button>
+                          <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
                             <MessageCircle className="h-4 w-4" />
-                            <span>{post.comments}</span>
-                          </div>
+                            <span className="font-medium">{post.comments}</span>
+                          </button>
                         </div>
                         <span className="text-sm text-gray-500">{formatDate(post.createdAt)}</span>
                       </div>
@@ -546,7 +611,7 @@ export default function PetLogPage() {
           </div>
 
           <div className="space-y-6">
-            {filteredPosts.map((post) => {
+            {paginatedPosts.map((post) => {
               const mainRecord = getMainFeedingRecord(post)
               const avgPalatability = getAverageRating(post.feedingRecords, 'palatability')
               const avgSatisfaction = getAverageRating(post.feedingRecords, 'satisfaction')
@@ -577,19 +642,33 @@ export default function PetLogPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3 lg:space-x-4 text-sm text-gray-500 flex-shrink-0">
-                        <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-2 lg:space-x-3 text-sm text-gray-500 flex-shrink-0">
+                        <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
                           <Eye className="h-4 w-4" />
-                          <span>{post.views}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
+                          <span className="font-medium">{post.views}</span>
+                        </button>
+                        <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
                           <ThumbsUp className={`h-4 w-4 ${post.isLiked ? 'text-blue-500' : ''}`} />
-                          <span>{post.likes}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
+                          <span className="font-medium">{post.likes}</span>
+                        </button>
+                        <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
                           <MessageCircle className="h-4 w-4" />
-                          <span>{post.comments}</span>
-                        </div>
+                          <span className="font-medium">{post.comments}</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleBookmarkToggle(post.id, e)}
+                          className={`p-2 rounded-lg transition-colors min-h-[36px] touch-manipulation ${
+                            bookmarkedPosts.has(post.id)
+                              ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100'
+                              : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+                          }`}
+                        >
+                          {bookmarkedPosts.has(post.id) ? (
+                            <BookmarkCheck className="h-4 w-4" />
+                          ) : (
+                            <Bookmark className="h-4 w-4" />
+                          )}
+                        </button>
                       </div>
                     </div>
 
@@ -705,6 +784,45 @@ export default function PetLogPage() {
               <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
               <p className="text-gray-500">다른 검색어나 필터를 시도해보세요.</p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredPosts.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2 mt-8">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="flex items-center space-x-1 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-colors min-h-[40px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>이전</span>
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[40px] min-w-[40px] touch-manipulation ${
+                      currentPage === page
+                        ? 'bg-purple-600 text-white'
+                        : 'border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="flex items-center space-x-1 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-colors min-h-[40px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                <span>다음</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
           )}
         </div>
