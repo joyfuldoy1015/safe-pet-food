@@ -716,6 +716,13 @@ export default function PetLogPostDetail() {
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
+                  onFocus={() => {
+                    console.log('Textarea focused, isLoggedIn:', isLoggedIn)
+                    if (!isLoggedIn) {
+                      console.log('Showing login modal')
+                      setShowLoginModal(true)
+                    }
+                  }}
                   onClick={() => {
                     console.log('Textarea clicked, isLoggedIn:', isLoggedIn)
                     if (!isLoggedIn) {
