@@ -717,7 +717,9 @@ export default function PetLogPostDetail() {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   onClick={() => {
+                    console.log('Textarea clicked, isLoggedIn:', isLoggedIn)
                     if (!isLoggedIn) {
+                      console.log('Showing login modal')
                       setShowLoginModal(true)
                     }
                   }}
@@ -892,6 +894,7 @@ export default function PetLogPostDetail() {
         </div>
 
         {/* Login Modal */}
+        {console.log('showLoginModal state:', showLoginModal)}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-md w-full p-6">
