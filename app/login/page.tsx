@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { 
   Eye, 
   EyeOff, 
@@ -15,14 +17,40 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
-  
-  // 임시로 관리자 계정 여부를 설정 (실제로는 로그인 상태에서 가져와야 함)
-  const isAdmin = true // 실제 구현 시 로그인 상태에서 관리자 권한 확인
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleGoogleLogin = async () => {
+    setIsLoading(true)
+    try {
+      await signIn('google', { callbackUrl: '/' })
+    } catch (error) {
+      console.error('Google login error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // 로그인 로직 구현
-    console.log('Login attempt:', { email, password, rememberMe })
+    setIsLoading(true)
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+      
+      if (result?.ok) {
+        router.push('/')
+      } else {
+        console.error('Login failed:', result?.error)
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -41,9 +69,13 @@ export default function LoginPage() {
           
           {/* Social Login Buttons */}
           <div className="space-y-3">
-            <button className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-5 h-5 mr-3" />
-              Google로 로그인
+              {isLoading ? '로그인 중...' : 'Google로 로그인'}
             </button>
             
             <button className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors">
@@ -146,9 +178,10 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+                disabled={isLoading}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                로그인
+                {isLoading ? '로그인 중...' : '로그인'}
               </button>
             </div>
 
