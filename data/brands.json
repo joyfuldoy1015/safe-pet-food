@@ -3,6 +3,7 @@
     "id": "1",
     "name": "로얄캐닌",
     "manufacturer": "마스 펫케어 코리아",
+    "description": "프랑스의 프리미엄 펫푸드 브랜드로, 50년 이상의 연구와 개발을 통해 반려동물의 건강과 영양에 특화된 사료를 제공합니다. 수의학적 전문성과 과학적 접근을 바탕으로 각 품종과 생애주기에 맞는 맞춤형 영양 솔루션을 제공합니다.",
     "recall_history": [
       {
         "date": "2019-03-15",
@@ -22,6 +23,7 @@
     "id": "2", 
     "name": "힐스",
     "manufacturer": "힐스 펫 뉴트리션",
+    "description": "1939년 설립된 미국의 수의학 전문 브랜드로, 수의사와 함께 개발한 처방식 사료로 유명합니다. 과학적 연구를 바탕으로 한 영양학적 접근과 수의학적 전문성을 통해 반려동물의 특별한 건강 요구사항을 충족시킵니다.",
     "recall_history": [
       {
         "date": "2019-01-31",
@@ -191,5 +193,24 @@
     "country": "캐나다",
     "certifications": ["CFIA", "AAFCO"],
     "image": "/brands/go.jpg"
+  },
+  {
+    "id": "13",
+    "name": "내가 추가한 브랜드",
+    "manufacturer": "내 제조사",
+    "recall_history": [
+      {
+        "date": "2023-01-15",
+        "reason": "예시 리콜 사유",
+        "severity": "low",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.5,
+    "product_lines": ["프리미엄", "내추럴"],
+    "established_year": 2020,
+    "country": "한국",
+    "certifications": ["KFIA"],
+    "image": "/brands/my-brand.jpg"
   }
 ] 

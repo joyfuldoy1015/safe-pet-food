@@ -8,6 +8,7 @@ interface Brand {
   id: string
   name: string
   manufacturer: string
+  description?: string
   recall_history: Array<{
     date: string
     reason: string
@@ -246,6 +247,15 @@ export default function BrandsPage() {
                             <span>{transparencyBadge.text}</span>
                           </div>
                         </div>
+
+                        {/* Description */}
+                        {brand.description && (
+                          <div className="mb-4">
+                            <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                              {brand.description}
+                            </p>
+                          </div>
+                        )}
 
                         {/* Rating */}
                         <div className="flex items-center space-x-2 mb-4">
