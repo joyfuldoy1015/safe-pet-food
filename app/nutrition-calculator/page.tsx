@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AlertCircle, CheckCircle, XCircle, Info, Share2, Heart, Calculator, ArrowLeft } from 'lucide-react'
+import { AlertCircle, CheckCircle, XCircle, Info, Share2, Heart, Calculator, ArrowLeft, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 
 // Nutritional Standards (Dry Matter Basis)
@@ -345,6 +345,23 @@ export default function NutritionCalculator() {
     })
   }
 
+  const handleReset = () => {
+    setPetType('dog')
+    setLifeStage('adult')
+    setHealthStatus('normal')
+    setNutrients({
+      protein: 0,
+      fat: 0,
+      fiber: 0,
+      ash: 0,
+      moisture: 0,
+      calcium: 0,
+      phosphorus: 0
+    })
+    setResult(null)
+    setShowShareModal(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -568,6 +585,15 @@ export default function NutritionCalculator() {
                 >
                   <Share2 className="h-5 w-5" />
                   <span>분석 결과 공유하기</span>
+                </button>
+
+                {/* Reset Button */}
+                <button
+                  onClick={handleReset}
+                  className="w-full bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 mt-3"
+                >
+                  <RotateCcw className="h-5 w-5" />
+                  <span>다시 분석하기</span>
                 </button>
               </div>
             )}

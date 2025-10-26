@@ -383,17 +383,27 @@ export default function PetLogPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            펫 로그 커뮤니티 📖
-          </h1>
-          <p className="text-lg text-gray-600">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              펫 로그 커뮤니티
+            </h1>
+          </div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             다른 반려집사들의 급여 경험을 둘러보고 나만의 기록도 남겨보세요
           </p>
         </div>
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
-            <h2 className="text-lg font-bold text-gray-900">급여 기록 찾기</h2>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8 hover:shadow-2xl transition-all duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                <Search className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">급여 기록 찾기</h2>
+            </div>
             <button
               onClick={() => {
                 if (isLoggedIn) {
@@ -402,17 +412,17 @@ export default function PetLogPage() {
                   setShowLoginModal(true)
                 }
               }}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               급여 기록 공유하기
             </button>
           </div>
           
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <div className="w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
                   type="text"
                   placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
@@ -421,18 +431,18 @@ export default function PetLogPage() {
                     setSearchTerm(e.target.value)
                     setCurrentPage(1)
                   }}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="pl-12 pr-4 py-4 w-full border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-lg"
                 />
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-4">
               <select
                 value={selectedCategory}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex-1"
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
               >
                 <option value="all">전체 카테고리</option>
                 <option value="사료">🍽️ 사료</option>
@@ -446,7 +456,7 @@ export default function PetLogPage() {
                   setSelectedSpecies(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent flex-1"
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
               >
                 <option value="all">전체 반려동물</option>
                 <option value="dog">🐕 강아지</option>
@@ -458,12 +468,16 @@ export default function PetLogPage() {
 
         {/* Top 3 Popular Posts */}
         <div className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="h-5 w-5 text-orange-500" />
-            <h2 className="text-xl font-bold text-gray-900">인기 급여 후기 TOP 3</h2>
-            <span className="text-sm text-gray-500">조회수 기준</span>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">인기 급여 후기 TOP 3</h2>
+              <p className="text-sm text-gray-500">조회수 기준</p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {topPosts.map((post, index) => {
               const mainRecord = getMainFeedingRecord(post)
               const avgPalatability = getAverageRating(post.feedingRecords, 'palatability')
@@ -471,8 +485,8 @@ export default function PetLogPage() {
               
               return (
                 <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow group cursor-pointer">
-                    <div className="p-6">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 group cursor-pointer transform hover:scale-105">
+                    <div className="p-8">
                       {/* Ranking Badge */}
                       <div className="flex items-center justify-between mb-4">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
@@ -502,57 +516,71 @@ export default function PetLogPage() {
                         </div>
                       </div>
 
-                      {/* User Info */}
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          {post.ownerAvatar}
+                      {/* User Info - Mobile Optimized */}
+                      <div className="flex items-center space-x-3 mb-6">
+                        <div className="w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <span className="text-lg">{post.ownerAvatar}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-900 truncate">{post.ownerName}</p>
-                          <div className="flex flex-wrap items-center gap-1 text-sm text-gray-500">
-                            <span className="whitespace-nowrap">{post.petAvatar} {post.petName}</span>
-                            <span>•</span>
-                            <span className="whitespace-nowrap">{post.petAge}</span>
-                            <span>•</span>
-                            <span className="whitespace-nowrap">{post.petWeight}</span>
+                          <p className="font-bold text-gray-900 text-lg truncate">{post.ownerName}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <span>{post.petAvatar}</span>
+                              <span className="font-medium">{post.petName}</span>
+                            </span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>{post.petAge}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>{post.petWeight}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Main Product Info */}
+                      {/* Main Product Info - Mobile Optimized */}
                       {mainRecord && (
-                        <div className="mb-4">
-                          <div className="flex items-start space-x-2 mb-2">
-                            <span className="text-lg flex-shrink-0">{categoryConfig[mainRecord.category].icon}</span>
-                            <h3 className="font-bold text-gray-900 group-hover:text-purple-600 transition-colors break-words flex-1 min-w-0 line-clamp-2">
-                              {mainRecord.productName}
-                            </h3>
+                        <div className="mb-6">
+                          <div className="flex items-start space-x-3 mb-4">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                              <span className="text-lg">{categoryConfig[mainRecord.category].icon}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-gray-900 text-lg leading-tight break-words">
+                                {mainRecord.productName}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">{mainRecord.brand}</p>
+                            </div>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${categoryConfig[mainRecord.category].color}`}>
+                            <span className={`px-3 py-2 text-sm font-semibold rounded-xl border-2 whitespace-nowrap ${categoryConfig[mainRecord.category].color}`}>
                               {getCategoryText(mainRecord.category)}
                             </span>
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${statusConfig[mainRecord.status].color}`}>
+                            <span className={`px-3 py-2 text-sm font-semibold rounded-xl border-2 whitespace-nowrap ${statusConfig[mainRecord.status].color}`}>
                               {getStatusText(mainRecord.status)}
                             </span>
                           </div>
                         </div>
                       )}
 
-                      {/* Ratings */}
-                      <div className="mb-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">기호성</span>
-                          <div className="flex items-center space-x-1">
-                            {renderStars(Math.round(avgPalatability))}
-                            <span className="text-sm font-medium text-gray-900 ml-1">{avgPalatability}</span>
+                      {/* Ratings - Mobile Optimized */}
+                      <div className="mb-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-semibold text-gray-700">기호성</span>
+                              <span className="text-lg font-bold text-gray-900">{avgPalatability}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              {renderStars(Math.round(avgPalatability))}
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">만족도</span>
-                          <div className="flex items-center space-x-1">
-                            {renderStars(Math.round(avgSatisfaction))}
-                            <span className="text-sm font-medium text-gray-900 ml-1">{avgSatisfaction}</span>
+                          <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-semibold text-gray-700">만족도</span>
+                              <span className="text-lg font-bold text-gray-900">{avgSatisfaction}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              {renderStars(Math.round(avgSatisfaction))}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -604,10 +632,14 @@ export default function PetLogPage() {
 
         {/* Recent Posts */}
         <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Clock className="h-5 w-5 text-blue-500" />
-            <h2 className="text-xl font-bold text-gray-900">최신 급여 후기</h2>
-            <span className="text-sm text-gray-500">최근 등록·수정순</span>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+              <Clock className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">최신 급여 후기</h2>
+              <p className="text-sm text-gray-500">최근 등록·수정순</p>
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -620,25 +652,26 @@ export default function PetLogPage() {
               
               return (
                 <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6 cursor-pointer">
-                    {/* Header */}
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 space-y-3 lg:space-y-0">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          {post.ownerAvatar}
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 p-8 cursor-pointer">
+                    {/* Header - Mobile Optimized */}
+                    <div className="flex flex-col space-y-4 mb-6">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-14 h-14 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <span className="text-xl">{post.ownerAvatar}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-900 truncate">{post.ownerName}</p>
-                          <div className="flex flex-wrap items-center gap-1 text-sm text-gray-500">
-                            <span className="whitespace-nowrap">{post.petAvatar} {post.petName}</span>
-                            <span>•</span>
-                            <span className="whitespace-nowrap">{post.petBreed}</span>
-                            <span>•</span>
-                            <span className="whitespace-nowrap">{post.petAge}</span>
-                            <span>•</span>
-                            <span className="whitespace-nowrap">{post.petWeight}</span>
-                            <span>•</span>
-                            <span className="whitespace-nowrap">{formatDate(post.updatedAt)}</span>
+                          <p className="font-bold text-gray-900 text-lg truncate">{post.ownerName}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <span>{post.petAvatar}</span>
+                              <span className="font-semibold">{post.petName}</span>
+                            </span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>{post.petBreed}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>{post.petAge}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>{post.petWeight}</span>
                           </div>
                         </div>
                       </div>

@@ -1,0 +1,162 @@
+{
+  "criteria": {
+    "ingredient_quality": {
+      "name": "원료 생육",
+      "weight": 25,
+      "levels": {
+        "premium": {
+          "name": "생육 Only",
+          "score": 100,
+          "description": "모든 원료가 생육 상태로 사용됨",
+          "color": "#10B981"
+        },
+        "high": {
+          "name": "생육 + 건조",
+          "score": 80,
+          "description": "주요 원료는 생육, 일부 건조 원료 포함",
+          "color": "#34D399"
+        },
+        "medium": {
+          "name": "혼합",
+          "score": 60,
+          "description": "생육과 건조 원료가 혼합됨",
+          "color": "#F59E0B"
+        },
+        "low": {
+          "name": "건조 위주",
+          "score": 40,
+          "description": "대부분 건조 원료 사용",
+          "color": "#EF4444"
+        }
+      }
+    },
+    "ingredient_transparency": {
+      "name": "상세성분표기 여부",
+      "weight": 20,
+      "levels": {
+        "premium": {
+          "name": "꼼수없는 표기",
+          "score": 100,
+          "description": "모든 성분이 구체적으로 표기됨",
+          "color": "#10B981"
+        },
+        "high": {
+          "name": "상세 표기",
+          "score": 80,
+          "description": "대부분 성분이 상세히 표기됨",
+          "color": "#34D399"
+        },
+        "medium": {
+          "name": "일반 표기",
+          "score": 60,
+          "description": "기본적인 성분만 표기됨",
+          "color": "#F59E0B"
+        },
+        "low": {
+          "name": "모호한 표기",
+          "score": 30,
+          "description": "성분 표기가 모호하거나 불완전함",
+          "color": "#EF4444"
+        }
+      }
+    },
+    "safety_record": {
+      "name": "안전성",
+      "weight": 25,
+      "levels": {
+        "premium": {
+          "name": "10년 내 리콜 없음",
+          "score": 100,
+          "description": "최근 10년간 리콜 이력 없음",
+          "color": "#10B981"
+        },
+        "high": {
+          "name": "5년 내 리콜 없음",
+          "score": 80,
+          "description": "최근 5년간 리콜 이력 없음",
+          "color": "#34D399"
+        },
+        "medium": {
+          "name": "3년 내 리콜 없음",
+          "score": 60,
+          "description": "최근 3년간 리콜 이력 없음",
+          "color": "#F59E0B"
+        },
+        "low": {
+          "name": "최근 리콜 있음",
+          "score": 20,
+          "description": "최근 리콜 이력 있음",
+          "color": "#EF4444"
+        }
+      }
+    },
+    "nutritional_standards": {
+      "name": "영양협회 기준 만족",
+      "weight": 20,
+      "levels": {
+        "premium": {
+          "name": "모든 기준 만족",
+          "score": 100,
+          "description": "AAFCO, NRC 등 모든 영양 기준 만족",
+          "color": "#10B981"
+        },
+        "high": {
+          "name": "주요 기준 만족",
+          "score": 80,
+          "description": "대부분의 영양 기준 만족",
+          "color": "#34D399"
+        },
+        "medium": {
+          "name": "기본 기준 만족",
+          "score": 60,
+          "description": "최소한의 영양 기준 만족",
+          "color": "#F59E0B"
+        },
+        "low": {
+          "name": "기준 미달",
+          "score": 30,
+          "description": "영양 기준을 충족하지 못함",
+          "color": "#EF4444"
+        }
+      }
+    },
+    "preservative_type": {
+      "name": "보존제 종류",
+      "weight": 10,
+      "levels": {
+        "premium": {
+          "name": "천연 보존제",
+          "score": 100,
+          "description": "비타민 E, 로즈마리 추출물 등 천연 보존제 사용",
+          "color": "#10B981"
+        },
+        "high": {
+          "name": "안전한 합성 보존제",
+          "score": 80,
+          "description": "BHA, BHT 등 안전한 합성 보존제 사용",
+          "color": "#34D399"
+        },
+        "medium": {
+          "name": "일반 합성 보존제",
+          "score": 60,
+          "description": "일반적인 합성 보존제 사용",
+          "color": "#F59E0B"
+        },
+        "low": {
+          "name": "위험한 보존제",
+          "score": 20,
+          "description": "잠재적으로 위험한 보존제 사용",
+          "color": "#EF4444"
+        }
+      }
+    }
+  },
+  "grade_thresholds": {
+    "S": { "min": 90, "name": "최고급", "color": "#7C3AED", "description": "모든 기준에서 우수한 성능" },
+    "A": { "min": 80, "name": "고급", "color": "#10B981", "description": "대부분 기준에서 우수한 성능" },
+    "B": { "min": 70, "name": "양호", "color": "#34D399", "description": "기본적인 기준은 충족" },
+    "C": { "min": 60, "name": "보통", "color": "#F59E0B", "description": "최소한의 기준 충족" },
+    "D": { "min": 50, "name": "미흡", "color": "#EF4444", "description": "일부 기준 미달" },
+    "F": { "min": 0, "name": "부적합", "color": "#DC2626", "description": "대부분 기준 미달" }
+  }
+}

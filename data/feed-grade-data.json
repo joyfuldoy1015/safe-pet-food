@@ -1,0 +1,153 @@
+{
+  "feeds": [
+    {
+      "id": "feed-001",
+      "name": "로얄캐닌 어덜트",
+      "brand": "로얄캐닌",
+      "category": "건식사료",
+      "target_species": "dog",
+      "life_stage": "adult",
+      "analysis": {
+        "ingredient_quality": "premium",
+        "ingredient_transparency": "premium", 
+        "safety_record": "premium",
+        "nutritional_standards": "premium",
+        "preservative_type": "high"
+      },
+      "details": {
+        "ingredients": "닭고기, 쌀, 옥수수, 동물성 지방, 비트펄프",
+        "preservatives": "비타민 E, 로즈마리 추출물",
+        "recall_history": [],
+        "certifications": ["AAFCO", "NRC"],
+        "transparency_score": 95
+      },
+      "created_at": "2024-01-15",
+      "updated_at": "2024-12-20"
+    },
+    {
+      "id": "feed-002", 
+      "name": "힐스 사이언스 다이어트",
+      "brand": "힐스",
+      "category": "건식사료",
+      "target_species": "dog",
+      "life_stage": "adult",
+      "analysis": {
+        "ingredient_quality": "high",
+        "ingredient_transparency": "high",
+        "safety_record": "premium", 
+        "nutritional_standards": "premium",
+        "preservative_type": "medium"
+      },
+      "details": {
+        "ingredients": "닭고기, 옥수수, 밀, 동물성 지방, 쌀",
+        "preservatives": "BHA, BHT",
+        "recall_history": [],
+        "certifications": ["AAFCO"],
+        "transparency_score": 85
+      },
+      "created_at": "2024-01-20",
+      "updated_at": "2024-12-20"
+    },
+    {
+      "id": "feed-003",
+      "name": "오리젠 어덜트",
+      "brand": "오리젠", 
+      "category": "건식사료",
+      "target_species": "dog",
+      "life_stage": "adult",
+      "analysis": {
+        "ingredient_quality": "premium",
+        "ingredient_transparency": "premium",
+        "safety_record": "high",
+        "nutritional_standards": "premium", 
+        "preservative_type": "premium"
+      },
+      "details": {
+        "ingredients": "신선한 닭고기, 칠면조, 생선, 계란",
+        "preservatives": "비타민 E, 로즈마리 추출물",
+        "recall_history": [],
+        "certifications": ["AAFCO", "NRC"],
+        "transparency_score": 98
+      },
+      "created_at": "2024-02-01",
+      "updated_at": "2024-12-20"
+    },
+    {
+      "id": "feed-004",
+      "name": "퍼피쵸이스 어덜트",
+      "brand": "퍼피쵸이스",
+      "category": "건식사료", 
+      "target_species": "dog",
+      "life_stage": "adult",
+      "analysis": {
+        "ingredient_quality": "medium",
+        "ingredient_transparency": "medium",
+        "safety_record": "medium",
+        "nutritional_standards": "high",
+        "preservative_type": "medium"
+      },
+      "details": {
+        "ingredients": "닭고기, 옥수수, 밀, 동물성 지방",
+        "preservatives": "BHA, BHT, 에톡시퀸",
+        "recall_history": ["2022-03-15"],
+        "certifications": ["AAFCO"],
+        "transparency_score": 70
+      },
+      "created_at": "2024-02-10",
+      "updated_at": "2024-12-20"
+    },
+    {
+      "id": "feed-005",
+      "name": "저가 브랜드 A",
+      "brand": "저가브랜드",
+      "category": "건식사료",
+      "target_species": "dog", 
+      "life_stage": "adult",
+      "analysis": {
+        "ingredient_quality": "low",
+        "ingredient_transparency": "low",
+        "safety_record": "low",
+        "nutritional_standards": "low",
+        "preservative_type": "low"
+      },
+      "details": {
+        "ingredients": "육분, 옥수수, 밀, 동물성 지방",
+        "preservatives": "에톡시퀸, BHA, BHT",
+        "recall_history": ["2023-01-20", "2023-08-15"],
+        "certifications": [],
+        "transparency_score": 40
+      },
+      "created_at": "2024-02-15",
+      "updated_at": "2024-12-20"
+    }
+  ],
+  "recall_database": [
+    {
+      "id": "recall-001",
+      "brand": "퍼피쵸이스",
+      "product": "퍼피쵸이스 어덜트",
+      "date": "2022-03-15",
+      "reason": "살모넬라 오염",
+      "severity": "high",
+      "affected_lots": ["LOT20220301", "LOT20220302"]
+    },
+    {
+      "id": "recall-002", 
+      "brand": "저가브랜드",
+      "product": "저가 브랜드 A",
+      "date": "2023-01-20",
+      "reason": "비타민 D 과다",
+      "severity": "medium",
+      "affected_lots": ["LOT20230115"]
+    },
+    {
+      "id": "recall-003",
+      "brand": "저가브랜드", 
+      "product": "저가 브랜드 A",
+      "date": "2023-08-15",
+      "reason": "금속 이물질",
+      "severity": "high",
+      "affected_lots": ["LOT20230801", "LOT20230802"]
+    }
+  ]
+}

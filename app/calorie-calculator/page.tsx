@@ -89,6 +89,17 @@ export default function CalorieCalculator() {
       recommendations
     })
     setShowResult(true)
+    
+    // 결과 표시 후 결과 섹션으로 스크롤
+    setTimeout(() => {
+      const resultSection = document.getElementById('calculation-result')
+      if (resultSection) {
+        resultSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        })
+      }
+    }, 100)
   }
 
   const resetCalculator = () => {
@@ -248,7 +259,7 @@ export default function CalorieCalculator() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div id="calculation-result" className="bg-white rounded-2xl shadow-xl p-8">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="h-8 w-8 text-green-600" />

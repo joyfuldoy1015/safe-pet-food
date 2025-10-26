@@ -24,7 +24,8 @@ const defaultCategories = {
     items: [
       { name: '사료 성분 계산기', href: '/nutrition-calculator', icon: Calculator, description: '사료의 보장성분표를 입력하면 건물기준으로 영양 점수를 계산해드려요.' },
       { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
-      { name: '브랜드 평가', href: '/brands', icon: Star, description: '다양한 사료 브랜드의 안전성과 사용자 리뷰를 확인해보세요.' }
+      { name: '브랜드 평가', href: '/brands', icon: Star, description: '다양한 사료 브랜드의 안전성과 사용자 리뷰를 확인해보세요.' },
+      { name: '사료 등급 분석', href: '/feed-grade-analyzer', icon: Calculator, description: '5가지 핵심 기준으로 사료의 등급을 과학적으로 분석합니다.' }
     ]
   },
   '건강/케어': {

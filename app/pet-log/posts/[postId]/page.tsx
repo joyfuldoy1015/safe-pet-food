@@ -477,7 +477,7 @@ export default function PetLogPostDetail() {
   }
 
   const renderRecord = (record: FeedingRecord) => (
-    <div key={record.id} className={`border border-gray-200 rounded-xl p-6 ${categoryConfig[record.category].bgColor}`}>
+    <div key={record.id} className={`border-2 border-gray-200 rounded-2xl p-8 ${categoryConfig[record.category].bgColor} hover:shadow-lg transition-all duration-200`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-start mb-2">
@@ -586,43 +586,55 @@ export default function PetLogPostDetail() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <Link
           href="/pet-log"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           돌아가기
         </Link>
 
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8 hover:shadow-2xl transition-all duration-300">
           <div className="md:flex md:items-start md:justify-between">
-            <div className="mb-4 md:mb-0">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-                {post.petName}의 급여 기록
-              </h1>
-              <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-500 sm:space-x-6 space-y-1 sm:space-y-0">
-                <span className="flex items-center">
-                  🐕 {post.petBreed} · {post.petAge} · {post.petWeight}
-                </span>
-                <span className="flex items-center">
-                  👤 {post.ownerName}
-                </span>
-                <span className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  {post.updatedAt} 업데이트
-                </span>
+            <div className="mb-6 md:mb-0">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-2xl">🐕</span>
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                    {post.petName}의 급여 기록
+                  </h1>
+                  <div className="flex flex-col sm:flex-row sm:items-center text-lg text-gray-600 sm:space-x-6 space-y-2 sm:space-y-0">
+                    <span className="flex items-center gap-2">
+                      <span className="text-xl">{post.petBreed}</span>
+                      <span>•</span>
+                      <span>{post.petAge}</span>
+                      <span>•</span>
+                      <span>{post.petWeight}</span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg">👤</span>
+                      <span className="font-semibold">{post.ownerName}</span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      <span>{post.updatedAt} 업데이트</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
             
             {/* Desktop: 오른쪽에 표시 */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-6">
               <div className="text-right">
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-blue-600">{post.totalRecords}</div>
-                  <div className="text-xs text-blue-600">총 기록</div>
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200">
+                  <div className="text-3xl font-bold text-blue-600 mb-1">{post.totalRecords}</div>
+                  <div className="text-sm font-semibold text-blue-600">총 기록</div>
                 </div>
               </div>
               <button
@@ -633,19 +645,19 @@ export default function PetLogPostDetail() {
                     setShowLoginModal(true)
                   }
                 }}
-                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                <Award className="h-4 w-4" />
-                <span>내 경험 공유하기</span>
+                <Award className="h-5 w-5" />
+                <span className="font-semibold">내 경험 공유하기</span>
               </button>
             </div>
           </div>
           
           {/* Mobile: 아래쪽에 표시 (767px 이하) */}
-          <div className="flex md:hidden items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            <div className="bg-blue-50 rounded-lg p-3">
-              <div className="text-xl font-bold text-blue-600">{post.totalRecords}</div>
-              <div className="text-xs text-blue-600">총 기록</div>
+          <div className="flex md:hidden items-center justify-between mt-6 pt-6 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-4 border-2 border-blue-200">
+              <div className="text-2xl font-bold text-blue-600 mb-1">{post.totalRecords}</div>
+              <div className="text-sm font-semibold text-blue-600">총 기록</div>
             </div>
             <button
               onClick={() => {
@@ -655,10 +667,10 @@ export default function PetLogPostDetail() {
                   setShowLoginModal(true)
                 }
               }}
-              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm min-h-[44px] touch-manipulation"
+              className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm min-h-[48px] touch-manipulation"
             >
               <Award className="h-5 w-5" />
-              <span>내 경험 공유하기</span>
+              <span className="font-semibold">내 경험 공유하기</span>
             </button>
           </div>
         </div>
@@ -673,19 +685,30 @@ export default function PetLogPostDetail() {
             const completedCount = records.filter(r => r.status === '급여완료').length
 
             return (
-              <div key={category}>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <span className="text-2xl mr-3">{categoryConfig[category].icon}</span>
-                    <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
-                    <span className={`ml-3 px-3 py-1 rounded-full text-sm font-medium ${categoryConfig[category].color}`}>
-                      {records.length}개 제품
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {activeCount > 0 && <span className="text-green-600">사용중 {activeCount}개</span>}
-                    {activeCount > 0 && completedCount > 0 && <span className="mx-2">·</span>}
-                    {completedCount > 0 && <span>완료 {completedCount}개</span>}
+              <div key={category} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-xl">{categoryConfig[category].icon}</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className={`px-4 py-2 rounded-xl text-sm font-semibold border-2 ${categoryConfig[category].color}`}>
+                          {records.length}개 제품
+                        </span>
+                        {activeCount > 0 && (
+                          <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-lg">
+                            사용중 {activeCount}개
+                          </span>
+                        )}
+                        {completedCount > 0 && (
+                          <span className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg">
+                            완료 {completedCount}개
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -698,15 +721,19 @@ export default function PetLogPostDetail() {
         </div>
 
         {/* Comments Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-              <MessageCircle className="h-6 w-6 mr-2" />
-              질문하기
-              <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                {comments.length + comments.reduce((sum, comment) => sum + comment.replies.length, 0)}
-              </span>
-            </h2>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mt-8 hover:shadow-2xl transition-all duration-300">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <MessageCircle className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">질문하기</h2>
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-xl font-semibold">
+                  {comments.length + comments.reduce((sum, comment) => sum + comment.replies.length, 0)}개 질문
+                </span>
+              </div>
+            </div>
             {isLoggedIn && (
               <div className="text-sm text-gray-500">
                 {currentUser?.name}님으로 로그인됨
@@ -727,21 +754,17 @@ export default function PetLogPostDetail() {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   onFocus={() => {
-                    console.log('Textarea focused, isLoggedIn:', isLoggedIn)
                     if (!isLoggedIn) {
-                      console.log('Showing login modal')
                       setShowLoginModal(true)
                     }
                   }}
                   onClick={() => {
-                    console.log('Textarea clicked, isLoggedIn:', isLoggedIn)
                     if (!isLoggedIn) {
-                      console.log('Showing login modal')
                       setShowLoginModal(true)
                     }
                   }}
                   placeholder={isLoggedIn ? `${post.ownerName}님에게 질문해보세요...` : "로그인 후 질문할 수 있습니다."}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none cursor-pointer"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none cursor-pointer transition-all duration-200"
                   rows={3}
                   disabled={!isLoggedIn}
                 />
@@ -752,9 +775,9 @@ export default function PetLogPostDetail() {
                   <button
                     onClick={handleSubmitComment}
                     disabled={!newComment.trim() || !isLoggedIn}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation ${
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px] touch-manipulation ${
                       isLoggedIn && newComment.trim()
-                        ? 'bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transform hover:scale-105'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
@@ -913,43 +936,42 @@ export default function PetLogPostDetail() {
         </div>
 
         {/* Login Modal */}
-        {console.log('showLoginModal state:', showLoginModal)}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
               <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mb-4">
-                  <User className="h-6 w-6 text-purple-600" />
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 mb-6 shadow-lg">
+                  <User className="h-8 w-8 text-white" />
                 </div>
                 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   로그인이 필요합니다
                 </h3>
                 
-                <p className="text-sm text-gray-600 mb-6">
-                  댓글 작성, 좋아요, 경험 공유 등의 기능을 이용하려면<br />
+                <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                  질문하기, 좋아요, 경험 공유 등의 기능을 이용하려면<br />
                   먼저 로그인해주세요.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
                     href="/login"
-                    className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+                    className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     로그인하기
                   </Link>
                   
                   <button
                     onClick={() => setShowLoginModal(false)}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                    className="inline-flex items-center justify-center px-6 py-4 bg-gray-100 text-gray-700 text-lg font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200"
                   >
                     취소
                   </button>
                 </div>
                 
-                <p className="text-xs text-gray-500 mt-4">
+                <p className="text-sm text-gray-500 mt-6">
                   아직 계정이 없으신가요? 
-                  <Link href="/signup" className="text-purple-600 hover:text-purple-700 ml-1">
+                  <Link href="/signup" className="text-purple-600 hover:text-purple-700 ml-1 font-semibold">
                     회원가입
                   </Link>
                 </p>
