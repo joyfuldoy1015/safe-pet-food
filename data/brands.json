@@ -98,5 +98,98 @@
     "country": "미국",
     "certifications": ["AAFCO"],
     "image": "/brands/natural-balance.jpg"
+  },
+  {
+    "id": "7",
+    "name": "웰니스",
+    "manufacturer": "Wellness Pet Company",
+    "recall_history": [
+      {
+        "date": "2017-05-10",
+        "reason": "비타민D 과다",
+        "severity": "medium",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.3,
+    "product_lines": ["코어", "심플", "컴플릿 헬스"],
+    "established_year": 1997,
+    "country": "미국",
+    "certifications": ["AAFCO", "USDA"],
+    "image": "/brands/wellness.jpg"
+  },
+  {
+    "id": "8",
+    "name": "블루 버팔로",
+    "manufacturer": "General Mills",
+    "recall_history": [
+      {
+        "date": "2016-11-02",
+        "reason": "잠재적 살모넬라 오염",
+        "severity": "medium",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.1,
+    "product_lines": ["라이프 프로텍션", "프리덤", "베이직"],
+    "established_year": 2002,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/blue-buffalo.jpg"
+  },
+  {
+    "id": "9",
+    "name": "캔디드",
+    "manufacturer": "Candidae Pet Foods",
+    "recall_history": [],
+    "overall_rating": 4.4,
+    "product_lines": ["올 그레인 프리", "리미티드 인그리디언트"],
+    "established_year": 1996,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/candidae.jpg"
+  },
+  {
+    "id": "10",
+    "name": "프로바이오틱스",
+    "manufacturer": "Pro Plan",
+    "recall_history": [
+      {
+        "date": "2015-09-15",
+        "reason": "비타민/미네랄 불균형",
+        "severity": "low",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 3.7,
+    "product_lines": ["포커스", "옵티라이프", "옵티웨이트"],
+    "established_year": 1986,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/probiotics.jpg"
+  },
+  {
+    "id": "11",
+    "name": "지바",
+    "manufacturer": "ZIVA Pet Foods",
+    "recall_history": [],
+    "overall_rating": 4.6,
+    "product_lines": ["프리미엄", "내추럴", "그레인프리"],
+    "established_year": 2010,
+    "country": "독일",
+    "certifications": ["EU", "AAFCO"],
+    "image": "/brands/ziva.jpg"
+  },
+  {
+    "id": "12",
+    "name": "고우",
+    "manufacturer": "GO! Solutions",
+    "recall_history": [],
+    "overall_rating": 4.2,
+    "product_lines": ["스킨 앤 코트", "스마트 웨이트", "스마트 트레인"],
+    "established_year": 2006,
+    "country": "캐나다",
+    "certifications": ["CFIA", "AAFCO"],
+    "image": "/brands/go.jpg"
   }
 ] 

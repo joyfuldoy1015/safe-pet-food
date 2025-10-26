@@ -5,6 +5,7 @@ import {
   validateBrandUpdate,
   formatValidationErrors 
 } from '../../../lib/validations/brand'
+import brandsData from '../../../data/brands.json'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -20,44 +21,74 @@ function checkSupabaseConfig() {
 // GET - 브랜드 목록 조회
 export async function GET(request: NextRequest) {
   try {
-    // 런타임에 환경 변수 체크
-    if (!checkSupabaseConfig()) {
-      return NextResponse.json(
-        { error: 'Supabase configuration is missing. Please check environment variables.' },
-        { status: 500 }
-      )
-    }
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
     const country = searchParams.get('country')
     const sortBy = searchParams.get('sortBy') || 'name'
     const order = searchParams.get('order') || 'asc'
 
-    let query = supabase
-      .from('brands')
-      .select('*')
+    let brands = []
 
-    // 검색 필터
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,manufacturer.ilike.%${search}%`)
+    // Supabase 설정이 있으면 데이터베이스에서 가져오기
+    if (checkSupabaseConfig()) {
+      let query = supabase
+        .from('brands')
+        .select('*')
+
+      // 검색 필터
+      if (search) {
+        query = query.or(`name.ilike.%${search}%,manufacturer.ilike.%${search}%`)
+      }
+
+      // 국가 필터
+      if (country) {
+        query = query.eq('country', country)
+      }
+
+      // 정렬
+      query = query.order(sortBy, { ascending: order === 'asc' })
+
+      const { data: brandsData, error } = await query
+
+      if (error) {
+        console.error('Supabase error:', error)
+        // Supabase 오류 시 JSON 파일로 폴백
+        brands = brandsData as any[]
+      } else {
+        brands = brandsData || []
+      }
+    } else {
+      // Supabase 설정이 없으면 JSON 파일에서 가져오기
+      console.log('Using JSON data fallback for brands')
+      brands = brandsData as any[]
     }
 
-    // 국가 필터
-    if (country) {
-      query = query.eq('country', country)
-    }
+    // JSON 데이터 사용 시 클라이언트 사이드 필터링
+    if (!checkSupabaseConfig()) {
+      // 검색 필터
+      if (search) {
+        brands = brands.filter((brand: any) => 
+          brand.name.toLowerCase().includes(search.toLowerCase()) ||
+          brand.manufacturer.toLowerCase().includes(search.toLowerCase())
+        )
+      }
 
-    // 정렬
-    query = query.order(sortBy, { ascending: order === 'asc' })
+      // 국가 필터
+      if (country) {
+        brands = brands.filter((brand: any) => brand.country === country)
+      }
 
-    const { data: brands, error } = await query
-
-    if (error) {
-      console.error('Supabase error:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch brands', details: error.message },
-        { status: 500 }
-      )
+      // 정렬
+      brands.sort((a: any, b: any) => {
+        const aValue = a[sortBy]
+        const bValue = b[sortBy]
+        
+        if (order === 'desc') {
+          return bValue > aValue ? 1 : -1
+        } else {
+          return aValue > bValue ? 1 : -1
+        }
+      })
     }
 
     return NextResponse.json(brands, {
