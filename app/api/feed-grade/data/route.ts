@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import feedGradeData from '../../../../../data/feed-grade-data.json'
+import fs from 'fs'
+import path from 'path'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    // JSON 파일 읽기
+    const dataPath = path.join(process.cwd(), 'data', 'feed-grade-data.json')
+    const feedGradeData = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
+
     const { searchParams } = new URL(request.url)
     const species = searchParams.get('species')
     const lifeStage = searchParams.get('life_stage')
@@ -15,15 +20,15 @@ export async function GET(request: NextRequest) {
 
     // 필터링 적용
     if (species) {
-      feeds = feeds.filter(feed => feed.target_species === species)
+      feeds = feeds.filter((feed: any) => feed.target_species === species)
     }
 
     if (lifeStage) {
-      feeds = feeds.filter(feed => feed.life_stage === lifeStage)
+      feeds = feeds.filter((feed: any) => feed.life_stage === lifeStage)
     }
 
     if (brand) {
-      feeds = feeds.filter(feed => 
+      feeds = feeds.filter((feed: any) => 
         feed.brand.toLowerCase().includes(brand.toLowerCase())
       )
     }

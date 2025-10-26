@@ -367,8 +367,12 @@ export default function FeedGradeAnalyzer() {
                  feed.analysis.ingredient_quality === 'high' ? '고급' : '일반',
           score: feed.analysis.ingredient_quality === 'premium' ? 20 : 
                  feed.analysis.ingredient_quality === 'high' ? 18 : 15,
+          weight: 0.3,
+          weighted_score: feed.analysis.ingredient_quality === 'premium' ? 6 : 
+                         feed.analysis.ingredient_quality === 'high' ? 5.4 : 4.5,
           color: feed.analysis.ingredient_quality === 'premium' ? '#10B981' : 
-                 feed.analysis.ingredient_quality === 'high' ? '#10B981' : '#F59E0B'
+                 feed.analysis.ingredient_quality === 'high' ? '#10B981' : '#F59E0B',
+          description: '원료의 품질과 신선도를 평가합니다'
         },
         {
           criterion: '성분 투명성',
@@ -376,8 +380,12 @@ export default function FeedGradeAnalyzer() {
                  feed.analysis.ingredient_transparency === 'high' ? '투명' : '일반',
           score: feed.analysis.ingredient_transparency === 'premium' ? 20 : 
                  feed.analysis.ingredient_transparency === 'high' ? 18 : 15,
+          weight: 0.25,
+          weighted_score: feed.analysis.ingredient_transparency === 'premium' ? 5 : 
+                         feed.analysis.ingredient_transparency === 'high' ? 4.5 : 3.75,
           color: feed.analysis.ingredient_transparency === 'premium' ? '#10B981' : 
-                 feed.analysis.ingredient_transparency === 'high' ? '#10B981' : '#F59E0B'
+                 feed.analysis.ingredient_transparency === 'high' ? '#10B981' : '#F59E0B',
+          description: '성분 표기의 투명성과 구체성을 평가합니다'
         }
       ],
       strengths: ['고품질 원료 사용', '투명한 성분 표기'],
@@ -760,12 +768,12 @@ export default function FeedGradeAnalyzer() {
                               <div className="text-red-700">{option.examples.bad}</div>
                             </div>
                           )}
-                          {option.examples.warning && (
-                            <div className="bg-yellow-50 p-2 rounded">
-                              <div className="font-medium text-yellow-800 mb-1">⚠️ 주의:</div>
-                              <div className="text-yellow-700">{option.examples.warning}</div>
-                            </div>
-                          )}
+                           {'warning' in option.examples && option.examples.warning && (
+                             <div className="bg-yellow-50 p-2 rounded">
+                               <div className="font-medium text-yellow-800 mb-1">⚠️ 주의:</div>
+                               <div className="text-yellow-700">{option.examples.warning}</div>
+                             </div>
+                           )}
                         </div>
                       )}
                     </label>
