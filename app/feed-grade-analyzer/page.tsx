@@ -519,7 +519,7 @@ export default function FeedGradeAnalyzer() {
       case 'ingredient_quality':
         return {
           gradient: 'from-green-500 to-emerald-500',
-          border: 'border-green-500',
+          border: 'border-l-green-500',
           bg: 'from-green-50 to-emerald-50',
           check: 'from-green-500 to-emerald-500',
           icon: 'from-green-500 to-emerald-500'
@@ -527,7 +527,7 @@ export default function FeedGradeAnalyzer() {
       case 'ingredient_transparency':
         return {
           gradient: 'from-blue-500 to-cyan-500',
-          border: 'border-blue-500',
+          border: 'border-l-blue-500',
           bg: 'from-blue-50 to-cyan-50',
           check: 'from-blue-500 to-cyan-500',
           icon: 'from-blue-500 to-cyan-500'
@@ -535,7 +535,7 @@ export default function FeedGradeAnalyzer() {
       case 'safety_record':
         return {
           gradient: 'from-red-500 to-pink-500',
-          border: 'border-red-500',
+          border: 'border-l-red-500',
           bg: 'from-red-50 to-pink-50',
           check: 'from-red-500 to-pink-500',
           icon: 'from-red-500 to-pink-500'
@@ -543,7 +543,7 @@ export default function FeedGradeAnalyzer() {
       case 'nutritional_standards':
         return {
           gradient: 'from-purple-500 to-indigo-500',
-          border: 'border-purple-500',
+          border: 'border-l-purple-500',
           bg: 'from-purple-50 to-indigo-50',
           check: 'from-purple-500 to-indigo-500',
           icon: 'from-purple-500 to-indigo-500'
@@ -551,7 +551,7 @@ export default function FeedGradeAnalyzer() {
       case 'preservative_type':
         return {
           gradient: 'from-orange-500 to-amber-500',
-          border: 'border-orange-500',
+          border: 'border-l-orange-500',
           bg: 'from-orange-50 to-amber-50',
           check: 'from-orange-500 to-amber-500',
           icon: 'from-orange-500 to-amber-500'
@@ -559,7 +559,7 @@ export default function FeedGradeAnalyzer() {
       default:
         return {
           gradient: 'from-gray-500 to-gray-600',
-          border: 'border-gray-500',
+          border: 'border-l-gray-500',
           bg: 'from-gray-50 to-gray-100',
           check: 'from-gray-500 to-gray-600',
           icon: 'from-gray-500 to-gray-600'
@@ -797,13 +797,13 @@ export default function FeedGradeAnalyzer() {
             {Object.entries(criteriaOptions).map(([key, criterion]) => {
               const colors = getCriterionColor(key)
               return (
-              <div key={key} className={`bg-white rounded-2xl shadow-xl border-l-4 ${colors.border} border border-gray-100 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300`}>
+              <div key={key} className={`bg-white rounded-2xl shadow-xl border-l-4 ${colors.border} p-4 sm:p-8 hover:shadow-2xl transition-all duration-300`}>
                 <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                   <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r ${colors.icon} rounded-2xl flex items-center justify-center flex-shrink-0`}>
                     {getCriterionIcon(key)}
                   </div>
                   <span className={`break-words bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
-                    {criterion.name}
+                  {criterion.name}
                   </span>
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -812,7 +812,7 @@ export default function FeedGradeAnalyzer() {
                       key={option.value}
                       className={`relative flex flex-col p-4 sm:p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
                         formData[key as keyof FeedAnalysisInput] === option.value
-                          ? `${colors.border} bg-gradient-to-br ${colors.bg} shadow-lg`
+                          ? `border-2 ${colors.border.replace('border-l-', 'border-')} bg-gradient-to-br ${colors.bg} shadow-lg`
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                     >
