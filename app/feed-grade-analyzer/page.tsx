@@ -511,52 +511,52 @@ export default function FeedGradeAnalyzer() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+        {/* Header Section - Mobile Optimized */}
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
             사료 등급 분석기 🔍
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            5가지 핵심 기준으로 사료의 등급을 과학적으로 분석합니다
-          </p>
+              </h1>
+          <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 px-4 leading-relaxed">
+                5가지 핵심 기준으로 사료의 등급을 과학적으로 분석합니다
+              </p>
           
           {/* Action Buttons - Only show when no result */}
           {!result && (
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 px-4">
               <button
                 onClick={resetForm}
-                className="flex items-center gap-2 px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base w-full sm:w-auto justify-center"
               >
                 <RotateCcw className="w-4 h-4" />
                 초기화
               </button>
             </div>
           )}
-        </div>
+      </div>
 
-        {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-white p-1 rounded-2xl shadow-xl border border-gray-100 mb-8">
+        {/* Tab Navigation - Mobile Optimized */}
+        <div className="flex space-x-1 bg-white p-1 rounded-2xl shadow-xl border border-gray-100 mb-6 sm:mb-8">
           <button
             onClick={() => setActiveTab('search')}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl transition-all duration-200 ${
+            className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-3 sm:py-4 px-3 sm:px-6 rounded-xl transition-all duration-200 ${
               activeTab === 'search'
                 ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             }`}
           >
-            <Search className="w-5 h-5" />
-            사료 검색
+            <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-xs sm:text-sm font-medium">사료 검색</span>
           </button>
           <button
             onClick={() => setActiveTab('input')}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl transition-all duration-200 ${
+            className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-3 sm:py-4 px-3 sm:px-6 rounded-xl transition-all duration-200 ${
               activeTab === 'input'
                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             }`}
           >
-            <Calculator className="w-5 h-5" />
-            직접 입력
+            <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-xs sm:text-sm font-medium">직접 입력</span>
           </button>
           <button
             onClick={() => {
@@ -574,34 +574,34 @@ export default function FeedGradeAnalyzer() {
               }
             }}
             disabled={!result}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-xl transition-all duration-200 ${
+            className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-3 sm:py-4 px-3 sm:px-6 rounded-xl transition-all duration-200 ${
               activeTab === 'result'
                 ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg'
                 : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             } ${!result ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <BarChart3 className="w-5 h-5" />
-            분석 결과
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-xs sm:text-sm font-medium">분석 결과</span>
           </button>
         </div>
 
-        {/* Search Section */}
+        {/* Search Section - Mobile Optimized */}
         {activeTab === 'search' && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Search Input */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Search className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300">
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                  <Search className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">사료 브랜드 검색</h2>
-                <p className="text-lg text-gray-600 mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">사료 브랜드 검색</h2>
+                <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 px-4 leading-relaxed">
                   검색하면 즉시 분석 결과를 확인할 수 있습니다
                 </p>
               </div>
               
-              <div className="relative mb-8">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-6 w-6" />
+              <div className="relative mb-6 sm:mb-8">
+                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 sm:h-6 sm:w-6" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -609,28 +609,28 @@ export default function FeedGradeAnalyzer() {
                     setSearchQuery(e.target.value)
                     handleSearch(e.target.value)
                   }}
-                  placeholder="사료 브랜드명을 입력하세요 (예: 로얄캐닌, 힐스, 푸리나)"
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  placeholder="사료 브랜드명을 입력하세요"
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
 
-              {/* Search Results */}
+              {/* Search Results - Mobile Optimized */}
               {searchResults.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">검색 결과</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 px-2">검색 결과</h3>
                   {searchResults.map((feed) => (
                     <div
                       key={feed.id}
                       onClick={() => handleSelectFeed(feed)}
-                      className="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-purple-300"
+                      className="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-2xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200 cursor-pointer hover:border-purple-300"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-bold text-gray-900 mb-2">{feed.name}</h4>
-                          <p className="text-gray-600 mb-3">{feed.description}</p>
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500">브랜드: {feed.brand}</span>
-                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-2 leading-tight break-words">{feed.name}</h4>
+                          <p className="text-sm sm:text-base text-gray-600 mb-3 leading-relaxed">{feed.description}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <span className="text-xs sm:text-sm text-gray-500">브랜드: {feed.brand}</span>
+                            <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold w-fit ${
                               feed.grade === 'A' ? 'bg-green-100 text-green-800' : 
                               feed.grade === 'B' ? 'bg-yellow-100 text-yellow-800' : 
                               'bg-red-100 text-red-800'
@@ -639,9 +639,9 @@ export default function FeedGradeAnalyzer() {
                             </span>
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">{feed.grade}</span>
+                        <div className="flex justify-center sm:justify-end">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                            <span className="text-white font-bold text-base sm:text-lg">{feed.grade}</span>
                           </div>
                         </div>
                       </div>
@@ -650,34 +650,34 @@ export default function FeedGradeAnalyzer() {
                 </div>
               )}
 
-              {/* No Results */}
+              {/* No Results - Mobile Optimized */}
               {searchQuery && searchResults.length === 0 && (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-8 h-8 text-gray-400" />
+                <div className="text-center py-6 sm:py-8 px-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <Search className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">검색 결과가 없습니다</h3>
-                  <p className="text-gray-600 mb-6">다른 키워드로 검색하거나 직접 입력해보세요</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">검색 결과가 없습니다</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">다른 키워드로 검색하거나 직접 입력해보세요</p>
                   <button
                     onClick={() => setActiveTab('input')}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto"
                   >
                     직접 입력하기
                   </button>
                 </div>
               )}
 
-              {/* Manual Input Option */}
+              {/* Manual Input Option - Mobile Optimized */}
               {!searchQuery && (
-                <div className="text-center py-8 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">💡 더 정확한 분석을 원하시나요?</h3>
-                  <p className="text-gray-600 mb-6">
+                <div className="text-center py-6 sm:py-8 border-t border-gray-200 px-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">💡 더 정확한 분석을 원하시나요?</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">
                     사료 성분표를 직접 확인하고 입력하면<br />
                     더 정확하고 상세한 분석이 가능합니다
                   </p>
                   <button
                     onClick={() => setActiveTab('input')}
-                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-sm sm:text-base w-full sm:w-auto"
                   >
                     직접 성분 입력하기
                   </button>
@@ -687,49 +687,49 @@ export default function FeedGradeAnalyzer() {
           </div>
         )}
 
-        {/* Input Form */}
+        {/* Input Form - Mobile Optimized */}
         {activeTab === 'input' && (
-          <div className="space-y-8">
-            {/* Learning Motivation Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl shadow-xl border border-blue-200 p-8 hover:shadow-2xl transition-all duration-300">
+          <div className="space-y-6 sm:space-y-8">
+            {/* Learning Motivation Section - Mobile Optimized */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl shadow-xl border border-blue-200 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Info className="w-8 h-8 text-white" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                  <Info className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">💡 사료 성분표 읽는 법</h2>
-                <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">💡 사료 성분표 읽는 법</h2>
+                <p className="text-sm sm:text-lg text-gray-700 mb-4 sm:mb-6 leading-relaxed px-2">
                   직접 확인하면 더 정확한 분석이 가능해요!<br />
                   사료 포장지의 성분표를 확인하고 아래 항목들을 선택해주세요.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="font-semibold text-blue-600 mb-2">🔍 원료 품질</div>
-                    <div className="text-gray-600">첫 번째 원료가 고기인지 확인</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+                    <div className="font-semibold text-blue-600 mb-1 sm:mb-2 text-sm sm:text-base">🔍 원료 품질</div>
+                    <div className="text-gray-600 text-xs sm:text-sm">첫 번째 원료가 고기인지 확인</div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="font-semibold text-green-600 mb-2">📋 성분 투명성</div>
-                    <div className="text-gray-600">원료의 구체적인 정보 제공</div>
+                  <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm">
+                    <div className="font-semibold text-green-600 mb-1 sm:mb-2 text-sm sm:text-base">📋 성분 투명성</div>
+                    <div className="text-gray-600 text-xs sm:text-sm">원료의 구체적인 정보 제공</div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 shadow-sm">
-                    <div className="font-semibold text-purple-600 mb-2">🛡️ 안전성</div>
-                    <div className="text-gray-600">리콜 이력과 보존료 종류</div>
+                  <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm sm:col-span-2 lg:col-span-1">
+                    <div className="font-semibold text-purple-600 mb-1 sm:mb-2 text-sm sm:text-base">🛡️ 안전성</div>
+                    <div className="text-gray-600 text-xs sm:text-sm">리콜 이력과 보존료 종류</div>
                   </div>
                 </div>
               </div>
             </div>
             {Object.entries(criteriaOptions).map(([key, criterion]) => (
-              <div key={key} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-white" />
+              <div key={key} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  {criterion.name}
+                  <span className="break-words">{criterion.name}</span>
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   {criterion.options.map((option) => (
                     <label
                       key={option.value}
-                      className={`relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                      className={`relative flex flex-col p-4 sm:p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
                         formData[key as keyof FeedAnalysisInput] === option.value
                           ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -743,35 +743,35 @@ export default function FeedGradeAnalyzer() {
                         onChange={(e) => handleInputChange(key as keyof FeedAnalysisInput, e.target.value)}
                         className="sr-only"
                       />
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-semibold text-gray-900">{option.label}</span>
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <span className="font-semibold text-gray-900 text-sm sm:text-base break-words">{option.label}</span>
                         {formData[key as keyof FeedAnalysisInput] === option.value && (
-                          <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                            <CheckCircle className="w-4 h-4 text-white" />
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </div>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 leading-relaxed mb-3">{option.description}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-2 sm:mb-3">{option.description}</p>
                       
-                      {/* Examples */}
+                      {/* Examples - Mobile Optimized */}
                       {option.examples && (
-                        <div className="space-y-2 text-xs">
+                        <div className="space-y-1.5 sm:space-y-2 text-xs">
                           {option.examples.good && (
-                            <div className="bg-green-50 p-2 rounded">
-                              <div className="font-medium text-green-800 mb-1">✅ 좋은 예:</div>
-                              <div className="text-green-700">{option.examples.good}</div>
+                            <div className="bg-green-50 p-2 sm:p-2 rounded">
+                              <div className="font-medium text-green-800 mb-1 text-xs">✅ 좋은 예:</div>
+                              <div className="text-green-700 text-xs leading-relaxed">{option.examples.good}</div>
                             </div>
                           )}
                           {option.examples.bad && (
-                            <div className="bg-red-50 p-2 rounded">
-                              <div className="font-medium text-red-800 mb-1">❌ 나쁜 예:</div>
-                              <div className="text-red-700">{option.examples.bad}</div>
+                            <div className="bg-red-50 p-2 sm:p-2 rounded">
+                              <div className="font-medium text-red-800 mb-1 text-xs">❌ 나쁜 예:</div>
+                              <div className="text-red-700 text-xs leading-relaxed">{option.examples.bad}</div>
                             </div>
                           )}
                            {'warning' in option.examples && option.examples.warning && (
-                             <div className="bg-yellow-50 p-2 rounded">
-                               <div className="font-medium text-yellow-800 mb-1">⚠️ 주의:</div>
-                               <div className="text-yellow-700">{option.examples.warning}</div>
+                             <div className="bg-yellow-50 p-2 sm:p-2 rounded">
+                               <div className="font-medium text-yellow-800 mb-1 text-xs">⚠️ 주의:</div>
+                               <div className="text-yellow-700 text-xs leading-relaxed">{option.examples.warning}</div>
                              </div>
                            )}
                         </div>
@@ -782,21 +782,21 @@ export default function FeedGradeAnalyzer() {
               </div>
             ))}
 
-            {/* Analyze Button */}
-            <div className="flex justify-center">
+            {/* Analyze Button - Mobile Optimized */}
+            <div className="flex justify-center px-4">
               <button
                 onClick={handleAnalyze}
                 disabled={isAnalyzing}
-                className="flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-lg rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="flex items-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-5 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-base sm:text-lg rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none w-full sm:w-auto justify-center"
               >
                 {isAnalyzing ? (
                   <>
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     분석 중...
                   </>
                 ) : (
                   <>
-                    <TrendingUp className="w-6 h-6" />
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                     등급 분석하기
                   </>
                 )}
@@ -805,44 +805,44 @@ export default function FeedGradeAnalyzer() {
           </div>
         )}
 
-        {/* Results */}
+        {/* Results - Mobile Optimized */}
         {activeTab === 'result' && result && (
-          <div id="analysis-result" className="space-y-8">
-            {/* Overall Grade */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-10 text-center hover:shadow-2xl transition-all duration-300">
-              <div className="flex items-center justify-center gap-6 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  {getGradeIcon(result.overall_grade)}
+          <div id="analysis-result" className="space-y-6 sm:space-y-8">
+            {/* Overall Grade - Mobile Optimized */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-10 text-center hover:shadow-2xl transition-all duration-300">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                {getGradeIcon(result.overall_grade)}
                 </div>
-                <div>
-                  <h2 className="text-4xl font-bold mb-2" style={{ color: result.grade_color }}>
-                    {result.overall_grade}등급
-                  </h2>
-                  <div className="text-3xl font-bold text-gray-700">
-                    {result.overall_score}점
+                <div className="text-center sm:text-left">
+                  <h2 className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2" style={{ color: result.grade_color }}>
+                  {result.overall_grade}등급
+                </h2>
+                  <div className="text-xl sm:text-3xl font-bold text-gray-700">
+                  {result.overall_score}점
                   </div>
                 </div>
               </div>
-              <p className="text-gray-600 text-xl leading-relaxed">{result.grade_description}</p>
+              <p className="text-sm sm:text-xl text-gray-600 leading-relaxed px-2">{result.grade_description}</p>
             </div>
 
-            {/* Breakdown */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-              <h3 className="text-2xl font-semibold text-gray-900 mb-8 flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
+            {/* Breakdown - Mobile Optimized */}
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300">
+              <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                세부 분석 결과
+                <span className="break-words">세부 분석 결과</span>
               </h3>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {result.breakdown.map((item, index) => (
-                  <div key={index} className="border-2 border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all duration-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-gray-900">{item.criterion}</h4>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">가중치: {item.weight}%</span>
+                  <div key={index} className="border-2 border-gray-100 rounded-2xl p-4 sm:p-6 hover:shadow-lg transition-all duration-200">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{item.criterion}</h4>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                        <span className="text-xs sm:text-sm text-gray-600 bg-gray-100 px-2 sm:px-3 py-1 rounded-full">가중치: {item.weight}%</span>
                         <span 
-                          className="font-bold px-4 py-2 rounded-xl text-sm shadow-sm"
+                          className="font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm shadow-sm"
                           style={{ 
                             backgroundColor: `${item.color}20`, 
                             color: item.color,
@@ -853,13 +853,13 @@ export default function FeedGradeAnalyzer() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1 rounded-lg">{item.level}</span>
-                      <span className="text-sm font-bold text-gray-700 bg-blue-50 px-3 py-1 rounded-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
+                      <span className="text-xs sm:text-sm font-medium text-gray-600 bg-gray-50 px-2 sm:px-3 py-1 rounded-lg w-fit">{item.level}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-700 bg-blue-50 px-2 sm:px-3 py-1 rounded-lg w-fit">
                         가중 점수: {item.weighted_score}점
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">{item.description}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 leading-relaxed">{item.description}</p>
                     <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
                       <div
                         className="h-3 rounded-full transition-all duration-700 shadow-sm"
@@ -943,18 +943,18 @@ export default function FeedGradeAnalyzer() {
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
+            {/* Action Buttons - Mobile Optimized */}
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-6 sm:mt-8 px-4">
               <button
                 onClick={resetForm}
-                className="flex items-center gap-2 px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base w-full sm:w-auto"
               >
                 <RotateCcw className="w-4 h-4" />
                 다시 분석하기
               </button>
               <button 
                 onClick={handleShare}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto"
               >
                 <Share2 className="w-4 h-4" />
                 공유하기
@@ -964,38 +964,38 @@ export default function FeedGradeAnalyzer() {
         )}
       </div>
 
-      {/* Share Modal */}
+      {/* Share Modal - Mobile Optimized */}
       {showShareModal && result && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">분석 결과 공유</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[95vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">분석 결과 공유</h3>
                 <button
                   onClick={() => setShowShareModal(false)}
-                  className="text-gray-500 hover:text-gray-700 text-xl"
+                  className="text-gray-500 hover:text-gray-700 text-lg sm:text-xl p-1"
                 >
                   ✕
                 </button>
               </div>
               
-              {/* Preview Card */}
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 mb-6">
-                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200">
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+              {/* Preview Card - Mobile Optimized */}
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                <div className="text-center p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border-2 border-blue-200">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
                       {getGradeIcon(result.overall_grade)}
                     </div>
                     <div>
-                      <div className="text-2xl font-bold mb-1" style={{ color: result.grade_color }}>
+                      <div className="text-xl sm:text-2xl font-bold mb-1" style={{ color: result.grade_color }}>
                         {result.overall_grade}등급
                       </div>
-                      <div className="text-lg font-semibold text-gray-700">
+                      <div className="text-base sm:text-lg font-semibold text-gray-700">
                         {result.overall_score}점
                       </div>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-600 mb-4">
+                  <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 leading-relaxed">
                     {result.grade_description}
                   </div>
                   
@@ -1022,45 +1022,45 @@ export default function FeedGradeAnalyzer() {
                 </div>
               </div>
               
-              {/* Share Options */}
-              <div className="space-y-3">
+              {/* Share Options - Mobile Optimized */}
+              <div className="space-y-2 sm:space-y-3">
                 <button
                   onClick={copyToClipboard}
-                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 text-sm sm:text-base"
                 >
                   📋 결과 복사하기
                 </button>
                 
                 <button
                   onClick={() => handleSNSShare('instagram')}
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 text-sm sm:text-base"
                 >
                   📸 인스타그램으로 공유하기
                 </button>
                 
                 <button
                   onClick={() => handleSNSShare('threads')}
-                  className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="w-full bg-black hover:bg-gray-800 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 text-sm sm:text-base"
                 >
                   🧵 쓰레드로 공유하기
                 </button>
                 
                 <button
                   onClick={() => handleSNSShare('facebook')}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 text-sm sm:text-base"
                 >
                   📘 페이스북으로 공유하기
                 </button>
                 
                 <button
                   onClick={() => handleSNSShare('kakao')}
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 text-sm sm:text-base"
                 >
                   💬 카카오톡으로 공유하기
                 </button>
               </div>
               
-              <div className="mt-6 text-xs text-gray-500 text-center">
+              <div className="mt-4 sm:mt-6 text-xs text-gray-500 text-center leading-relaxed px-2">
                 분석 결과는 일반적인 참고용이며, 개체차이가 있을 수 있습니다.<br/>
                 특별한 건강 상태가 있다면 수의사와 상담하세요.
               </div>
