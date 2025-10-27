@@ -18,7 +18,12 @@ import {
   RotateCcw,
   Download,
   Share2,
-  Search
+  Search,
+  Leaf,
+  Eye,
+  Heart,
+  BookOpen,
+  Zap
 } from 'lucide-react'
 
 interface FeedAnalysisInput {
@@ -508,6 +513,78 @@ export default function FeedGradeAnalyzer() {
     }
   }
 
+  // 각 항목별 고유 색상 정의
+  const getCriterionColor = (key: string) => {
+    switch (key) {
+      case 'ingredient_quality':
+        return {
+          gradient: 'from-green-500 to-emerald-500',
+          border: 'border-green-500',
+          bg: 'from-green-50 to-emerald-50',
+          check: 'from-green-500 to-emerald-500',
+          icon: 'from-green-500 to-emerald-500'
+        }
+      case 'ingredient_transparency':
+        return {
+          gradient: 'from-blue-500 to-cyan-500',
+          border: 'border-blue-500',
+          bg: 'from-blue-50 to-cyan-50',
+          check: 'from-blue-500 to-cyan-500',
+          icon: 'from-blue-500 to-cyan-500'
+        }
+      case 'safety_record':
+        return {
+          gradient: 'from-red-500 to-pink-500',
+          border: 'border-red-500',
+          bg: 'from-red-50 to-pink-50',
+          check: 'from-red-500 to-pink-500',
+          icon: 'from-red-500 to-pink-500'
+        }
+      case 'nutritional_standards':
+        return {
+          gradient: 'from-purple-500 to-indigo-500',
+          border: 'border-purple-500',
+          bg: 'from-purple-50 to-indigo-50',
+          check: 'from-purple-500 to-indigo-500',
+          icon: 'from-purple-500 to-indigo-500'
+        }
+      case 'preservative_type':
+        return {
+          gradient: 'from-orange-500 to-amber-500',
+          border: 'border-orange-500',
+          bg: 'from-orange-50 to-amber-50',
+          check: 'from-orange-500 to-amber-500',
+          icon: 'from-orange-500 to-amber-500'
+        }
+      default:
+        return {
+          gradient: 'from-gray-500 to-gray-600',
+          border: 'border-gray-500',
+          bg: 'from-gray-50 to-gray-100',
+          check: 'from-gray-500 to-gray-600',
+          icon: 'from-gray-500 to-gray-600'
+        }
+    }
+  }
+
+  // 각 항목별 고유 아이콘 정의
+  const getCriterionIcon = (key: string) => {
+    switch (key) {
+      case 'ingredient_quality':
+        return <Leaf className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      case 'ingredient_transparency':
+        return <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      case 'safety_record':
+        return <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      case 'nutritional_standards':
+        return <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      case 'preservative_type':
+        return <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      default:
+        return <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -717,13 +794,17 @@ export default function FeedGradeAnalyzer() {
                 </div>
               </div>
             </div>
-            {Object.entries(criteriaOptions).map(([key, criterion]) => (
-              <div key={key} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            {Object.entries(criteriaOptions).map(([key, criterion]) => {
+              const colors = getCriterionColor(key)
+              return (
+              <div key={key} className={`bg-white rounded-2xl shadow-xl border-l-4 ${colors.border} border border-gray-100 p-4 sm:p-8 hover:shadow-2xl transition-all duration-300`}>
+                <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r ${colors.icon} rounded-2xl flex items-center justify-center flex-shrink-0`}>
+                    {getCriterionIcon(key)}
                   </div>
-                  <span className="break-words">{criterion.name}</span>
+                  <span className={`break-words bg-gradient-to-r ${colors.gradient} bg-clip-text text-transparent`}>
+                    {criterion.name}
+                  </span>
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   {criterion.options.map((option) => (
@@ -731,7 +812,7 @@ export default function FeedGradeAnalyzer() {
                       key={option.value}
                       className={`relative flex flex-col p-4 sm:p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg ${
                         formData[key as keyof FeedAnalysisInput] === option.value
-                          ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg'
+                          ? `${colors.border} bg-gradient-to-br ${colors.bg} shadow-lg`
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                     >
@@ -746,7 +827,7 @@ export default function FeedGradeAnalyzer() {
                       <div className="flex items-center justify-between mb-2 sm:mb-3">
                         <span className="font-semibold text-gray-900 text-sm sm:text-base break-words">{option.label}</span>
                         {formData[key as keyof FeedAnalysisInput] === option.value && (
-                          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className={`w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r ${colors.check} rounded-full flex items-center justify-center flex-shrink-0`}>
                             <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                           </div>
                         )}
@@ -780,7 +861,8 @@ export default function FeedGradeAnalyzer() {
                   ))}
                 </div>
               </div>
-            ))}
+              )
+            })}
 
             {/* Analyze Button - Mobile Optimized */}
             <div className="flex justify-center px-4">
