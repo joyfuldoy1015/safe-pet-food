@@ -421,8 +421,8 @@ export default function PetLogPage() {
           
           <div className="flex flex-col gap-6">
             <div className="w-full">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <div className="relative flex">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
                 <input
                   type="text"
                   placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
@@ -431,8 +431,23 @@ export default function PetLogPage() {
                     setSearchTerm(e.target.value)
                     setCurrentPage(1)
                   }}
-                  className="pl-12 pr-4 py-4 w-full border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-lg"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      // 엔터키로 검색 실행 (이미 실시간 검색이므로 추가 동작 없음)
+                    }
+                  }}
+                  className="pl-12 pr-20 py-4 w-full border-2 border-gray-200 rounded-l-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-lg"
                 />
+                <button
+                  onClick={() => {
+                    // 검색 실행 (이미 실시간 검색이므로 현재 상태 유지)
+                    setCurrentPage(1)
+                  }}
+                  className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-r-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
+                >
+                  <Search className="h-5 w-5" />
+                  검색
+                </button>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -630,20 +645,53 @@ export default function PetLogPage() {
           </div>
         </div>
 
-        {/* Recent Posts */}
+        {/* Search Results or Recent Posts */}
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
               <Clock className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">최신 급여 후기</h2>
-              <p className="text-sm text-gray-500">최근 등록·수정순</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' ? '검색 결과' : '최신 급여 후기'}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' 
+                  ? `총 ${filteredPosts.length}개의 급여 기록을 찾았습니다` 
+                  : '최근 등록·수정순'
+                }
+              </p>
             </div>
           </div>
 
-          <div className="space-y-6">
-            {paginatedPosts.map((post) => {
+          {/* No Results Message */}
+          {filteredPosts.length === 0 && (searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all') && (
+            <div className="text-center py-12 bg-white rounded-2xl shadow-xl border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">검색 결과가 없습니다</h3>
+              <p className="text-gray-600 mb-6">
+                다른 검색어나 필터를 사용해보세요
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('')
+                  setSelectedCategory('all')
+                  setSelectedSpecies('all')
+                  setCurrentPage(1)
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                필터 초기화
+              </button>
+            </div>
+          )}
+
+          {/* Posts List - Only show if there are results */}
+          {filteredPosts.length > 0 && (
+            <div className="space-y-6">
+              {paginatedPosts.map((post) => {
               const mainRecord = getMainFeedingRecord(post)
               const avgPalatability = getAverageRating(post.feedingRecords, 'palatability')
               const avgSatisfaction = getAverageRating(post.feedingRecords, 'satisfaction')
@@ -810,13 +858,6 @@ export default function PetLogPage() {
                 </Link>
               )
             })}
-          </div>
-
-          {filteredPosts.length === 0 && (
-            <div className="text-center py-12">
-              <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
-              <p className="text-gray-500">다른 검색어나 필터를 시도해보세요.</p>
             </div>
           )}
 
