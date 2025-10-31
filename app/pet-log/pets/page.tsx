@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { 
   Plus, 
   Edit, 
@@ -35,8 +36,11 @@ interface PetProfile {
 
 export default function PetsPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === 'authenticated'
   const [pets, setPets] = useState<PetProfile[]>([])
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   // 로컬 스토리지에서 반려동물 프로필 불러오기
   useEffect(() => {
@@ -47,6 +51,24 @@ export default function PetsPage() {
       console.error('반려동물 프로필 로드 중 오류:', error)
     }
   }, [])
+
+  // 반려동물 등록 버튼 클릭 핸들러
+  const handleNewPetClick = () => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true)
+    } else {
+      router.push('/pet-log/pets/new')
+    }
+  }
+
+  // 급여 기록 작성 버튼 클릭 핸들러
+  const handleWriteRecordClick = (petId: string) => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true)
+    } else {
+      router.push(`/pet-log/posts/write?petId=${petId}`)
+    }
+  }
 
   // 반려동물 삭제
   const handleDelete = (petId: string) => {
@@ -73,13 +95,13 @@ export default function PetsPage() {
               </div>
               <h1 className="text-3xl font-bold text-gray-900">내 반려동물 관리</h1>
             </div>
-            <Link
-              href="/pet-log/pets/new"
+            <button
+              onClick={handleNewPetClick}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Plus className="h-5 w-5" />
               새 반려동물 등록
-            </Link>
+            </button>
           </div>
           <p className="text-lg text-gray-600">
             등록된 반려동물의 정보를 관리하고 급여 기록을 작성할 수 있습니다
@@ -96,13 +118,13 @@ export default function PetsPage() {
             <p className="text-gray-600 mb-6">
               반려동물을 등록하고 급여 기록을 관리해보세요
             </p>
-            <Link
-              href="/pet-log/pets/new"
+            <button
+              onClick={handleNewPetClick}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Plus className="h-5 w-5" />
               첫 반려동물 등록하기
-            </Link>
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -152,7 +174,7 @@ export default function PetsPage() {
                 {/* 액션 버튼 */}
                 <div className="flex gap-2 mt-6">
                   <button
-                    onClick={() => router.push(`/pet-log/posts/write?petId=${pet.id}`)}
+                    onClick={() => handleWriteRecordClick(pet.id)}
                     className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg font-medium transition-all duration-200 text-sm"
                   >
                     급여 기록 작성
@@ -204,6 +226,51 @@ export default function PetsPage() {
                     삭제하기
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 로그인 필요 모달 */}
+        {showLoginModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 mb-4 sm:mb-6 shadow-lg">
+                  <User className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                </div>
+                
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+                  로그인이 필요합니다
+                </h3>
+                
+                <p className="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
+                  반려동물 등록, 급여 기록 작성 등의 기능을 이용하려면<br className="hidden sm:block" />
+                  먼저 로그인해주세요.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm sm:text-lg font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    로그인하기
+                  </Link>
+                  
+                  <button
+                    onClick={() => setShowLoginModal(false)}
+                    className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gray-100 text-gray-700 text-sm sm:text-lg font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200"
+                  >
+                    취소
+                  </button>
+                </div>
+                
+                <p className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6">
+                  아직 계정이 없으신가요? 
+                  <Link href="/signup" className="text-purple-600 hover:text-purple-700 ml-1 font-semibold">
+                    회원가입
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
