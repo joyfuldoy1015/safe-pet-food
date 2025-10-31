@@ -886,16 +886,16 @@ export default function PetLogPage() {
                         
                         {/* Metadata Tags */}
                         <div className="flex flex-wrap gap-2 mb-3">
-                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
-                            <User className="h-3.5 w-3.5 text-gray-600" />
-                            <span className="text-xs text-gray-700">
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-green-500 rounded-full text-white shadow-sm">
+                            <User className="h-3.5 w-3.5" />
+                            <span className="text-xs font-semibold">
                               나이 {post.petAge}{post.petSpecies === 'dog' ? '(강아지)' : '(고양이)'}
                             </span>
                           </div>
                           {mainRecord && (
-                            <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
-                              <Calendar className="h-3.5 w-3.5 text-gray-600" />
-                              <span className="text-xs text-gray-700">
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-purple-500 rounded-full text-white shadow-sm">
+                              <Calendar className="h-3.5 w-3.5" />
+                              <span className="text-xs font-semibold">
                                 급여 {mainRecord.duration}
                               </span>
                             </div>
@@ -904,21 +904,21 @@ export default function PetLogPage() {
                         
                         {/* Engagement Metrics */}
                         <div className="flex flex-wrap gap-2 mb-4">
-                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
-                            <Eye className="h-3.5 w-3.5 text-gray-600" />
-                            <span className="text-xs text-gray-700">
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 rounded-full text-white shadow-sm">
+                            <Eye className="h-3.5 w-3.5" />
+                            <span className="text-xs font-semibold">
                               {post.views.toLocaleString()} 조회
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
-                            <ThumbsUp className="h-3.5 w-3.5 text-gray-600" />
-                            <span className="text-xs text-gray-700">
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-red-500 rounded-full text-white shadow-sm">
+                            <ThumbsUp className="h-3.5 w-3.5" />
+                            <span className="text-xs font-semibold">
                               추천 {post.likes}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
-                            <MessageCircle className="h-3.5 w-3.5 text-gray-600" />
-                            <span className="text-xs text-gray-700">
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-orange-500 rounded-full text-white shadow-sm">
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            <span className="text-xs font-semibold">
                               댓글 {post.comments}
                             </span>
                           </div>
