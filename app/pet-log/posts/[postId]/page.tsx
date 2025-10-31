@@ -672,30 +672,30 @@ export default function PetLogPostDetail() {
           </div>
 
           {/* Mobile/Tablet: 세로 레이아웃 */}
-          <div className="flex md:hidden flex-col gap-4">
+          <div className="flex md:hidden flex-col gap-3 sm:gap-4">
             {/* Top: Pet Icon & Info with Total Records */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                  <span className="text-xl">🐕</span>
+            <div className="flex items-start justify-between gap-2 sm:gap-3">
+              <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                  <span className="text-lg sm:text-xl">🐕</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2 leading-tight">
                     {post.petName}의 급여 기록
                   </h1>
-                  <div className="flex flex-col gap-1 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <span>{post.petBreed}</span>
-                      <span>•</span>
-                      <span>{post.petAge}</span>
-                      <span>•</span>
-                      <span>{post.petWeight}</span>
+                  <div className="flex flex-col gap-1 text-xs sm:text-sm text-gray-600">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                      <span className="whitespace-nowrap">{post.petBreed}</span>
+                      <span className="text-gray-400">•</span>
+                      <span className="whitespace-nowrap">{post.petAge}</span>
+                      <span className="text-gray-400">•</span>
+                      <span className="whitespace-nowrap">{post.petWeight}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">{post.ownerName}</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                      <span className="font-semibold whitespace-nowrap">{post.ownerName}</span>
+                      <span className="text-gray-400">•</span>
+                      <span className="flex items-center gap-1 whitespace-nowrap">
+                        <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-500" />
                         <span>{post.updatedAt} 업데이트</span>
                       </span>
                     </div>
@@ -703,8 +703,8 @@ export default function PetLogPostDetail() {
                 </div>
               </div>
               {/* 총 기록 박스 - 상단 오른쪽 */}
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200 text-center w-20 h-20 flex flex-col items-center justify-center flex-shrink-0">
-                <div className="text-xl font-bold text-blue-600 mb-0.5">{post.totalRecords}</div>
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-2.5 sm:p-3 border border-blue-200 text-center w-16 h-16 sm:w-20 sm:h-20 flex flex-col items-center justify-center flex-shrink-0">
+                <div className="text-lg sm:text-xl font-bold text-blue-600 mb-0.5">{post.totalRecords}</div>
                 <div className="text-xs font-semibold text-blue-600">총 기록</div>
               </div>
             </div>
