@@ -356,7 +356,7 @@ export default function PetLogPostDetail() {
   const { data: session, status } = useSession()
   const isLoggedIn = status === 'authenticated'
   const currentUser = session?.user ? {
-    id: session.user.id || session.user.email || 'unknown',
+    id: (session.user as any).id || session.user.email || 'unknown',
     name: session.user.name || session.user.email || '사용자'
   } : null
 
