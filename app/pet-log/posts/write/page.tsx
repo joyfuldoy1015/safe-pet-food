@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { 
   ArrowLeft, 
   Plus, 
@@ -56,8 +56,34 @@ interface PostData {
   feedingRecords: FeedingRecord[]
 }
 
+// 반려동물 프로필 인터페이스
+interface PetProfile {
+  id: string
+  name: string
+  species: 'dog' | 'cat'
+  birthYear: number
+  age: string
+  gender: 'male' | 'female'
+  neutered: boolean
+  breed: string
+  weight: string
+  allergies: string[]
+  healthConditions: string[]
+  specialNotes: string
+  createdAt: string
+  updatedAt: string
+  ownerId: string
+  ownerName: string
+}
+
 export default function WritePostPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const selectedPetId = searchParams.get('petId')
+  
+  // 등록된 반려동물 프로필 목록
+  const [petProfiles, setPetProfiles] = useState<PetProfile[]>([])
+  const [selectedPetProfile, setSelectedPetProfile] = useState<string>('')
   
   // 반려동물 정보
   const [petInfo, setPetInfo] = useState({
@@ -95,6 +121,68 @@ export default function WritePostPage() {
   const [currentStep, setCurrentStep] = useState(1) // 1: 반려동물 정보, 2: 급여 기록, 3: 미리보기
   const [newBenefit, setNewBenefit] = useState('')
   const [newSideEffect, setNewSideEffect] = useState('')
+  const [useNewPet, setUseNewPet] = useState(false)
+
+  // 로컬 스토리지에서 반려동물 프로필 불러오기
+  useEffect(() => {
+    try {
+      const savedPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
+      setPetProfiles(savedPets)
+      
+      // URL 파라미터로 선택된 반려동물이 있으면 해당 반려동물 선택
+      if (selectedPetId) {
+        const pet = savedPets.find((p: PetProfile) => p.id === selectedPetId)
+        if (pet) {
+          setSelectedPetProfile(selectedPetId)
+          loadPetInfo(pet)
+          setUseNewPet(false)
+        }
+      } else if (savedPets.length > 0) {
+        // 기본적으로 첫 번째 반려동물 선택
+        setSelectedPetProfile(savedPets[0].id)
+        loadPetInfo(savedPets[0])
+        setUseNewPet(false)
+      } else {
+        // 등록된 반려동물이 없으면 새로 입력 모드
+        setUseNewPet(true)
+      }
+    } catch (error) {
+      console.error('반려동물 프로필 로드 중 오류:', error)
+      setUseNewPet(true)
+    }
+  }, [selectedPetId])
+
+  // 선택한 반려동물 프로필에서 정보 로드
+  const loadPetInfo = (pet: PetProfile) => {
+    setPetInfo({
+      petName: pet.name,
+      petBreed: pet.breed,
+      petAge: pet.age,
+      petWeight: pet.weight,
+      ownerName: pet.ownerName
+    })
+  }
+
+  // 반려동물 선택 변경
+  const handlePetSelect = (petId: string) => {
+    if (petId === 'new') {
+      setUseNewPet(true)
+      setPetInfo({
+        petName: '',
+        petBreed: '',
+        petAge: '',
+        petWeight: '',
+        ownerName: ''
+      })
+    } else {
+      const pet = petProfiles.find(p => p.id === petId)
+      if (pet) {
+        setSelectedPetProfile(petId)
+        loadPetInfo(pet)
+        setUseNewPet(false)
+      }
+    }
+  }
 
   // 카테고리 설정
   const categoryConfig = {
@@ -243,8 +331,13 @@ export default function WritePostPage() {
       ownerName: petInfo.ownerName,
       ownerId: 'current-user', // 실제로는 세션에서 가져옴
       ownerAvatar: '👤',
-      petAvatar: petInfo.petBreed.includes('고양이') || petInfo.petBreed.includes('cat') ? '🐱' : '🐕',
-      petSpecies: petInfo.petBreed.includes('고양이') || petInfo.petBreed.includes('cat') ? 'cat' : 'dog',
+      petAvatar: selectedPetProfile && !useNewPet && petProfiles.length > 0
+        ? (petProfiles.find(p => p.id === selectedPetProfile)?.species === 'cat' ? '🐱' : '🐕')
+        : (petInfo.petBreed.includes('고양이') || petInfo.petBreed.includes('cat') ? '🐱' : '🐕'),
+      petSpecies: selectedPetProfile && !useNewPet && petProfiles.length > 0
+        ? (petProfiles.find(p => p.id === selectedPetProfile)?.species || 'dog')
+        : (petInfo.petBreed.includes('고양이') || petInfo.petBreed.includes('cat') ? 'cat' : 'dog'),
+      petProfileId: selectedPetProfile && !useNewPet ? selectedPetProfile : undefined,
       createdAt: now,
       updatedAt: now,
       totalRecords: feedingRecords.length,
@@ -320,9 +413,41 @@ export default function WritePostPage() {
         {/* 단계 1: 반려동물 정보 */}
         {currentStep === 1 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">반려동물 정보</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">반려동물 정보</h2>
+              {petProfiles.length > 0 && (
+                <Link
+                  href="/pet-log/pets/new"
+                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  + 새 반려동물 등록
+                </Link>
+              )}
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 등록된 반려동물 선택 */}
+            {petProfiles.length > 0 && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  등록된 반려동물 선택
+                </label>
+                <select
+                  value={useNewPet ? 'new' : selectedPetProfile}
+                  onChange={(e) => handlePetSelect(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  {petProfiles.map(pet => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name} ({pet.breed}, {pet.age})
+                    </option>
+                  ))}
+                  <option value="new">+ 새 반려동물 정보 입력</option>
+                </select>
+              </div>
+            )}
+            
+            {/* 반려동물 정보 입력 폼 */}
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${petProfiles.length > 0 && !useNewPet ? 'opacity-60' : ''}`}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   반려동물 이름 *
@@ -331,8 +456,11 @@ export default function WritePostPage() {
                   type="text"
                   value={petInfo.petName}
                   onChange={(e) => setPetInfo({...petInfo, petName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                    !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
+                  }`}
                   placeholder="예: 뽀미"
+                  disabled={!useNewPet && petProfiles.length > 0}
                 />
               </div>
               
@@ -344,8 +472,11 @@ export default function WritePostPage() {
                   type="text"
                   value={petInfo.petBreed}
                   onChange={(e) => setPetInfo({...petInfo, petBreed: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                    !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
+                  }`}
                   placeholder="예: 골든 리트리버"
+                  disabled={!useNewPet && petProfiles.length > 0}
                 />
               </div>
               
@@ -357,8 +488,11 @@ export default function WritePostPage() {
                   type="text"
                   value={petInfo.petAge}
                   onChange={(e) => setPetInfo({...petInfo, petAge: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                    !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
+                  }`}
                   placeholder="예: 3세"
+                  disabled={!useNewPet && petProfiles.length > 0}
                 />
               </div>
               
@@ -370,8 +504,11 @@ export default function WritePostPage() {
                   type="text"
                   value={petInfo.petWeight}
                   onChange={(e) => setPetInfo({...petInfo, petWeight: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                    !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
+                  }`}
                   placeholder="예: 28kg"
+                  disabled={!useNewPet && petProfiles.length > 0}
                 />
               </div>
               
@@ -385,9 +522,21 @@ export default function WritePostPage() {
                   onChange={(e) => setPetInfo({...petInfo, ownerName: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="예: 김집사"
+                  disabled={!useNewPet && petProfiles.length > 0}
                 />
               </div>
             </div>
+            
+            {petProfiles.length === 0 && (
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  💡 <strong>팁:</strong> 반려동물을 먼저 등록하면 다음 급여 기록 작성 시 자동으로 정보가 입력됩니다.{' '}
+                  <Link href="/pet-log/pets/new" className="underline font-medium">
+                    새 반려동물 등록하기
+                  </Link>
+                </p>
+              </div>
+            )}
             
             <div className="flex justify-end mt-8">
               <button

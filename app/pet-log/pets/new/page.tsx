@@ -96,14 +96,52 @@ export default function NewPetPage() {
     setSaving(true)
 
     try {
-      // 실제로는 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // 반려동물 프로필 ID 생성
+      const petId = `pet-${Date.now()}`
+      const now = new Date().toISOString().split('T')[0]
       
-      // 성공 시 리다이렉트
-      router.push('/pet-log')
+      // 나이 계산 (출생연도 기준)
+      const age = formData.birthYear ? (new Date().getFullYear() - formData.birthYear) : 0
+      const ageString = age > 0 ? `${age}세` : '0세'
+      
+      // 반려동물 프로필 데이터 구성
+      const petProfile = {
+        id: petId,
+        name: formData.name,
+        species: formData.species,
+        birthYear: formData.birthYear,
+        age: ageString,
+        gender: formData.gender,
+        neutered: formData.neutered,
+        breed: formData.breed || '미상',
+        weight: formData.weight ? `${formData.weight}kg` : '',
+        allergies: formData.allergies,
+        healthConditions: formData.healthConditions,
+        specialNotes: formData.specialNotes,
+        createdAt: now,
+        updatedAt: now,
+        ownerId: 'current-user', // 실제로는 세션에서 가져옴
+        ownerName: '현재 사용자' // 실제로는 세션에서 가져옴
+      }
+      
+      // 로컬 스토리지에 저장
+      try {
+        const existingPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
+        const updatedPets = [...existingPets, petProfile]
+        localStorage.setItem('petProfiles', JSON.stringify(updatedPets))
+        console.log('반려동물 프로필이 저장되었습니다:', petProfile)
+      } catch (storageError) {
+        console.error('저장 중 오류:', storageError)
+        alert('반려동물 정보 저장 중 오류가 발생했습니다.')
+        setSaving(false)
+        return
+      }
+      
+      // 성공 시 급여 기록 작성 페이지로 리다이렉트 (선택한 반려동물과 함께)
+      router.push(`/pet-log/posts/write?petId=${petId}`)
     } catch (error) {
       console.error('Error saving pet:', error)
-      // 에러 처리
+      alert('반려동물 등록 중 오류가 발생했습니다.')
     } finally {
       setSaving(false)
     }
