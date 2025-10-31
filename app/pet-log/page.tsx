@@ -704,7 +704,7 @@ export default function PetLogPage() {
                 className="px-4 sm:px-5 py-3 sm:py-3.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 whitespace-nowrap text-sm sm:text-base"
               >
                 <PawPrint className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span>내 반려동물</span>
+                <span>나의 반려동물 등록하기</span>
               </Link>
               <button
                 onClick={() => {
