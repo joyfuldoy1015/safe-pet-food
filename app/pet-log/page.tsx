@@ -698,19 +698,28 @@ export default function PetLogPage() {
               </div>
               <h2 className="text-xl font-bold text-gray-900">급여 기록 찾기</h2>
             </div>
-            <button
-              onClick={() => {
-                if (isLoggedIn) {
-                  window.location.href = '/pet-log/posts/write'
-                } else {
-                  setShowLoginModal(true)
-                }
-              }}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
-            >
-              <Plus className="h-5 w-5" />
-              급여 기록 공유하기
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/pet-log/pets"
+                className="px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 whitespace-nowrap"
+              >
+                <PawPrint className="h-5 w-5" />
+                내 반려동물
+              </Link>
+              <button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    window.location.href = '/pet-log/posts/write'
+                  } else {
+                    setShowLoginModal(true)
+                  }
+                }}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
+              >
+                <Plus className="h-5 w-5" />
+                급여 기록 공유하기
+              </button>
+            </div>
           </div>
           
           <div className="flex flex-col gap-6">
