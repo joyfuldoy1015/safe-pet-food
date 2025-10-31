@@ -703,7 +703,7 @@ export default function PetLogPage() {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
                 <input
                   type="text"
-                  placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
+                  placeholder="제품명, 집사명으로 검색"
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value)
@@ -713,7 +713,7 @@ export default function PetLogPage() {
                       // 엔터키로 검색 실행 (이미 실시간 검색이므로 추가 동작 없음)
                     }
                   }}
-                  className="pl-12 pr-20 py-4 w-full border-2 border-gray-200 rounded-l-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-lg"
+                  className="pl-12 pr-20 py-4 w-full border-2 border-gray-200 rounded-l-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-base sm:text-lg placeholder:text-gray-400"
                 />
                 <button
                   onClick={() => {
