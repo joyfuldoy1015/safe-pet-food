@@ -698,13 +698,14 @@ export default function PetLogPage() {
               </div>
               <h2 className="text-xl font-bold text-gray-900">급여 기록 찾기</h2>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/pet-log/pets"
-                className="px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 whitespace-nowrap"
+                className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 whitespace-nowrap text-sm sm:text-base h-[44px] sm:h-auto"
               >
-                <PawPrint className="h-5 w-5" />
-                내 반려동물
+                <PawPrint className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="hidden sm:inline">내 반려동물</span>
+                <span className="sm:hidden">내 반려동물</span>
               </Link>
               <button
                 onClick={() => {
@@ -714,10 +715,11 @@ export default function PetLogPage() {
                     setShowLoginModal(true)
                   }
                 }}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap text-sm sm:text-base h-[44px] sm:h-auto flex-1 sm:flex-initial"
               >
-                <Plus className="h-5 w-5" />
-                급여 기록 공유하기
+                <Plus className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                <span className="hidden sm:inline">급여 기록 공유하기</span>
+                <span className="sm:hidden">공유하기</span>
               </button>
             </div>
           </div>
