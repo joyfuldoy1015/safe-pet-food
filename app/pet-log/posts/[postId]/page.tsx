@@ -462,11 +462,11 @@ export default function PetLogPostDetail() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center space-x-0.5 sm:space-x-1">
         {Array.from({ length: 5 }, (_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${
+            className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
               i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
             }`}
           />
@@ -476,28 +476,37 @@ export default function PetLogPostDetail() {
   }
 
   const renderRecord = (record: FeedingRecord) => (
-    <div key={record.id} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 hover:shadow-2xl transition-all duration-300">
+    <div key={record.id} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 hover:shadow-2xl transition-all duration-300">
       {/* Product Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex-1">
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight mb-2">{record.productName}</h3>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight mb-2">{record.productName}</h3>
           {record.brand && (
-            <p className="text-sm text-gray-600">
-              {record.brand}
-              {record.price && <span> · {record.price}</span>}
-              {record.purchaseLocation && <span> · {record.purchaseLocation}</span>}
-            </p>
+            <div className="flex flex-col gap-1 text-xs sm:text-sm text-gray-600">
+              <span>{record.brand}</span>
+              {record.price && (
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1">
+                  <span>{record.price}</span>
+                  {record.purchaseLocation && (
+                    <>
+                      <span className="hidden sm:inline"> · </span>
+                      <span>{record.purchaseLocation}</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
+        <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-auto">
+          <span className={`px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
             record.status === '급여중' ? 'bg-green-100 text-green-800 border border-green-200' :
             record.status === '급여완료' ? 'bg-gray-100 text-gray-800 border border-gray-200' :
             'bg-red-100 text-red-800 border border-red-200'
           }`}>
             {statusConfig[record.status].icon} {record.status}
           </span>
-          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200 whitespace-nowrap">
+          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200 whitespace-nowrap">
             <Clock className="h-3.5 w-3.5 text-gray-600" />
             <span className="text-xs text-gray-700">{record.duration}</span>
           </div>
@@ -505,49 +514,49 @@ export default function PetLogPostDetail() {
       </div>
 
       {/* Main Info Grid - 2x2 */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {/* 급여 기간 */}
-        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <p className="text-xs text-gray-500 mb-2 font-medium">급여 기간</p>
-          <p className="text-base font-semibold text-gray-900">
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
+          <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 font-medium">급여 기간</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">
             {record.startDate} ~ {record.endDate || '현재'}
           </p>
         </div>
         {/* 재구매 의향 */}
-        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <p className="text-xs text-gray-500 mb-2 font-medium">재구매 의향</p>
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
+          <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 font-medium">재구매 의향</p>
           <div className="flex items-center">
             {record.repurchaseIntent ? (
-              <span className="text-green-700 flex items-center font-semibold text-base">
-                <Heart className="h-4 w-4 mr-1.5 fill-current" />
+              <span className="text-green-700 flex items-center font-semibold text-sm sm:text-base">
+                <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 fill-current" />
                 있음
               </span>
             ) : (
-              <span className="text-gray-600 flex items-center font-semibold text-base">
-                <Heart className="h-4 w-4 mr-1.5" />
+              <span className="text-gray-600 flex items-center font-semibold text-sm sm:text-base">
+                <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                 없음
               </span>
             )}
           </div>
         </div>
         {/* 기호성 */}
-        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <p className="text-xs text-gray-500 mb-2 font-medium">
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
+          <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 font-medium">
             {record.category === '화장실' ? '사용성' : '기호성'}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {renderStars(record.palatability)}
-            <span className="text-base font-semibold text-gray-900">
+            <span className="text-sm sm:text-base font-semibold text-gray-900">
               {record.palatability}/5
             </span>
           </div>
         </div>
         {/* 만족도 */}
-        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <p className="text-xs text-gray-500 mb-2 font-medium">만족도</p>
-          <div className="flex items-center gap-2">
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
+          <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 font-medium">만족도</p>
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {renderStars(record.satisfaction)}
-            <span className="text-base font-semibold text-gray-900">
+            <span className="text-sm sm:text-base font-semibold text-gray-900">
               {record.satisfaction}/5
             </span>
           </div>
@@ -555,17 +564,17 @@ export default function PetLogPostDetail() {
       </div>
 
       {/* Benefits & Side Effects - 좌우 배치 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
         {/* 장점 */}
         {record.benefits && record.benefits.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-green-600 text-lg">👍</span>
-              <h4 className="text-sm font-semibold text-green-700">장점</h4>
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <span className="text-green-600 text-base sm:text-lg">👍</span>
+              <h4 className="text-xs sm:text-sm font-semibold text-green-700">장점</h4>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {record.benefits.map((benefit, index) => (
-                <span key={index} className="px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full font-medium border border-green-200">
+                <span key={index} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-green-100 text-green-800 text-xs rounded-full font-medium border border-green-200">
                   {benefit}
                 </span>
               ))}
@@ -575,13 +584,13 @@ export default function PetLogPostDetail() {
         {/* 단점 */}
         {record.sideEffects && record.sideEffects.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-red-600 text-lg">👎</span>
-              <h4 className="text-sm font-semibold text-red-700">단점</h4>
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <span className="text-red-600 text-base sm:text-lg">👎</span>
+              <h4 className="text-xs sm:text-sm font-semibold text-red-700">단점</h4>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {record.sideEffects.map((effect, index) => (
-                <span key={index} className="px-3 py-1.5 bg-red-100 text-red-800 text-xs rounded-full font-medium border border-red-200">
+                <span key={index} className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-red-100 text-red-800 text-xs rounded-full font-medium border border-red-200">
                   {effect}
                 </span>
               ))}
@@ -592,8 +601,8 @@ export default function PetLogPostDetail() {
 
       {/* Comment Section */}
       {record.comment && (
-        <div className="bg-gray-100 rounded-lg p-4">
-          <p className="text-sm text-gray-700 leading-relaxed">{record.comment}</p>
+        <div className="bg-gray-100 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{record.comment}</p>
         </div>
       )}
     </div>
@@ -604,9 +613,9 @@ export default function PetLogPostDetail() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <Link
           href="/pet-log"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 sm:mb-6 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-200 text-sm sm:text-base"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
           돌아가기
         </Link>
 
@@ -718,7 +727,7 @@ export default function PetLogPostDetail() {
         </div>
 
         {/* Category Sections */}
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {(['사료', '간식', '영양제', '화장실'] as ProductCategory[]).map(category => {
             const records = categorizedRecords[category]
             if (records.length === 0) return null
@@ -727,30 +736,30 @@ export default function PetLogPostDetail() {
             const completedCount = records.filter(r => r.status === '급여완료').length
 
             return (
-              <div key={category} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
+              <div key={category} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 hover:shadow-2xl transition-all duration-300">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ${
                       category === '사료' ? 'bg-gradient-to-r from-blue-500 to-purple-500' :
                       category === '간식' ? 'bg-gradient-to-r from-green-500 to-teal-500' :
                       category === '영양제' ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
                       'bg-gradient-to-r from-orange-500 to-red-500'
                     }`}>
-                      <span className="text-xl">{categoryConfig[category].icon}</span>
+                      <span className="text-lg sm:text-xl">{categoryConfig[category].icon}</span>
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{category}</h2>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-full font-semibold border border-gray-200">
+                        <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-700 text-xs sm:text-sm rounded-full font-semibold border border-gray-200">
                           {records.length}개 제품
                         </span>
                         {activeCount > 0 && (
-                          <span className="px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-full border border-green-200">
+                          <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-green-100 text-green-800 text-xs sm:text-sm font-medium rounded-full border border-green-200">
                             사용중 {activeCount}개
                           </span>
                         )}
                         {completedCount > 0 && (
-                          <span className="px-3 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-full border border-gray-200">
+                          <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-100 text-gray-800 text-xs sm:text-sm font-medium rounded-full border border-gray-200">
                             완료 {completedCount}개
                           </span>
                         )}
@@ -759,7 +768,7 @@ export default function PetLogPostDetail() {
                   </div>
                 </div>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {records.map(renderRecord)}
                 </div>
               </div>
@@ -768,37 +777,37 @@ export default function PetLogPostDetail() {
         </div>
 
         {/* Comments Section */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mt-8 hover:shadow-2xl transition-all duration-300">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
-                <MessageCircle className="h-6 w-6 text-white" />
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 mt-6 sm:mt-8 hover:shadow-2xl transition-all duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">질문하기</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">질문하기</h2>
                 <div className="mt-2">
-                  <span className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-full font-semibold border border-gray-200">
+                  <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-700 text-xs sm:text-sm rounded-full font-semibold border border-gray-200">
                     {comments.length + comments.reduce((sum, comment) => sum + comment.replies.length, 0)}개 질문
                   </span>
                 </div>
               </div>
             </div>
             {isLoggedIn && (
-              <div className="text-sm text-gray-500">
+              <div className="text-xs sm:text-sm text-gray-500">
                 {currentUser?.name}님으로 로그인됨
               </div>
             )}
           </div>
 
           {/* Comment Form */}
-          <div className="mb-8">
-            <div className="flex items-start space-x-3">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-start space-x-2 sm:space-x-3">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-gray-500" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
                 </div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
@@ -813,24 +822,24 @@ export default function PetLogPostDetail() {
                     }
                   }}
                   placeholder={isLoggedIn ? `${post.ownerName}님에게 질문해보세요...` : "로그인 후 질문할 수 있습니다."}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none cursor-pointer transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none cursor-pointer transition-all duration-200 text-sm sm:text-base"
                   rows={3}
                   disabled={!isLoggedIn}
                 />
-                <div className="flex justify-between items-center mt-2">
-                  <p className="text-xs text-gray-500">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mt-2">
+                  <p className="text-xs text-gray-500 hidden sm:block">
                     급여 경험이나 제품에 대해 궁금한 점을 물어보세요.
                   </p>
                   <button
                     onClick={handleSubmitComment}
                     disabled={!newComment.trim() || !isLoggedIn}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 min-h-[44px] touch-manipulation ${
+                    className={`flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 min-h-[40px] sm:min-h-[44px] touch-manipulation w-full sm:w-auto ${
                       isLoggedIn && newComment.trim()
                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transform hover:scale-105'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    <Send className="h-5 w-5" />
+                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
                     <span>질문하기</span>
                   </button>
                 </div>
@@ -839,79 +848,79 @@ export default function PetLogPostDetail() {
           </div>
 
           {/* Comments List */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {comments.map((comment) => (
-              <div key={comment.id} className="border-b border-gray-100 pb-6 last:border-b-0">
-                <div className="flex items-start space-x-3">
+              <div key={comment.id} className="border-b border-gray-100 pb-4 sm:pb-6 last:border-b-0">
+                <div className="flex items-start space-x-2 sm:space-x-3">
                   <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-blue-600" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-gray-900">{comment.userName}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                      <span className="font-semibold text-sm sm:text-base text-gray-900">{comment.userName}</span>
                       {comment.userId === post.ownerId && (
                         <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
                           작성자
                         </span>
                       )}
-                      <span className="text-sm text-gray-500">
+                      <span className="text-xs sm:text-sm text-gray-500">
                         {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                     </div>
-                    <p className="text-gray-700 mb-3">{comment.content}</p>
+                    <p className="text-sm sm:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed break-words">{comment.content}</p>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <button
                         onClick={() => handleToggleLike(comment.id)}
-                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors border min-h-[36px] touch-manipulation ${
+                        className={`flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm transition-colors border min-h-[32px] sm:min-h-[36px] touch-manipulation ${
                           comment.isLiked 
                             ? 'text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100' 
                             : 'text-gray-600 bg-gray-50 border-gray-200 hover:text-blue-600 hover:bg-gray-100'
                         }`}
                       >
-                        <ThumbsUp className={`h-3.5 w-3.5 ${comment.isLiked ? 'fill-current' : ''}`} />
+                        <ThumbsUp className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${comment.isLiked ? 'fill-current' : ''}`} />
                         <span className="font-medium text-xs">{comment.likes}</span>
                       </button>
                       
                       <button
                         onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm text-gray-600 bg-gray-50 border border-gray-200 hover:text-blue-600 hover:bg-gray-100 transition-colors min-h-[36px] touch-manipulation"
+                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm text-gray-600 bg-gray-50 border border-gray-200 hover:text-blue-600 hover:bg-gray-100 transition-colors min-h-[32px] sm:min-h-[36px] touch-manipulation"
                       >
-                        <Reply className="h-3.5 w-3.5" />
+                        <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         <span className="text-xs">답글</span>
                       </button>
                     </div>
 
                     {/* Reply Form */}
                     {replyingTo === comment.id && (
-                      <div className="mt-4 pl-4 border-l-2 border-gray-200">
-                        <div className="flex items-start space-x-3">
+                      <div className="mt-3 sm:mt-4 pl-2 sm:pl-4 border-l-2 border-gray-200">
+                        <div className="flex items-start space-x-2 sm:space-x-3">
                           <div className="flex-shrink-0">
-                            <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                              <User className="h-3 w-3 text-gray-500" />
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-500" />
                             </div>
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <textarea
                               value={replyContent}
                               onChange={(e) => setReplyContent(e.target.value)}
                               placeholder="답글을 작성하세요..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                              className="w-full px-2.5 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-xs sm:text-sm"
                               rows={2}
                             />
-                            <div className="flex justify-end space-x-2 mt-2">
+                            <div className="flex justify-end gap-2 mt-2">
                               <button
                                 onClick={() => setReplyingTo(null)}
-                                className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700"
+                                className="px-2.5 sm:px-3 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700"
                               >
                                 취소
                               </button>
                               <button
                                 onClick={() => handleSubmitReply(comment.id)}
                                 disabled={!replyContent.trim()}
-                                className={`px-3 py-1 text-sm rounded transition-colors ${
+                                className={`px-2.5 sm:px-3 py-1 text-xs sm:text-sm rounded transition-colors ${
                                   replyContent.trim()
                                     ? 'bg-blue-500 text-white hover:bg-blue-600'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -927,21 +936,21 @@ export default function PetLogPostDetail() {
 
                     {/* Replies */}
                     {comment.replies.length > 0 && (
-                      <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-4">
+                      <div className="mt-3 sm:mt-4 pl-2 sm:pl-4 border-l-2 border-gray-200 space-y-3 sm:space-y-4">
                         {comment.replies.map((reply) => (
-                          <div key={reply.id} className="flex items-start space-x-3">
+                          <div key={reply.id} className="flex items-start space-x-2 sm:space-x-3">
                             <div className="flex-shrink-0">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                              <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ${
                                 reply.userId === post.ownerId ? 'bg-green-100' : 'bg-gray-200'
                               }`}>
-                                <User className={`h-3 w-3 ${
+                                <User className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${
                                   reply.userId === post.ownerId ? 'text-green-600' : 'text-gray-500'
                                 }`} />
                               </div>
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="font-medium text-gray-900 text-sm">{reply.userName}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                                <span className="font-medium text-gray-900 text-xs sm:text-sm">{reply.userName}</span>
                                 {reply.userId === post.ownerId && (
                                   <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
                                     작성자
@@ -951,14 +960,14 @@ export default function PetLogPostDetail() {
                                   {new Date(reply.createdAt).toLocaleDateString('ko-KR')}
                                 </span>
                               </div>
-                              <p className="text-gray-700 text-sm mb-2">{reply.content}</p>
+                              <p className="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 leading-relaxed break-words">{reply.content}</p>
                               <button
                                 onClick={() => handleToggleLike(comment.id, true, reply.id)}
-                                className={`flex items-center space-x-1 text-xs transition-colors ${
+                                className={`flex items-center gap-1 text-xs transition-colors ${
                                   reply.isLiked ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
                                 }`}
                               >
-                                <ThumbsUp className={`h-3 w-3 ${reply.isLiked ? 'fill-current' : ''}`} />
+                                <ThumbsUp className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${reply.isLiked ? 'fill-current' : ''}`} />
                                 <span>{reply.likes}</span>
                               </button>
                             </div>
@@ -974,10 +983,10 @@ export default function PetLogPostDetail() {
 
           {/* Empty State */}
           {comments.length === 0 && (
-            <div className="text-center py-8">
-              <MessageCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 mb-2">아직 질문이 없습니다.</p>
-              <p className="text-sm text-gray-400">
+            <div className="text-center py-6 sm:py-8">
+              <MessageCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+              <p className="text-sm sm:text-base text-gray-500 mb-2">아직 질문이 없습니다.</p>
+              <p className="text-xs sm:text-sm text-gray-400">
                 {post.ownerName}님에게 급여 경험에 대해 질문해보세요!
               </p>
             </div>
@@ -987,38 +996,38 @@ export default function PetLogPostDetail() {
         {/* Login Modal */}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl">
               <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 mb-6 shadow-lg">
-                  <User className="h-8 w-8 text-white" />
+                <div className="mx-auto flex items-center justify-center h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 mb-4 sm:mb-6 shadow-lg">
+                  <User className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                 </div>
                 
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                   로그인이 필요합니다
                 </h3>
                 
-                <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                  질문하기, 좋아요, 경험 공유 등의 기능을 이용하려면<br />
+                <p className="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
+                  질문하기, 좋아요, 경험 공유 등의 기능을 이용하려면<br className="hidden sm:block" />
                   먼저 로그인해주세요.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                   <Link
                     href="/login"
-                    className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm sm:text-lg font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     로그인하기
                   </Link>
                   
                   <button
                     onClick={() => setShowLoginModal(false)}
-                    className="inline-flex items-center justify-center px-6 py-4 bg-gray-100 text-gray-700 text-lg font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200"
+                    className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gray-100 text-gray-700 text-sm sm:text-lg font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200"
                   >
                     취소
                   </button>
                 </div>
                 
-                <p className="text-sm text-gray-500 mt-6">
+                <p className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6">
                   아직 계정이 없으신가요? 
                   <Link href="/signup" className="text-purple-600 hover:text-purple-700 ml-1 font-semibold">
                     회원가입
