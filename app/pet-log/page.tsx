@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { 
   Plus, 
   Calendar, 
@@ -566,9 +567,9 @@ export default function PetLogPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showLoginModal, setShowLoginModal] = useState(false)
   
-  // 로그인 상태 관리 (실제 배포 시에는 NextAuth.js, 세션, 또는 인증 컨텍스트에서 가져와야 함)
-  // 예: const { data: session } = useSession() 또는 const { user } = useAuth()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  // 로그인 상태 관리 - NextAuth 세션 사용
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === 'authenticated'
   const [selectedSpecies, setSelectedSpecies] = useState<string>('all')
   const [displayedPostsCount, setDisplayedPostsCount] = useState(4)
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())

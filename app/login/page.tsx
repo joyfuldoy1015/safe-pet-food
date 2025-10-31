@@ -42,12 +42,15 @@ export default function LoginPage() {
       })
       
       if (result?.ok) {
-        router.push('/')
+        // 로그인 성공 시 현재 페이지에서 리다이렉트하거나 새로고침
+        window.location.href = '/'
       } else {
+        alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
         console.error('Login failed:', result?.error)
       }
     } catch (error) {
       console.error('Login error:', error)
+      alert('로그인 중 오류가 발생했습니다.')
     } finally {
       setIsLoading(false)
     }

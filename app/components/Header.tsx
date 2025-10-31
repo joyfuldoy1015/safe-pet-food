@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useSession, signOut } from 'next-auth/react'
 import { 
   Calculator, 
   Star, 
@@ -16,7 +17,8 @@ import {
   HelpCircle,
   Menu,
   X,
-  BookOpen
+  BookOpen,
+  LogOut
 } from 'lucide-react'
 
 const categories = {
@@ -51,6 +53,12 @@ const categories = {
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === 'authenticated'
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' })
+  }
 
   return (
     <header className="bg-yellow-400 sticky top-0 z-50">
@@ -105,14 +113,31 @@ export default function Header() {
             ))}
           </nav>
           
-          {/* 로그인/회원가입 버튼 */}
+          {/* 로그인/회원가입 또는 로그아웃 버튼 */}
           <div className="hidden md:flex items-center space-x-2">
-            <Link href="/login" className="text-black hover:text-gray-700 font-medium transition-colors">
-              로그인
-            </Link>
-            <Link href="/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
-              회원가입
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <span className="text-black font-medium text-sm">
+                  {session?.user?.name || session?.user?.email || '사용자'}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="text-black hover:text-gray-700 font-medium transition-colors flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-yellow-300"
+                >
+                  <LogOut className="h-4 w-4" />
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-black hover:text-gray-700 font-medium transition-colors">
+                  로그인
+                </Link>
+                <Link href="/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                  회원가입
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -143,12 +168,32 @@ export default function Header() {
               </div>
             ))}
             <div className="flex flex-col space-y-2 px-2 mt-4">
-              <Link href="/login" className="text-black hover:text-gray-700 font-medium py-2 text-left" onClick={() => setMobileMenuOpen(false)}>
-                로그인
-              </Link>
-              <Link href="/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium text-center" onClick={() => setMobileMenuOpen(false)}>
-                회원가입
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <div className="px-4 py-2 text-black font-medium">
+                    {session?.user?.name || session?.user?.email || '사용자'}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      handleLogout()
+                    }}
+                    className="flex items-center gap-2 text-black hover:text-gray-700 font-medium py-2 text-left px-4 hover:bg-yellow-300 rounded-lg"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="text-black hover:text-gray-700 font-medium py-2 text-left" onClick={() => setMobileMenuOpen(false)}>
+                    로그인
+                  </Link>
+                  <Link href="/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium text-center" onClick={() => setMobileMenuOpen(false)}>
+                    회원가입
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
