@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Plus, 
@@ -19,8 +19,6 @@ import {
   Filter,
   Search,
   User,
-  ChevronLeft,
-  ChevronRight,
   Bookmark,
   BookmarkCheck
 } from 'lucide-react'
@@ -234,6 +232,266 @@ const detailedPosts: DetailedPetLogPost[] = [
         sideEffects: ['조금 딱딱함']
       }
     ]
+  },
+  {
+    id: 'post-4',
+    petName: '루이',
+    petBreed: '시바견',
+    petAge: '2세',
+    petWeight: '8.5kg',
+    ownerName: '박민수',
+    ownerId: 'owner-4',
+    ownerAvatar: '👨‍🎓',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-10',
+    updatedAt: '2024-01-18',
+    totalRecords: 4,
+    views: 456,
+    likes: 34,
+    comments: 12,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-6',
+        productName: '오리젠 오리지널',
+        category: '사료',
+        brand: '오리젠',
+        startDate: '2024-01-05',
+        status: '급여중',
+        duration: '13일',
+        palatability: 5,
+        satisfaction: 5,
+        repurchaseIntent: true,
+        comment: '고품질 원료로 만든 사료라서 믿고 급여하고 있어요. 루이가 정말 잘 먹어요!',
+        price: '120,000원 (11.4kg)',
+        purchaseLocation: '온라인 펫샵',
+        benefits: ['고품질 원료', '기호성 우수', '털 윤기', '소화 잘됨']
+      }
+    ]
+  },
+  {
+    id: 'post-5',
+    petName: '나비',
+    petBreed: '러시안 블루',
+    petAge: '5세',
+    petWeight: '3.8kg',
+    ownerName: '이지영',
+    ownerId: 'owner-5',
+    ownerAvatar: '👩‍💻',
+    petAvatar: '🐱',
+    petSpecies: 'cat',
+    createdAt: '2024-01-08',
+    updatedAt: '2024-01-15',
+    totalRecords: 6,
+    views: 678,
+    likes: 45,
+    comments: 8,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-7',
+        productName: '아카나 그라스랜드',
+        category: '사료',
+        brand: '아카나',
+        startDate: '2023-12-20',
+        status: '급여중',
+        duration: '29일',
+        palatability: 4,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '러시안 블루 고양이에게 딱 맞는 사료인 것 같아요. 털도 부드러워졌어요.',
+        price: '85,000원 (5.4kg)',
+        purchaseLocation: '펫샵',
+        benefits: ['털 윤기', '소화 잘됨', '기호성 좋음']
+      }
+    ]
+  },
+  {
+    id: 'post-6',
+    petName: '멍멍이',
+    petBreed: '포메라니안',
+    petAge: '1세',
+    petWeight: '2.1kg',
+    ownerName: '최수진',
+    ownerId: 'owner-6',
+    ownerAvatar: '👩‍🎨',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-12',
+    updatedAt: '2024-01-19',
+    totalRecords: 3,
+    views: 234,
+    likes: 28,
+    comments: 5,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-8',
+        productName: '로얄캐닌 포메라니안 퍼피',
+        category: '사료',
+        brand: '로얄캐닌',
+        startDate: '2024-01-01',
+        status: '급여중',
+        duration: '19일',
+        palatability: 5,
+        satisfaction: 5,
+        repurchaseIntent: true,
+        comment: '강아지 전용 사료라서 그런지 정말 잘 먹어요! 성장에도 도움이 될 것 같아요.',
+        price: '65,000원 (3kg)',
+        purchaseLocation: '동물병원',
+        benefits: ['강아지 전용', '성장 도움', '기호성 우수', '소화 잘됨']
+      }
+    ]
+  },
+  {
+    id: 'post-7',
+    petName: '야옹이',
+    petBreed: '코리안 숏헤어',
+    petAge: '4세',
+    petWeight: '4.5kg',
+    ownerName: '정현우',
+    ownerId: 'owner-7',
+    ownerAvatar: '👨‍🔬',
+    petAvatar: '🐱',
+    petSpecies: 'cat',
+    createdAt: '2024-01-05',
+    updatedAt: '2024-01-17',
+    totalRecords: 7,
+    views: 567,
+    likes: 41,
+    comments: 15,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-9',
+        productName: '힐스 프리스크립션 다이어트',
+        category: '사료',
+        brand: '힐스',
+        startDate: '2023-11-15',
+        status: '급여중',
+        duration: '2개월 4일',
+        palatability: 3,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '다이어트용 사료라서 맛은 조금 아쉽지만, 체중 관리에는 효과가 있어요.',
+        price: '95,000원 (5kg)',
+        purchaseLocation: '동물병원',
+        benefits: ['체중 관리', '다이어트 효과', '소화 잘됨'],
+        sideEffects: ['기호성 보통']
+      }
+    ]
+  },
+  {
+    id: 'post-8',
+    petName: '바둑이',
+    petBreed: '진돗개',
+    petAge: '6세',
+    petWeight: '25kg',
+    ownerName: '김철수',
+    ownerId: 'owner-8',
+    ownerAvatar: '👨‍🌾',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-03',
+    updatedAt: '2024-01-16',
+    totalRecords: 5,
+    views: 789,
+    likes: 67,
+    comments: 22,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-10',
+        productName: '네츄럴발란스 리미티드 인그리디언트',
+        category: '사료',
+        brand: '네츄럴발란스',
+        startDate: '2023-12-01',
+        status: '급여중',
+        duration: '1개월 16일',
+        palatability: 4,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '한국 토종견인 바둑이에게 딱 맞는 사료인 것 같아요. 건강해 보여요!',
+        price: '75,000원 (12kg)',
+        purchaseLocation: '온라인 펫샵',
+        benefits: ['한국 토종견용', '건강 증진', '기호성 좋음', '소화 잘됨']
+      }
+    ]
+  },
+  {
+    id: 'post-9',
+    petName: '초코',
+    petBreed: '비글',
+    petAge: '3세',
+    petWeight: '12kg',
+    ownerName: '한소희',
+    ownerId: 'owner-9',
+    ownerAvatar: '👩‍⚕️',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-20',
+    updatedAt: '2024-01-22',
+    totalRecords: 5,
+    views: 623,
+    likes: 51,
+    comments: 14,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-11',
+        productName: '퍼피나스 그레인프리',
+        category: '사료',
+        brand: '퍼피나스',
+        startDate: '2024-01-10',
+        status: '급여중',
+        duration: '12일',
+        palatability: 5,
+        satisfaction: 4.5,
+        repurchaseIntent: true,
+        comment: '그레인프리라서 알레르기가 있는 우리 초코에게 완벽해요! 식이 섬유도 풍부해서 소화도 잘 되고 있어요.',
+        price: '98,000원 (10kg)',
+        purchaseLocation: '온라인 펫샵',
+        benefits: ['그레인프리', '알레르기 대응', '소화 개선', '기호성 우수']
+      }
+    ]
+  },
+  {
+    id: 'post-10',
+    petName: '토끼',
+    petBreed: '먼치킨',
+    petAge: '2세',
+    petWeight: '3.2kg',
+    ownerName: '서민지',
+    ownerId: 'owner-10',
+    ownerAvatar: '👩‍🏫',
+    petAvatar: '🐱',
+    petSpecies: 'cat',
+    createdAt: '2024-01-18',
+    updatedAt: '2024-01-21',
+    totalRecords: 4,
+    views: 412,
+    likes: 38,
+    comments: 9,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-12',
+        productName: '캣챠 프리미엄',
+        category: '사료',
+        brand: '캣챠',
+        startDate: '2024-01-05',
+        status: '급여중',
+        duration: '16일',
+        palatability: 4.5,
+        satisfaction: 4.5,
+        repurchaseIntent: true,
+        comment: '먼치킨 고양이의 건강을 위해 선택했어요. 작은 알갱이라 먹기도 편하고 소화도 잘 되는 것 같아요.',
+        price: '52,000원 (3kg)',
+        purchaseLocation: '펫샵',
+        benefits: ['작은 알갱이', '소화 개선', '기호성 좋음', '건강 증진']
+      }
+    ]
   }
 ]
 
@@ -312,9 +570,10 @@ export default function PetLogPage() {
   // 예: const { data: session } = useSession() 또는 const { user } = useAuth()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedSpecies, setSelectedSpecies] = useState<string>('all')
-  const [currentPage, setCurrentPage] = useState(1)
-  const postsPerPage = 6
+  const [displayedPostsCount, setDisplayedPostsCount] = useState(4)
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())
+  const [sortBy, setSortBy] = useState<'likes' | 'updated' | 'created'>('likes')
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
 
   // 필터링된 포스트들
   const filteredPosts = detailedPosts.filter(post => {
@@ -334,28 +593,26 @@ export default function PetLogPage() {
     const matchesSpecies = selectedSpecies === 'all' || post.petSpecies === selectedSpecies
     
     return matchesSearch && matchesCategory && matchesSpecies
+  }).sort((a, b) => {
+    if (sortBy === 'likes') return b.likes - a.likes
+    if (sortBy === 'updated') return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
-  // 인기 포스트 (조회수 기준 상위 3개)
-  const topPosts = [...detailedPosts]
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 3)
-
-  // 최신 포스트들 (페이지네이션 적용)
-  const recentPosts = [...detailedPosts]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
   
-  // 페이지네이션 계산
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
-  const startIndex = (currentPage - 1) * postsPerPage
-  const endIndex = startIndex + postsPerPage
-  const paginatedPosts = filteredPosts.slice(startIndex, endIndex)
+  // 표시할 포스트들 (더보기 버튼용)
+  const displayedPosts = filteredPosts.slice(0, displayedPostsCount)
+  const hasMorePosts = filteredPosts.length > displayedPostsCount
   
-  // 페이지 변경 시 스크롤을 맨 위로
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  // 더보기 버튼 클릭 시 10개씩 추가
+  const handleLoadMore = () => {
+    setDisplayedPostsCount(prev => prev + 10)
   }
+  
+  // 필터나 검색 변경 시 표시 개수 리셋
+  useEffect(() => {
+    setDisplayedPostsCount(4)
+  }, [searchTerm, selectedCategory, selectedSpecies, sortBy])
 
   // 즐겨찾기 토글 함수
   const handleBookmarkToggle = (postId: string, e: React.MouseEvent) => {
@@ -376,6 +633,27 @@ export default function PetLogPage() {
       }
       return newSet
     })
+  }
+
+  // 후기 텍스트 더보기/접기 토글 함수
+  const handleCommentToggle = (postId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    setExpandedComments(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(postId)) {
+        newSet.delete(postId)
+      } else {
+        newSet.add(postId)
+      }
+      return newSet
+    })
+  }
+
+  // 텍스트가 클램프가 필요한지 확인하는 함수 (대략 3줄 기준)
+  const needsClamp = (text: string): boolean => {
+    return text.length > 80 // 대략 3줄 기준
   }
 
   return (
@@ -429,7 +707,6 @@ export default function PetLogPage() {
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value)
-                    setCurrentPage(1)
                   }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
@@ -441,9 +718,8 @@ export default function PetLogPage() {
                 <button
                   onClick={() => {
                     // 검색 실행 (이미 실시간 검색이므로 현재 상태 유지)
-                    setCurrentPage(1)
                   }}
-                  className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-r-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
+                  className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-r-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2 whitespace-nowrap"
                 >
                   <Search className="h-5 w-5" />
                   검색
@@ -455,7 +731,6 @@ export default function PetLogPage() {
                 value={selectedCategory}
                 onChange={(e) => {
                   setSelectedCategory(e.target.value)
-                  setCurrentPage(1)
                 }}
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
               >
@@ -469,7 +744,6 @@ export default function PetLogPage() {
                 value={selectedSpecies}
                 onChange={(e) => {
                   setSelectedSpecies(e.target.value)
-                  setCurrentPage(1)
                 }}
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
               >
@@ -477,175 +751,23 @@ export default function PetLogPage() {
                 <option value="dog">🐕 강아지</option>
                 <option value="cat">🐱 고양이</option>
               </select>
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  const v = e.target.value as 'likes' | 'updated' | 'created'
+                  setSortBy(v)
+                }}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
+              >
+                <option value="likes">추천순</option>
+                <option value="updated">최신 등록 순</option>
+                <option value="created">신규 등록 순</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* Top 3 Popular Posts */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">인기 급여 후기 TOP 3</h2>
-              <p className="text-sm text-gray-500">조회수 기준</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {topPosts.map((post, index) => {
-              const mainRecord = getMainFeedingRecord(post)
-              const avgPalatability = getAverageRating(post.feedingRecords, 'palatability')
-              const avgSatisfaction = getAverageRating(post.feedingRecords, 'satisfaction')
-              
-              return (
-                <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block">
-                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 group cursor-pointer transform hover:scale-105">
-                    <div className="p-8">
-                      {/* Ranking Badge */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
-                          index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <Eye className="h-4 w-4" />
-                            <span>{post.views.toLocaleString()}</span>
-                          </div>
-                          <button
-                            onClick={(e) => handleBookmarkToggle(post.id, e)}
-                            className={`p-2 rounded-lg transition-colors min-h-[36px] touch-manipulation ${
-                              bookmarkedPosts.has(post.id)
-                                ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100'
-                                : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-                            }`}
-                          >
-                            {bookmarkedPosts.has(post.id) ? (
-                              <BookmarkCheck className="h-4 w-4" />
-                            ) : (
-                              <Bookmark className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* User Info - Mobile Optimized */}
-                      <div className="flex items-center space-x-3 mb-6">
-                        <div className="w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center flex-shrink-0">
-                          <span className="text-lg">{post.ownerAvatar}</span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-gray-900 text-lg truncate">{post.ownerName}</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <span>{post.petAvatar}</span>
-                              <span className="font-medium">{post.petName}</span>
-                            </span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{post.petAge}</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{post.petWeight}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Main Product Info - Mobile Optimized */}
-                      {mainRecord && (
-                        <div className="mb-6">
-                          <div className="flex items-start space-x-3 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                              <span className="text-lg">{categoryConfig[mainRecord.category].icon}</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-gray-900 text-lg leading-tight break-words">
-                                {mainRecord.productName}
-                              </h3>
-                              <p className="text-sm text-gray-600 mt-1">{mainRecord.brand}</p>
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className={`px-3 py-2 text-sm font-semibold rounded-xl border-2 whitespace-nowrap ${categoryConfig[mainRecord.category].color}`}>
-                              {getCategoryText(mainRecord.category)}
-                            </span>
-                            <span className={`px-3 py-2 text-sm font-semibold rounded-xl border-2 whitespace-nowrap ${statusConfig[mainRecord.status].color}`}>
-                              {getStatusText(mainRecord.status)}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Ratings - Mobile Optimized */}
-                      <div className="mb-6">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-gray-50 rounded-xl p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-semibold text-gray-700">기호성</span>
-                              <span className="text-lg font-bold text-gray-900">{avgPalatability}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              {renderStars(Math.round(avgPalatability))}
-                            </div>
-                          </div>
-                          <div className="bg-gray-50 rounded-xl p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-semibold text-gray-700">만족도</span>
-                              <span className="text-lg font-bold text-gray-900">{avgSatisfaction}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              {renderStars(Math.round(avgSatisfaction))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Records Summary */}
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-600 mb-2">
-                          총 {post.totalRecords}개 제품 급여 기록
-                        </p>
-                        {mainRecord?.comment && (
-                          <p className="text-gray-700 text-sm break-words line-clamp-2">
-                            &ldquo;{mainRecord.comment}&rdquo;
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Benefits Tags */}
-                      {mainRecord?.benefits && mainRecord.benefits.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {mainRecord.benefits.slice(0, 3).map((benefit, tagIndex) => (
-                            <span key={tagIndex} className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                              {benefit}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
-                            <ThumbsUp className={`h-4 w-4 ${post.isLiked ? 'text-blue-500' : ''}`} />
-                            <span className="font-medium">{post.likes}</span>
-                          </button>
-                          <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
-                            <MessageCircle className="h-4 w-4" />
-                            <span className="font-medium">{post.comments}</span>
-                          </button>
-                        </div>
-                        <span className="text-sm text-gray-500">{formatDate(post.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Search Results or Recent Posts */}
+        {/* All Posts */}
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
@@ -653,12 +775,12 @@ export default function PetLogPage() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' ? '검색 결과' : '최신 급여 후기'}
+                {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' ? '검색 결과' : '모든 급여 후기'}
               </h2>
               <p className="text-sm text-gray-500">
                 {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' 
                   ? `총 ${filteredPosts.length}개의 급여 기록을 찾았습니다` 
-                  : '최근 등록·수정순'
+                  : `${sortBy === 'likes' ? '추천순' : sortBy === 'updated' ? '최신 등록 순' : '신규 등록 순'}으로 정렬됨`
                 }
               </p>
             </div>
@@ -679,7 +801,6 @@ export default function PetLogPage() {
                   setSearchTerm('')
                   setSelectedCategory('all')
                   setSelectedSpecies('all')
-                  setCurrentPage(1)
                 }}
                 className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
@@ -690,168 +811,125 @@ export default function PetLogPage() {
 
           {/* Posts List - Only show if there are results */}
           {filteredPosts.length > 0 && (
-            <div className="space-y-6">
-              {paginatedPosts.map((post) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+              {displayedPosts.map((post) => {
               const mainRecord = getMainFeedingRecord(post)
               const avgPalatability = getAverageRating(post.feedingRecords, 'palatability')
               const avgSatisfaction = getAverageRating(post.feedingRecords, 'satisfaction')
-              const ongoingCount = post.feedingRecords.filter(r => r.status === '급여중').length
-              const completedCount = post.feedingRecords.filter(r => r.status === '급여완료').length
               
               return (
-                <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block">
-                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 p-8 cursor-pointer">
-                    {/* Header - Mobile Optimized */}
-                    <div className="flex flex-col space-y-4 mb-6">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-14 h-14 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center flex-shrink-0">
-                          <span className="text-xl">{post.ownerAvatar}</span>
+                <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block h-full">
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden h-full flex flex-col min-h-[350px]">
+                    <div className="flex flex-col md:flex-row flex-1 h-full">
+                      {/* Pet Image - Left Side */}
+                      <div className="w-full md:w-48 flex-shrink-0 bg-[#E8E8F8] flex items-center justify-center p-4">
+                        <div className="text-9xl bg-white rounded-xl p-4 shadow-sm">
+                          {post.petAvatar}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-gray-900 text-lg truncate">{post.ownerName}</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <span>{post.petAvatar}</span>
-                              <span className="font-semibold">{post.petName}</span>
+                      </div>
+                      
+                      {/* Content - Right Side */}
+                      <div className="flex-1 p-6 flex flex-col h-full">
+                        {/* Main Title - Product Name */}
+                        <div className="mb-3">
+                          <h2 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">
+                            {mainRecord?.productName || '급여 기록'}
+                          </h2>
+                          <p className="text-xs text-gray-500">
+                            업데이트: {formatDate(post.updatedAt)}
+                          </p>
+                        </div>
+                        
+                        {/* Satisfaction Rating */}
+                        <div className="mb-3">
+                          <div className="flex items-center space-x-1">
+                            {mainRecord ? renderStars(Math.round(avgSatisfaction)) : renderStars(0)}
+                            <span className="ml-2 text-base font-bold text-gray-900">
+                              {avgSatisfaction.toFixed(1)}
                             </span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{post.petBreed}</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{post.petAge}</span>
-                            <span className="hidden sm:inline">•</span>
-                            <span>{post.petWeight}</span>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2 lg:space-x-3 text-sm text-gray-500 flex-shrink-0">
-                        <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
-                          <Eye className="h-4 w-4" />
-                          <span className="font-medium">{post.views}</span>
-                        </button>
-                        <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
-                          <ThumbsUp className={`h-4 w-4 ${post.isLiked ? 'text-blue-500' : ''}`} />
-                          <span className="font-medium">{post.likes}</span>
-                        </button>
-                        <button className="flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] touch-manipulation">
-                          <MessageCircle className="h-4 w-4" />
-                          <span className="font-medium">{post.comments}</span>
-                        </button>
-                        <button
-                          onClick={(e) => handleBookmarkToggle(post.id, e)}
-                          className={`p-2 rounded-lg transition-colors min-h-[36px] touch-manipulation ${
-                            bookmarkedPosts.has(post.id)
-                              ? 'text-yellow-500 bg-yellow-50 hover:bg-yellow-100'
-                              : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
-                          }`}
-                        >
-                          {bookmarkedPosts.has(post.id) ? (
-                            <BookmarkCheck className="h-4 w-4" />
+                        
+                        {/* Feeding Review Text - In Gray Box */}
+                        <div className="mb-4">
+                          {mainRecord?.comment ? (
+                            <div className="bg-gray-100 rounded-lg p-3">
+                              <p 
+                                className={`text-sm text-gray-700 leading-relaxed ${
+                                  expandedComments.has(post.id) || !needsClamp(mainRecord.comment)
+                                    ? '' 
+                                    : 'line-clamp-3'
+                                }`}
+                                style={{
+                                  minHeight: '48px',
+                                  maxHeight: expandedComments.has(post.id) ? 'none' : '72px',
+                                  overflow: expandedComments.has(post.id) ? 'visible' : 'hidden'
+                                }}
+                              >
+                                {mainRecord.comment}
+                              </p>
+                              {needsClamp(mainRecord.comment) && (
+                                <button
+                                  onClick={(e) => handleCommentToggle(post.id, e)}
+                                  className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                                >
+                                  {expandedComments.has(post.id) ? '접기' : '더보기'}
+                                </button>
+                              )}
+                            </div>
                           ) : (
-                            <Bookmark className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Records Summary */}
-                    <div className="mb-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 space-y-2 sm:space-y-0">
-                        <h3 className="text-lg font-bold text-gray-900">급여 기록 요약</h3>
-                        <div className="flex flex-wrap items-center gap-2 text-sm">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full font-medium whitespace-nowrap">
-                            총 {post.totalRecords}개 제품
-                          </span>
-                          {ongoingCount > 0 && (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs whitespace-nowrap">
-                              급여중 {ongoingCount}개
-                            </span>
-                          )}
-                          {completedCount > 0 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs whitespace-nowrap">
-                              완료 {completedCount}개
-                            </span>
+                            <div className="bg-gray-100 rounded-lg p-3 h-[72px] flex items-center">
+                              <p className="text-sm text-gray-400 italic">급여 후기가 없습니다.</p>
+                            </div>
                           )}
                         </div>
-                      </div>
-
-                      {/* Category breakdown */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {Object.entries(
-                          post.feedingRecords.reduce((acc, record) => {
-                            acc[record.category] = (acc[record.category] || 0) + 1
-                            return acc
-                          }, {} as Record<ProductCategory, number>)
-                        ).map(([category, count]) => (
-                          <span key={category} className={`px-2 py-1 text-xs font-medium rounded-full border ${categoryConfig[category as ProductCategory].color}`}>
-                            {categoryConfig[category as ProductCategory].icon} {category} {count}개
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Main Product Highlight */}
-                    {mainRecord && (
-                      <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-3 lg:space-y-0">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <span className="text-lg">{categoryConfig[mainRecord.category].icon}</span>
-                              <h4 className="font-bold text-gray-900 truncate flex-1 min-w-0">{mainRecord.productName}</h4>
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${statusConfig[mainRecord.status].color}`}>
-                                {getStatusText(mainRecord.status)}
+                        
+                        {/* Metadata Tags */}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                            <User className="h-3.5 w-3.5 text-gray-600" />
+                            <span className="text-xs text-gray-700">
+                              나이 {post.petAge}{post.petSpecies === 'dog' ? '(강아지)' : '(고양이)'}
+                            </span>
+                          </div>
+                          {mainRecord && (
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                              <Calendar className="h-3.5 w-3.5 text-gray-600" />
+                              <span className="text-xs text-gray-700">
+                                급여 {mainRecord.duration}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">
-                              {mainRecord.brand} • {mainRecord.duration} 급여
-                            </p>
-                            {mainRecord.comment && (
-                              <p className="text-sm text-gray-700 italic break-words">&ldquo;{mainRecord.comment}&rdquo;</p>
-                            )}
-                          </div>
-                          <div className="lg:ml-4 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-600">기호성</span>
-                              <div className="flex items-center space-x-1">
-                                {renderStars(mainRecord.palatability)}
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-600">만족도</span>
-                              <div className="flex items-center space-x-1">
-                                {renderStars(mainRecord.satisfaction)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Benefits & Side Effects */}
-                        <div className="mt-3">
-                          {mainRecord.benefits && mainRecord.benefits.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-2">
-                              {mainRecord.benefits.slice(0, 4).map((benefit, index) => (
-                                <span key={index} className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                                  ✓ {benefit}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          {mainRecord.sideEffects && mainRecord.sideEffects.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {mainRecord.sideEffects.slice(0, 2).map((sideEffect, index) => (
-                                <span key={index} className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">
-                                  ⚠ {sideEffect}
-                                </span>
-                              ))}
-                            </div>
                           )}
                         </div>
-                      </div>
-                    )}
-
-                    {/* Update Info */}
-                    <div className="pt-4 border-t border-gray-100">
-                      <div className="text-sm text-gray-500 text-center">
-                        마지막 업데이트: {formatDate(post.updatedAt)}
+                        
+                        {/* Engagement Metrics */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                            <Eye className="h-3.5 w-3.5 text-gray-600" />
+                            <span className="text-xs text-gray-700">
+                              {post.views.toLocaleString()} 조회
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                            <ThumbsUp className="h-3.5 w-3.5 text-gray-600" />
+                            <span className="text-xs text-gray-700">
+                              추천 {post.likes}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                            <MessageCircle className="h-3.5 w-3.5 text-gray-600" />
+                            <span className="text-xs text-gray-700">
+                              댓글 {post.comments}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <div className="mt-auto">
+                          <button className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors">
+                            <span>자세히 보기</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -861,42 +939,25 @@ export default function PetLogPage() {
             </div>
           )}
 
-          {/* Pagination */}
-          {filteredPosts.length > 0 && totalPages > 1 && (
-            <div className="flex items-center justify-center space-x-2 mt-8">
+          {/* 더보기 버튼 */}
+          {filteredPosts.length > 0 && hasMorePosts && (
+            <div className="flex items-center justify-center mt-8">
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="flex items-center space-x-1 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-colors min-h-[40px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                onClick={handleLoadMore}
+                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
               >
-                <ChevronLeft className="h-4 w-4" />
-                <span>이전</span>
+                <span>더보기</span>
+                <TrendingUp className="h-5 w-5" />
               </button>
-              
-              <div className="flex items-center space-x-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[40px] min-w-[40px] touch-manipulation ${
-                      currentPage === page
-                        ? 'bg-purple-600 text-white'
-                        : 'border border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-              </div>
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="flex items-center space-x-1 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-colors min-h-[40px] touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                <span>다음</span>
-                <ChevronRight className="h-4 w-4" />
-              </button>
+            </div>
+          )}
+          
+          {/* 모든 포스트를 본 경우 메시지 */}
+          {filteredPosts.length > 0 && !hasMorePosts && displayedPosts.length > 4 && (
+            <div className="text-center py-6 mt-4">
+              <p className="text-gray-500 text-sm">
+                모든 급여 후기를 확인했습니다. ({filteredPosts.length}개)
+              </p>
             </div>
           )}
         </div>
