@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp } from 'lucide-react'
+import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
 
 // 제품 카테고리 타입
@@ -462,8 +462,8 @@ export default function PetLogPostDetail() {
 
   const renderStars = (rating: number) => {
     return (
-      <div className="flex items-center">
-        {[...Array(5)].map((_, i) => (
+      <div className="flex items-center space-x-1">
+        {Array.from({ length: 5 }, (_, i) => (
           <Star
             key={i}
             className={`h-4 w-4 ${
@@ -471,115 +471,129 @@ export default function PetLogPostDetail() {
             }`}
           />
         ))}
-        <span className="ml-1 text-sm text-gray-600">({rating}/5)</span>
       </div>
     )
   }
 
   const renderRecord = (record: FeedingRecord) => (
-    <div key={record.id} className={`border-2 border-gray-200 rounded-2xl p-8 ${categoryConfig[record.category].bgColor} hover:shadow-lg transition-all duration-200`}>
-      <div className="flex items-start justify-between mb-4">
+    <div key={record.id} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 hover:shadow-2xl transition-all duration-300">
+      {/* Product Header */}
+      <div className="flex items-start justify-between mb-6">
         <div className="flex-1">
-          <div className="flex items-start mb-2">
-            <span className="text-xl mr-2 flex-shrink-0">{categoryConfig[record.category].icon}</span>
-            <h3 className="font-semibold text-gray-900 text-lg leading-tight break-words">{record.productName}</h3>
-          </div>
-          <p className="text-sm text-gray-600 mb-1">{record.brand}</p>
-          {record.price && (
-            <p className="text-sm text-gray-500">{record.price} · {record.purchaseLocation}</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight mb-2">{record.productName}</h3>
+          {record.brand && (
+            <p className="text-sm text-gray-600">
+              {record.brand}
+              {record.price && <span> · {record.price}</span>}
+              {record.purchaseLocation && <span> · {record.purchaseLocation}</span>}
+            </p>
           )}
         </div>
-        <div className="flex flex-col items-end">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium mb-2 ${statusConfig[record.status].color}`}>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
+            record.status === '급여중' ? 'bg-green-100 text-green-800 border border-green-200' :
+            record.status === '급여완료' ? 'bg-gray-100 text-gray-800 border border-gray-200' :
+            'bg-red-100 text-red-800 border border-red-200'
+          }`}>
             {statusConfig[record.status].icon} {record.status}
           </span>
-          <div className="flex items-center text-xs text-gray-500">
-            <Clock className="h-3 w-3 mr-1" />
-            {record.duration}
+          <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200 whitespace-nowrap">
+            <Clock className="h-3.5 w-3.5 text-gray-600" />
+            <span className="text-xs text-gray-700">{record.duration}</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div className="bg-white/50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 mb-1 font-medium">급여 기간</p>
-          <p className="text-sm font-semibold text-gray-900">
+      {/* Main Info Grid - 2x2 */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {/* 급여 기간 */}
+        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <p className="text-xs text-gray-500 mb-2 font-medium">급여 기간</p>
+          <p className="text-base font-semibold text-gray-900">
             {record.startDate} ~ {record.endDate || '현재'}
           </p>
         </div>
-        <div className="bg-white/50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 mb-1 font-medium">재구매 의향</p>
+        {/* 재구매 의향 */}
+        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <p className="text-xs text-gray-500 mb-2 font-medium">재구매 의향</p>
           <div className="flex items-center">
             {record.repurchaseIntent ? (
-              <span className="text-green-700 flex items-center font-medium">
-                <Heart className="h-4 w-4 mr-1 fill-current" />
+              <span className="text-green-700 flex items-center font-semibold text-base">
+                <Heart className="h-4 w-4 mr-1.5 fill-current" />
                 있음
               </span>
             ) : (
-              <span className="text-gray-600 flex items-center font-medium">
-                <Heart className="h-4 w-4 mr-1" />
+              <span className="text-gray-600 flex items-center font-semibold text-base">
+                <Heart className="h-4 w-4 mr-1.5" />
                 없음
               </span>
             )}
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div className="bg-white/50 rounded-lg p-3">
+        {/* 기호성 */}
+        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <p className="text-xs text-gray-500 mb-2 font-medium">
             {record.category === '화장실' ? '사용성' : '기호성'}
           </p>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             {renderStars(record.palatability)}
-            <span className="text-xs text-gray-600 ml-2">
-              {record.palatability}/5점
+            <span className="text-base font-semibold text-gray-900">
+              {record.palatability}/5
             </span>
           </div>
         </div>
-        <div className="bg-white/50 rounded-lg p-3">
+        {/* 만족도 */}
+        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <p className="text-xs text-gray-500 mb-2 font-medium">만족도</p>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             {renderStars(record.satisfaction)}
-            <span className="text-xs text-gray-600 ml-2">
-              {record.satisfaction}/5점
+            <span className="text-base font-semibold text-gray-900">
+              {record.satisfaction}/5
             </span>
           </div>
         </div>
       </div>
 
-      {(record.benefits && record.benefits.length > 0) && (
-        <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-2">장점</p>
-          <div className="flex flex-wrap gap-1">
-            {record.benefits.map((benefit, index) => (
-              <span key={index} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                ✓ {benefit}
-              </span>
-            ))}
+      {/* Benefits & Side Effects - 좌우 배치 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* 장점 */}
+        {record.benefits && record.benefits.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-green-600 text-lg">👍</span>
+              <h4 className="text-sm font-semibold text-green-700">장점</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {record.benefits.map((benefit, index) => (
+                <span key={index} className="px-3 py-1.5 bg-green-100 text-green-800 text-xs rounded-full font-medium border border-green-200">
+                  {benefit}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      {(record.sideEffects && record.sideEffects.length > 0) && (
-        <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-2">단점</p>
-          <div className="flex flex-wrap gap-1">
-            {record.sideEffects.map((effect, index) => (
-              <span key={index} className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
-                ! {effect}
-              </span>
-            ))}
+        )}
+        {/* 단점 */}
+        {record.sideEffects && record.sideEffects.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-red-600 text-lg">👎</span>
+              <h4 className="text-sm font-semibold text-red-700">단점</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {record.sideEffects.map((effect, index) => (
+                <span key={index} className="px-3 py-1.5 bg-red-100 text-red-800 text-xs rounded-full font-medium border border-red-200">
+                  {effect}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
+      {/* Comment Section */}
       {record.comment && (
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-          <div className="flex items-start">
-            <MessageCircle className="h-4 w-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" />
-            <p className="text-sm text-gray-700">{record.comment}</p>
-          </div>
+        <div className="bg-gray-100 rounded-lg p-4">
+          <p className="text-sm text-gray-700 leading-relaxed">{record.comment}</p>
         </div>
       )}
     </div>
@@ -597,45 +611,40 @@ export default function PetLogPostDetail() {
         </Link>
 
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8 hover:shadow-2xl transition-all duration-300">
-          <div className="md:flex md:items-start md:justify-between">
-            <div className="mb-6 md:mb-0">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-2xl">🐕</span>
-                </div>
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                    {post.petName}의 급여 기록
-                  </h1>
-                  <div className="flex flex-col sm:flex-row sm:items-center text-lg text-gray-600 sm:space-x-6 space-y-2 sm:space-y-0">
-                    <span className="flex items-center gap-2">
-                      <span className="text-xl">{post.petBreed}</span>
-                      <span>•</span>
-                      <span>{post.petAge}</span>
-                      <span>•</span>
-                      <span>{post.petWeight}</span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span className="text-lg">👤</span>
-                      <span className="font-semibold">{post.ownerName}</span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      <span>{post.updatedAt} 업데이트</span>
-                    </span>
-                  </div>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 hover:shadow-2xl transition-all duration-300">
+          {/* Desktop: 한 줄 레이아웃 */}
+          <div className="hidden md:flex items-center justify-between gap-6">
+            {/* Left Section: Pet Icon & Info */}
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-2xl">🐕</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                  {post.petName}의 급여 기록
+                </h1>
+                <div className="flex items-center gap-2 text-base text-gray-600">
+                  <span>{post.petBreed}</span>
+                  <span>•</span>
+                  <span>{post.petAge}</span>
+                  <span>•</span>
+                  <span>{post.petWeight}</span>
+                  <span>•</span>
+                  <span className="font-semibold">{post.ownerName}</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>{post.updatedAt} 업데이트</span>
+                  </span>
                 </div>
               </div>
             </div>
             
-            {/* Desktop: 오른쪽에 표시 */}
-            <div className="hidden md:flex items-center space-x-6">
-              <div className="text-right">
-                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">{post.totalRecords}</div>
-                  <div className="text-sm font-semibold text-blue-600">총 기록</div>
-                </div>
+            {/* Right Section: Stats & Action Button */}
+            <div className="flex items-center gap-6 flex-shrink-0">
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200 text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-1">{post.totalRecords}</div>
+                <div className="text-sm font-semibold text-blue-600">총 기록</div>
               </div>
               <button
                 onClick={() => {
@@ -645,20 +654,53 @@ export default function PetLogPostDetail() {
                     setShowLoginModal(true)
                   }
                 }}
-                className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex-shrink-0"
               >
                 <Award className="h-5 w-5" />
-                <span className="font-semibold">내 경험 공유하기</span>
+                <span className="text-base font-semibold whitespace-nowrap">내 경험 공유하기</span>
               </button>
             </div>
           </div>
-          
-          {/* Mobile: 아래쪽에 표시 (767px 이하) */}
-          <div className="flex md:hidden items-center justify-between mt-6 pt-6 border-t border-gray-200">
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-4 border-2 border-blue-200">
-              <div className="text-2xl font-bold text-blue-600 mb-1">{post.totalRecords}</div>
-              <div className="text-sm font-semibold text-blue-600">총 기록</div>
+
+          {/* Mobile/Tablet: 세로 레이아웃 */}
+          <div className="flex md:hidden flex-col gap-4">
+            {/* Top: Pet Icon & Info with Total Records */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                  <span className="text-xl">🐕</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                    {post.petName}의 급여 기록
+                  </h1>
+                  <div className="flex flex-col gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <span>{post.petBreed}</span>
+                      <span>•</span>
+                      <span>{post.petAge}</span>
+                      <span>•</span>
+                      <span>{post.petWeight}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">{post.ownerName}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>{post.updatedAt} 업데이트</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* 총 기록 박스 - 상단 오른쪽 */}
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-3 border border-blue-200 text-center w-20 h-20 flex flex-col items-center justify-center flex-shrink-0">
+                <div className="text-xl font-bold text-blue-600 mb-0.5">{post.totalRecords}</div>
+                <div className="text-xs font-semibold text-blue-600">총 기록</div>
+              </div>
             </div>
+            
+            {/* Bottom: Action Button */}
             <button
               onClick={() => {
                 if (isLoggedIn) {
@@ -667,10 +709,10 @@ export default function PetLogPostDetail() {
                   setShowLoginModal(true)
                 }
               }}
-              className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm min-h-[48px] touch-manipulation"
+              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-semibold justify-center w-full"
             >
-              <Award className="h-5 w-5" />
-              <span className="font-semibold">내 경험 공유하기</span>
+              <Award className="h-4 w-4" />
+              <span className="whitespace-nowrap">내 경험 공유하기</span>
             </button>
           </div>
         </div>
@@ -686,24 +728,29 @@ export default function PetLogPostDetail() {
 
             return (
               <div key={category} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
+                      category === '사료' ? 'bg-gradient-to-r from-blue-500 to-purple-500' :
+                      category === '간식' ? 'bg-gradient-to-r from-green-500 to-teal-500' :
+                      category === '영양제' ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
+                      'bg-gradient-to-r from-orange-500 to-red-500'
+                    }`}>
                       <span className="text-xl">{categoryConfig[category].icon}</span>
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className={`px-4 py-2 rounded-xl text-sm font-semibold border-2 ${categoryConfig[category].color}`}>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <span className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-full font-semibold border border-gray-200">
                           {records.length}개 제품
                         </span>
                         {activeCount > 0 && (
-                          <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-lg">
+                          <span className="px-3 py-1.5 bg-green-100 text-green-800 text-sm font-medium rounded-full border border-green-200">
                             사용중 {activeCount}개
                           </span>
                         )}
                         {completedCount > 0 && (
-                          <span className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg">
+                          <span className="px-3 py-1.5 bg-gray-100 text-gray-800 text-sm font-medium rounded-full border border-gray-200">
                             완료 {completedCount}개
                           </span>
                         )}
@@ -712,7 +759,7 @@ export default function PetLogPostDetail() {
                   </div>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {records.map(renderRecord)}
                 </div>
               </div>
@@ -729,9 +776,11 @@ export default function PetLogPostDetail() {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">질문하기</h2>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-xl font-semibold">
-                  {comments.length + comments.reduce((sum, comment) => sum + comment.replies.length, 0)}개 질문
-                </span>
+                <div className="mt-2">
+                  <span className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm rounded-full font-semibold border border-gray-200">
+                    {comments.length + comments.reduce((sum, comment) => sum + comment.replies.length, 0)}개 질문
+                  </span>
+                </div>
               </div>
             </div>
             {isLoggedIn && (
@@ -813,25 +862,25 @@ export default function PetLogPostDetail() {
                     </div>
                     <p className="text-gray-700 mb-3">{comment.content}</p>
                     
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleLike(comment.id)}
-                        className={`flex items-center space-x-1 text-sm transition-colors px-3 py-2 rounded-lg min-h-[36px] touch-manipulation ${
+                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors border min-h-[36px] touch-manipulation ${
                           comment.isLiked 
-                            ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' 
-                            : 'text-gray-500 hover:text-blue-600 hover:bg-gray-50'
+                            ? 'text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100' 
+                            : 'text-gray-600 bg-gray-50 border-gray-200 hover:text-blue-600 hover:bg-gray-100'
                         }`}
                       >
-                        <ThumbsUp className={`h-4 w-4 ${comment.isLiked ? 'fill-current' : ''}`} />
-                        <span className="font-medium">{comment.likes}</span>
+                        <ThumbsUp className={`h-3.5 w-3.5 ${comment.isLiked ? 'fill-current' : ''}`} />
+                        <span className="font-medium text-xs">{comment.likes}</span>
                       </button>
                       
                       <button
                         onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                        className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600 hover:bg-gray-50 transition-colors px-3 py-2 rounded-lg min-h-[36px] touch-manipulation"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm text-gray-600 bg-gray-50 border border-gray-200 hover:text-blue-600 hover:bg-gray-100 transition-colors min-h-[36px] touch-manipulation"
                       >
-                        <Reply className="h-4 w-4" />
-                        <span>답글</span>
+                        <Reply className="h-3.5 w-3.5" />
+                        <span className="text-xs">답글</span>
                       </button>
                     </div>
 
