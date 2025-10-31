@@ -54,11 +54,9 @@ const handler = NextAuth({
       return token
     },
     async session({ session, token }) {
-      if (token.id) {
-        session.user = {
-          ...session.user,
-          id: token.id as string,
-        }
+      if (token.id && session.user) {
+        // NextAuth User 타입 확장을 위해 타입 단언 사용
+        (session.user as any).id = token.id as string
       }
       return session
     },

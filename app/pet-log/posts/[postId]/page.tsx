@@ -329,7 +329,7 @@ export default function PetLogPostDetail() {
           totalComments: savedPost.totalComments || (savedPost.comments?.length || 0)
         }
         setPost(formattedPost)
-      } else if (!post && mockDetailedPosts[postId as keyof typeof mockDetailedPosts]) {
+      } else if (mockDetailedPosts[postId as keyof typeof mockDetailedPosts]) {
         // mock 데이터에서 찾기
         setPost(mockDetailedPosts[postId as keyof typeof mockDetailedPosts])
       }
