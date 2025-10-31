@@ -704,8 +704,7 @@ export default function PetLogPage() {
                 className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 whitespace-nowrap text-sm sm:text-base h-[44px] sm:h-auto"
               >
                 <PawPrint className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span className="hidden sm:inline">내 반려동물</span>
-                <span className="sm:hidden">내 반려동물</span>
+                <span>내 반려동물</span>
               </Link>
               <button
                 onClick={() => {
@@ -719,7 +718,7 @@ export default function PetLogPage() {
               >
                 <Plus className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <span className="hidden sm:inline">급여 기록 공유하기</span>
-                <span className="sm:hidden">공유하기</span>
+                <span className="sm:inline">공유하기</span>
               </button>
             </div>
           </div>
