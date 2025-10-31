@@ -367,7 +367,7 @@ export default function PetLogPostDetail() {
       return
     }
     
-    if (!newComment.trim()) return
+    if (!newComment.trim() || !post) return
     
     const comment: Comment = {
       id: `comment-${Date.now()}`,
@@ -380,8 +380,36 @@ export default function PetLogPostDetail() {
       replies: []
     }
     
-    setComments([...comments, comment])
+    const updatedComments = [...comments, comment]
+    setComments(updatedComments)
     setNewComment('')
+    
+    // 로컬 스토리지에 저장
+    try {
+      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+      const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+      
+      if (postIndex !== -1) {
+        // 저장된 포스트가 있는 경우 업데이트
+        savedPosts[postIndex] = {
+          ...savedPosts[postIndex],
+          comments: updatedComments,
+          totalComments: updatedComments.length
+        }
+        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+      } else if (post) {
+        // 저장된 포스트가 없는 경우 (mock 데이터) 새로 저장
+        const updatedPost = {
+          ...post,
+          comments: updatedComments,
+          totalComments: updatedComments.length
+        }
+        savedPosts.push(updatedPost)
+        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+      }
+    } catch (error) {
+      console.error('댓글 저장 중 오류:', error)
+    }
   }
 
   // 답글 작성 함수
@@ -391,7 +419,7 @@ export default function PetLogPostDetail() {
       return
     }
     
-    if (!replyContent.trim()) return
+    if (!replyContent.trim() || !post) return
     
     const reply: Reply = {
       id: `reply-${Date.now()}`,
@@ -403,14 +431,42 @@ export default function PetLogPostDetail() {
       isLiked: false
     }
     
-    setComments(comments.map(comment => 
+    const updatedComments = comments.map(comment => 
       comment.id === commentId 
         ? { ...comment, replies: [...comment.replies, reply] }
         : comment
-    ))
+    )
     
+    setComments(updatedComments)
     setReplyContent('')
     setReplyingTo(null)
+    
+    // 로컬 스토리지에 저장
+    try {
+      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+      const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+      
+      if (postIndex !== -1) {
+        // 저장된 포스트가 있는 경우 업데이트
+        savedPosts[postIndex] = {
+          ...savedPosts[postIndex],
+          comments: updatedComments,
+          totalComments: updatedComments.length
+        }
+        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+      } else if (post) {
+        // 저장된 포스트가 없는 경우 (mock 데이터) 새로 저장
+        const updatedPost = {
+          ...post,
+          comments: updatedComments,
+          totalComments: updatedComments.length
+        }
+        savedPosts.push(updatedPost)
+        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+      }
+    } catch (error) {
+      console.error('답글 저장 중 오류:', error)
+    }
   }
 
   // 좋아요 토글 함수
@@ -420,8 +476,9 @@ export default function PetLogPostDetail() {
       return
     }
 
+    let updatedComments: Comment[]
     if (isReply && replyId) {
-      setComments(comments.map(comment => ({
+      updatedComments = comments.map(comment => ({
         ...comment,
         replies: comment.replies.map(reply => 
           reply.id === replyId
@@ -432,9 +489,9 @@ export default function PetLogPostDetail() {
               }
             : reply
         )
-      })))
+      }))
     } else {
-      setComments(comments.map(comment => 
+      updatedComments = comments.map(comment => 
         comment.id === commentId
           ? { 
               ...comment, 
@@ -442,7 +499,34 @@ export default function PetLogPostDetail() {
               isLiked: !comment.isLiked 
             }
           : comment
-      ))
+      )
+    }
+    
+    setComments(updatedComments)
+    
+    // 로컬 스토리지에 저장
+    if (post) {
+      try {
+        const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+        const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+        
+        if (postIndex !== -1) {
+          savedPosts[postIndex] = {
+            ...savedPosts[postIndex],
+            comments: updatedComments
+          }
+          localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+        } else {
+          const updatedPost = {
+            ...post,
+            comments: updatedComments
+          }
+          savedPosts.push(updatedPost)
+          localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+        }
+      } catch (error) {
+        console.error('좋아요 저장 중 오류:', error)
+      }
     }
   }
 
