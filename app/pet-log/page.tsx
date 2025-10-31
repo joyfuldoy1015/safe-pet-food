@@ -717,8 +717,7 @@ export default function PetLogPage() {
                 className="px-5 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap text-sm sm:text-base"
               >
                 <Plus className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span className="hidden sm:inline">급여 기록 공유하기</span>
-                <span className="sm:inline">공유하기</span>
+                <span>급여 기록 공유하기</span>
               </button>
             </div>
           </div>
