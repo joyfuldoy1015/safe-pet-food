@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 
 // 제품 카테고리 타입
@@ -313,10 +313,40 @@ export default function PetLogPostDetail() {
   const router = useRouter()
   const postId = params.postId as string
 
-  const post = mockDetailedPosts[postId as keyof typeof mockDetailedPosts]
+  const [post, setPost] = useState<DetailedPetLogPost | null>(mockDetailedPosts[postId as keyof typeof mockDetailedPosts] || null)
+
+  // 로컬 스토리지에서 포스트 불러오기
+  useEffect(() => {
+    try {
+      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+      const savedPost = savedPosts.find((p: any) => p.id === postId)
+      
+      if (savedPost) {
+        // comments 필드 추가 (없을 경우 빈 배열)
+        const formattedPost = {
+          ...savedPost,
+          comments: savedPost.comments || [],
+          totalComments: savedPost.totalComments || (savedPost.comments?.length || 0)
+        }
+        setPost(formattedPost)
+      } else if (!post && mockDetailedPosts[postId as keyof typeof mockDetailedPosts]) {
+        // mock 데이터에서 찾기
+        setPost(mockDetailedPosts[postId as keyof typeof mockDetailedPosts])
+      }
+    } catch (error) {
+      console.error('포스트 로드 중 오류:', error)
+    }
+  }, [postId])
+
+  // post가 변경될 때 comments 초기화
+  useEffect(() => {
+    if (post) {
+      setComments(post.comments || [])
+    }
+  }, [post])
   
   // 댓글 관련 상태
-  const [comments, setComments] = useState<Comment[]>(post?.comments || [])
+  const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')

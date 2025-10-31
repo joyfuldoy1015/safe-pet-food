@@ -229,11 +229,46 @@ export default function WritePostPage() {
 
   // 포스트 제출
   const submitPost = () => {
-    // TODO: API 호출로 포스트 저장
-    console.log('포스트 데이터:', { petInfo, feedingRecords })
+    // 포스트 ID 생성 (타임스탬프 기반)
+    const postId = `post-${Date.now()}`
+    const now = new Date().toISOString().split('T')[0]
     
-    // 임시로 post-1로 리다이렉트 (실제로는 생성된 포스트 ID로)
-    router.push('/pet-log/posts/post-1?created=true')
+    // 포스트 데이터 구성
+    const postData = {
+      id: postId,
+      petName: petInfo.petName,
+      petBreed: petInfo.petBreed,
+      petAge: petInfo.petAge,
+      petWeight: petInfo.petWeight,
+      ownerName: petInfo.ownerName,
+      ownerId: 'current-user', // 실제로는 세션에서 가져옴
+      ownerAvatar: '👤',
+      petAvatar: petInfo.petBreed.includes('고양이') || petInfo.petBreed.includes('cat') ? '🐱' : '🐕',
+      petSpecies: petInfo.petBreed.includes('고양이') || petInfo.petBreed.includes('cat') ? 'cat' : 'dog',
+      createdAt: now,
+      updatedAt: now,
+      totalRecords: feedingRecords.length,
+      views: 0,
+      likes: 0,
+      comments: 0,
+      isLiked: false,
+      feedingRecords: feedingRecords
+    }
+    
+    // 로컬 스토리지에 저장
+    try {
+      const existingPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+      const updatedPosts = [postData, ...existingPosts]
+      localStorage.setItem('petLogPosts', JSON.stringify(updatedPosts))
+      console.log('포스트가 저장되었습니다:', postData)
+    } catch (error) {
+      console.error('포스트 저장 중 오류:', error)
+      alert('포스트 저장 중 오류가 발생했습니다.')
+      return
+    }
+    
+    // 상세 페이지로 리다이렉트
+    router.push(`/pet-log/posts/${postId}?created=true`)
   }
 
   // 단계별 검증

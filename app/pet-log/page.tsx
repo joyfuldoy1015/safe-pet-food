@@ -575,9 +575,24 @@ export default function PetLogPage() {
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())
   const [sortBy, setSortBy] = useState<'likes' | 'updated' | 'created'>('likes')
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
+  const [allPosts, setAllPosts] = useState<DetailedPetLogPost[]>([])
+
+  // 로컬 스토리지에서 저장된 포스트 불러오기
+  useEffect(() => {
+    try {
+      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+      // 로컬 스토리지의 포스트와 mock 데이터 병합
+      const mergedPosts = [...savedPosts, ...detailedPosts]
+      setAllPosts(mergedPosts)
+    } catch (error) {
+      console.error('포스트 로드 중 오류:', error)
+      // 오류 발생 시 mock 데이터만 사용
+      setAllPosts(detailedPosts)
+    }
+  }, [])
 
   // 필터링된 포스트들
-  const filteredPosts = detailedPosts.filter(post => {
+  const filteredPosts = (allPosts.length > 0 ? allPosts : detailedPosts).filter(post => {
     const mainRecord = getMainFeedingRecord(post)
     const matchesSearch = 
       post.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
