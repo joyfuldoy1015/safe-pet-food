@@ -810,21 +810,39 @@ export default function PetLogPostDetail() {
               <div className="flex-1 min-w-0">
                 <textarea
                   value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onFocus={() => {
-                    if (!isLoggedIn) {
-                      setShowLoginModal(true)
+                  onChange={(e) => {
+                    if (isLoggedIn) {
+                      setNewComment(e.target.value)
                     }
                   }}
-                  onClick={() => {
+                  onFocus={(e) => {
                     if (!isLoggedIn) {
+                      e.preventDefault()
+                      setShowLoginModal(true)
+                      e.currentTarget.blur()
+                    }
+                  }}
+                  onClick={(e) => {
+                    if (!isLoggedIn) {
+                      e.preventDefault()
+                      setShowLoginModal(true)
+                      e.currentTarget.blur()
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    if (!isLoggedIn) {
+                      e.preventDefault()
                       setShowLoginModal(true)
                     }
                   }}
                   placeholder={isLoggedIn ? `${post.ownerName}님에게 질문해보세요...` : "로그인 후 질문할 수 있습니다."}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none cursor-pointer transition-all duration-200 text-sm sm:text-base"
+                  className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl resize-none transition-all duration-200 text-sm sm:text-base ${
+                    isLoggedIn 
+                      ? 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-text' 
+                      : 'cursor-pointer bg-gray-50'
+                  }`}
                   rows={3}
-                  disabled={!isLoggedIn}
+                  readOnly={!isLoggedIn}
                 />
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mt-2">
                   <p className="text-xs text-gray-500 hidden sm:block">
