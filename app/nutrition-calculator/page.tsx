@@ -426,6 +426,7 @@ export default function NutritionCalculator() {
                     >
                       <div className="text-lg mb-1">🌱</div>
                       <div className="font-medium text-sm">성장기</div>
+                      <div className="text-xs text-gray-500 mt-0.5">(1세 미만)</div>
                     </button>
                     <button
                       onClick={() => setLifeStage('adult')}
@@ -437,6 +438,7 @@ export default function NutritionCalculator() {
                     >
                       <div className="text-lg mb-1">🦴</div>
                       <div className="font-medium text-sm">성견/성묘</div>
+                      <div className="text-xs text-gray-500 mt-0.5">(1-7세)</div>
                     </button>
                     <button
                       onClick={() => setLifeStage('senior')}
@@ -448,6 +450,7 @@ export default function NutritionCalculator() {
                     >
                       <div className="text-lg mb-1">👴</div>
                       <div className="font-medium text-sm">노령견/노령묘</div>
+                      <div className="text-xs text-gray-500 mt-0.5">(7세 이상)</div>
                     </button>
                   </div>
                 </div>
