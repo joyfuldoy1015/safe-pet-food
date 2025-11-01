@@ -10,6 +10,7 @@ interface PetInfo {
   weight: number
   activityLevel: 'low' | 'normal' | 'high'
   isNeutered: boolean
+  feedCaloriePerKg: number // 사료 1kg당 칼로리 (kcal/kg)
 }
 
 interface CalorieResult {
@@ -25,7 +26,8 @@ export default function CalorieCalculator() {
     age: 'adult',
     weight: 0,
     activityLevel: 'normal',
-    isNeutered: false
+    isNeutered: false,
+    feedCaloriePerKg: 350 // 기본값: 350 kcal/kg
   })
   
   const [result, setResult] = useState<CalorieResult | null>(null)
@@ -71,7 +73,10 @@ export default function CalorieCalculator() {
     }
 
     const dailyCalories = Math.round(rer * activityMultiplier)
-    const feedingAmount = Math.round(dailyCalories / 350 * 100) // 일반적인 사료 칼로리 기준
+    // 입력한 사료 1kg당 칼로리를 기반으로 급여량 계산 (g 단위)
+    const feedingAmount = petInfo.feedCaloriePerKg > 0 
+      ? Math.round((dailyCalories / petInfo.feedCaloriePerKg) * 1000)
+      : 0
 
     const recommendations = [
       `하루 ${Math.round(dailyCalories / 2)} 칼로리씩 2회 급여를 권장합니다.`,
@@ -108,7 +113,8 @@ export default function CalorieCalculator() {
       age: 'adult',
       weight: 0,
       activityLevel: 'normal',
-      isNeutered: false
+      isNeutered: false,
+      feedCaloriePerKg: 350
     })
     setResult(null)
     setShowResult(false)
@@ -249,9 +255,42 @@ export default function CalorieCalculator() {
                 </div>
               </div>
 
+              {/* 사료 1kg당 칼로리 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  사료 1kg당 칼로리 (kcal/kg)
+                  <span className="ml-2 text-xs text-gray-500">사료 포장지의 영양성분표를 확인하세요</span>
+                </label>
+                <div className="space-y-3">
+                  <input
+                    type="number"
+                    value={petInfo.feedCaloriePerKg || ''}
+                    onChange={(e) => setPetInfo(prev => ({ ...prev, feedCaloriePerKg: parseFloat(e.target.value) || 0 }))}
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="예: 350 (일반적인 건사료 기준)"
+                    min="0"
+                    step="1"
+                  />
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div className="flex items-start gap-2">
+                      <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-700">
+                        <p className="font-semibold mb-1">참고 사항:</p>
+                        <ul className="space-y-1 text-xs">
+                          <li>• 일반 건사료: 300-400 kcal/kg</li>
+                          <li>• 습사료: 800-1,200 kcal/kg</li>
+                          <li>• 반습식 사료: 1,200-1,400 kcal/kg</li>
+                          <li>• 사료 포장지의 "사료 1kg당 칼로리" 또는 "대사 에너지" 값을 입력하세요</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <button
                 onClick={calculateCalories}
-                disabled={petInfo.weight <= 0}
+                disabled={petInfo.weight <= 0 || petInfo.feedCaloriePerKg <= 0}
                 className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 칼로리 계산하기
@@ -287,7 +326,10 @@ export default function CalorieCalculator() {
                     <div className="text-3xl font-bold text-orange-600 mb-2">
                       {result.dailyFeedingAmount}g
                     </div>
-                    <div className="text-sm text-gray-600">일일 사료량 (대략)</div>
+                    <div className="text-sm text-gray-600">일일 사료량</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      ({petInfo.feedCaloriePerKg} kcal/kg 기준)
+                    </div>
                   </div>
                 </div>
 
