@@ -845,16 +845,8 @@ export default function PetLogPage() {
               return (
                 <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block h-full">
                   <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden h-full flex flex-col min-h-[350px]">
-                    <div className="flex flex-col md:flex-row flex-1 h-full">
-                      {/* Pet Image - Left Side */}
-                      <div className="w-full md:w-48 flex-shrink-0 bg-[#E8E8F8] flex items-center justify-center p-4">
-                        <div className="text-9xl bg-white rounded-xl p-4 shadow-sm">
-                          {post.petAvatar}
-                        </div>
-                      </div>
-                      
-                      {/* Content - Right Side */}
-                      <div className="flex-1 p-6 flex flex-col h-full">
+                    {/* Content */}
+                    <div className="flex-1 p-6 flex flex-col h-full">
                         {/* Main Title - Product Name */}
                         <div className="mb-3">
                           <h2 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">
