@@ -846,7 +846,7 @@ export default function PetLogPage() {
                 <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block h-full">
                   <div className="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden h-full flex flex-col min-h-[350px]">
                     {/* Content */}
-                    <div className="flex-1 p-6 flex flex-col h-full">
+                    <div className="flex-1 p-6 flex flex-col h-full overflow-hidden">
                         {/* Main Title - Product Name */}
                         <div className="mb-3">
                           <h2 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">
@@ -947,7 +947,6 @@ export default function PetLogPage() {
                             <span>자세히 보기</span>
                           </button>
                         </div>
-                      </div>
                     </div>
                   </div>
                 </Link>
