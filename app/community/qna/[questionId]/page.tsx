@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   ArrowLeft, 
   Heart, 
@@ -107,6 +108,7 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
     // 임시로 로그인 상태 설정
     setIsLoggedIn(true)
     setCurrentUser('user123')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.questionId])
 
   const fetchQuestionData = async () => {
@@ -411,7 +413,7 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
             {/* Author Info */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
-                <img src={question.authorAvatar} alt={question.authorName} className="h-10 w-10 rounded-full" />
+                <Image src={question.authorAvatar} alt={question.authorName} width={40} height={40} className="rounded-full" />
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-900">{question.authorName}</span>
@@ -501,10 +503,12 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
               <div className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {question.media.map((media, index) => (
-                    <img 
+                    <Image 
                       key={index}
                       src={media} 
                       alt={`첨부 이미지 ${index + 1}`}
+                      width={400}
+                      height={256}
                       className="rounded-lg border border-gray-200 w-full h-64 object-cover"
                     />
                   ))}
@@ -537,7 +541,7 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <img src={acceptedAnswer.authorAvatar} alt={acceptedAnswer.authorName} className="h-10 w-10 rounded-full flex-shrink-0" />
+                  <Image src={acceptedAnswer.authorAvatar} alt={acceptedAnswer.authorName} width={40} height={40} className="rounded-full flex-shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
@@ -578,7 +582,7 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
                         {acceptedAnswer.comments.map(comment => (
                           <div key={comment.id} className="bg-white rounded-lg p-3 border border-green-200">
                             <div className="flex items-start space-x-3">
-                              <img src={comment.authorAvatar} alt={comment.authorName} className="h-6 w-6 rounded-full flex-shrink-0" />
+                              <Image src={comment.authorAvatar} alt={comment.authorName} width={24} height={24} className="rounded-full flex-shrink-0" />
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-1">
                                   <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
@@ -632,7 +636,7 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
             <div key={answer.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="p-6">
                 <div className="flex items-start space-x-4">
-                  <img src={answer.authorAvatar} alt={answer.authorName} className="h-10 w-10 rounded-full flex-shrink-0" />
+                  <Image src={answer.authorAvatar} alt={answer.authorName} width={40} height={40} className="rounded-full flex-shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
@@ -682,7 +686,7 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
                         {answer.comments.map(comment => (
                           <div key={comment.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                             <div className="flex items-start space-x-3">
-                              <img src={comment.authorAvatar} alt={comment.authorName} className="h-6 w-6 rounded-full flex-shrink-0" />
+                              <Image src={comment.authorAvatar} alt={comment.authorName} width={24} height={24} className="rounded-full flex-shrink-0" />
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-1">
                                   <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
