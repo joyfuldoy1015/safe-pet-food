@@ -581,8 +581,17 @@ export default function PetLogPage() {
   useEffect(() => {
     try {
       const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+      // 로컬 스토리지 데이터 정리 (comments가 객체인 경우 배열로 변환)
+      const cleanedSavedPosts = savedPosts.map((post: any) => ({
+        ...post,
+        // comments 필드가 객체인 경우 배열로 변환
+        comments: Array.isArray(post.comments) ? post.comments : 
+                  (post.comments && typeof post.comments === 'object' ? [post.comments] : []),
+        // feedingRecords가 배열이 아닌 경우 빈 배열로 설정
+        feedingRecords: Array.isArray(post.feedingRecords) ? post.feedingRecords : []
+      }))
       // 로컬 스토리지의 포스트와 mock 데이터 병합
-      const mergedPosts = [...savedPosts, ...detailedPosts]
+      const mergedPosts = [...cleanedSavedPosts, ...detailedPosts]
       setAllPosts(mergedPosts)
     } catch (error) {
       console.error('포스트 로드 중 오류:', error)
