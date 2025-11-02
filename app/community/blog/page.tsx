@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { 
   Search, 
   Filter, 
@@ -94,6 +95,7 @@ export default function BlogMainPage() {
 
   useEffect(() => {
     filterAndSortPosts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [posts, searchQuery, selectedCategory, sortBy])
 
   const fetchBlogData = async () => {
@@ -370,7 +372,7 @@ export default function BlogMainPage() {
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <img src={post.authorAvatar} alt={post.authorName} className="h-8 w-8 rounded-full" />
+                        <Image src={post.authorAvatar} alt={post.authorName} width={32} height={32} className="h-8 w-8 rounded-full" />
                         <div>
                           <div className="font-medium text-sm">{post.authorName}</div>
                           <div className="text-xs opacity-75">{formatDate(post.createdAt)}</div>
@@ -542,7 +544,7 @@ export default function BlogMainPage() {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <img src={post.authorAvatar} alt={post.authorName} className="h-8 w-8 rounded-full" />
+                          <Image src={post.authorAvatar} alt={post.authorName} width={32} height={32} className="h-8 w-8 rounded-full" />
                           <div>
                             <div className="font-medium text-sm text-gray-900">{post.authorName}</div>
                             <div className="text-xs text-gray-500">{formatDate(post.createdAt)}</div>

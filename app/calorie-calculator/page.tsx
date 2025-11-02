@@ -280,7 +280,7 @@ export default function CalorieCalculator() {
                           <li>• 일반 건사료: 300-400 kcal/kg</li>
                           <li>• 습사료: 800-1,200 kcal/kg</li>
                           <li>• 반습식 사료: 1,200-1,400 kcal/kg</li>
-                          <li>• 사료 포장지의 "사료 1kg당 칼로리" 또는 "대사 에너지" 값을 입력하세요</li>
+                          <li>• 사료 포장지의 &quot;사료 1kg당 칼로리&quot; 또는 &quot;대사 에너지&quot; 값을 입력하세요</li>
                         </ul>
                       </div>
                     </div>

@@ -807,6 +807,7 @@ export default function BrandDetailPage() {
       // URL에서 파라미터 제거
       window.history.replaceState({}, '', `/brands/${brandName}`)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandName])
 
   const fetchVoteData = async () => {
