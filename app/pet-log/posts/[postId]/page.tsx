@@ -625,10 +625,6 @@ export default function PetLogPostDetail() {
           }`}>
             {statusConfig[record.status].icon} {record.status}
           </span>
-          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200 whitespace-nowrap">
-            <Clock className="h-3.5 w-3.5 text-gray-600" />
-            <span className="text-xs text-gray-700">{record.duration}</span>
-          </div>
         </div>
       </div>
 
@@ -637,8 +633,12 @@ export default function PetLogPostDetail() {
         {/* 급여 기간 */}
         <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
           <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 font-medium">급여 기간</p>
-          <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">
+          <p className="text-sm sm:text-base font-semibold text-gray-900 break-words mb-1">
             {record.startDate} ~ {record.endDate || '현재'}
+          </p>
+          <p className="text-xs sm:text-sm text-gray-600 flex items-center gap-1">
+            <Clock className="h-3 w-3 text-gray-500" />
+            <span>총 {record.duration}</span>
           </p>
         </div>
         {/* 재구매 의향 */}
