@@ -622,7 +622,7 @@ export default function PetLogPostDetail() {
             record.status === '급여중' ? 'bg-green-100 text-green-800 border border-green-200' :
             record.status === '급여완료' ? 'bg-gray-100 text-gray-800 border border-gray-200' :
             'bg-red-100 text-red-800 border border-red-200'
-          }`} style={{ fontSize: '17px' }}>
+          }`} style={{ fontSize: '15px' }}>
             {statusConfig[record.status].icon} {record.status}
           </span>
         </div>
