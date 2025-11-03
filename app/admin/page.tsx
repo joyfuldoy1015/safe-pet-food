@@ -76,20 +76,36 @@ const adminMenuItems = [
     stats: { total: 2845, new: 28 }
   },
   {
+    title: '커뮤니티 관리',
+    description: '펫 로그, Q&A 포럼 게시물 및 댓글 관리',
+    icon: MessageCircle,
+    href: '/admin/community',
+    color: 'from-purple-500 to-pink-500',
+    stats: { posts: 487, questions: 156 }
+  },
+  {
+    title: '사료 등급 분석 관리',
+    description: '사료 등급 분석 데이터 및 기준 관리',
+    icon: Calculator,
+    href: '/admin/feed-grade',
+    color: 'from-orange-500 to-red-500',
+    stats: { total: 324, analyzed: 156 }
+  },
+  {
+    title: '건강검진표 분석 관리',
+    description: '건강검진표 분석 데이터 및 히스토리 관리',
+    icon: ClipboardList,
+    href: '/admin/health-analysis',
+    color: 'from-green-500 to-teal-500',
+    stats: { total: 892, new: 12 }
+  },
+  {
     title: '통계 분석',
     description: '사이트 이용 통계 및 인기 제품 분석',
     icon: BarChart3,
     href: '/admin/analytics',
     color: 'from-indigo-500 to-blue-500',
     stats: { visitors: '12.4K', growth: '+15%' }
-  },
-  {
-    title: '커뮤니티 관리',
-    description: 'Q&A 포럼 및 펫 로그 게시물 관리',
-    icon: MessageCircle,
-    href: '/admin/community',
-    color: 'from-purple-500 to-pink-500',
-    stats: { posts: 487, questions: 156 }
   },
   {
     title: '배포 관리',
@@ -127,7 +143,7 @@ export default function AdminPanel() {
           </div>
           
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
@@ -137,17 +153,6 @@ export default function AdminPanel() {
                 <Users className="h-8 w-8 text-blue-500" />
               </div>
               <p className="text-xs text-green-600 mt-2">↗ +12% 이번 달</p>
-            </div>
-            
-            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">총 브랜드</p>
-                  <p className="text-2xl font-bold text-gray-900">156</p>
-                </div>
-                <Shield className="h-8 w-8 text-blue-500" />
-              </div>
-              <p className="text-xs text-green-600 mt-2">↗ +3개 이번 달</p>
             </div>
             
             <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
@@ -164,12 +169,23 @@ export default function AdminPanel() {
             <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">월 방문자</p>
-                  <p className="text-2xl font-bold text-gray-900">12.4K</p>
+                  <p className="text-sm text-gray-600">사료 등급 분석</p>
+                  <p className="text-2xl font-bold text-gray-900">324</p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-500" />
+                <Calculator className="h-8 w-8 text-orange-500" />
               </div>
-              <p className="text-xs text-green-600 mt-2">↗ +18% 이번 달</p>
+              <p className="text-xs text-green-600 mt-2">분석 완료: 156건</p>
+            </div>
+            
+            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">건강검진표 분석</p>
+                  <p className="text-2xl font-bold text-gray-900">892</p>
+                </div>
+                <ClipboardList className="h-8 w-8 text-green-500" />
+              </div>
+              <p className="text-xs text-green-600 mt-2">신규: 12건</p>
             </div>
           </div>
         </div>
@@ -210,6 +226,12 @@ export default function AdminPanel() {
                   )}
                   {item.stats.questions && (
                     <p className="text-xs text-blue-600">질문: {item.stats.questions}</p>
+                  )}
+                  {item.stats.analyzed && (
+                    <p className="text-xs text-blue-600">분석완료: {item.stats.analyzed}</p>
+                  )}
+                  {item.stats.new !== undefined && item.stats.new > 0 && (
+                    <p className="text-xs text-green-600">신규: {item.stats.new}</p>
                   )}
                 </div>
               </div>
