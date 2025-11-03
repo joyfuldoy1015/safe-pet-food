@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import brandsData from '../../../../data/brands.json'
 import reviewsData from '../../../../data/reviews.json'
+import { supabase } from '@/lib/supabase'
+
+// Supabase 사용 여부 확인
+const useSupabase = () => {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
+  )
+}
+
+// Supabase 데이터를 JSON 형식으로 변환
+const transformSupabaseToJsonFormat = (supabaseData: any) => {
+  return {
+    id: supabaseData.id,
+    name: supabaseData.name,
+    manufacturer: supabaseData.manufacturer,
+    country: supabaseData.country,
+    description: supabaseData.brand_description,
+    recall_history: supabaseData.recall_history,
+    overall_rating: parseFloat(supabaseData.overall_rating) || 0,
+    product_lines: supabaseData.product_lines || [],
+    established_year: supabaseData.established_year,
+    certifications: supabaseData.certifications || [],
+    image: supabaseData.image,
+    brand_pros: supabaseData.brand_pros || [],
+    brand_cons: supabaseData.brand_cons || []
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -9,8 +38,41 @@ export async function GET(
   try {
     const brandName = decodeURIComponent(params.brandName)
     
-    // Find brand by name
-    const brand = brandsData.find(b => b.name === brandName)
+    // Supabase 사용 가능하면 Supabase에서 가져오기
+    if (useSupabase()) {
+      try {
+        const { data, error } = await supabase
+          .from('brands')
+          .select('*')
+          .eq('name', brandName)
+          .single()
+
+        if (!error && data) {
+          const brand = transformSupabaseToJsonFormat(data)
+          
+          // Get reviews for this brand (현재는 reviews 테이블이 없으므로 JSON 사용)
+          const brandReviews = reviewsData.filter(review => review.brand_id === brand.id)
+          
+          // Calculate review statistics
+          const reviewStats = calculateReviewStats(brandReviews)
+          
+          // Calculate trust metrics based on brand data and reviews
+          const trustMetrics = calculateTrustMetrics(brand, brandReviews)
+          
+          return NextResponse.json({
+            ...brand,
+            reviews: brandReviews,
+            review_stats: reviewStats,
+            trust_metrics: trustMetrics
+          })
+        }
+      } catch (supabaseError) {
+        console.warn('Supabase error, falling back to JSON:', supabaseError)
+      }
+    }
+
+    // Fallback: JSON 파일에서 브랜드 데이터 가져오기
+    const brand = brandsData.find((b: any) => b.name === brandName)
     
     if (!brand) {
       return NextResponse.json(
@@ -20,7 +82,7 @@ export async function GET(
     }
 
     // Get reviews for this brand
-    const brandReviews = reviewsData.filter(review => review.brand_id === brand.id)
+    const brandReviews = reviewsData.filter((review: any) => review.brand_id === brand.id)
     
     // Calculate review statistics
     const reviewStats = calculateReviewStats(brandReviews)
@@ -35,6 +97,7 @@ export async function GET(
       trust_metrics: trustMetrics
     })
   } catch (error) {
+    console.error('Failed to fetch brand data:', error)
     return NextResponse.json(
       { error: 'Failed to fetch brand data' },
       { status: 500 }
