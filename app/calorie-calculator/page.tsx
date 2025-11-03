@@ -1,22 +1,25 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Calculator, ArrowLeft, Info, Heart, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { calculateFeeding } from '@/lib/calorie-calculator'
 
 interface PetInfo {
   type: 'dog' | 'cat'
   age: 'puppy' | 'adult' | 'senior'
   weight: number
-  activityLevel: 'low' | 'normal' | 'high'
+  activityLevel: 'low' | 'normal' | 'high' | 'weight_loss'
   isNeutered: boolean
   feedCaloriePerKg: number // 사료 1kg당 칼로리 (kcal/kg)
+  ageMonths?: number // Optional: age in months for more precise puppy/kitten calculations
 }
 
 interface CalorieResult {
-  baseCalories: number
-  adjustedCalories: number
-  dailyFeedingAmount: number
+  baseCalories: number // RER
+  adjustedCalories: number // DER
+  dailyFeedingAmount: number // feedingGrams
+  activityFactor: number // activity factor used
   recommendations: string[]
 }
 
@@ -33,53 +36,33 @@ export default function CalorieCalculator() {
   const [result, setResult] = useState<CalorieResult | null>(null)
   const [showResult, setShowResult] = useState(false)
 
-  const calculateCalories = () => {
-    if (petInfo.weight <= 0) return
-
-    // RER (Resting Energy Requirement) 계산
-    const rer = 70 * Math.pow(petInfo.weight, 0.75)
-    
-    // 활동 계수 적용
-    let activityMultiplier = 1.6 // 기본값 (성견/성묘, 중성화됨)
-    
-    if (petInfo.type === 'dog') {
-      if (petInfo.age === 'puppy') {
-        activityMultiplier = 3.0
-      } else if (petInfo.age === 'senior') {
-        activityMultiplier = petInfo.isNeutered ? 1.4 : 1.6
-      } else {
-        if (petInfo.isNeutered) {
-          activityMultiplier = petInfo.activityLevel === 'low' ? 1.4 : 
-                             petInfo.activityLevel === 'normal' ? 1.6 : 1.8
-        } else {
-          activityMultiplier = petInfo.activityLevel === 'low' ? 1.6 : 
-                             petInfo.activityLevel === 'normal' ? 1.8 : 2.0
-        }
-      }
-    } else { // cat
-      if (petInfo.age === 'puppy') { // kitten
-        activityMultiplier = 2.5
-      } else if (petInfo.age === 'senior') {
-        activityMultiplier = petInfo.isNeutered ? 1.1 : 1.4
-      } else {
-        if (petInfo.isNeutered) {
-          activityMultiplier = petInfo.activityLevel === 'low' ? 1.2 : 
-                             petInfo.activityLevel === 'normal' ? 1.4 : 1.6
-        } else {
-          activityMultiplier = petInfo.activityLevel === 'low' ? 1.4 : 
-                             petInfo.activityLevel === 'normal' ? 1.6 : 1.8
-        }
-      }
+  // Debounced calculation function
+  const calculateCalories = useCallback(() => {
+    // Validation
+    if (petInfo.weight <= 0 || petInfo.feedCaloriePerKg <= 0) {
+      setResult(null)
+      return
     }
 
-    const dailyCalories = Math.round(rer * activityMultiplier)
-    // 입력한 사료 1kg당 칼로리를 기반으로 급여량 계산 (g 단위)
-    const feedingAmount = petInfo.feedCaloriePerKg > 0 
-      ? Math.round((dailyCalories / petInfo.feedCaloriePerKg) * 1000)
-      : 0
+    const calculation = calculateFeeding({
+      species: petInfo.type,
+      age: petInfo.age,
+      weightKg: petInfo.weight,
+      activity: petInfo.activityLevel,
+      neutered: petInfo.isNeutered,
+      kcalPerKg: petInfo.feedCaloriePerKg,
+      ageMonths: petInfo.ageMonths
+    })
+
+    if (!calculation) {
+      setResult(null)
+      return
+    }
+
+    const { rer, factor, der, feedingGrams } = calculation
 
     const recommendations = [
-      `하루 ${Math.round(dailyCalories / 2)} 칼로리씩 2회 급여를 권장합니다.`,
+      `하루 ${Math.round(der / 2)} 칼로리씩 2회 급여를 권장합니다.`,
       petInfo.type === 'dog' ? 
         '강아지는 규칙적인 운동과 함께 급여량을 조절하세요.' : 
         '고양이는 소량씩 여러 번 나누어 급여하는 것이 좋습니다.',
@@ -87,10 +70,19 @@ export default function CalorieCalculator() {
       '특별한 건강 상태가 있다면 수의사와 상담하세요.'
     ]
 
+    // Add weight loss note if applicable
+    if (petInfo.activityLevel === 'weight_loss') {
+      recommendations.push('체중 감량은 수의사 지도하에 진행하세요.')
+    }
+
+    // Add tip about treats
+    recommendations.push('간식을 주는 경우 사료량을 약 10% 줄이세요.')
+
     setResult({
-      baseCalories: Math.round(rer),
-      adjustedCalories: dailyCalories,
-      dailyFeedingAmount: feedingAmount,
+      baseCalories: rer,
+      adjustedCalories: der,
+      dailyFeedingAmount: feedingGrams,
+      activityFactor: factor,
       recommendations
     })
     setShowResult(true)
@@ -105,7 +97,18 @@ export default function CalorieCalculator() {
         })
       }
     }, 100)
-  }
+  }, [petInfo])
+
+  // Debounce calculation on input change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (showResult) {
+        calculateCalories()
+      }
+    }, 150)
+
+    return () => clearTimeout(timer)
+  }, [petInfo, showResult, calculateCalories])
 
   const resetCalculator = () => {
     setPetInfo({
@@ -210,11 +213,12 @@ export default function CalorieCalculator() {
               {/* 활동량 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">활동량</label>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
                     { value: 'low', label: '낮음', desc: '실내생활, 운동 적음' },
                     { value: 'normal', label: '보통', desc: '일반적인 활동량' },
-                    { value: 'high', label: '높음', desc: '활발한 운동, 많은 활동' }
+                    { value: 'high', label: '높음', desc: '활발한 운동, 많은 활동' },
+                    { value: 'weight_loss', label: '체중감량', desc: '체중 감량 목표' }
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -289,7 +293,9 @@ export default function CalorieCalculator() {
               </div>
 
               <button
-                onClick={calculateCalories}
+                onClick={() => {
+                  calculateCalories()
+                }}
                 disabled={petInfo.weight <= 0 || petInfo.feedCaloriePerKg <= 0}
                 className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
@@ -324,7 +330,7 @@ export default function CalorieCalculator() {
                   </div>
                   <div className="bg-orange-50 p-6 rounded-xl text-center">
                     <div className="text-3xl font-bold text-orange-600 mb-2">
-                      {result.dailyFeedingAmount}g
+                      {result.dailyFeedingAmount.toFixed(1)}g
                     </div>
                     <div className="text-sm text-gray-600">일일 사료량</div>
                     <div className="text-xs text-gray-500 mt-1">
