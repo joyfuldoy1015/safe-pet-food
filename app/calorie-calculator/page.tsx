@@ -280,12 +280,15 @@ export default function CalorieCalculator() {
                       <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-blue-700">
                         <p className="font-semibold mb-1">참고 사항:</p>
-                        <ul className="space-y-1 text-xs">
-                          <li>• 일반 건사료: 300-400 kcal/kg</li>
-                          <li>• 습사료: 800-1,200 kcal/kg</li>
-                          <li>• 반습식 사료: 1,200-1,400 kcal/kg</li>
-                          <li>• 사료 포장지의 &quot;사료 1kg당 칼로리&quot; 또는 &quot;대사 에너지&quot; 값을 입력하세요</li>
+                        <ul className="space-y-1.5 text-xs">
+                          <li>• 일반 건사료(Dry food): 3,300~4,500 kcal/kg</li>
+                          <li className="text-xs opacity-90 ml-3">→ 수분이 적어 칼로리 밀도가 높습니다.</li>
+                          <li>• 습사료(Wet food): 800~1,200 kcal/kg</li>
+                          <li className="text-xs opacity-90 ml-3">→ 수분이 70~80%로 많아 칼로리 밀도가 낮습니다.</li>
                         </ul>
+                        <p className="mt-2 text-xs font-medium">
+                          💡 사료 포장지의 &quot;대사 에너지(ME, kcal/kg)&quot; 또는 &quot;사료 1kg당 칼로리&quot; 값을 직접 확인하여 입력하세요.
+                        </p>
                       </div>
                     </div>
                   </div>
