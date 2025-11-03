@@ -303,9 +303,9 @@ const categoryConfig = {
 
 // 상태별 색상
 const statusConfig = {
-  '급여중': { color: 'bg-green-100 text-green-800', icon: '🟢' },
-  '급여완료': { color: 'bg-gray-100 text-gray-800', icon: '⚫' },
-  '급여중지': { color: 'bg-red-100 text-red-800', icon: '🔴' }
+  '급여중': { color: 'bg-green-100 text-green-800', icon: '🟢', label: '급여 중' },
+  '급여완료': { color: 'bg-gray-100 text-gray-800', icon: '⚫', label: '급여 완료' },
+  '급여중지': { color: 'bg-red-100 text-red-800', icon: '🔴', label: '급여 중지' }
 }
 
 export default function PetLogPostDetail() {
@@ -623,7 +623,7 @@ export default function PetLogPostDetail() {
             record.status === '급여완료' ? 'bg-gray-100 text-gray-800 border border-gray-200' :
             'bg-red-100 text-red-800 border border-red-200'
           }`} style={{ fontSize: '15px' }}>
-            {statusConfig[record.status].icon} {record.status}
+            {statusConfig[record.status].icon} {statusConfig[record.status].label}
           </span>
         </div>
       </div>
