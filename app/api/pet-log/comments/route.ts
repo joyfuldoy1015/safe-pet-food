@@ -57,14 +57,38 @@ export async function POST(request: Request) {
     }
 
     // 포스트의 댓글 수 업데이트
-    await supabase.rpc('increment_comments_count', { post_id: postId })
-      .catch(() => {
-        // RPC가 없으면 직접 업데이트
-        supabase
+    try {
+      const { error: rpcError } = await supabase.rpc('increment_comments_count', { post_id: postId })
+      if (rpcError) {
+        // RPC가 없으면 현재 값을 가져와서 +1 해서 업데이트
+        const { data: post, error: fetchError } = await supabase
           .from('pet_log_posts')
-          .update({ comments_count: supabase.raw('comments_count + 1') })
+          .select('comments_count')
           .eq('id', postId)
-      })
+          .single()
+        
+        if (!fetchError && post) {
+          await supabase
+            .from('pet_log_posts')
+            .update({ comments_count: (post.comments_count || 0) + 1 })
+            .eq('id', postId)
+        }
+      }
+    } catch (error) {
+      // RPC가 없으면 현재 값을 가져와서 +1 해서 업데이트
+      const { data: post, error: fetchError } = await supabase
+        .from('pet_log_posts')
+        .select('comments_count')
+        .eq('id', postId)
+        .single()
+      
+      if (!fetchError && post) {
+        await supabase
+          .from('pet_log_posts')
+          .update({ comments_count: (post.comments_count || 0) + 1 })
+          .eq('id', postId)
+      }
+    }
 
     return NextResponse.json(newComment, { status: 201 })
   } catch (error) {
