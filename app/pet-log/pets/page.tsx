@@ -179,6 +179,13 @@ export default function PetsPage() {
                   >
                     급여 기록 작성
                   </button>
+                  <Link
+                    href={`/pet-log/pets/${pet.id}`}
+                    className="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
+                    title="급여 기록 보기"
+                  >
+                    <PawPrint className="h-4 w-4" />
+                  </Link>
                   <button
                     onClick={() => router.push(`/pet-log/pets/${pet.id}/edit`)}
                     className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"

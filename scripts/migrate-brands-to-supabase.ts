@@ -10,6 +10,10 @@
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
+import dotenv from 'dotenv'
+
+// .env.local 파일 로드
+dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -37,7 +41,7 @@ async function migrateBrands() {
 
     for (const brand of brandsData) {
       try {
-        // Supabase에 삽입
+        // Supabase에 삽입 (image 컬럼 제외 - 추후 추가 가능)
         const { data, error } = await supabase
           .from('brands')
           .insert({
@@ -52,8 +56,8 @@ async function migrateBrands() {
             brand_description: brand.description || brand.brand_description || '',
             manufacturing_info: brand.manufacturing_info || '',
             brand_pros: brand.brand_pros || [],
-            brand_cons: brand.brand_cons || [],
-            image: brand.image || null
+            brand_cons: brand.brand_cons || []
+            // image 컬럼은 테이블에 추가 후 다시 마이그레이션 가능
           })
           .select()
           .single()

@@ -127,7 +127,7 @@ export default function WaterCalculator() {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               활동량 (반려동물의 일상적인 활동 수준)
             </label>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
               <button
                 onClick={() => setActivityLevel('low')}
                 className={`p-4 rounded-xl border-2 transition-all ${

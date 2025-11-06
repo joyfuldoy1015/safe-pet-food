@@ -46,7 +46,6 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     overall_rating: parseFloat(supabaseData.overall_rating) || 0,
     product_lines: supabaseData.product_lines || [],
     established_year: supabaseData.established_year,
-    country: supabaseData.country,
     certifications: supabaseData.certifications || [],
     image: supabaseData.image,
     brand_pros: supabaseData.brand_pros || [],

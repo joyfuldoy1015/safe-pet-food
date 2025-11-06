@@ -854,6 +854,7 @@ export default function PetLogPostDetail() {
             if (records.length === 0) return null
 
             const activeCount = records.filter(r => r.status === '급여중').length
+            const stoppedCount = records.filter(r => r.status === '급여중지').length
             const completedCount = records.filter(r => r.status === '급여완료').length
 
             return (
@@ -871,19 +872,24 @@ export default function PetLogPostDetail() {
                     <div>
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{category}</h2>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-700 text-xs sm:text-sm rounded-full font-semibold border border-gray-200">
-                          {records.length}개 제품
-                        </span>
                         {activeCount > 0 && (
                           <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-green-100 text-green-800 text-xs sm:text-sm font-medium rounded-full border border-green-200">
-                            사용중 {activeCount}개
+                            {category === '화장실' ? '사용 중' : '급여 중'} {activeCount}개
+                          </span>
+                        )}
+                        {stoppedCount > 0 && (
+                          <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-red-100 text-red-800 text-xs sm:text-sm font-medium rounded-full border border-red-200">
+                            {category === '화장실' ? '사용 중지' : '급여 중지'} {stoppedCount}개
                           </span>
                         )}
                         {completedCount > 0 && (
                           <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-100 text-gray-800 text-xs sm:text-sm font-medium rounded-full border border-gray-200">
-                            완료 {completedCount}개
+                            {category === '화장실' ? '사용 완료' : '급여 완료'} {completedCount}개
                           </span>
                         )}
+                        <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-700 text-xs sm:text-sm rounded-full font-semibold border border-gray-200">
+                          {records.length}개 제품
+                        </span>
                       </div>
                     </div>
                   </div>

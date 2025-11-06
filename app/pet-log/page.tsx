@@ -571,32 +571,101 @@ export default function PetLogPage() {
   const { data: session, status } = useSession()
   const isLoggedIn = status === 'authenticated'
   const [selectedSpecies, setSelectedSpecies] = useState<string>('all')
+  const [selectedPet, setSelectedPet] = useState<string>('all')
+  const [petProfiles, setPetProfiles] = useState<Array<{id: string, name: string}>>([])
   const [displayedPostsCount, setDisplayedPostsCount] = useState(4)
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())
   const [sortBy, setSortBy] = useState<'likes' | 'updated' | 'created'>('likes')
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
   const [allPosts, setAllPosts] = useState<DetailedPetLogPost[]>([])
 
-  // 로컬 스토리지에서 저장된 포스트 불러오기
+  // Supabase API에서 포스트 불러오기 + 로컬 스토리지 fallback
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        // Supabase API에서 포스트 가져오기
+        const response = await fetch('/api/pet-log/posts')
+        const apiPosts = await response.json()
+        
+        if (apiPosts && apiPosts.length > 0) {
+          console.log('✅ Supabase에서 포스트를 가져왔습니다:', apiPosts.length, '개')
+          // Supabase 데이터 형식 변환 (comments를 배열로 정규화)
+          const formattedApiPosts = apiPosts.map((post: any) => {
+            // comments를 배열로 변환
+            let commentsArray: any[] = []
+            if (Array.isArray(post.comments)) {
+              commentsArray = post.comments.map((comment: any) => ({
+                ...comment,
+                // replies가 객체인 경우 배열로 변환
+                replies: Array.isArray(comment.replies) 
+                  ? comment.replies 
+                  : (comment.replies && typeof comment.replies === 'object' 
+                      ? Object.values(comment.replies) 
+                      : [])
+              }))
+            } else if (post.comments && typeof post.comments === 'object') {
+              // comments가 객체인 경우 배열로 변환
+              commentsArray = Object.values(post.comments).map((comment: any) => ({
+                ...comment,
+                replies: Array.isArray(comment.replies) 
+                  ? comment.replies 
+                  : (comment.replies && typeof comment.replies === 'object' 
+                      ? Object.values(comment.replies) 
+                      : [])
+              }))
+            }
+            
+            return {
+              ...post,
+              comments: commentsArray,
+              totalComments: commentsArray.length || 0,
+              feedingRecords: Array.isArray(post.feedingRecords) ? post.feedingRecords : []
+            }
+          })
+          setAllPosts(formattedApiPosts)
+        } else {
+          // Supabase에 데이터가 없으면 localStorage fallback
+          console.log('⚠️ Supabase에 데이터가 없습니다. localStorage를 확인합니다.')
+          const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+          const cleanedSavedPosts = savedPosts.map((post: any) => ({
+            ...post,
+            comments: Array.isArray(post.comments) ? post.comments : 
+                      (post.comments && typeof post.comments === 'object' ? [post.comments] : []),
+            feedingRecords: Array.isArray(post.feedingRecords) ? post.feedingRecords : []
+          }))
+          const mergedPosts = [...cleanedSavedPosts, ...detailedPosts]
+          setAllPosts(mergedPosts)
+        }
+      } catch (error) {
+        console.error('⚠️ API 오류, localStorage fallback:', error)
+        // 오류 발생 시 localStorage와 mock 데이터 사용
+        try {
+          const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+          const cleanedSavedPosts = savedPosts.map((post: any) => ({
+            ...post,
+            comments: Array.isArray(post.comments) ? post.comments : 
+                      (post.comments && typeof post.comments === 'object' ? [post.comments] : []),
+            feedingRecords: Array.isArray(post.feedingRecords) ? post.feedingRecords : []
+          }))
+          const mergedPosts = [...cleanedSavedPosts, ...detailedPosts]
+          setAllPosts(mergedPosts)
+        } catch (localStorageError) {
+          console.error('❌ localStorage 오류:', localStorageError)
+          setAllPosts(detailedPosts)
+        }
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  // 반려동물 프로필 목록 불러오기 (필터용)
   useEffect(() => {
     try {
-      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-      // 로컬 스토리지 데이터 정리 (comments가 객체인 경우 배열로 변환)
-      const cleanedSavedPosts = savedPosts.map((post: any) => ({
-        ...post,
-        // comments 필드가 객체인 경우 배열로 변환
-        comments: Array.isArray(post.comments) ? post.comments : 
-                  (post.comments && typeof post.comments === 'object' ? [post.comments] : []),
-        // feedingRecords가 배열이 아닌 경우 빈 배열로 설정
-        feedingRecords: Array.isArray(post.feedingRecords) ? post.feedingRecords : []
-      }))
-      // 로컬 스토리지의 포스트와 mock 데이터 병합
-      const mergedPosts = [...cleanedSavedPosts, ...detailedPosts]
-      setAllPosts(mergedPosts)
+      const savedPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
+      setPetProfiles(savedPets.map((pet: any) => ({ id: pet.id, name: pet.name })))
     } catch (error) {
-      console.error('포스트 로드 중 오류:', error)
-      // 오류 발생 시 mock 데이터만 사용
-      setAllPosts(detailedPosts)
+      console.error('반려동물 프로필 로드 중 오류:', error)
     }
   }, [])
 
@@ -617,7 +686,9 @@ export default function PetLogPage() {
     
     const matchesSpecies = selectedSpecies === 'all' || post.petSpecies === selectedSpecies
     
-    return matchesSearch && matchesCategory && matchesSpecies
+    const matchesPet = selectedPet === 'all' || (post as any).petProfileId === selectedPet
+    
+    return matchesSearch && matchesCategory && matchesSpecies && matchesPet
   }).sort((a, b) => {
     if (sortBy === 'likes') return b.likes - a.likes
     if (sortBy === 'updated') return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -637,7 +708,7 @@ export default function PetLogPage() {
   // 필터나 검색 변경 시 표시 개수 리셋
   useEffect(() => {
     setDisplayedPostsCount(4)
-  }, [searchTerm, selectedCategory, selectedSpecies, sortBy])
+  }, [searchTerm, selectedCategory, selectedSpecies, selectedPet, sortBy])
 
   // 즐겨찾기 토글 함수
   const handleBookmarkToggle = (postId: string, e: React.MouseEvent) => {
@@ -781,10 +852,26 @@ export default function PetLogPage() {
                 }}
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
               >
-                <option value="all">전체 반려동물</option>
+                <option value="all">전체 반려동물 종류</option>
                 <option value="dog">🐕 강아지</option>
                 <option value="cat">🐱 고양이</option>
               </select>
+              {petProfiles.length > 0 && (
+                <select
+                  value={selectedPet}
+                  onChange={(e) => {
+                    setSelectedPet(e.target.value)
+                  }}
+                  className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
+                >
+                  <option value="all">전체 반려동물</option>
+                  {petProfiles.map((pet) => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name}
+                    </option>
+                  ))}
+                </select>
+              )}
               <select
                 value={sortBy}
                 onChange={(e) => {
@@ -945,7 +1032,7 @@ export default function PetLogPage() {
                           <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
                             <MessageCircle className="h-3.5 w-3.5 text-gray-600" />
                             <span className="text-xs text-gray-700">
-                              댓글 {post.comments}
+                              댓글 {Array.isArray(post.comments) ? post.comments.length : (post.totalComments || post.comments || 0)}
                             </span>
                           </div>
                         </div>

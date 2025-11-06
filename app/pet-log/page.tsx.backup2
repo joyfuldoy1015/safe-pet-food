@@ -1,0 +1,956 @@
+'use client'
+
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { 
+  Plus, 
+  Calendar, 
+  Star, 
+  Heart, 
+  BookOpen,
+  PawPrint,
+  TrendingUp,
+  Clock,
+  Award,
+  Users,
+  Eye,
+  MessageCircle,
+  ThumbsUp,
+  Filter,
+  Search,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Bookmark,
+  BookmarkCheck
+} from 'lucide-react'
+
+// 제품 카테고리 타입
+type ProductCategory = '사료' | '간식' | '영양제' | '화장실'
+
+// 급여 상태 타입
+type FeedingStatus = '급여중' | '급여완료' | '급여중지'
+
+// 급여 기록 인터페이스
+interface FeedingRecord {
+  id: string
+  productName: string
+  category: ProductCategory
+  brand: string
+  startDate: string
+  endDate?: string
+  status: FeedingStatus
+  duration: string
+  palatability: number // 1-5
+  satisfaction: number // 1-5
+  repurchaseIntent: boolean
+  comment?: string
+  price?: string
+  purchaseLocation?: string
+  sideEffects?: string[]
+  benefits?: string[]
+}
+
+// 펫 로그 포스트 인터페이스
+interface PetLogPost {
+  id: string
+  petName: string
+  petBreed: string
+  petAge: string
+  petWeight: string
+  ownerName: string
+  ownerId: string
+  ownerAvatar: string
+  petAvatar: string
+  petSpecies: 'dog' | 'cat'
+  createdAt: string
+  updatedAt: string
+  totalRecords: number
+  views: number
+  likes: number
+  comments: number
+  isLiked: boolean
+  feedingRecords: FeedingRecord[]
+}
+
+// 상세 포스트 데이터 (실제 앱에서는 API에서 가져올 데이터)
+const detailedPosts: PetLogPost[] = [
+  {
+    id: 'post-1',
+    petName: '뽀미',
+    petBreed: '골든 리트리버',
+    petAge: '3세',
+    petWeight: '28kg',
+    ownerName: '김집사',
+    ownerId: 'owner-1',
+    ownerAvatar: '👨‍💼',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-15',
+    updatedAt: '2024-01-20',
+    totalRecords: 8,
+    views: 1247,
+    likes: 89,
+    comments: 23,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-1',
+        productName: '힐스 어덜트 라지 브리드',
+        category: '사료',
+        brand: '힐스',
+        startDate: '2024-01-16',
+        status: '급여중',
+        duration: '5일',
+        palatability: 4,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '로얄캐닌에서 바꿨는데 적응 기간이 필요해 보여요. 그래도 잘 먹고 있어요.',
+        price: '89,000원 (15kg)',
+        purchaseLocation: '온라인 펫샵',
+        benefits: ['털 윤기 개선', '소화 잘됨']
+      },
+      {
+        id: 'record-2',
+        productName: '로얄캐닌 골든 리트리버 어덜트',
+        category: '사료',
+        brand: '로얄캐닌',
+        startDate: '2023-10-01',
+        endDate: '2024-01-15',
+        status: '급여완료',
+        duration: '3개월 15일',
+        palatability: 5,
+        satisfaction: 5,
+        repurchaseIntent: true,
+        comment: '우리 뽀미가 정말 잘 먹어요. 털도 윤기가 좋아졌고 변 상태도 완벽해요!',
+        price: '95,000원 (12kg)',
+        purchaseLocation: '동물병원',
+        benefits: ['기호성 우수', '털 윤기', '변 상태 좋음']
+      },
+      {
+        id: 'record-3',
+        productName: '네츄럴발란스 트레이닝 트릿',
+        category: '간식',
+        brand: '네츄럴발란스',
+        startDate: '2024-01-10',
+        status: '급여중',
+        duration: '11일',
+        palatability: 5,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '훈련할 때 주는 간식으로 완벽해요. 작은 크기라 훈련하기 좋습니다.',
+        price: '15,000원 (200g)',
+        purchaseLocation: '펫샵',
+        benefits: ['훈련용으로 좋음', '작은 크기', '기호성 우수']
+      }
+    ]
+  },
+  {
+    id: 'post-2',
+    petName: '모모',
+    petBreed: '페르시안',
+    petAge: '7세',
+    petWeight: '4.2kg',
+    ownerName: '김지은',
+    ownerId: 'owner-2',
+    ownerAvatar: '👩',
+    petAvatar: '🐱',
+    petSpecies: 'cat',
+    createdAt: '2024-12-18',
+    updatedAt: '2024-12-18',
+    totalRecords: 5,
+    views: 892,
+    likes: 67,
+    comments: 15,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-4',
+        productName: '로얄캐닌 페르시안 어덜트',
+        category: '사료',
+        brand: '로얄캐닌',
+        startDate: '2024-10-01',
+        status: '급여중',
+        duration: '2개월 18일',
+        palatability: 5,
+        satisfaction: 5,
+        repurchaseIntent: true,
+        comment: '페르시안 고양이 전용 사료라서 그런지 우리 모모가 정말 잘 먹어요! 털도 더 윤기나고 소화도 잘 되는 것 같아요.',
+        price: '75,000원 (4kg)',
+        purchaseLocation: '동물병원',
+        benefits: ['페르시안 전용', '장모종 케어', '소화 잘됨', '털 윤기']
+      }
+    ]
+  },
+  {
+    id: 'post-3',
+    petName: '코코',
+    petBreed: '래브라도 리트리버',
+    petAge: '4세',
+    petWeight: '32kg',
+    ownerName: '이수진',
+    ownerId: 'owner-3',
+    ownerAvatar: '👩‍🦰',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-12-16',
+    updatedAt: '2024-12-16',
+    totalRecords: 6,
+    views: 743,
+    likes: 52,
+    comments: 18,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-5',
+        productName: '덴탈츄 대형견용',
+        category: '간식',
+        brand: '그린리스',
+        startDate: '2024-11-01',
+        status: '급여중',
+        duration: '1개월 16일',
+        palatability: 5,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '치아 건강을 위해 구매했는데 코코가 너무 좋아해요! 씹는 재미도 있고 실제로 치석도 줄어든 것 같습니다.',
+        price: '18,000원 (300g)',
+        purchaseLocation: '펫샵',
+        benefits: ['치아 건강', '치석 제거', '기호성 우수'],
+        sideEffects: ['조금 딱딱함']
+      }
+    ]
+  },
+  {
+    id: 'post-4',
+    petName: '루이',
+    petBreed: '시바견',
+    petAge: '2세',
+    petWeight: '8.5kg',
+    ownerName: '박민수',
+    ownerId: 'owner-4',
+    ownerAvatar: '👨‍🎓',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-10',
+    updatedAt: '2024-01-18',
+    totalRecords: 4,
+    views: 456,
+    likes: 34,
+    comments: 12,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-6',
+        productName: '오리젠 오리지널',
+        category: '사료',
+        brand: '오리젠',
+        startDate: '2024-01-05',
+        status: '급여중',
+        duration: '13일',
+        palatability: 5,
+        satisfaction: 5,
+        repurchaseIntent: true,
+        comment: '고품질 원료로 만든 사료라서 믿고 급여하고 있어요. 루이가 정말 잘 먹어요!',
+        price: '120,000원 (11.4kg)',
+        purchaseLocation: '온라인 펫샵',
+        benefits: ['고품질 원료', '기호성 우수', '털 윤기', '소화 잘됨']
+      }
+    ]
+  },
+  {
+    id: 'post-5',
+    petName: '나비',
+    petBreed: '러시안 블루',
+    petAge: '5세',
+    petWeight: '3.8kg',
+    ownerName: '이지영',
+    ownerId: 'owner-5',
+    ownerAvatar: '👩‍💻',
+    petAvatar: '🐱',
+    petSpecies: 'cat',
+    createdAt: '2024-01-08',
+    updatedAt: '2024-01-15',
+    totalRecords: 6,
+    views: 678,
+    likes: 45,
+    comments: 8,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-7',
+        productName: '아카나 그라스랜드',
+        category: '사료',
+        brand: '아카나',
+        startDate: '2023-12-20',
+        status: '급여중',
+        duration: '29일',
+        palatability: 4,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '러시안 블루 고양이에게 딱 맞는 사료인 것 같아요. 털도 부드러워졌어요.',
+        price: '85,000원 (5.4kg)',
+        purchaseLocation: '펫샵',
+        benefits: ['털 윤기', '소화 잘됨', '기호성 좋음']
+      }
+    ]
+  },
+  {
+    id: 'post-6',
+    petName: '멍멍이',
+    petBreed: '포메라니안',
+    petAge: '1세',
+    petWeight: '2.1kg',
+    ownerName: '최수진',
+    ownerId: 'owner-6',
+    ownerAvatar: '👩‍🎨',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-12',
+    updatedAt: '2024-01-19',
+    totalRecords: 3,
+    views: 234,
+    likes: 28,
+    comments: 5,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-8',
+        productName: '로얄캐닌 포메라니안 퍼피',
+        category: '사료',
+        brand: '로얄캐닌',
+        startDate: '2024-01-01',
+        status: '급여중',
+        duration: '19일',
+        palatability: 5,
+        satisfaction: 5,
+        repurchaseIntent: true,
+        comment: '강아지 전용 사료라서 그런지 정말 잘 먹어요! 성장에도 도움이 될 것 같아요.',
+        price: '65,000원 (3kg)',
+        purchaseLocation: '동물병원',
+        benefits: ['강아지 전용', '성장 도움', '기호성 우수', '소화 잘됨']
+      }
+    ]
+  },
+  {
+    id: 'post-7',
+    petName: '야옹이',
+    petBreed: '코리안 숏헤어',
+    petAge: '4세',
+    petWeight: '4.5kg',
+    ownerName: '정현우',
+    ownerId: 'owner-7',
+    ownerAvatar: '👨‍🔬',
+    petAvatar: '🐱',
+    petSpecies: 'cat',
+    createdAt: '2024-01-05',
+    updatedAt: '2024-01-17',
+    totalRecords: 7,
+    views: 567,
+    likes: 41,
+    comments: 15,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-9',
+        productName: '힐스 프리스크립션 다이어트',
+        category: '사료',
+        brand: '힐스',
+        startDate: '2023-11-15',
+        status: '급여중',
+        duration: '2개월 4일',
+        palatability: 3,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '다이어트용 사료라서 맛은 조금 아쉽지만, 체중 관리에는 효과가 있어요.',
+        price: '95,000원 (5kg)',
+        purchaseLocation: '동물병원',
+        benefits: ['체중 관리', '다이어트 효과', '소화 잘됨'],
+        sideEffects: ['기호성 보통']
+      }
+    ]
+  },
+  {
+    id: 'post-8',
+    petName: '바둑이',
+    petBreed: '진돗개',
+    petAge: '6세',
+    petWeight: '25kg',
+    ownerName: '김철수',
+    ownerId: 'owner-8',
+    ownerAvatar: '👨‍🌾',
+    petAvatar: '🐕',
+    petSpecies: 'dog',
+    createdAt: '2024-01-03',
+    updatedAt: '2024-01-16',
+    totalRecords: 5,
+    views: 789,
+    likes: 67,
+    comments: 22,
+    isLiked: false,
+    feedingRecords: [
+      {
+        id: 'record-10',
+        productName: '네츄럴발란스 리미티드 인그리디언트',
+        category: '사료',
+        brand: '네츄럴발란스',
+        startDate: '2023-12-01',
+        status: '급여중',
+        duration: '1개월 16일',
+        palatability: 4,
+        satisfaction: 4,
+        repurchaseIntent: true,
+        comment: '한국 토종견인 바둑이에게 딱 맞는 사료인 것 같아요. 건강해 보여요!',
+        price: '75,000원 (12kg)',
+        purchaseLocation: '온라인 펫샵',
+        benefits: ['한국 토종견용', '건강 증진', '기호성 좋음', '소화 잘됨']
+      }
+    ]
+  }
+]
+
+// 유틸리티 함수들
+const getCategoryText = (category: ProductCategory) => {
+  switch (category) {
+    case '사료': return '사료'
+    case '간식': return '간식'
+    case '영양제': return '영양제'
+    case '화장실': return '화장실'
+    default: return '기타'
+  }
+}
+
+const getCategoryIcon = (category: ProductCategory) => {
+  switch (category) {
+    case '사료': return '🍽️'
+    case '간식': return '🦴'
+    case '영양제': return '💊'
+    case '화장실': return '🚽'
+    default: return '📦'
+  }
+}
+
+const getStatusColor = (status: FeedingStatus) => {
+  switch (status) {
+    case '급여중': return 'bg-green-100 text-green-700'
+    case '급여완료': return 'bg-blue-100 text-blue-700'
+    case '급여중지': return 'bg-gray-100 text-gray-700'
+    default: return 'bg-gray-100 text-gray-700'
+  }
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const getMainFeedingRecord = (post: PetLogPost): FeedingRecord | undefined => {
+  return post.feedingRecords.find(record => record.status === '급여중') || post.feedingRecords[0]
+}
+
+const getAverageRating = (records: FeedingRecord[], type: 'palatability' | 'satisfaction') => {
+  if (records.length === 0) return 0
+  const sum = records.reduce((acc, record) => acc + record[type], 0)
+  return Math.round((sum / records.length) * 10) / 10
+}
+
+export default function PetLogPage() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  
+  // 로그인 상태 관리 (실제 배포 시에는 NextAuth.js, 세션, 또는 인증 컨텍스트에서 가져와야 함)
+  // 예: const { data: session } = useSession() 또는 const { user } = useAuth()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [selectedSpecies, setSelectedSpecies] = useState<string>('all')
+  const [displayedPosts, setDisplayedPosts] = useState(6) // 표시할 포스트 수
+  const postsPerLoad = 6 // 한 번에 로드할 포스트 수
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())
+  const [isLoading, setIsLoading] = useState(false)
+
+  // 필터링된 포스트들 (추천 수 기준으로 정렬)
+  const filteredPosts = detailedPosts.filter(post => {
+    const mainRecord = getMainFeedingRecord(post)
+    const matchesSearch = 
+      post.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mainRecord && mainRecord.productName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      post.feedingRecords.some(record => 
+        record.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.brand.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    
+    const matchesCategory = selectedCategory === 'all' || 
+      post.feedingRecords.some(record => record.category === selectedCategory)
+    
+    const matchesSpecies = selectedSpecies === 'all' || post.petSpecies === selectedSpecies
+    
+    return matchesSearch && matchesCategory && matchesSpecies
+  }).sort((a, b) => b.likes - a.likes) // 추천 수 기준으로 정렬
+
+  // 무한 스크롤을 위한 포스트 계산
+  const visiblePosts = filteredPosts.slice(0, displayedPosts)
+  const hasMorePosts = displayedPosts < filteredPosts.length
+
+  // 무한 스크롤 핸들러
+  const loadMorePosts = () => {
+    if (isLoading || !hasMorePosts) return
+    
+    setIsLoading(true)
+    setTimeout(() => {
+      setDisplayedPosts(prev => Math.min(prev + postsPerLoad, filteredPosts.length))
+      setIsLoading(false)
+    }, 500) // 로딩 효과를 위한 딜레이
+  }
+
+  // 스크롤 이벤트 핸들러
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000) {
+        loadMorePosts()
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isLoading, hasMorePosts])
+
+  // 북마크 토글 핸들러
+  const handleBookmarkToggle = (postId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isLoggedIn) {
+      setShowLoginModal(true)
+      return
+    }
+    
+    setBookmarkedPosts(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(postId)) {
+        newSet.delete(postId)
+      } else {
+        newSet.add(postId)
+      }
+      return newSet
+    })
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Heart className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900">
+              펫 로그 커뮤니티
+            </h1>
+          </div>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            다른 반려집사들의 급여 경험을 둘러보고 나만의 기록도 남겨보세요
+          </p>
+        </div>
+
+        {/* Search and Filter Section */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                <Search className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">급여 기록 찾기</h2>
+            </div>
+            <button
+              onClick={() => {
+                if (isLoggedIn) {
+                  window.location.href = '/pet-log/posts/write'
+                } else {
+                  setShowLoginModal(true)
+                }
+              }}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
+            >
+              <Plus className="h-5 w-5" />
+              급여 기록 공유하기
+            </button>
+          </div>
+          
+          <div className="flex flex-col gap-6">
+            {/* Search Bar - Single Line */}
+            <div className="w-full">
+              <div className="flex items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
+                  <input
+                    type="text"
+                    placeholder="제품명, 반려동물 이름, 집사 이름으로 검색..."
+                    value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setDisplayedPosts(6)
+                  }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        // 엔터키로 검색 실행 (이미 실시간 검색이므로 추가 동작 없음)
+                      }
+                    }}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-l-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-lg border-r-0"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    // 검색 실행 (이미 실시간 검색이므로 현재 상태 유지)
+                    setCurrentPage(1)
+                  }}
+                  className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-r-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2 border-2 border-purple-500 border-l-0"
+                >
+                  <Search className="h-5 w-5" />
+                  검색
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <select
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value)
+                  setDisplayedPosts(6)
+                }}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
+              >
+                <option value="all">전체 카테고리</option>
+                <option value="사료">🍽️ 사료</option>
+                <option value="간식">🦴 간식</option>
+                <option value="영양제">💊 영양제</option>
+                <option value="화장실">🚽 화장실</option>
+              </select>
+              <select
+                value={selectedSpecies}
+                onChange={(e) => {
+                  setSelectedSpecies(e.target.value)
+                  setDisplayedPosts(6)
+                }}
+                className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 flex-1 text-lg"
+              >
+                <option value="all">전체 반려동물</option>
+                <option value="dog">🐕 강아지</option>
+                <option value="cat">🐱 고양이</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Posts Section */}
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' ? '검색 결과' : '추천 급여 후기'}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all' 
+                    ? `총 ${filteredPosts.length}개의 급여 기록을 찾았습니다` 
+                    : '추천 수 기준으로 정렬된 급여 후기'
+                  }
+                </p>
+              </div>
+            </div>
+            
+            {/* 통계 정보 */}
+            <div className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>총 {filteredPosts.length}개</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>표시 {visiblePosts.length}개</span>
+              </div>
+            </div>
+          </div>
+
+          {/* No Results Message */}
+          {filteredPosts.length === 0 && (searchTerm || selectedCategory !== 'all' || selectedSpecies !== 'all') && (
+            <div className="text-center py-12 bg-white rounded-2xl shadow-xl border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">검색 결과가 없습니다</h3>
+              <p className="text-gray-600 mb-6">
+                다른 검색어나 필터를 사용해보세요
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('')
+                  setSelectedCategory('all')
+                  setSelectedSpecies('all')
+                  setDisplayedPosts(6)
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                필터 초기화
+              </button>
+            </div>
+          )}
+
+          {/* Posts Grid */}
+          {filteredPosts.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visiblePosts.map((post) => {
+                const mainRecord = getMainFeedingRecord(post)
+                const avgPalatability = getAverageRating(post.feedingRecords, 'palatability')
+                const avgSatisfaction = getAverageRating(post.feedingRecords, 'satisfaction')
+                
+                return (
+                  <Link key={post.id} href={`/pet-log/posts/${post.id}`} className="block group">
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-[1.02] h-full overflow-hidden">
+                      {/* Header with gradient background */}
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 border-b border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-md">
+                              <span className="text-lg text-white">{post.ownerAvatar}</span>
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900 text-lg">{post.ownerName}</p>
+                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <span className="text-lg">{post.petAvatar}</span>
+                                <span className="font-semibold">{post.petName}</span>
+                                <span className="text-gray-400">•</span>
+                                <span>{post.petBreed}</span>
+                                <span className="text-gray-400">•</span>
+                                <span>{post.petAge}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => handleBookmarkToggle(post.id, e)}
+                            className={`p-2 rounded-lg transition-all duration-200 ${
+                              bookmarkedPosts.has(post.id)
+                                ? 'text-yellow-500 bg-yellow-100 hover:bg-yellow-200'
+                                : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50'
+                            }`}
+                          >
+                            {bookmarkedPosts.has(post.id) ? (
+                              <BookmarkCheck className="h-5 w-5" />
+                            ) : (
+                              <Bookmark className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        
+                        {/* Pet weight and species */}
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <PawPrint className="h-4 w-4" />
+                            <span>{post.petWeight}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                            <span className="capitalize">{post.petSpecies === 'dog' ? '강아지' : '고양이'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="p-6 flex-1">
+                        <div className="mb-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                              <span className="text-lg">
+                                {mainRecord?.category === '사료' ? '🍽️' : 
+                                 mainRecord?.category === '간식' ? '🦴' : 
+                                 mainRecord?.category === '영양제' ? '💊' : '🚽'}
+                              </span>
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-gray-900 text-lg line-clamp-1">{mainRecord?.productName}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="font-semibold text-gray-700">{mainRecord?.brand}</span>
+                                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                                  {mainRecord?.category}
+                                </span>
+                              </div>
+                            </div>
+                            <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getStatusColor(mainRecord?.status || '급여중')}`}>
+                              {mainRecord?.status}
+                            </span>
+                          </div>
+                          
+                          {/* Comment */}
+                          {mainRecord?.comment && (
+                            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                              <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">
+                                &ldquo;{mainRecord.comment}&rdquo;
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Benefits */}
+                          {mainRecord?.benefits && mainRecord.benefits.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {mainRecord.benefits.slice(0, 3).map((benefit, index) => (
+                                <span key={index} className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full font-medium">
+                                  {benefit}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Ratings */}
+                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 mb-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-700">기호성</span>
+                                <div className="flex items-center">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star key={i} className={`h-4 w-4 ${i < avgPalatability ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                                  ))}
+                                </div>
+                                <span className="text-sm font-bold text-gray-800 ml-1">{avgPalatability}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-700">만족도</span>
+                                <div className="flex items-center">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star key={i} className={`h-4 w-4 ${i < avgSatisfaction ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                                  ))}
+                                </div>
+                                <span className="text-sm font-bold text-gray-800 ml-1">{avgSatisfaction}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-6 text-sm text-gray-600">
+                            <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white transition-colors">
+                              <ThumbsUp className={`h-4 w-4 ${post.isLiked ? 'text-blue-500' : 'text-gray-400'}`} />
+                              <span className="font-semibold">{post.likes}</span>
+                            </button>
+                            <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white transition-colors">
+                              <MessageCircle className="h-4 w-4 text-gray-400" />
+                              <span className="font-semibold">{post.comments}</span>
+                            </button>
+                            <div className="flex items-center gap-2 px-3 py-2">
+                              <Eye className="h-4 w-4 text-gray-400" />
+                              <span className="font-semibold">{post.views}</span>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            <span className="font-medium">{formatDate(post.createdAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Infinite Scroll Loading */}
+          {filteredPosts.length > 0 && (
+            <div className="mt-12">
+              {hasMorePosts ? (
+                <div className="text-center">
+                  <button
+                    onClick={loadMorePosts}
+                    disabled={isLoading}
+                    className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>로딩 중...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span>더 많은 급여 후기 보기</span>
+                        <ChevronRight className="h-4 w-4" />
+                      </div>
+                    )}
+                  </button>
+                  <p className="text-sm text-gray-500 mt-3">
+                    {visiblePosts.length}개 중 {filteredPosts.length}개 표시됨
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Award className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">모든 급여 후기를 확인했습니다</h3>
+                  <p className="text-gray-600">
+                    총 {filteredPosts.length}개의 급여 후기를 모두 확인하셨습니다
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Login Required Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 mb-4">
+                <User className="h-6 w-6 text-purple-600" />
+              </div>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                로그인이 필요합니다
+              </h3>
+              
+              <p className="text-sm text-gray-600 mb-6">
+                급여 기록을 공유하려면 먼저 로그인해주세요.<br />
+                로그인 후에 다양한 기능을 이용할 수 있습니다.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  로그인하기
+                </Link>
+                
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  취소
+                </button>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-4">
+                아직 계정이 없으신가요? 
+                <Link href="/signup" className="text-purple-600 hover:text-purple-700 ml-1">
+                  회원가입
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

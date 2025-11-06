@@ -250,6 +250,79 @@ export default function WritePostPage() {
     })
   }
 
+  // 날짜 차이를 계산하여 급여 기간 문자열로 변환
+  const calculateDuration = (startDate: string, endDate?: string): string => {
+    if (!startDate) return ''
+    
+    // 종료일이 없으면 오늘 날짜 사용 (급여중인 경우)
+    const end = endDate ? new Date(endDate) : new Date()
+    const start = new Date(startDate)
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return ''
+    if (end < start) return '' // 종료일이 시작일보다 이전이면 빈 문자열
+    
+    const diffTime = Math.abs(end.getTime() - start.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    // 일 단위 계산
+    const years = Math.floor(diffDays / 365)
+    const months = Math.floor((diffDays % 365) / 30)
+    const days = diffDays % 30
+    
+    // 결과 문자열 생성
+    const parts: string[] = []
+    if (years > 0) {
+      parts.push(`${years}년`)
+    }
+    if (months > 0) {
+      parts.push(`${months}개월`)
+    }
+    if (days > 0 && years === 0 && months === 0) {
+      parts.push(`${days}일`)
+    } else if (days > 0 && (years > 0 || months > 0)) {
+      // 1년 이상이거나 1개월 이상이면 일은 표시하지 않음
+    }
+    
+    return parts.length > 0 ? parts.join(' ') : `${diffDays}일`
+  }
+
+  // 시작일/종료일 변경 시 급여 기간 자동 계산
+  useEffect(() => {
+    if (currentRecord.startDate) {
+      // 종료일이 입력되어 있으면 그 날짜 사용, 없으면 상태에 따라 처리
+      let endDate: string | undefined = currentRecord.endDate || undefined
+      
+      if (!endDate) {
+        // 종료일이 없을 때 상태에 따라 처리
+        if (currentRecord.status === '급여완료' || currentRecord.status === '급여중지') {
+          // 완료/중지 상태인데 종료일이 없으면 오늘까지 계산
+          endDate = undefined // calculateDuration에서 오늘 날짜 사용
+        } else if (currentRecord.status === '급여중') {
+          // 급여중이면 오늘까지 계산
+          endDate = undefined // calculateDuration에서 오늘 날짜 사용
+        }
+      }
+      
+      const calculatedDuration = calculateDuration(
+        currentRecord.startDate,
+        endDate
+      )
+      
+      if (calculatedDuration) {
+        setCurrentRecord(prev => ({
+          ...prev,
+          duration: calculatedDuration
+        }))
+      }
+    } else {
+      // 시작일이 없으면 duration 초기화
+      setCurrentRecord(prev => ({
+        ...prev,
+        duration: ''
+      }))
+    }
+  }, [currentRecord.startDate, currentRecord.endDate, currentRecord.status])
+
   // 급여 기록 추가
   const addFeedingRecord = () => {
     if (currentRecord.productName && currentRecord.brand) {
@@ -316,7 +389,7 @@ export default function WritePostPage() {
   }
 
   // 포스트 제출
-  const submitPost = () => {
+  const submitPost = async () => {
     // 포스트 ID 생성 (타임스탬프 기반)
     const postId = `post-${Date.now()}`
     const now = new Date().toISOString().split('T')[0]
@@ -348,14 +421,65 @@ export default function WritePostPage() {
       feedingRecords: feedingRecords
     }
     
-    // 로컬 스토리지에 저장
     try {
+      // Supabase API로 저장 시도
+      try {
+        const response = await fetch('/api/pet-log/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            post: {
+              id: postData.id,
+              petName: postData.petName,
+              petBreed: postData.petBreed,
+              petAge: postData.petAge,
+              petWeight: postData.petWeight,
+              ownerName: postData.ownerName,
+              ownerId: postData.ownerId,
+              ownerAvatar: postData.ownerAvatar,
+              petAvatar: postData.petAvatar,
+              petSpecies: postData.petSpecies,
+            },
+            feedingRecords: feedingRecords.map(record => ({
+              id: record.id,
+              productName: record.productName,
+              category: record.category,
+              brand: record.brand,
+              startDate: record.startDate,
+              endDate: record.endDate,
+              status: record.status,
+              duration: record.duration,
+              palatability: record.palatability,
+              satisfaction: record.satisfaction,
+              repurchaseIntent: record.repurchaseIntent,
+              comment: record.comment,
+              price: record.price,
+              purchaseLocation: record.purchaseLocation,
+              sideEffects: record.sideEffects || [],
+              benefits: record.benefits || []
+            }))
+          }),
+        })
+
+        if (response.ok) {
+          console.log('✅ Supabase에 포스트가 저장되었습니다:', postData.id)
+        } else {
+          const errorData = await response.json()
+          console.warn('⚠️ Supabase 저장 실패, localStorage로 fallback:', errorData)
+        }
+      } catch (apiError) {
+        console.warn('⚠️ Supabase API 오류, localStorage로 fallback:', apiError)
+      }
+
+      // 로컬 스토리지에도 저장 (fallback)
       const existingPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
       const updatedPosts = [postData, ...existingPosts]
       localStorage.setItem('petLogPosts', JSON.stringify(updatedPosts))
-      console.log('포스트가 저장되었습니다:', postData)
+      console.log('✅ localStorage에 포스트가 저장되었습니다:', postData.id)
     } catch (error) {
-      console.error('포스트 저장 중 오류:', error)
+      console.error('❌ 포스트 저장 중 오류:', error)
       alert('포스트 저장 중 오류가 발생했습니다.')
       return
     }
@@ -681,41 +805,54 @@ export default function WritePostPage() {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        급여 시작일
+                        급여 시작일 *
                       </label>
                       <input
                         type="date"
                         value={currentRecord.startDate}
                         onChange={(e) => setCurrentRecord({...currentRecord, startDate: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        required
                       />
                     </div>
                     
-                    {currentRecord.status === '급여완료' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          급여 종료일
-                        </label>
-                        <input
-                          type="date"
-                          value={currentRecord.endDate}
-                          onChange={(e) => setCurrentRecord({...currentRecord, endDate: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        />
-                      </div>
-                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        급여 종료일 <span className="text-xs text-gray-500 font-normal">(선택)</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={currentRecord.endDate || ''}
+                        onChange={(e) => setCurrentRecord({...currentRecord, endDate: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        min={currentRecord.startDate || undefined} // 시작일 이후만 선택 가능
+                        max={new Date().toISOString().split('T')[0]} // 오늘 이후 날짜 선택 불가
+                        disabled={!currentRecord.startDate} // 시작일이 없으면 비활성화
+                      />
+                      {!currentRecord.startDate && (
+                        <p className="mt-1 text-xs text-gray-500">시작일을 먼저 입력해주세요</p>
+                      )}
+                      {currentRecord.status === '급여중' && currentRecord.endDate && (
+                        <p className="mt-1 text-xs text-amber-600">급여중 상태에서는 종료일이 있어도 오늘까지 계산됩니다</p>
+                      )}
+                    </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        급여 기간
+                        급여 기간 <span className="text-xs text-gray-500 font-normal">(자동 계산)</span>
                       </label>
                       <input
                         type="text"
-                        value={currentRecord.duration}
-                        onChange={(e) => setCurrentRecord({...currentRecord, duration: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="예: 3개월, 1년 2개월"
+                        value={currentRecord.duration || ''}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+                        placeholder={currentRecord.startDate ? '날짜를 입력하면 자동으로 계산됩니다' : '예: 3개월, 1년 2개월'}
                       />
+                      {currentRecord.startDate && !currentRecord.duration && (
+                        <p className="mt-1 text-xs text-gray-500">
+                          종료일을 입력하면 기간이 자동으로 계산됩니다
+                        </p>
+                      )}
                     </div>
                     
                     <div>

@@ -15,12 +15,28 @@ const useSupabase = () => {
 // GET - 펫 로그 포스트 목록 조회
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const petProfileId = searchParams.get('petProfileId')
+    const petName = searchParams.get('petName')
+    
     // Supabase 사용 가능하면 Supabase에서 가져오기
     if (useSupabase()) {
       try {
-        const { data: posts, error: postsError } = await supabase
+        let query = supabase
           .from('pet_log_posts')
           .select('*')
+        
+        // 반려동물 프로필 ID로 필터링
+        if (petProfileId) {
+          query = query.eq('pet_profile_id', petProfileId)
+        }
+        
+        // 반려동물 이름으로 필터링 (petProfileId가 없을 경우)
+        if (petName && !petProfileId) {
+          query = query.ilike('pet_name', `%${petName}%`)
+        }
+        
+        const { data: posts, error: postsError } = await query
           .order('created_at', { ascending: false })
 
         if (!postsError && posts && posts.length > 0) {
@@ -114,6 +130,7 @@ export async function POST(request: Request) {
         owner_avatar: post.ownerAvatar || null,
         pet_avatar: post.petAvatar || null,
         pet_species: post.petSpecies || 'dog',
+        pet_profile_id: post.petProfileId || null,
         total_records: feedingRecords?.length || 0,
         views: 0,
         likes: 0,
