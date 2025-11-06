@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
 // Supabase 사용 여부 확인
-const useSupabase = () => {
+const isSupabaseConfigured = () => {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -15,7 +15,7 @@ const useSupabase = () => {
 // POST - 댓글 생성
 export async function POST(request: Request) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: 'Supabase not configured' },
         { status: 501 }
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 // PUT - 댓글 업데이트 (좋아요 등)
 export async function PUT(request: Request) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: 'Supabase not configured' },
         { status: 501 }

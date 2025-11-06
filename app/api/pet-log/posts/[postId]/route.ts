@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
 // Supabase 사용 여부 확인
-const useSupabase = () => {
+const isSupabaseConfigured = () => {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -21,7 +21,7 @@ export async function GET(
     const postId = params.postId
 
     // Supabase 사용 가능하면 Supabase에서 가져오기
-    if (useSupabase()) {
+    if (isSupabaseConfigured()) {
       try {
         // 포스트 가져오기
         const { data: post, error: postError } = await supabase
@@ -112,7 +112,7 @@ export async function PUT(
   { params }: { params: { postId: string } }
 ) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: 'Supabase not configured' },
         { status: 501 }
@@ -162,7 +162,7 @@ export async function DELETE(
   { params }: { params: { postId: string } }
 ) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: 'Supabase not configured' },
         { status: 501 }

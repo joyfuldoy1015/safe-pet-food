@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
 // Supabase 사용 여부 확인
-const useSupabase = () => {
+const isSupabaseConfigured = () => {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || 'asc'
 
     // Supabase 사용 가능하면 Supabase에서 가져오기
-    if (useSupabase()) {
+    if (isSupabaseConfigured()) {
       try {
         let query = supabase.from('brands').select('*')
 
@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
 // POST - 브랜드 생성 (Supabase 사용)
 export async function POST(request: NextRequest) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { 
           error: 'Brand creation not supported',
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
 // PUT - 브랜드 수정 (Supabase 사용)
 export async function PUT(request: NextRequest) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { 
           error: 'Brand update not supported',
@@ -243,7 +243,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - 브랜드 삭제 (Supabase 사용)
 export async function DELETE(request: NextRequest) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { 
           error: 'Brand deletion not supported',

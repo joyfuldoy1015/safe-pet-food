@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
 // Supabase 사용 여부 확인
-const useSupabase = () => {
+const isSupabaseConfigured = () => {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -15,7 +15,7 @@ const useSupabase = () => {
 // POST - 사료 등급 분석 결과 저장
 export async function POST(request: Request) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       // Supabase가 없으면 localStorage에 저장하도록 안내 (클라이언트에서 처리)
       return NextResponse.json(
         { 
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 // GET - 사료 등급 분석 결과 조회
 export async function GET(request: NextRequest) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json([], { status: 200 })
     }
 

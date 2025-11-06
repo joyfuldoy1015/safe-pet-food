@@ -4,7 +4,7 @@ import reviewsData from '../../../../data/reviews.json'
 import { supabase } from '@/lib/supabase'
 
 // Supabase 사용 여부 확인
-const useSupabase = () => {
+const isSupabaseConfigured = () => {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -39,7 +39,7 @@ export async function GET(
     const brandName = decodeURIComponent(params.brandName)
     
     // Supabase 사용 가능하면 Supabase에서 가져오기
-    if (useSupabase()) {
+    if (isSupabaseConfigured()) {
       try {
         const { data, error } = await supabase
           .from('brands')

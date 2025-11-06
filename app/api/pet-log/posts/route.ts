@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
 // Supabase 사용 여부 확인
-const useSupabase = () => {
+const isSupabaseConfigured = () => {
   return !!(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const petName = searchParams.get('petName')
     
     // Supabase 사용 가능하면 Supabase에서 가져오기
-    if (useSupabase()) {
+    if (isSupabaseConfigured()) {
       try {
         let query = supabase
           .from('pet_log_posts')
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
 // POST - 새 펫 로그 포스트 생성
 export async function POST(request: Request) {
   try {
-    if (!useSupabase()) {
+    if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { 
           error: 'Supabase not configured',
