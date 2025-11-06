@@ -68,7 +68,8 @@ interface DetailedPetLogPost {
   feedingRecords: FeedingRecord[]
   views: number
   likes: number
-  comments: number
+  comments: number | any[] // 배열 또는 숫자
+  totalComments?: number // 옵셔널 속성 추가
   isLiked: boolean
 }
 
