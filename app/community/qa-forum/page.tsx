@@ -302,7 +302,7 @@ export default function CommunityQAForumPage() {
                 }`}
               >
                 <Flame className="h-4 w-4" />
-                <span className="text-sm font-medium">Hot</span>
+                <span className="text-sm font-medium">인기글</span>
               </button>
               <button
                 onClick={() => setSortOption('recent')}
@@ -313,7 +313,7 @@ export default function CommunityQAForumPage() {
                 }`}
               >
                 <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium">Recent</span>
+                <span className="text-sm font-medium">새 글</span>
               </button>
               <button
                 onClick={() => setSortOption('unanswered')}
@@ -324,7 +324,7 @@ export default function CommunityQAForumPage() {
                 }`}
               >
                 <HelpCircle className="h-4 w-4" />
-                <span className="text-sm font-medium">Unanswered</span>
+                <span className="text-sm font-medium">답변 대기 중</span>
               </button>
             </div>
           </div>
