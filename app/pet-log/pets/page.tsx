@@ -123,7 +123,7 @@ export default function PetsPage() {
                 className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <Plus className="h-5 w-5" />
-                새 반려동물 등록
+                새 반려동물 등록하기
               </button>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function PetsPage() {
                 className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Plus className="h-5 w-5" />
-                새 반려동물 등록
+                새 반려동물 등록하기
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
