@@ -94,19 +94,9 @@ export default function PetsPage() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">내 반려동물 관리</h1>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 mb-4">
+          <p className="text-base sm:text-lg text-gray-600">
             등록된 반려동물의 정보를 관리하고 급여 기록을 작성할 수 있습니다
           </p>
-          {/* 데스크톱에서만 표시되는 새 반려동물 등록 버튼 */}
-          <div className="hidden md:block">
-            <button
-              onClick={handleNewPetClick}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              <Plus className="h-5 w-5" />
-              새 반려동물 등록
-            </button>
-          </div>
         </div>
 
         {/* 반려동물 목록 */}
@@ -127,10 +117,10 @@ export default function PetsPage() {
                 <Plus className="h-5 w-5" />
                 첫 반려동물 등록하기
               </button>
-              {/* 모바일에서만 표시되는 새 반려동물 등록 버튼 */}
+              {/* 새 반려동물 등록 버튼 */}
               <button
                 onClick={handleNewPetClick}
-                className="md:hidden inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-purple-500 text-purple-600 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <Plus className="h-5 w-5" />
                 새 반려동물 등록
@@ -139,11 +129,11 @@ export default function PetsPage() {
           </div>
         ) : (
           <>
-            {/* 모바일에서만 표시되는 새 반려동물 등록 버튼 */}
-            <div className="md:hidden mb-6">
+            {/* 새 반려동물 등록 버튼 */}
+            <div className="mb-6">
               <button
                 onClick={handleNewPetClick}
-                className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Plus className="h-5 w-5" />
                 새 반려동물 등록
