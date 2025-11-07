@@ -1,483 +1,430 @@
 'use client'
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { Search, Filter, MessageSquare, Plus, ThumbsUp, ThumbsDown, CheckCircle, Clock, XCircle, User, Award, ArrowLeft } from 'lucide-react'
-
-interface Question {
-  id: string
-  title: string
-  content: string
-  author: string
-  authorLevel: 'beginner' | 'experienced' | 'expert'
-  category: 'food' | 'health' | 'behavior' | 'products' | 'general'
-  status: 'open' | 'answered' | 'closed'
-  createdAt: string
-  votes: number
-  answerCount: number
-  isAnswered: boolean
-  answers?: Answer[]
-}
-
-interface Answer {
-  id: string
-  content: string
-  author: string
-  authorLevel: 'beginner' | 'experienced' | 'expert'
-  createdAt: string
-  votes: number
-  isAccepted: boolean
-}
-
-const mockQuestions: Question[] = [
+import React, { useState, useMemo, useEffect } from 'react'
+import { Search, Plus, Flame, Clock, HelpCircle, ChevronDown, Loader2 } from 'lucide-react'
+import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
+import AskQuestionModal from '@/app/components/qa-forum/AskQuestionModal'
+import CategoryTabs from '@/app/components/qa-forum/CategoryTabs'
+import SidebarTrending from '@/app/components/qa-forum/SidebarTrending'
+// Mock data - in production, this would come from an API
+const questionsData = [
   {
     id: '1',
     title: '강아지가 사료를 잘 안 먹어요. 어떻게 해야 할까요?',
-    content: '3살 골든리트리버인데 최근에 사료를 잘 안 먹습니다. 건강에는 문제가 없어 보이는데 식욕이 떨어진 것 같아요.',
-    author: '반려인초보',
-    authorLevel: 'beginner',
-    category: 'food',
-    status: 'answered',
-    createdAt: '2024-01-20',
+    content: '3살 골든리트리버인데 최근에 사료를 잘 안 먹습니다. 건강에는 문제가 없어 보이는데 식욕이 떨어진 것 같아요.\n\n평소에는 잘 먹던 아이인데 2주 전부터 갑자기 사료를 남기기 시작했어요. 간식은 잘 먹는데 사료만 안 먹어서 걱정입니다.\n\n혹시 비슷한 경험 있으신 분들 조언 부탁드려요. 병원에 가봐야 할까요?',
+    author: { name: '반려인초보', level: 'beginner' },
+    category: '🍖 사료 & 영양',
+    categoryEmoji: '🍖',
     votes: 15,
     answerCount: 3,
-    isAnswered: true,
-    answers: [
-      {
-        id: 'a1',
-        content: '사료를 바꿔보시거나 토핑을 조금 올려주시는 것도 좋은 방법입니다. 건강검진도 받아보세요.',
-        author: '수의사김선생',
-        authorLevel: 'expert',
-        createdAt: '2024-01-20',
-        votes: 12,
-        isAccepted: true
-      }
-    ]
+    views: 234,
+    createdAt: '2024-01-20T10:30:00Z',
+    updatedAt: '2024-01-20T14:20:00Z',
+    status: 'answered'
   },
   {
     id: '2',
     title: '고양이 모래 추천 부탁드립니다',
-    content: '털 빠짐이 심한 장모종 고양이를 키우고 있는데, 모래가 털에 잘 붙지 않는 제품이 있을까요?',
-    author: '냥집사5년차',
-    authorLevel: 'experienced',
-    category: 'products',
-    status: 'open',
-    createdAt: '2024-01-19',
+    content: '털 빠짐이 심한 장모종 고양이를 키우고 있는데, 모래가 털에 잘 붙지 않는 제품이 있을까요?\n\n현재는 일반 벤토나이트 모래를 사용하고 있는데, 털에 많이 붙어서 청소가 힘들어요. 클레이 모래나 다른 종류의 모래를 추천해주시면 감사하겠습니다!',
+    author: { name: '냥집사5년차', level: 'experienced' },
+    category: '💬 자유토론',
+    categoryEmoji: '💬',
     votes: 8,
     answerCount: 2,
-    isAnswered: false
+    views: 156,
+    createdAt: '2024-01-19T15:45:00Z',
+    status: 'open'
   },
   {
     id: '3',
     title: '강아지 영양제 급여 시기가 궁금해요',
-    content: '6개월 된 강아지인데 언제부터 영양제를 급여하는 게 좋을까요? 필수 영양제가 있다면 추천해주세요.',
-    author: '퍼피맘',
-    authorLevel: 'beginner',
-    category: 'health',
-    status: 'answered',
-    createdAt: '2024-01-18',
+    content: '6개월 된 강아지인데 언제부터 영양제를 급여하는 게 좋을까요? 필수 영양제가 있다면 추천해주세요.\n\n현재는 사료만 먹이고 있는데, 주변에서 영양제를 먹여야 한다는 말을 들어서 궁금합니다. 어떤 영양제가 필요한지, 언제부터 시작하는 게 좋은지 알려주세요!',
+    author: { name: '퍼피맘', level: 'beginner' },
+    category: '❤️ 건강',
+    categoryEmoji: '❤️',
     votes: 22,
     answerCount: 5,
-    isAnswered: true
+    views: 312,
+    createdAt: '2024-01-18T09:15:00Z',
+    updatedAt: '2024-01-19T11:30:00Z',
+    status: 'answered'
+  },
+  {
+    id: '4',
+    title: '강아지 산책 시 다른 강아지와 싸워요',
+    content: '1살 된 믹스견을 키우고 있는데, 산책할 때 다른 강아지를 만나면 짖거나 공격적인 행동을 보여요.\n\n사회화가 부족한 것 같은데, 어떻게 훈련해야 할까요? 전문 훈련사에게 맡겨야 할까요?',
+    author: { name: '댕댕이집사', level: 'beginner' },
+    category: '🎓 훈련 & 행동',
+    categoryEmoji: '🎓',
+    votes: 12,
+    answerCount: 4,
+    views: 189,
+    createdAt: '2024-01-17T13:20:00Z',
+    status: 'open'
+  },
+  {
+    id: '5',
+    title: '고양이 화장실 훈련 방법',
+    content: '새로 입양한 3개월 고양이인데, 화장실을 제대로 사용하지 못해요.\n\n모래는 어디에 두는 게 좋고, 어떻게 훈련해야 할까요?',
+    author: { name: '고양이초보', level: 'beginner' },
+    category: '🎓 훈련 & 행동',
+    categoryEmoji: '🎓',
+    votes: 18,
+    answerCount: 6,
+    views: 267,
+    createdAt: '2024-01-16T16:10:00Z',
+    updatedAt: '2024-01-17T10:45:00Z',
+    status: 'answered'
+  },
+  {
+    id: '6',
+    title: '강아지 사료 브랜드 추천해주세요',
+    content: '골든리트리버 2살을 키우고 있는데, 어떤 사료 브랜드가 좋을까요?\n\n알레르기가 있어서 곡물 없는 사료를 찾고 있어요. 가격대는 중간 정도면 좋겠습니다.',
+    author: { name: '골든맘', level: 'experienced' },
+    category: '🍖 사료 & 영양',
+    categoryEmoji: '🍖',
+    votes: 25,
+    answerCount: 8,
+    views: 445,
+    createdAt: '2024-01-15T11:00:00Z',
+    updatedAt: '2024-01-16T14:30:00Z',
+    status: 'answered'
   }
+] as Question[]
+
+// Categories configuration
+const categories = [
+  { value: 'all', label: '전체', emoji: '🌐' },
+  { value: '🐶 강아지', label: '강아지', emoji: '🐶' },
+  { value: '🐱 고양이', label: '고양이', emoji: '🐱' },
+  { value: '🍖 사료 & 영양', label: '사료 & 영양', emoji: '🍖' },
+  { value: '❤️ 건강', label: '건강', emoji: '❤️' },
+  { value: '🎓 훈련 & 행동', label: '훈련 & 행동', emoji: '🎓' },
+  { value: '💬 자유토론', label: '자유토론', emoji: '💬' }
 ]
 
-const categoryLabels = {
-  all: '전체',
-  food: '사료/간식',
-  health: '건강/영양',
-  behavior: '행동/훈련',
-  products: '용품/제품',
-  general: '일반'
-}
+// Sort options
+type SortOption = 'hot' | 'recent' | 'unanswered'
 
-const statusLabels = {
-  all: '전체',
-  open: '답변 대기',
-  answered: '답변 완료',
-  closed: '해결됨'
-}
+// Number of questions to load per page
+const QUESTIONS_PER_PAGE = 5
 
 export default function CommunityQAForumPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [sortOption, setSortOption] = useState<SortOption>('hot')
   const [showQuestionModal, setShowQuestionModal] = useState(false)
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [questions, setQuestions] = useState<Question[]>(mockQuestions)
-  
-  // 로그인 상태 관리 (실제 배포 시에는 NextAuth.js, 세션, 또는 인증 컨텍스트에서 가져와야 함)
-  // 예: const { data: session } = useSession() 또는 const { user } = useAuth()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [questions, setQuestions] = useState<Question[]>(
+    questionsData.map((q) => ({
+      ...q,
+      isUpvoted: false
+    }))
+  )
+  const [userVotes, setUserVotes] = useState<Record<string, boolean>>({})
+  const [displayedCount, setDisplayedCount] = useState(QUESTIONS_PER_PAGE)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
-  const filteredQuestions = questions.filter(question => {
-    const matchesSearch = question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  // Format time ago helper
+  const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffInSeconds < 60) return '방금 전'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}일 전`
+    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}개월 전`
+    return `${Math.floor(diffInSeconds / 31536000)}년 전`
+  }
+
+  // Filter and sort questions
+  const filteredAndSortedQuestions = useMemo(() => {
+    let filtered = questions.filter((question) => {
+      const matchesSearch =
+        question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          question.content.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || question.category === selectedCategory
-    const matchesStatus = selectedStatus === 'all' || question.status === selectedStatus
-    
-    return matchesSearch && matchesCategory && matchesStatus
-  })
+      const matchesCategory =
+        selectedCategory === 'all' || question.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
 
-  const sortedQuestions = filteredQuestions.sort((a, b) => {
-    // 최신순으로 정렬
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
+    // Sort based on option
+    switch (sortOption) {
+      case 'hot':
+        filtered.sort((a, b) => {
+          // Hot = combination of votes, answers, and recency
+          const scoreA = a.votes * 2 + a.answerCount + (a.views || 0) / 10
+          const scoreB = b.votes * 2 + b.answerCount + (b.views || 0) / 10
+          return scoreB - scoreA
+        })
+        break
+      case 'recent':
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        break
+      case 'unanswered':
+        filtered = filtered.filter((q) => q.answerCount === 0)
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        break
+    }
 
-  const handleQuestionSubmit = (questionData: any) => {
+    return filtered
+  }, [questions, searchTerm, selectedCategory, sortOption])
+
+  // Reset displayed count when filters change
+  useEffect(() => {
+    setDisplayedCount(QUESTIONS_PER_PAGE)
+  }, [searchTerm, selectedCategory, sortOption])
+
+  // Questions to display (paginated)
+  const displayedQuestions = useMemo(() => {
+    return filteredAndSortedQuestions.slice(0, displayedCount)
+  }, [filteredAndSortedQuestions, displayedCount])
+
+  // Check if there are more questions to load
+  const hasMore = displayedCount < filteredAndSortedQuestions.length
+
+  // Handle load more
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true)
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    setDisplayedCount((prev) => prev + QUESTIONS_PER_PAGE)
+    setIsLoadingMore(false)
+  }
+
+  // Get trending questions (top 5 by votes)
+  const trendingQuestions = useMemo(() => {
+    return [...questions]
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, 5)
+      .map((q) => ({
+        ...q,
+        isUpvoted: userVotes[q.id] || false
+      }))
+  }, [questions, userVotes])
+
+  // Handle upvote
+  const handleUpvote = (questionId: string) => {
+    const isCurrentlyUpvoted = userVotes[questionId]
+
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === questionId
+          ? { ...q, votes: isCurrentlyUpvoted ? q.votes - 1 : q.votes + 1 }
+          : q
+      )
+    )
+
+    setUserVotes((prev) => {
+      if (isCurrentlyUpvoted) {
+        const newVotes = { ...prev }
+        delete newVotes[questionId]
+        return newVotes
+      }
+      return { ...prev, [questionId]: true }
+    })
+  }
+
+  // Handle question submit
+  const handleQuestionSubmit = (data: {
+    title: string
+    category: string
+    content: string
+    isAnonymous: boolean
+    imageUrl?: string
+  }) => {
     const newQuestion: Question = {
       id: `q-${Date.now()}`,
-      title: questionData.title,
-      content: questionData.content,
-      author: '익명',
-      authorLevel: 'beginner',
-      category: questionData.category,
-      status: 'open',
-      createdAt: new Date().toISOString().split('T')[0],
+      title: data.title,
+      content: data.content,
+      author: {
+        name: data.isAnonymous ? '익명' : '사용자',
+        level: 'beginner'
+      },
+      category: data.category,
+      categoryEmoji: categories.find((c) => c.value === data.category)?.emoji || '💬',
       votes: 0,
       answerCount: 0,
-      isAnswered: false
+      views: 0,
+      createdAt: new Date().toISOString(),
+      status: 'open',
+      isUpvoted: false,
+      imageUrl: data.imageUrl
     }
     
     setQuestions([newQuestion, ...questions])
     setShowQuestionModal(false)
   }
 
-  const handleVote = (questionId: string, direction: 'up' | 'down') => {
-    const voteChange = direction === 'up' ? 1 : -1
-    
-    setQuestions(questions.map(question =>
-      question.id === questionId
-        ? { ...question, votes: question.votes + voteChange }
-        : question
-    ))
-
-    // 실제로는 여기서 API 호출
-    console.log(`Voting ${direction} for question ${questionId}`)
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'answered': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'closed': return <XCircle className="h-4 w-4 text-gray-500" />
-      default: return <Clock className="h-4 w-4 text-orange-500" />
-    }
-  }
-
-  const getAuthorBadge = (level: string) => {
-    const badges = {
-      beginner: { label: '새싹', color: 'bg-green-100 text-green-800' },
-      experienced: { label: '경험자', color: 'bg-blue-100 text-blue-800' },
-      expert: { label: '전문가', color: 'bg-purple-100 text-purple-800' }
-    }
-    const badge = badges[level as keyof typeof badges]
-    return (
-      <span className={`px-2 py-1 text-xs rounded-full ${badge.color}`}>
-        {badge.label}
-      </span>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Q&A 포럼 💬
           </h1>
           <p className="text-lg text-gray-600">
             반려동물에 대한 궁금한 점을 질문하고, 경험을 나눠보세요.
           </p>
         </div>
-        {/* Controls */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 mb-8">
-          <div className="space-y-4">
+
+        {/* Search and Sort Bar */}
+        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="질문 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            {/* Filters Row */}
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            {/* Sort Options */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setSortOption('hot')}
+                className={`px-4 py-3 rounded-lg transition-colors flex items-center space-x-2 ${
+                  sortOption === 'hot'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                {Object.entries(categoryLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                <Flame className="h-4 w-4" />
+                <span className="text-sm font-medium">Hot</span>
+              </button>
+              <button
+                onClick={() => setSortOption('recent')}
+                className={`px-4 py-3 rounded-lg transition-colors flex items-center space-x-2 ${
+                  sortOption === 'recent'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                {Object.entries(statusLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+                <Clock className="h-4 w-4" />
+                <span className="text-sm font-medium">Recent</span>
+              </button>
+              <button
+                onClick={() => setSortOption('unanswered')}
+                className={`px-4 py-3 rounded-lg transition-colors flex items-center space-x-2 ${
+                  sortOption === 'unanswered'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">Unanswered</span>
+              </button>
             </div>
-
-            {/* Question Button - Full Width on Mobile */}
-            <button
-              onClick={() => {
-                if (isLoggedIn) {
-                  setShowQuestionModal(true)
-                } else {
-                  setShowLoginModal(true)
-                }
-              }}
-              className="w-full inline-flex items-center justify-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
-            >
-              <Plus className="h-4 w-4" />
-              <span>질문하기</span>
-            </button>
           </div>
         </div>
 
-        {/* Question List */}
-        <div className="space-y-6">
-          {sortedQuestions.length > 0 ? (
-            sortedQuestions.map(question => (
-              <div key={question.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-shadow">
-                {/* Category */}
-                <div className="flex items-center space-x-2 mb-3">
-                  {getStatusIcon(question.status)}
-                  <span className="text-xs text-gray-500 uppercase tracking-wide">
-                    {categoryLabels[question.category as keyof typeof categoryLabels]}
-                  </span>
-                </div>
-
-                {/* Author and Date */}
-                <div className="flex items-center justify-between mb-3">
-                  {/* Left: Author */}
-                  <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    <span className="text-sm text-gray-700 font-medium">{question.author}</span>
-                    {getAuthorBadge(question.authorLevel)}
+        {/* Category Tabs */}
+        <div className="mb-6">
+          <CategoryTabs
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
                   </div>
                   
-                  {/* Right: Date */}
-                  <span className="text-xs text-gray-500">
-                    {question.createdAt}
-                  </span>
-                </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Questions Feed */}
+          <div className="lg:col-span-2 space-y-6">
+            {displayedQuestions.length > 0 ? (
+              <>
+                {displayedQuestions.map((question) => (
+                  <QuestionCard
+                    key={question.id}
+                    question={{
+                      ...question,
+                      isUpvoted: userVotes[question.id] || false
+                    }}
+                    onUpvote={handleUpvote}
+                    formatTimeAgo={formatTimeAgo}
+                  />
+                ))}
 
-                {/* Title */}
-                <Link 
-                  href={`/community/qa-forum/${question.id}`}
-                  className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer block"
-                >
-                  {question.title}
-                </Link>
-
-                {/* Content Summary */}
-                <p className="text-sm text-gray-600 line-clamp-2 mb-4">
-                  {question.content}
-                </p>
-
-                {/* Stats - Right Aligned */}
-                <div className="flex items-center justify-end gap-4 text-sm text-gray-500">
-                  {/* Votes */}
-                  <div className="flex items-center space-x-1">
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        handleVote(question.id, 'up')
-                      }}
-                      className="p-1 text-gray-400 hover:text-green-500 transition-colors"
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="flex justify-center pt-6">
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={isLoadingMore}
+                      className="flex items-center space-x-2 px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-soft"
                     >
-                      <ThumbsUp className="h-4 w-4" />
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>로딩 중...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-5 w-5" />
+                          <span>더 보기</span>
+                        </>
+                      )}
                     </button>
-                    <span className="text-gray-700 font-medium min-w-[1.5rem] text-center">{question.votes}</span>
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        handleVote(question.id, 'down')
-                      }}
-                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                    </button>
-                  </div>
-                  
-                  {/* Comments */}
-                  <div className="flex items-center space-x-1.5">
-                    <MessageSquare className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    <span className="text-gray-700 font-medium">{question.answerCount}</span>
-                  </div>
-
-                  {/* Views (if available) */}
-                  {/* <div className="flex items-center space-x-1.5">
-                    <Eye className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    <span className="text-gray-700 font-medium">123</span>
-                  </div> */}
-                </div>
-
-                {/* Answers Preview */}
-                {question.answers && question.answers.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <div className="flex items-start space-x-3">
-                        <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <span className="text-sm font-medium text-green-800">
-                              {question.answers[0].author}
-                            </span>
-                            {getAuthorBadge(question.answers[0].authorLevel)}
-                            <span className="text-xs text-green-600">채택된 답변</span>
-                          </div>
-                          <p className="text-sm text-green-700 line-clamp-2">
-                            {question.answers[0].content}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 )}
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-20 text-gray-500">
-              <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg">검색 결과가 없습니다.</p>
-              <p className="text-sm mt-1">다른 검색어나 필터를 시도해보세요.</p>
-            </div>
-          )}
-        </div>
 
-        {/* Question Modal */}
-        {showQuestionModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">새 질문 작성</h3>
-              
-              <form onSubmit={(e) => {
-                e.preventDefault()
-                const formData = new FormData(e.target as HTMLFormElement)
-                handleQuestionSubmit({
-                  title: formData.get('title'),
-                  content: formData.get('content'),
-                  category: formData.get('category')
-                })
-              }}>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">제목</label>
-                    <input
-                      type="text"
-                      name="title"
-                      required
-                      placeholder="질문의 제목을 입력해주세요"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                {/* End of list message */}
+                {!hasMore && displayedQuestions.length > 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">모든 질문을 불러왔습니다.</p>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
-                    <select
-                      name="category"
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">카테고리를 선택해주세요</option>
-                      <option value="food">사료/간식</option>
-                      <option value="health">건강/영양</option>
-                      <option value="behavior">행동/훈련</option>
-                      <option value="products">용품/제품</option>
-                      <option value="general">일반</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
-                    <textarea
-                      name="content"
-                      required
-                      rows={6}
-                      placeholder="구체적인 상황과 궁금한 점을 자세히 설명해주세요"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    ></textarea>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowQuestionModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                  >
-                    질문 등록
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Login Required Modal */}
-        {showLoginModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-md w-full p-6">
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-                  <User className="h-6 w-6 text-blue-600" />
-                </div>
-                
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  로그인이 필요합니다
-                </h3>
-                
-                <p className="text-sm text-gray-600 mb-6">
-                  질문을 작성하려면 먼저 로그인해주세요.<br />
-                  로그인 후에 다양한 기능을 이용할 수 있습니다.
+                )}
+              </>
+            ) : (
+              <div className="text-center py-20 bg-white rounded-xl shadow-soft border border-gray-200">
+                <HelpCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium text-gray-900 mb-2">
+                  질문이 없습니다
                 </p>
-                
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    로그인하기
-                  </Link>
-                  
-                  <button
-                    onClick={() => setShowLoginModal(false)}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    취소
-                  </button>
-                </div>
-                
-                <p className="text-xs text-gray-500 mt-4">
-                  아직 계정이 없으신가요? 
-                  <Link href="/signup" className="text-blue-600 hover:text-blue-700 ml-1">
-                    회원가입
-                  </Link>
+                <p className="text-sm text-gray-600">
+                  첫 번째 질문을 작성해보세요!
                 </p>
               </div>
-            </div>
+            )}
           </div>
-        )}
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <SidebarTrending
+              trendingQuestions={trendingQuestions}
+              formatTimeAgo={formatTimeAgo}
+            />
+          </div>
+                </div>
+                
+        {/* Floating Ask Question Button */}
+                  <button
+          onClick={() => setShowQuestionModal(true)}
+          className="fixed bottom-6 right-6 h-14 w-14 bg-blue-500 text-white rounded-full shadow-strong hover:bg-blue-600 transition-all duration-200 hover:scale-110 flex items-center justify-center z-40"
+          aria-label="질문하기"
+                  >
+          <Plus className="h-6 w-6" />
+                  </button>
+
+        {/* Ask Question Modal */}
+        <AskQuestionModal
+          isOpen={showQuestionModal}
+          onClose={() => setShowQuestionModal(false)}
+          onSubmit={handleQuestionSubmit}
+          categories={categories.filter((c) => c.value !== 'all')}
+        />
       </main>
     </div>
   )
