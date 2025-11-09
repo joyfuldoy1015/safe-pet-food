@@ -299,3 +299,111 @@ export const mockComments: Comment[] = [
   }
 ]
 
+// Mock Q&A Threads
+import type { QAThread, QAPost } from '@/lib/types/review-log'
+
+export const mockQAThreads: QAThread[] = [
+  {
+    id: 'thread-1',
+    logId: 'log-1',
+    title: '급여량은 어떻게 하시나요?',
+    authorId: 'owner-2',
+    createdAt: '2024-10-05T10:00:00Z'
+  },
+  {
+    id: 'thread-2',
+    logId: 'log-1',
+    title: '알러지 반응은 없으셨나요?',
+    authorId: 'owner-2',
+    createdAt: '2024-10-06T14:00:00Z'
+  },
+  {
+    id: 'thread-3',
+    logId: 'log-5',
+    title: '페르시안 고양이에게 추천할 만한가요?',
+    authorId: 'owner-1',
+    createdAt: '2024-09-05T11:00:00Z'
+  }
+]
+
+// Mock Q&A Posts
+export const mockQAPosts: QAPost[] = [
+  // Thread 1: 급여량 질문
+  {
+    id: 'post-1',
+    threadId: 'thread-1',
+    authorId: 'owner-2',
+    kind: 'question',
+    content: '급여량은 어떻게 하시나요? 저희 강아지는 3살이고 28kg인데 하루에 몇 컵씩 주시는지 궁금해요.',
+    isAccepted: false,
+    upvotes: 5,
+    createdAt: '2024-10-05T10:00:00Z'
+  },
+  {
+    id: 'post-2',
+    threadId: 'thread-1',
+    authorId: 'owner-1',
+    kind: 'answer',
+    content: '저희 뽀미는 3살 골든 리트리버 28kg인데 하루에 3컵씩 주고 있어요. 아침 1.5컵, 저녁 1.5컵으로 나눠서 주고 있습니다. 체중이 안정적으로 유지되고 있어서 이 양이 적당한 것 같아요.',
+    isAccepted: true,
+    upvotes: 12,
+    createdAt: '2024-10-05T11:30:00Z',
+    parentId: 'post-1'
+  },
+  {
+    id: 'post-3',
+    threadId: 'thread-1',
+    authorId: 'owner-2',
+    kind: 'comment',
+    content: '감사합니다! 저희도 비슷하게 해볼게요.',
+    isAccepted: false,
+    upvotes: 2,
+    createdAt: '2024-10-05T12:00:00Z',
+    parentId: 'post-2'
+  },
+  // Thread 2: 알러지 질문
+  {
+    id: 'post-4',
+    threadId: 'thread-2',
+    authorId: 'owner-2',
+    kind: 'question',
+    content: '알러지 반응은 없으셨나요? 저희 강아지가 닭고기 알러지가 있어서 걱정이에요.',
+    isAccepted: false,
+    upvotes: 3,
+    createdAt: '2024-10-06T14:00:00Z'
+  },
+  {
+    id: 'post-5',
+    threadId: 'thread-2',
+    authorId: 'owner-1',
+    kind: 'answer',
+    content: '저희 뽀미도 닭고기 알러지가 있었는데 이 사료는 전혀 문제가 없었어요. 원료를 확인해보니 닭고기가 포함되어 있지만, 가공 방식이 달라서 그런지 알러지 반응이 없었습니다. 하지만 개체차가 있을 수 있으니 처음에는 소량으로 테스트해보시는 것을 추천드려요.',
+    isAccepted: true,
+    upvotes: 8,
+    createdAt: '2024-10-06T15:00:00Z',
+    parentId: 'post-4'
+  },
+  // Thread 3: 페르시안 추천 질문
+  {
+    id: 'post-6',
+    threadId: 'thread-3',
+    authorId: 'owner-1',
+    kind: 'question',
+    content: '페르시안 고양이에게 추천할 만한가요? 저희 강아지도 장모종인데 털 관리에 도움이 될까요?',
+    isAccepted: false,
+    upvotes: 4,
+    createdAt: '2024-09-05T11:00:00Z'
+  },
+  {
+    id: 'post-7',
+    threadId: 'thread-3',
+    authorId: 'owner-2',
+    kind: 'answer',
+    content: '페르시안 전용 사료라서 털 관리에 특화되어 있어요. 저희 모모는 이 사료를 먹은 후 털이 훨씬 부드러워지고 윤기가 나기 시작했어요. 장모종 강아지에게도 도움이 될 것 같아요!',
+    isAccepted: true,
+    upvotes: 10,
+    createdAt: '2024-09-05T12:00:00Z',
+    parentId: 'post-6'
+  }
+]
+

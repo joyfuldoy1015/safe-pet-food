@@ -55,3 +55,32 @@ export interface Comment {
   isHelpful?: boolean
 }
 
+// Q&A Thread Types
+export interface QAThread {
+  id: string
+  logId: string
+  title: string
+  authorId: string
+  createdAt: string
+}
+
+export interface QAPost {
+  id: string
+  threadId: string
+  authorId: string
+  kind: 'question' | 'answer' | 'comment'
+  content: string
+  parentId?: string
+  isAccepted: boolean
+  upvotes: number
+  createdAt: string
+}
+
+export interface QAPostWithAuthor extends QAPost {
+  author?: {
+    id: string
+    nickname: string
+    avatarUrl?: string
+  }
+}
+

@@ -2,39 +2,67 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Star, Heart, MessageCircle, Eye, ThumbsUp, ThumbsDown, Calendar, ChevronDown, ChevronUp } from 'lucide-react'
-import { ReviewLog, Pet, Owner, Comment } from '@/lib/types/review-log'
-import CommentThread from './CommentThread'
+import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react'
+import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPost, QAPostWithAuthor } from '@/lib/types/review-log'
+import CommentThread from '@/app/components/pet-log/CommentThread'
+import QAThreadList from './QAThreadList'
+import { useAuth } from '@/hooks/useAuth'
 
-interface LogDrawerProps {
-  review: ReviewLog | null
+interface LogDetailDrawerProps {
+  log: ReviewLog | null
   pet: Pet | null
   owner: Owner | null
   isOpen: boolean
   onClose: () => void
-  onStatusChange: (reviewId: string, newStatus: 'feeding' | 'paused' | 'completed') => void
+  onStatusChange?: (logId: string, newStatus: 'feeding' | 'paused' | 'completed') => void
+  onEdit?: (log: ReviewLog) => void
+  onDelete?: (logId: string) => void
   formatTimeAgo: (date: string) => string
   formatDate: (date: string) => string
+  calculateAge: (birthDate: string) => string
   comments: Comment[]
   onCommentSubmit: (logId: string, content: string, parentId?: string) => void
+  onAuthRequired?: () => void
+  qaThreads?: QAThread[]
+  qaPosts?: QAPostWithAuthor[]
+  onQAThreadCreate?: (logId: string, title: string) => void
+  onQAPostSubmit?: (threadId: string, content: string, kind: 'question' | 'answer' | 'comment', parentId?: string) => void
+  onAcceptAnswer?: (postId: string) => void
+  onUpvote?: (postId: string) => void
+  getAuthorInfo?: (authorId: string) => { nickname: string; avatarUrl?: string } | null
   initialTab?: 'details' | 'comments' | 'qa'
   initialThreadId?: string
 }
 
-export default function LogDrawer({
-  review,
+/**
+ * Detailed log drawer with full information and comments
+ */
+export default function LogDetailDrawer({
+  log,
   pet,
   owner,
   isOpen,
   onClose,
   onStatusChange,
+  onEdit,
+  onDelete,
   formatTimeAgo,
   formatDate,
+  calculateAge,
   comments,
   onCommentSubmit,
+  onAuthRequired,
+  qaThreads = [],
+  qaPosts = [],
+  onQAThreadCreate,
+  onQAPostSubmit,
+  onAcceptAnswer,
+  onUpvote,
+  getAuthorInfo,
   initialTab = 'details',
   initialThreadId
-}: LogDrawerProps) {
+}: LogDetailDrawerProps) {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'details' | 'comments' | 'qa'>(initialTab)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['reason', 'changes']))
   const [newComment, setNewComment] = useState('')
@@ -46,36 +74,15 @@ export default function LogDrawer({
     }
   }, [isOpen, initialTab])
 
-  if (!review || !pet || !owner) return null
+  if (!log || !pet || !owner) return null
 
-  const categoryConfig = {
-    feed: { label: '사료', color: 'bg-blue-50 text-blue-700' },
-    snack: { label: '간식', color: 'bg-green-50 text-green-700' },
-    supplement: { label: '영양제', color: 'bg-purple-50 text-purple-700' },
-    toilet: { label: '화장실', color: 'bg-orange-50 text-orange-700' }
-  }
+  const isOwner = user?.id === log.ownerId
+  const reviewComments = comments.filter((c) => c.logId === log.id)
 
   const statusConfig = {
     feeding: { label: '급여 중', color: 'bg-green-100 text-green-800' },
     paused: { label: '급여 중지', color: 'bg-gray-100 text-gray-800' },
     completed: { label: '급여 완료', color: 'bg-blue-100 text-blue-800' }
-  }
-
-  const category = categoryConfig[review.category]
-  const status = statusConfig[review.status]
-
-  const calculateAge = (birthDate: string): string => {
-    const birth = new Date(birthDate)
-    const now = new Date()
-    const years = now.getFullYear() - birth.getFullYear()
-    const months = now.getMonth() - birth.getMonth()
-    if (months < 0) {
-      return `${years - 1}세`
-    }
-    if (years > 0) {
-      return `${years}세`
-    }
-    return `${months}개월`
   }
 
   const toggleSection = (section: string) => {
@@ -91,19 +98,23 @@ export default function LogDrawer({
   }
 
   const handleStatusChange = (newStatus: 'feeding' | 'paused' | 'completed') => {
-    if (confirm(`상태를 "${statusConfig[newStatus].label}"로 변경하시겠습니까?`)) {
-      onStatusChange(review.id, newStatus)
+    if (onStatusChange && confirm(`상태를 "${statusConfig[newStatus].label}"로 변경하시겠습니까?`)) {
+      onStatusChange(log.id, newStatus)
     }
   }
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newComment.trim()) return
-    onCommentSubmit(review.id, newComment.trim())
+
+    if (!user && onAuthRequired) {
+      onAuthRequired()
+      return
+    }
+
+    onCommentSubmit(log.id, newComment.trim())
     setNewComment('')
   }
-
-  const reviewComments = comments.filter((c) => c.logId === review.id)
 
   return (
     <AnimatePresence>
@@ -130,73 +141,92 @@ export default function LogDrawer({
             <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-xl font-semibold sm:font-bold text-gray-900 truncate">{review.brand}</h2>
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">{review.product}</p>
+                  <h2 className="text-base sm:text-xl font-semibold sm:font-bold text-gray-900 truncate">
+                    {log.brand}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">{log.product}</p>
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
-              >
-                <X className="h-5 w-5 text-gray-500" />
-              </button>
+              <div className="flex items-center gap-2">
+                {isOwner && (
+                  <>
+                    {onEdit && (
+                      <button
+                        onClick={() => onEdit(log)}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        aria-label="수정"
+                      >
+                        <Edit className="h-5 w-5 text-gray-500" />
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        onClick={() => {
+                          if (confirm('정말 삭제하시겠습니까?')) {
+                            onDelete(log.id)
+                          }
+                        }}
+                        className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                        aria-label="삭제"
+                      >
+                        <Trash2 className="h-5 w-5 text-red-500" />
+                      </button>
+                    )}
+                  </>
+                )}
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
             </div>
 
-            {/* Status Switch & Rating */}
+            {/* Status & Rating */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 space-y-3">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                <span className="text-xs sm:text-sm font-medium text-gray-700">상태:</span>
-                <div className="flex gap-2 flex-wrap">
-                  {(['feeding', 'paused', 'completed'] as const).map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => handleStatusChange(s)}
-                      className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-                        review.status === s
-                          ? statusConfig[s].color
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {statusConfig[s].label}
-                    </button>
-                  ))}
+              {isOwner && onStatusChange && (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">상태:</span>
+                  <div className="flex gap-2 flex-wrap">
+                    {(['feeding', 'paused', 'completed'] as const).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => handleStatusChange(s)}
+                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                          log.status === s
+                            ? statusConfig[s].color
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {statusConfig[s].label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              {review.rating && (
+              )}
+              {log.rating && (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }, (_, i) => (
                       <Star
                         key={i}
-                        className={`h-5 w-5 ${
-                          i < review.rating!
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
+                        size={14}
+                        className={i < Math.round(log.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
                       />
                     ))}
                   </div>
-                  <span className="text-lg font-bold text-gray-900">{review.rating}.0</span>
-                  {review.recommend !== undefined && (
-                    <div className="flex items-center gap-1 ml-2">
-                      {review.recommend ? (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-lg">
-                          <ThumbsUp className="h-4 w-4" />
-                          <span className="text-xs font-medium">추천</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded-lg">
-                          <ThumbsDown className="h-4 w-4" />
-                          <span className="text-xs font-medium">비추천</span>
-                        </div>
-                      )}
-                    </div>
+                  <span className="text-sm font-medium text-gray-700">{log.rating.toFixed(1)}</span>
+                  {log.recommend !== undefined && (
+                    <span className="text-sm text-gray-600">
+                      {log.recommend ? '👍 추천' : '👎 비추천'}
+                    </span>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Pet Mini Profile */}
+            {/* Pet Info */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
               <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">반려동물 정보</h3>
               <div className="flex items-center gap-3">
@@ -204,24 +234,11 @@ export default function LogDrawer({
                   {pet.species === 'dog' ? '🐕' : '🐱'}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-900">{pet.name}</div>
-                  <div className="text-sm text-gray-600">
-                    {pet.species === 'dog' ? '강아지' : '고양이'} · {calculateAge(pet.birthDate)} · {pet.weightKg}kg
+                  <div className="font-medium text-gray-900">{pet.name}</div>
+                  <div className="text-xs sm:text-sm text-gray-600">
+                    {pet.species === 'dog' ? '강아지' : '고양이'} · {calculateAge(pet.birthDate)}
+                    {pet.weightKg && ` · ${pet.weightKg}kg`}
                   </div>
-                  {pet.tags && pet.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {pet.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 bg-orange-100 text-orange-800 rounded text-xs"
-                        >
-                          {tag === 'allergy-chicken' ? '닭 알레르기' :
-                           tag === 'sensitive-stomach' ? '민감한 위' :
-                           tag === 'picky-eater' ? '편식' : tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -233,10 +250,10 @@ export default function LogDrawer({
                 <span className="text-xs sm:text-sm font-medium text-gray-900">급여 기간</span>
               </div>
               <p className="text-xs sm:text-sm text-gray-700">
-                {formatDate(review.periodStart)}
-                {review.periodEnd && ` ~ ${formatDate(review.periodEnd)}`}
-                {!review.periodEnd && ' ~ 현재'}
-                {review.durationDays && ` (총 ${review.durationDays}일)`}
+                {formatDate(log.periodStart)}
+                {log.periodEnd && ` ~ ${formatDate(log.periodEnd)}`}
+                {!log.periodEnd && ' ~ 현재'}
+                {log.durationDays && ` (총 ${log.durationDays}일)`}
               </p>
             </div>
 
@@ -264,6 +281,21 @@ export default function LogDrawer({
                 {reviewComments.length > 0 && (
                   <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">
                     {reviewComments.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('qa')}
+                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors relative ${
+                  activeTab === 'qa'
+                    ? 'text-[#3056F5] border-b-2 border-[#3056F5]'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Q&A
+                {qaThreads.length > 0 && (
+                  <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">
+                    {qaThreads.length}
                   </span>
                 )}
               </button>
@@ -295,16 +327,16 @@ export default function LogDrawer({
                           className="px-3 sm:px-4 py-2 sm:py-3"
                         >
                           <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-line">
-                            {review.notes || review.excerpt}
+                            {log.notes || log.excerpt}
                           </p>
-                          {review.continueReasons && review.continueReasons.length > 0 && (
+                          {log.continueReasons && log.continueReasons.length > 0 && (
                             <div className="mt-3">
                               <p className="text-xs font-medium text-gray-600 mb-2">계속하는 이유:</p>
                               <div className="flex flex-wrap gap-2">
-                                {review.continueReasons.map((reason, index) => (
+                                {log.continueReasons.map((reason) => (
                                   <span
-                                    key={index}
-                                    className="px-2 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-medium"
+                                    key={reason}
+                                    className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs border border-emerald-100"
                                   >
                                     {reason}
                                   </span>
@@ -336,10 +368,10 @@ export default function LogDrawer({
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="px-4 py-3"
+                          className="px-3 sm:px-4 py-2 sm:py-3"
                         >
-                          <p className="text-sm text-gray-700">
-                            {review.notes || '관찰된 변화에 대한 상세 정보가 없습니다.'}
+                          <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-line">
+                            {log.notes || '관찰된 변화가 기록되지 않았습니다.'}
                           </p>
                         </motion.div>
                       )}
@@ -347,7 +379,7 @@ export default function LogDrawer({
                   </div>
 
                   {/* 중지/교체 이유 */}
-                  {review.stopReasons && review.stopReasons.length > 0 && (
+                  {log.stopReasons && log.stopReasons.length > 0 && (
                     <div className="border border-gray-200 rounded-xl overflow-hidden">
                       <button
                         onClick={() => toggleSection('stop')}
@@ -366,13 +398,13 @@ export default function LogDrawer({
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="px-4 py-3"
+                            className="px-3 sm:px-4 py-2 sm:py-3"
                           >
                             <div className="flex flex-wrap gap-2">
-                              {review.stopReasons.map((reason, index) => (
+                              {log.stopReasons.map((reason) => (
                                 <span
-                                  key={index}
-                                  className="px-2 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-medium"
+                                  key={reason}
+                                  className="px-2 py-1 rounded-full bg-rose-50 text-rose-700 text-xs border border-rose-100"
                                 >
                                   {reason}
                                 </span>
@@ -388,33 +420,23 @@ export default function LogDrawer({
                   <div className="flex items-center gap-3 sm:gap-6 pt-3 sm:pt-4 border-t border-gray-200 text-xs sm:text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <Heart className="h-4 w-4" />
-                      <span>{review.likes}</span>
+                      <span>{log.likes}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MessageCircle className="h-4 w-4" />
-                      <span>{review.commentsCount}</span>
+                      <span>{log.commentsCount}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      <span>{review.views}</span>
-                    </div>
-                    <div className="ml-auto text-xs text-gray-500">
-                      {formatTimeAgo(review.updatedAt)}
+                      <span>{log.views}</span>
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : activeTab === 'comments' ? (
                 <>
-                  {/* Comments */}
+                  {/* Comments List */}
                   <div className="space-y-4">
-                    {reviewComments.length === 0 ? (
-                      <div className="text-center py-12">
-                        <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-sm text-gray-500">
-                          아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
-                        </p>
-                      </div>
-                    ) : (
+                    {reviewComments.length > 0 ? (
                       reviewComments
                         .filter((c) => !c.parentId)
                         .map((comment) => (
@@ -423,39 +445,90 @@ export default function LogDrawer({
                             comment={comment}
                             allComments={reviewComments}
                             formatTimeAgo={formatTimeAgo}
-                            onReply={(content, parentId) =>
-                              onCommentSubmit(review.id, content, parentId)
-                            }
+                            onReply={(content, parentId) => {
+                              if (!user && onAuthRequired) {
+                                onAuthRequired()
+                                return
+                              }
+                              onCommentSubmit(log.id, content, parentId)
+                            }}
                           />
                         ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-sm text-gray-500">아직 댓글이 없습니다.</p>
+                      </div>
                     )}
                   </div>
 
                   {/* Comment Form */}
-                  <form onSubmit={handleCommentSubmit} className="pt-6 border-t border-gray-200">
+                  <form onSubmit={handleCommentSubmit} className="mt-6 pt-6 border-t border-gray-200">
                     <textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="댓글을 작성해주세요..."
+                      placeholder={user ? '댓글을 작성해주세요...' : '로그인이 필요합니다. 클릭하여 로그인하세요.'}
+                      onClick={() => {
+                        if (!user && onAuthRequired) {
+                          onAuthRequired()
+                        }
+                      }}
+                      disabled={!user}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
-                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm resize-none disabled:bg-gray-50 disabled:cursor-pointer"
                     />
-                    <div className="flex justify-end mt-3">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        type="submit"
-                        disabled={!newComment.trim()}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-[#3056F5] text-white rounded-xl hover:bg-[#2545D4] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        <span>댓글 작성</span>
-                      </motion.button>
-                    </div>
+                    {user && (
+                      <div className="flex justify-end mt-3">
+                        <button
+                          type="submit"
+                          disabled={!newComment.trim()}
+                          className="px-4 py-2 bg-[#3056F5] text-white rounded-xl text-sm font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          댓글 작성
+                        </button>
+                      </div>
+                    )}
                   </form>
                 </>
-              )}
+              ) : activeTab === 'qa' ? (
+                <>
+                  {/* Q&A Threads */}
+                  {qaThreads.length > 0 || onQAThreadCreate ? (
+                    <div className="space-y-4">
+                      {onQAThreadCreate && user && (
+                        <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                          <button
+                            onClick={() => {
+                              const title = prompt('질문 제목을 입력하세요:')
+                              if (title && log) {
+                                onQAThreadCreate(log.id, title)
+                              }
+                            }}
+                            className="w-full px-4 py-2 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors"
+                          >
+                            + 새 질문하기
+                          </button>
+                        </div>
+                      )}
+                      <QAThreadList
+                        threads={qaThreads}
+                        posts={qaPosts}
+                        currentUserId={user?.id}
+                        onPostSubmit={onQAPostSubmit || (() => {})}
+                        onAcceptAnswer={onAcceptAnswer}
+                        onUpvote={onUpvote}
+                        formatTimeAgo={formatTimeAgo}
+                        getAuthorInfo={getAuthorInfo || (() => null)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-sm">아직 질문이 없습니다.</p>
+                    </div>
+                  )}
+                </>
+              ) : null}
             </div>
           </motion.div>
         </>

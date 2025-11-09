@@ -8,6 +8,7 @@ import { mockReviewLogs, mockOwners, mockPets, mockComments } from '@/lib/mock/r
 import CommunityReviewCard from '@/app/components/pet-log/CommunityReviewCard'
 import FeedFilters from '@/app/components/pet-log/FeedFilters'
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
+import FeedActivityPanel from '@/components/activity/FeedActivityPanel'
 
 type SortOption = 'popular' | 'recent' | 'completed'
 
@@ -18,6 +19,8 @@ export default function PetLogPage() {
   const [comments, setComments] = useState<Comment[]>(mockComments)
   const [selectedReview, setSelectedReview] = useState<ReviewLog | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [initialTab, setInitialTab] = useState<'details' | 'comments' | 'qa'>('details')
+  const [initialThreadId, setInitialThreadId] = useState<string | undefined>(undefined)
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
 
   // Filters
@@ -157,14 +160,34 @@ export default function PetLogPage() {
       .slice(0, 5)
   }, [reviews])
 
-  // Handle review detail
+  // Handle review detail - navigate to pet history page
   const handleViewDetail = (reviewId: string) => {
     const review = reviews.find((r) => r.id === reviewId)
     if (review) {
+      // Navigate to pet-centric history page
+      window.location.href = `/owners/${review.ownerId}/pets/${review.petId}`
+    }
+  }
+
+  // Handle activity panel open
+  const handleActivityOpen = (params: {
+    logId: string
+    tab: 'details' | 'comments' | 'qa'
+    threadId?: string
+  }) => {
+    const review = reviews.find((r) => r.id === params.logId)
+    if (review) {
       setSelectedReview(review)
+      setInitialTab(params.tab)
+      setInitialThreadId(params.threadId)
       setIsDrawerOpen(true)
     }
   }
+
+  // Get visible log IDs (for activity panel)
+  const visibleLogIds = useMemo(() => {
+    return displayedReviews.map((r) => r.id)
+  }, [displayedReviews])
 
   // Handle question click
   const handleQuestionClick = (reviewId: string) => {
@@ -413,6 +436,15 @@ export default function PetLogPage() {
                 </p>
               </motion.div>
             )}
+
+            {/* Activity Panel */}
+            {visibleLogIds.length > 0 && (
+              <FeedActivityPanel
+                logIds={visibleLogIds}
+                onOpen={handleActivityOpen}
+                formatTimeAgo={formatTimeAgo}
+              />
+            )}
           </div>
 
           {/* Sidebar */}
@@ -508,12 +540,19 @@ export default function PetLogPage() {
           pet={selectedPet}
           owner={selectedOwner}
           isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
+          onClose={() => {
+            setIsDrawerOpen(false)
+            setSelectedReview(null)
+            setInitialTab('details')
+            setInitialThreadId(undefined)
+          }}
           onStatusChange={handleStatusChange}
           formatTimeAgo={formatTimeAgo}
           formatDate={formatDate}
           comments={comments}
           onCommentSubmit={handleCommentSubmit}
+          initialTab={initialTab}
+          initialThreadId={initialThreadId}
         />
       </main>
     </div>
