@@ -174,7 +174,7 @@ export default function Home() {
       </section>
 
       {/* Trending Questions Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6">
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <TrendingUp className="h-5 w-5 text-orange-500" />
@@ -220,7 +220,7 @@ export default function Home() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200 max-w-2xl mx-auto">
           <h3 className="font-bold text-gray-900 mb-2 text-lg text-center">뉴스레터 구독</h3>
           <p className="text-sm text-gray-700 mb-4 text-center">
