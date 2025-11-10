@@ -10,6 +10,7 @@ import CommunityReviewCard from '@/app/components/pet-log/CommunityReviewCard'
 import FeedFilters from '@/app/components/pet-log/FeedFilters'
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
 import LogFormDialog from '@/components/log/LogFormDialog'
+import FeedingLeaderboard from '@/components/rank/FeedingLeaderboard'
 import { useAuth } from '@/hooks/useAuth'
 
 type SortOption = 'popular' | 'recent' | 'completed'
@@ -297,6 +298,19 @@ export default function PetLogPage() {
             onStatusChange={setSelectedStatus}
             onRatingChange={setSelectedRating}
             onRecommendChange={setSelectedRecommend}
+          />
+        </motion.div>
+
+        {/* Feeding Leaderboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-6"
+        >
+          <FeedingLeaderboard
+            initialSpecies={selectedSpecies}
+            initialCategory={selectedCategory}
           />
         </motion.div>
 
