@@ -383,7 +383,7 @@ export default function QuestionDetailPage() {
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">{question.categoryEmoji}</span>
                   <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
-                    {question.category.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF]+[\s]*/, '')}
+                    {question.category.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF\u2764\uFE0F\u200D\s]+/, '').trim()}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
