@@ -2,6 +2,7 @@ import { getSupabaseClient } from '../supa/client'
 
 /**
  * Get recent comments for given log IDs
+ * Only returns visible comments (admin_status='visible')
  */
 export async function getRecentComments(
   logIds: string[],
@@ -19,6 +20,7 @@ export async function getRecentComments(
       review_logs!comments_log_id_fkey(id, brand, product)
     `)
     .in('log_id', logIds)
+    .eq('admin_status', 'visible')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -32,6 +34,7 @@ export async function getRecentComments(
 
 /**
  * Get recent Q&A posts for given log IDs
+ * Only returns visible posts (admin_status='visible')
  */
 export async function getRecentQA(
   logIds: string[],
@@ -50,6 +53,7 @@ export async function getRecentQA(
       review_logs!qa_threads_log_id_fkey(id, brand, product)
     `)
     .in('qa_threads.log_id', logIds)
+    .eq('admin_status', 'visible')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 

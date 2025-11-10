@@ -221,12 +221,12 @@ export default function Home() {
 
       {/* Newsletter Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200 max-w-2xl mx-auto">
+        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200 max-w-2xl mx-auto">
           <h3 className="font-bold text-gray-900 mb-2 text-lg text-center">뉴스레터 구독</h3>
           <p className="text-sm text-gray-700 mb-4 text-center">
             반려동물 건강 정보와 최신 소식을 받아보세요
           </p>
-          <button className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-md hover:shadow-lg">
+          <button className="w-full px-4 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors text-sm font-medium shadow-md hover:shadow-lg">
             구독하기
           </button>
         </div>

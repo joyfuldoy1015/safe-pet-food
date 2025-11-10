@@ -137,6 +137,14 @@ $$ LANGUAGE plpgsql;
 -- Triggers
 -- ============================================
 
+-- Drop existing triggers if they exist (idempotent)
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+DROP TRIGGER IF EXISTS update_pets_updated_at ON pets;
+DROP TRIGGER IF EXISTS update_review_logs_updated_at ON review_logs;
+DROP TRIGGER IF EXISTS update_comments_updated_at ON comments;
+DROP TRIGGER IF EXISTS calculate_review_logs_duration ON review_logs;
+DROP TRIGGER IF EXISTS update_review_logs_comments_count ON comments;
+
 -- Update updated_at
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON profiles
@@ -183,6 +191,11 @@ ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 -- ============================================
 -- Profiles RLS Policies
 -- ============================================
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
+
 -- Anyone can read profiles
 CREATE POLICY "Profiles are viewable by everyone"
   ON profiles FOR SELECT
@@ -202,6 +215,12 @@ CREATE POLICY "Users can update their own profile"
 -- ============================================
 -- Pets RLS Policies
 -- ============================================
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Pets are viewable by everyone" ON pets;
+DROP POLICY IF EXISTS "Users can insert their own pets" ON pets;
+DROP POLICY IF EXISTS "Users can update their own pets" ON pets;
+DROP POLICY IF EXISTS "Users can delete their own pets" ON pets;
+
 -- Anyone can read pets
 CREATE POLICY "Pets are viewable by everyone"
   ON pets FOR SELECT
@@ -226,10 +245,16 @@ CREATE POLICY "Users can delete their own pets"
 -- ============================================
 -- Review Logs RLS Policies
 -- ============================================
--- Anyone can read review logs
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Review logs are viewable by everyone" ON review_logs;
+DROP POLICY IF EXISTS "Users can insert their own review logs" ON review_logs;
+DROP POLICY IF EXISTS "Users can update their own review logs" ON review_logs;
+DROP POLICY IF EXISTS "Users can delete their own review logs" ON review_logs;
+
+-- Anyone can read review logs (only visible ones)
 CREATE POLICY "Review logs are viewable by everyone"
   ON review_logs FOR SELECT
-  USING (true);
+  USING (admin_status = 'visible' OR admin_status IS NULL);
 
 -- Users can insert review logs for themselves
 CREATE POLICY "Users can insert their own review logs"
@@ -250,6 +275,12 @@ CREATE POLICY "Users can delete their own review logs"
 -- ============================================
 -- Comments RLS Policies
 -- ============================================
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Comments are viewable by everyone" ON comments;
+DROP POLICY IF EXISTS "Authenticated users can insert comments" ON comments;
+DROP POLICY IF EXISTS "Users can update their own comments" ON comments;
+DROP POLICY IF EXISTS "Users can delete their own comments" ON comments;
+
 -- Anyone can read comments
 CREATE POLICY "Comments are viewable by everyone"
   ON comments FOR SELECT

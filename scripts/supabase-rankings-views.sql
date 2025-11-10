@@ -6,12 +6,31 @@
 -- This view should compute duration_days for each log
 CREATE OR REPLACE VIEW public.review_logs_with_duration AS
 SELECT 
-  rl.*,
+  rl.id,
+  rl.pet_id,
+  rl.owner_id,
+  rl.category,
+  rl.brand,
+  rl.product,
+  rl.status,
+  rl.period_start,
+  rl.period_end,
+  rl.rating,
+  rl.recommend,
+  rl.continue_reasons,
+  rl.stop_reasons,
+  rl.excerpt,
+  rl.notes,
+  rl.likes,
+  rl.views,
+  rl.comments_count,
+  rl.created_at,
+  rl.updated_at,
   CASE 
     WHEN rl.period_end IS NOT NULL THEN 
-      EXTRACT(DAY FROM (rl.period_end - rl.period_start))::INTEGER
+      (rl.period_end - rl.period_start)::INTEGER
     WHEN rl.status = 'feeding' THEN 
-      EXTRACT(DAY FROM (CURRENT_DATE - rl.period_start))::INTEGER
+      (CURRENT_DATE - rl.period_start)::INTEGER
     ELSE 
       rl.duration_days
   END AS duration_days

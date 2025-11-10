@@ -30,24 +30,36 @@ export default function FeedingLeaderboard({
     setError(null)
 
     try {
-      let data: ProductRanking[] = []
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise<ProductRanking[]>((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 10000) // 10 second timeout
+      })
 
-      switch (activeTab) {
-        case 'trust':
-          data = await getTopLongest({ limit: 10, species, category, minLogs: 2 })
-          break
-        case 'popular':
-          data = await getTopMentions({ limit: 10, species, category })
-          break
-        case 'recommended':
-          data = await getBlended({ limit: 10, species, category, minLogs: 2 })
-          break
-      }
+      const fetchPromise = (async () => {
+        let data: ProductRanking[] = []
 
-      setRankings(data)
+        switch (activeTab) {
+          case 'trust':
+            data = await getTopLongest({ limit: 10, species, category, minLogs: 2 })
+            break
+          case 'popular':
+            data = await getTopMentions({ limit: 10, species, category })
+            break
+          case 'recommended':
+            data = await getBlended({ limit: 10, species, category, minLogs: 2 })
+            break
+        }
+
+        return data
+      })()
+
+      const data = await Promise.race([fetchPromise, timeoutPromise])
+      setRankings(data || [])
     } catch (err) {
       console.error('[FeedingLeaderboard] Error fetching rankings:', err)
-      setError('랭킹을 불러오는 중 오류가 발생했습니다.')
+      // If Supabase is not configured or views don't exist, show empty state
+      setRankings([])
+      setError(null) // Don't show error, just show empty state
     } finally {
       setLoading(false)
     }

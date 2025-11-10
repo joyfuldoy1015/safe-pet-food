@@ -49,6 +49,7 @@ export async function getPet(petId: string): Promise<Pet | null> {
 
 /**
  * Get all review logs for a specific owner and pet
+ * Only returns visible logs (admin_status='visible')
  */
 export async function getLogsByOwnerPet(
   ownerId: string,
@@ -62,6 +63,7 @@ export async function getLogsByOwnerPet(
     .select('*')
     .eq('owner_id', ownerId)
     .eq('pet_id', petId)
+    .eq('admin_status', 'visible')
     .order('updated_at', { ascending: false })
 
   if (error) {
@@ -101,6 +103,7 @@ export async function getOwnerWithPets(ownerId: string): Promise<{
 
 /**
  * Get Q&A threads for a review log
+ * Only returns visible threads (admin_status='visible')
  */
 export async function getThreadsByLog(logId: string): Promise<any[]> {
   const supabase = getSupabaseClient()
@@ -110,6 +113,7 @@ export async function getThreadsByLog(logId: string): Promise<any[]> {
     .from('qa_threads')
     .select('*')
     .eq('log_id', logId)
+    .eq('admin_status', 'visible')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -122,6 +126,7 @@ export async function getThreadsByLog(logId: string): Promise<any[]> {
 
 /**
  * Get posts for a Q&A thread
+ * Only returns visible posts (admin_status='visible')
  */
 export async function getPostsByThread(threadId: string): Promise<any[]> {
   const supabase = getSupabaseClient()
@@ -131,6 +136,7 @@ export async function getPostsByThread(threadId: string): Promise<any[]> {
     .from('qa_posts')
     .select('*')
     .eq('thread_id', threadId)
+    .eq('admin_status', 'visible')
     .order('created_at', { ascending: true })
 
   if (error) {

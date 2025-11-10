@@ -66,6 +66,11 @@ export async function getTopLongest({
       .limit(limit)
 
     if (error) {
+      // If view doesn't exist, return empty array (graceful fallback)
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.warn('[getTopLongest] View does not exist, returning empty array')
+        return []
+      }
       console.error('[getTopLongest] Error:', error)
       return []
     }
@@ -115,6 +120,11 @@ export async function getTopMentions({
         .eq('pets.species', species)
 
       if (logsError) {
+        // If table doesn't exist, return empty array (graceful fallback)
+        if (logsError.code === '42P01' || logsError.message?.includes('does not exist')) {
+          console.warn('[getTopMentions] Table does not exist, returning empty array')
+          return []
+        }
         console.error('[getTopMentions] Error fetching logs:', logsError)
         return []
       }
@@ -166,6 +176,11 @@ export async function getTopMentions({
         .limit(limit)
 
       if (error) {
+        // If view doesn't exist, return empty array (graceful fallback)
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.warn('[getTopMentions] View does not exist, returning empty array')
+          return []
+        }
         console.error('[getTopMentions] Error:', error)
         return []
       }

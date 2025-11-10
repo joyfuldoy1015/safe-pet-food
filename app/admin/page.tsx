@@ -1,295 +1,446 @@
+/*
+ * AUDIT SUMMARY:
+ * 
+ * Routes found:
+ * - / (Homepage): Hero, Feature Cards, UGC Feed Preview (Q&A/Reviews)
+ * - /explore: Full listing with filters/sorting/search
+ * - /pet-log (/reviews): Cards grid, filters, Log Drawer, Activity Panel
+ * - /owners/[ownerId]/pets/[petId]: Pet-centric history, grouped by category
+ * - /community/qa-forum: Q&A threads & posts
+ * - /community/qa-forum/[questionId]: Question detail page
+ * 
+ * Shared components:
+ * - CommunityReviewCard: Review log cards
+ * - LogDrawer: Detail drawer for logs
+ * - FeedFilters: Filter bar for reviews
+ * - QuestionCard: Q&A question cards
+ * - CommentThread: Comment threads
+ * - UnifiedCard: Unified feed item card
+ * 
+ * Data models detected:
+ * - profiles: User profiles
+ * - pets: Pet information
+ * - review_logs: Feeding review logs
+ * - comments: Comments on logs
+ * - qa_threads: Q&A threads (attached to logs)
+ * - qa_posts: Q&A posts (questions/answers)
+ * - product_longest_feeding: View for longest feeding rankings
+ * - product_mentions: View for mentions rankings
+ * 
+ * Missing or TODO:
+ * - app_settings table (for feature flags)
+ * - Some views may need to be created in Supabase
+ * 
+ * Mapping public → admin sections:
+ * - Homepage → Dashboard (analytics)
+ * - /explore → Explore QA page
+ * - /pet-log → Logs page
+ * - /owners/[ownerId]/pets/[petId] → Users/Pets pages
+ * - /community/qa-forum → Q&A page
+ * - Comments → Comments page
+ * - Leaderboards → Rankings page
+ * - Settings → Settings page
+ */
+
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import AdminLayout from '@/components/admin/AdminLayout'
+import { useAuth } from '@/hooks/useAuth'
+import { useRouter } from 'next/navigation'
+import { getBrowserClient } from '@/lib/supabase-client'
 import { 
-  Shield, 
   Users, 
-  Package, 
-  Star, 
-  BarChart3, 
-  Settings, 
-  AlertTriangle,
-  TrendingUp,
   FileText,
-  Database,
-  UserCheck,
-  Coffee,
-  Calculator,
-  FileText as FileTextIcon,
-  MessageCircle,
-  Heart,
-  Zap,
-  ChevronDown,
-  Droplet,
-  ClipboardList,
+  MessageSquare,
   HelpCircle,
-  Info,
-  Menu,
-  X
+  TrendingUp,
+  AlertTriangle,
+  BarChart3,
+  Calendar
 } from 'lucide-react'
 
-
-const categories = {
-  '사료/급여': {
-    icon: Coffee,
-    color: 'from-orange-500 to-pink-500',
-    items: [
-      { name: '사료 성분 계산기', href: '/nutrition-calculator', icon: Calculator, description: '사료의 보장성분표를 입력하면 건물기준으로 영양 점수를 계산해드려요.' },
-      { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
-      { name: '브랜드 평가', href: '/brands', icon: Shield, description: '신뢰할 수 있는 브랜드인지 다양한 기준으로 평가해보세요.' }
-    ]
-  },
-  '건강/케어': {
-    icon: Heart,
-    color: 'from-red-500 to-pink-500',
-    items: [
-      { name: '건강검진표 분석기', href: '/health-analyzer', icon: FileTextIcon, description: '수의사 건강검진 결과를 AI가 쉽게 해석해드려요.' },
-      { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이가 하루에 마셔야 할 적정 물의 양을 계산해보세요.' }
-    ]
-  },
-  '커뮤니티': {
-    icon: Users,
-    color: 'from-blue-500 to-purple-500',
-    items: [
-      { name: '펫 로그', href: '/pet-log', icon: FileTextIcon, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
-      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
-    ]
-  }
+interface KPI {
+  label: string
+  value: string | number
+  change?: string
+  icon: React.ComponentType<{ className?: string }>
+  color: string
 }
 
-const adminMenuItems = [
-  {
-    title: '브랜드 관리',
-    description: '사료 브랜드 정보 관리 및 리콜 정보 업데이트',
-    icon: Shield,
-    href: '/admin/brands',
-    color: 'from-blue-500 to-cyan-500',
-    stats: { total: 156, new: 3 }
-  },
-  {
-    title: '사용자 관리',
-    description: '회원 정보 및 권한 관리',
-    icon: Users,
-    href: '/admin/users',
-    color: 'from-purple-500 to-violet-500',
-    stats: { total: 2845, new: 28 }
-  },
-  {
-    title: '커뮤니티 관리',
-    description: '펫 로그, Q&A 포럼 게시물 및 댓글 관리',
-    icon: MessageCircle,
-    href: '/admin/community',
-    color: 'from-purple-500 to-pink-500',
-    stats: { posts: 487, questions: 156 }
-  },
-  {
-    title: '사료 등급 분석 관리',
-    description: '사료 등급 분석 데이터 및 기준 관리',
-    icon: Calculator,
-    href: '/admin/feed-grade',
-    color: 'from-orange-500 to-red-500',
-    stats: { total: 324, analyzed: 156 }
-  },
-  {
-    title: '건강검진표 분석 관리',
-    description: '건강검진표 분석 데이터 및 히스토리 관리',
-    icon: ClipboardList,
-    href: '/admin/health-analysis',
-    color: 'from-green-500 to-teal-500',
-    stats: { total: 892, new: 12 }
-  },
-  {
-    title: '통계 분석',
-    description: '사이트 이용 통계 및 인기 제품 분석',
-    icon: BarChart3,
-    href: '/admin/analytics',
-    color: 'from-indigo-500 to-blue-500',
-    stats: { visitors: '12.4K', growth: '+15%' }
-  },
-  {
-    title: '배포 관리',
-    description: '버전 히스토리 및 배포 상태 모니터링',
-    icon: Zap,
-    href: '/admin/deployments',
-    color: 'from-green-500 to-emerald-500',
-    stats: { total: 12, status: 'Live' }
-  },
-  {
-    title: '시스템 설정',
-    description: '사이트 전반적인 설정 및 환경 관리',
-    icon: Settings,
-    href: '/admin/settings',
-    color: 'from-gray-500 to-slate-500',
-    stats: { alerts: 2, status: 'Normal' }
-  }
-]
+export default function AdminDashboard() {
+  const { user, isLoading: authLoading } = useAuth()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [kpis, setKPIs] = useState<KPI[]>([])
+  const [recentModerations, setRecentModerations] = useState<any[]>([])
+  const [mounted, setMounted] = useState(false)
 
-export default function AdminPanel() {
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Safety timeout: if loading takes more than 5 seconds, show error
+    const timeoutId = setTimeout(() => {
+      console.error('[AdminDashboard] Loading timeout after 5 seconds')
+      setLoading(false)
+    }, 5000)
+
+    // Wait for auth to load
+    if (authLoading) {
+      console.log('[AdminDashboard] Waiting for auth to load...')
+      return () => clearTimeout(timeoutId)
+    }
+
+    // Check admin access and load dashboard data
+    const checkAdminAccessAndLoadData = async () => {
+      console.log('[AdminDashboard] Checking admin access...', { user: user?.id, authLoading })
+      
+      if (!user) {
+        console.log('[AdminDashboard] No user, redirecting to login')
+        clearTimeout(timeoutId)
+        setLoading(false)
+        router.push('/login?redirect=/admin')
+        return
+      }
+
+      try {
+        // Get session token from Supabase
+        const supabase = getBrowserClient()
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.error('[AdminDashboard] Session error:', sessionError)
+          clearTimeout(timeoutId)
+          setLoading(false)
+          router.push('/login?redirect=/admin')
+          return
+        }
+        
+        if (!session) {
+          console.log('[AdminDashboard] No session, redirecting to login')
+          clearTimeout(timeoutId)
+          setLoading(false)
+          router.push('/login?redirect=/admin')
+          return
+        }
+
+        console.log('[AdminDashboard] Checking admin status via API...')
+        // Check if user is admin via API with session token (with timeout)
+        const controller = new AbortController()
+        const fetchTimeout = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+        
+        let response
+        try {
+          response = await fetch('/api/admin/check', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            signal: controller.signal
+          })
+          clearTimeout(fetchTimeout)
+        } catch (fetchError: any) {
+          clearTimeout(fetchTimeout)
+          if (fetchError.name === 'AbortError') {
+            console.error('[AdminDashboard] API request timeout')
+            clearTimeout(timeoutId)
+            setLoading(false)
+            router.push('/?error=500&message=요청 시간이 초과되었습니다')
+            return
+          }
+          throw fetchError
+        }
+        
+        if (!response.ok) {
+          console.error('[AdminDashboard] Admin check failed:', response.status)
+          clearTimeout(timeoutId)
+          setLoading(false)
+          router.push('/?error=403&message=관리자 권한이 필요합니다')
+          return
+        }
+
+        const data = await response.json()
+        console.log('[AdminDashboard] Admin check result:', data)
+
+        if (!data.isAdmin) {
+          console.log('[AdminDashboard] User is not admin')
+          clearTimeout(timeoutId)
+          setLoading(false)
+          router.push('/?error=403&message=관리자 권한이 필요합니다')
+          return
+        }
+
+        console.log('[AdminDashboard] User is admin, loading dashboard data...')
+        // User is admin, load dashboard data from API
+        try {
+          const statsResponse = await fetch('/api/admin/stats', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          })
+
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json()
+            const { kpis, recentModerations } = statsData
+
+            setKPIs([
+              {
+                label: '신규 로그 (7일)',
+                value: kpis.newLogs.value,
+                change: kpis.newLogs.change,
+                icon: FileText,
+                color: 'text-blue-600'
+              },
+              {
+                label: 'Q&A 질문 수',
+                value: kpis.qaThreads.value,
+                change: kpis.qaThreads.change,
+                icon: HelpCircle,
+                color: 'text-purple-600'
+              },
+              {
+                label: '활성 사용자 (7일)',
+                value: kpis.activeUsers.value,
+                change: kpis.activeUsers.change,
+                icon: Users,
+                color: 'text-green-600'
+              },
+              {
+                label: '숨김 콘텐츠',
+                value: kpis.hiddenContent.value,
+                change: kpis.hiddenContent.change,
+                icon: AlertTriangle,
+                color: 'text-red-600'
+              }
+            ])
+            setRecentModerations(recentModerations || [])
+          } else {
+            console.error('[AdminDashboard] Failed to load stats:', statsResponse.status)
+            // Fallback to empty data
+            setKPIs([
+              {
+                label: '신규 로그 (7일)',
+                value: 0,
+                change: '0%',
+                icon: FileText,
+                color: 'text-blue-600'
+              },
+              {
+                label: 'Q&A 질문 수',
+                value: 0,
+                change: '0%',
+                icon: HelpCircle,
+                color: 'text-purple-600'
+              },
+              {
+                label: '활성 사용자 (7일)',
+                value: 0,
+                change: '0%',
+                icon: Users,
+                color: 'text-green-600'
+              },
+              {
+                label: '숨김 콘텐츠',
+                value: 0,
+                change: '0',
+                icon: AlertTriangle,
+                color: 'text-red-600'
+              }
+            ])
+            setRecentModerations([])
+          }
+        } catch (statsError) {
+          console.error('[AdminDashboard] Error loading stats:', statsError)
+          // Fallback to empty data
+          setKPIs([
+            {
+              label: '신규 로그 (7일)',
+              value: 0,
+              change: '0%',
+              icon: FileText,
+              color: 'text-blue-600'
+            },
+            {
+              label: 'Q&A 질문 수',
+              value: 0,
+              change: '0%',
+              icon: HelpCircle,
+              color: 'text-purple-600'
+            },
+            {
+              label: '활성 사용자 (7일)',
+              value: 0,
+              change: '0%',
+              icon: Users,
+              color: 'text-green-600'
+            },
+            {
+              label: '숨김 콘텐츠',
+              value: 0,
+              change: '0',
+              icon: AlertTriangle,
+              color: 'text-red-600'
+            }
+          ])
+          setRecentModerations([])
+        }
+        
+        console.log('[AdminDashboard] Dashboard data loaded')
+        clearTimeout(timeoutId)
+        setLoading(false)
+      } catch (error) {
+        console.error('[AdminDashboard] Error checking admin access:', error)
+        clearTimeout(timeoutId)
+        setLoading(false) // Ensure loading state is cleared even on error
+        router.push('/?error=500&message=권한 확인 중 오류가 발생했습니다')
+      }
+    }
+
+    checkAdminAccessAndLoadData()
+
+    return () => clearTimeout(timeoutId)
+  }, [user, authLoading, router])
+
+  // Prevent hydration mismatch by ensuring consistent initial render
+  if (loading || !mounted) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">로딩 중...</div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Admin Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        {/* Header */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">관리자 패널</h1>
-              <p className="text-gray-600">Safe Pet Food 시스템을 관리하고 모니터링하세요</p>
-            </div>
+          <h1 className="text-2xl font-bold text-gray-900">대시보드</h1>
+          <p className="text-gray-600 mt-1">시스템 현황 및 최근 활동을 확인하세요</p>
           </div>
           
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">총 사용자</p>
-                  <p className="text-2xl font-bold text-gray-900">2,845</p>
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpis.map((kpi, index) => {
+            const Icon = kpi.icon
+            return (
+              <div
+                key={index}
+                className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg bg-gray-50 ${kpi.color}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  {kpi.change && (
+                    <span className={`text-sm font-medium ${
+                      kpi.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {kpi.change}
+                    </span>
+                  )}
                 </div>
-                <Users className="h-8 w-8 text-blue-500" />
+                <div className="text-2xl font-bold text-gray-900">{kpi.value}</div>
+                <div className="text-sm text-gray-600 mt-1">{kpi.label}</div>
               </div>
-              <p className="text-xs text-green-600 mt-2">↗ +12% 이번 달</p>
+            )
+          })}
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">커뮤니티 활동</p>
-                  <p className="text-2xl font-bold text-gray-900">643</p>
-                </div>
-                <MessageCircle className="h-8 w-8 text-purple-500" />
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Daily Activity Chart */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">일자별 활동 추이</h2>
+              <div className="flex gap-2">
+                <button className="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-lg">
+                  30일
+                </button>
+                <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
+                  90일
+                </button>
               </div>
-              <p className="text-xs text-green-600 mt-2">질문 156 · 펫로그 487</p>
+            </div>
+            <div className="h-64 flex items-center justify-center text-gray-400">
+              <div className="text-center">
+                <BarChart3 className="w-12 h-12 mx-auto mb-2" />
+                <p>차트 데이터 준비 중</p>
+              </div>
+            </div>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">사료 등급 분석</p>
-                  <p className="text-2xl font-bold text-gray-900">324</p>
-                </div>
-                <Calculator className="h-8 w-8 text-orange-500" />
+          {/* Recent Activity */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">최근 모더레이션</h2>
+            {recentModerations.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <AlertTriangle className="w-12 h-12 mx-auto mb-2" />
+                <p>최근 모더레이션 활동이 없습니다</p>
               </div>
-              <p className="text-xs text-green-600 mt-2">분석 완료: 156건</p>
+            ) : (
+              <div className="space-y-3">
+                {recentModerations.map((action, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <AlertTriangle className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{action.action}</p>
+                      <p className="text-xs text-gray-500">{action.target_table}</p>
+                    </div>
+                    <span className="text-xs text-gray-400">{action.created_at}</span>
+                  </div>
+                ))}
             </div>
-            
-            <div className="bg-white rounded-lg p-4 shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">건강검진표 분석</p>
-                  <p className="text-2xl font-bold text-gray-900">892</p>
-                </div>
-                <ClipboardList className="h-8 w-8 text-green-500" />
-              </div>
-              <p className="text-xs text-green-600 mt-2">신규: 12건</p>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Admin Menu Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {adminMenuItems.map((item) => (
+        {/* Quick Actions */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">빠른 작업</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
-              key={item.title}
-              href={item.href}
-              className="group bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
+              href="/admin/logs"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 bg-gradient-to-r ${item.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                  <item.icon className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-right">
-                  {item.stats.total && (
-                    <p className="text-sm text-gray-500">총 {item.stats.total.toLocaleString()}개</p>
-                  )}
-                  {item.stats.new && (
-                    <p className="text-xs text-green-600">신규 {item.stats.new}개</p>
-                  )}
-                  {item.stats.visitors && (
-                    <p className="text-sm text-gray-500">{item.stats.visitors}</p>
-                  )}
-                  {item.stats.growth && (
-                    <p className="text-xs text-green-600">{item.stats.growth}</p>
-                  )}
-                  {item.stats.alerts !== undefined && (
-                    <p className="text-xs text-red-600">{item.stats.alerts}개 알림</p>
-                  )}
-                  {item.stats.status && (
-                    <p className="text-xs text-green-600">{item.stats.status}</p>
-                  )}
-                  {item.stats.posts && (
-                    <p className="text-sm text-gray-500">포스트: {item.stats.posts}</p>
-                  )}
-                  {item.stats.questions && (
-                    <p className="text-xs text-blue-600">질문: {item.stats.questions}</p>
-                  )}
-                  {item.stats.analyzed && (
-                    <p className="text-xs text-blue-600">분석완료: {item.stats.analyzed}</p>
-                  )}
-                  {item.stats.new !== undefined && item.stats.new > 0 && (
-                    <p className="text-xs text-green-600">신규: {item.stats.new}</p>
-                  )}
-                </div>
-              </div>
-              
-              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                {item.title}
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {item.description}
-              </p>
-              
-              <div className="mt-4 flex items-center text-blue-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
-                관리하기 →
-              </div>
+              <FileText className="w-6 h-6 text-blue-600 mb-2" />
+              <div className="font-medium text-gray-900">로그 검토</div>
+              <div className="text-sm text-gray-500">대기 중인 로그</div>
             </Link>
-          ))}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mt-12 bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">최근 활동</h2>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <UserCheck className="h-5 w-5 text-green-500" />
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">새로운 사용자 <strong>김집사님</strong>이 가입했습니다.</p>
-                <p className="text-xs text-gray-500">5분 전</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <MessageCircle className="h-5 w-5 text-blue-500" />
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">새로운 Q&A 질문이 <strong>사료 급여량</strong>에 대해 등록되었습니다.</p>
-                <p className="text-xs text-gray-500">12분 전</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <FileTextIcon className="h-5 w-5 text-purple-500" />
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">새로운 펫 로그 포스트가 <strong>급여 경험 공유</strong>로 등록되었습니다.</p>
-                <p className="text-xs text-gray-500">1시간 전</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <Package className="h-5 w-5 text-blue-500" />
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">새로운 제품 <strong>힐스 고양이 사료</strong>가 추가되었습니다.</p>
-                <p className="text-xs text-gray-500">2시간 전</p>
-              </div>
-            </div>
+            <Link
+              href="/admin/comments"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <MessageSquare className="w-6 h-6 text-purple-600 mb-2" />
+              <div className="font-medium text-gray-900">댓글 검토</div>
+              <div className="text-sm text-gray-500">신고된 댓글</div>
+            </Link>
+            <Link
+              href="/admin/qa"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <HelpCircle className="w-6 h-6 text-green-600 mb-2" />
+              <div className="font-medium text-gray-900">Q&A 검토</div>
+              <div className="text-sm text-gray-500">대기 중인 질문</div>
+            </Link>
+            <Link
+              href="/admin/users"
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <Users className="w-6 h-6 text-orange-600 mb-2" />
+              <div className="font-medium text-gray-900">사용자 관리</div>
+              <div className="text-sm text-gray-500">신규 가입자</div>
+            </Link>
           </div>
         </div>
-      </main>
-
-
     </div>
+    </AdminLayout>
   )
 }

@@ -75,12 +75,12 @@ export default function SidebarTrending({
       </div>
 
       {/* Newsletter CTA */}
-      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200">
+      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
         <h3 className="font-bold text-gray-900 mb-2">뉴스레터 구독</h3>
         <p className="text-sm text-gray-700 mb-4">
           반려동물 건강 정보와 최신 소식을 받아보세요
         </p>
-        <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
+        <button className="w-full px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors text-sm font-medium">
           구독하기
         </button>
       </div>

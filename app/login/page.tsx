@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { getBrowserClient } from '@/lib/supabase-client'
 import { 
   Eye, 
   EyeOff, 
@@ -20,14 +21,37 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user } = useAuth()
+  const redirectTo = searchParams.get('redirect') || '/'
+
+  // If already logged in, redirect
+  useEffect(() => {
+    if (user) {
+      router.push(redirectTo)
+    }
+  }, [user, redirectTo, router])
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
     try {
-      await signIn('google', { callbackUrl: '/' })
+      const supabase = getBrowserClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+        }
+      })
+      
+      if (error) {
+        console.error('Google login error:', error)
+        alert('Google 로그인에 실패했습니다.')
+        setIsLoading(false)
+      }
+      // 성공 시 리디렉션되므로 setIsLoading(false)는 호출하지 않음
     } catch (error) {
       console.error('Google login error:', error)
-    } finally {
+      alert('로그인 중 오류가 발생했습니다.')
       setIsLoading(false)
     }
   }
@@ -44,7 +68,7 @@ export default function LoginPage() {
       
       if (result?.ok) {
         // 로그인 성공 시 현재 페이지에서 리다이렉트하거나 새로고침
-        window.location.href = '/'
+        window.location.href = redirectTo
       } else {
         alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
         console.error('Login failed:', result?.error)
@@ -88,17 +112,18 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+          {/* Email/Password Login */}
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gradient-to-br from-yellow-50 via-white to-orange-50 text-gray-500">또는</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gradient-to-br from-yellow-50 via-white to-orange-50 text-gray-500">또는</span>
-            </div>
-          </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="sr-only">
                   이메일 주소
@@ -117,6 +142,7 @@ export default function LoginPage() {
                     placeholder="이메일 주소"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -139,6 +165,7 @@ export default function LoginPage() {
                     placeholder="비밀번호"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                     <button
@@ -155,49 +182,27 @@ export default function LoginPage() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  로그인 상태 유지
-                </label>
+              <div>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? '로그인 중...' : '비밀번호로 로그인'}
+                </button>
               </div>
+            </form>
+          </div>
 
-              <div className="text-sm">
-                <a href="#" className="font-medium text-yellow-600 hover:text-yellow-500">
-                  비밀번호를 잊으셨나요?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? '로그인 중...' : '로그인'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <span className="text-sm text-gray-600">
-                아직 계정이 없으신가요?{' '}
-                <Link href="/signup" className="font-medium text-yellow-600 hover:text-yellow-500">
-                  회원가입
-                </Link>
-              </span>
-            </div>
-          </form>
+          <div className="text-center mt-6">
+            <span className="text-sm text-gray-600">
+              아직 계정이 없으신가요?{' '}
+              <Link href="/signup" className="font-medium text-yellow-600 hover:text-yellow-500">
+                회원가입
+              </Link>
+            </span>
+          </div>
         </div>
       </div>
 
