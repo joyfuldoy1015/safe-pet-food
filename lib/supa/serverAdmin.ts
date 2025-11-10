@@ -48,7 +48,7 @@ export async function isAdmin(userId: string): Promise<boolean> {
     return false
   }
 
-  return data.role === 'admin'
+  return (data as { role: string }).role === 'admin'
 }
 
 /**
@@ -90,14 +90,14 @@ export async function logModerationAction({
   const supabase = getAdminClient()
 
   const { error } = await supabase
-    .from('moderation_actions')
+    .from('moderation_actions' as any)
     .insert({
       actor_id: actorId,
       target_table: targetTable,
       target_id: targetId,
       action,
       reason
-    })
+    } as any)
 
   if (error) {
     console.error('[logModerationAction] Error:', error)
@@ -124,8 +124,9 @@ export async function setAdminStatus({
   const supabase = getAdminClient()
 
   // Update the record
-  const { error: updateError } = await supabase
-    .from(table)
+  // Use type assertion to bypass strict typing for dynamic table names
+  const tableClient = supabase.from(table as keyof Database['public']['Tables']) as any
+  const { error: updateError } = await tableClient
     .update({ admin_status: status })
     .eq('id', id)
 

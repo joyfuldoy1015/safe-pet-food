@@ -233,10 +233,19 @@ export default function AdminQAPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">
             로딩 중...
           </div>
+        ) : activeTab === 'threads' ? (
+          <Table<QAThread>
+            data={threads}
+            columns={threadColumns}
+            onRowClick={(item) => {
+              // TODO: Open detail drawer
+              console.log('Open detail for:', item.id)
+            }}
+          />
         ) : (
-          <Table
-            data={activeTab === 'threads' ? threads : posts}
-            columns={activeTab === 'threads' ? threadColumns : postColumns}
+          <Table<QAPost>
+            data={posts}
+            columns={postColumns}
             onRowClick={(item) => {
               // TODO: Open detail drawer
               console.log('Open detail for:', item.id)
