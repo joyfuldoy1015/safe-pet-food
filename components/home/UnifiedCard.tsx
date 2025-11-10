@@ -64,7 +64,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
                 <span className="whitespace-nowrap">{item.period.label}</span>
               </span>
             )}
-            {item.rating !== undefined && (
+            {item.rating !== undefined && item.rating !== null && (
               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-50 text-yellow-800 text-xs border border-yellow-200 font-medium">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star

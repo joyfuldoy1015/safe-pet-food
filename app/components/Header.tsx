@@ -18,7 +18,8 @@ import {
   Menu,
   X,
   BookOpen,
-  LogOut
+  LogOut,
+  Search
 } from 'lucide-react'
 
 const categories = {
@@ -45,7 +46,8 @@ const categories = {
     color: 'from-purple-500 to-indigo-500',
     items: [
       { name: '펫 로그', href: '/pet-log', icon: BookOpen, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
-      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
+      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' },
+      { name: '탐색하기', href: '/explore', icon: Search, description: 'Q&A와 급여 후기를 둘러보고 경험을 공유해보세요.' }
     ]
   }
 }
@@ -78,7 +80,10 @@ export default function Header() {
                 onMouseEnter={() => setActiveDropdown(categoryName)}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <button className="flex items-center space-x-1 text-black hover:text-gray-700 font-medium transition-colors px-2 py-1">
+                <button 
+                  onClick={() => setActiveDropdown(activeDropdown === categoryName ? null : categoryName)}
+                  className="flex items-center space-x-1 text-black hover:text-gray-700 font-medium transition-colors px-2 py-1"
+                >
                   <span>{categoryName}</span>
                   <ChevronDown className="h-4 w-4" />
                 </button>
@@ -88,12 +93,17 @@ export default function Header() {
                   <>
                     {/* Invisible bridge to prevent menu from closing */}
                     <div className="absolute top-full left-0 w-80 h-2 bg-transparent z-40"></div>
-                    <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <div 
+                      className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+                      onMouseEnter={() => setActiveDropdown(categoryName)}
+                      onMouseLeave={() => setActiveDropdown(null)}
+                    >
                       {category.items.map((item) => (
                         <Link
                           key={item.name}
                           href={item.href}
                           className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                          onClick={() => setActiveDropdown(null)}
                         >
                           <div className="flex items-start space-x-3">
                             <div className={`w-8 h-8 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
