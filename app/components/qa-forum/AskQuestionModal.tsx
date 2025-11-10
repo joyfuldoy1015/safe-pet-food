@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, Image as ImageIcon, User } from 'lucide-react'
+import { X, Image as ImageIcon } from 'lucide-react'
 
 interface AskQuestionModalProps {
   isOpen: boolean
@@ -25,7 +25,6 @@ export default function AskQuestionModal({
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [content, setContent] = useState('')
-  const [isAnonymous, setIsAnonymous] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
 
   if (!isOpen) return null
@@ -40,7 +39,7 @@ export default function AskQuestionModal({
       title: title.trim(),
       category,
       content: content.trim(),
-      isAnonymous,
+      isAnonymous: false,
       imageUrl: imageUrl.trim() || undefined
     })
 
@@ -48,7 +47,6 @@ export default function AskQuestionModal({
     setTitle('')
     setCategory('')
     setContent('')
-    setIsAnonymous(false)
     setImageUrl('')
   }
 
@@ -133,21 +131,6 @@ export default function AskQuestionModal({
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-          </div>
-
-          {/* Anonymous Toggle */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="anonymous"
-              checked={isAnonymous}
-              onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="anonymous" className="text-sm text-gray-700 flex items-center space-x-1">
-              <User className="h-4 w-4" />
-              <span>익명으로 질문하기</span>
-            </label>
           </div>
 
           {/* Actions */}

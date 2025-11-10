@@ -114,7 +114,7 @@ export default function FeedingLeaderboard({
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
-          ⏱️ 급여 랭킹
+          급여 랭킹
         </h2>
       </div>
 

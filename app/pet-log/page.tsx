@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Flame, Clock, CheckCircle, User, TrendingUp } from 'lucide-react'
+import { CheckCircle, User, TrendingUp, Plus } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
 import { mockReviewLogs, mockOwners, mockPets, mockComments } from '@/lib/mock/review-log'
 import CommunityReviewCard from '@/app/components/pet-log/CommunityReviewCard'
@@ -326,42 +326,39 @@ export default function PetLogPage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOption('popular')}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
+                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base ${
                         sortOption === 'popular'
                           ? 'bg-orange-500 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                       aria-label="인기순 정렬"
                     >
-                      <Flame className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span className="font-medium">🔥 인기</span>
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOption('recent')}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
+                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base ${
                         sortOption === 'recent'
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                       aria-label="최신순 정렬"
                     >
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span className="font-medium">🕓 최신</span>
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOption('completed')}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
+                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base ${
                         sortOption === 'completed'
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                       aria-label="급여 완료순 정렬"
                     >
-                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span className="font-medium">✅ 급여 완료</span>
                     </motion.button>
           </div>
@@ -568,10 +565,10 @@ export default function PetLogPage() {
         {/* FAB Button */}
         <button
           onClick={() => setIsLogFormOpen(true)}
-          className="fixed bottom-6 right-6 z-40 rounded-full bg-[#3056F5] text-white w-14 h-14 text-2xl shadow-lg hover:bg-[#2648e6] transition-all duration-200 active:scale-95 flex items-center justify-center"
+          className="fixed bottom-6 right-6 h-14 w-14 bg-blue-500 text-white rounded-full shadow-strong hover:bg-blue-600 transition-all duration-200 hover:scale-110 flex items-center justify-center z-40"
           aria-label="새 로그 작성"
         >
-          +
+          <Plus className="h-6 w-6" />
         </button>
 
         {/* Log Form Dialog */}
