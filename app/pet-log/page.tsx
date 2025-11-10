@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Flame, Clock, CheckCircle, User, TrendingUp } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
@@ -8,20 +9,22 @@ import { mockReviewLogs, mockOwners, mockPets, mockComments } from '@/lib/mock/r
 import CommunityReviewCard from '@/app/components/pet-log/CommunityReviewCard'
 import FeedFilters from '@/app/components/pet-log/FeedFilters'
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
-import FeedActivityPanel from '@/components/activity/FeedActivityPanel'
+import LogFormDialog from '@/components/log/LogFormDialog'
+import { useAuth } from '@/hooks/useAuth'
 
 type SortOption = 'popular' | 'recent' | 'completed'
 
 const ITEMS_PER_PAGE = 6
 
 export default function PetLogPage() {
+  const router = useRouter()
+  const { user } = useAuth()
   const [reviews, setReviews] = useState<ReviewLog[]>(mockReviewLogs)
   const [comments, setComments] = useState<Comment[]>(mockComments)
   const [selectedReview, setSelectedReview] = useState<ReviewLog | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [initialTab, setInitialTab] = useState<'details' | 'comments' | 'qa'>('details')
-  const [initialThreadId, setInitialThreadId] = useState<string | undefined>(undefined)
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
+  const [isLogFormOpen, setIsLogFormOpen] = useState(false)
 
   // Filters
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')
@@ -33,8 +36,8 @@ export default function PetLogPage() {
 
   // Format helpers
   const formatTimeAgo = (dateString: string): string => {
-  const date = new Date(dateString)
-  const now = new Date()
+    const date = new Date(dateString)
+    const now = new Date()
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
     if (diffInSeconds < 60) return '방금 전'
@@ -125,8 +128,25 @@ export default function PetLogPage() {
 
   const hasMore = displayedCount < filteredAndSortedReviews.length
 
-  // Get owner and pet for review
+  // Get owner and pet for review (with caching)
+  const ownerPetCache = useMemo(() => {
+    const cache = new Map<string, { owner: Owner | null; pet: Pet | null }>()
+    reviews.forEach((review) => {
+      const key = `${review.ownerId}-${review.petId}`
+      if (!cache.has(key)) {
+        const owner = mockOwners.find((o) => o.id === review.ownerId) || null
+        const pet = mockPets.find((p) => p.id === review.petId) || null
+        cache.set(key, { owner, pet })
+      }
+    })
+    return cache
+  }, [reviews])
+
   const getOwnerAndPet = (review: ReviewLog): { owner: Owner | null; pet: Pet | null } => {
+    const key = `${review.ownerId}-${review.petId}`
+    if (ownerPetCache.has(key)) {
+      return ownerPetCache.get(key)!
+    }
     const owner = mockOwners.find((o) => o.id === review.ownerId) || null
     const pet = mockPets.find((p) => p.id === review.petId) || null
     return { owner, pet }
@@ -165,33 +185,18 @@ export default function PetLogPage() {
     const review = reviews.find((r) => r.id === reviewId)
     if (review) {
       // Navigate to pet-centric history page
-      window.location.href = `/owners/${review.ownerId}/pets/${review.petId}`
+      router.push(`/owners/${review.ownerId}/pets/${review.petId}`)
     }
   }
 
-  // Handle activity panel open
-  const handleActivityOpen = (params: {
-    logId: string
-    tab: 'details' | 'comments' | 'qa'
-    threadId?: string
-  }) => {
-    const review = reviews.find((r) => r.id === params.logId)
-    if (review) {
-      setSelectedReview(review)
-      setInitialTab(params.tab)
-      setInitialThreadId(params.threadId)
-      setIsDrawerOpen(true)
-    }
-  }
 
-  // Get visible log IDs (for activity panel)
-  const visibleLogIds = useMemo(() => {
-    return displayedReviews.map((r) => r.id)
-  }, [displayedReviews])
-
-  // Handle question click
+  // Handle question click - navigate to detail page with Q&A tab
   const handleQuestionClick = (reviewId: string) => {
-    // Question composer is handled in CommunityReviewCard
+    const review = reviews.find((r) => r.id === reviewId)
+    if (review) {
+      // Navigate to pet history page with Q&A focus
+      router.push(`/owners/${review.ownerId}/pets/${review.petId}?tab=qa`)
+    }
   }
 
   // Handle status change
@@ -303,45 +308,48 @@ export default function PetLogPage() {
           className="sticky top-0 z-30 -mx-4 sm:mx-0 px-4 sm:px-0 py-4 sm:py-4 mb-6"
         >
           <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setSortOption('popular')}
-            className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
-              sortOption === 'popular'
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Flame className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="font-medium">🔥 인기</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setSortOption('recent')}
-            className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
-              sortOption === 'recent'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="font-medium">🕓 최신</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setSortOption('completed')}
-            className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
-              sortOption === 'completed'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="font-medium">✅ 급여 완료</span>
-          </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSortOption('popular')}
+                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
+                        sortOption === 'popular'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                      aria-label="인기순 정렬"
+                    >
+                      <Flame className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="font-medium">🔥 인기</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSortOption('recent')}
+                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
+                        sortOption === 'recent'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                      aria-label="최신순 정렬"
+                    >
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="font-medium">🕓 최신</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSortOption('completed')}
+                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm ${
+                        sortOption === 'completed'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                      aria-label="급여 완료순 정렬"
+                    >
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="font-medium">✅ 급여 완료</span>
+                    </motion.button>
           </div>
         </motion.div>
 
@@ -406,6 +414,7 @@ export default function PetLogPage() {
                     <button
                       onClick={handleLoadMore}
                       className="px-6 py-3 bg-white border-2 border-[#3056F5] text-[#3056F5] rounded-xl font-medium hover:bg-[#3056F5] hover:text-white transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
+                      aria-label="더 많은 후기 보기"
                     >
                       더 보기
                     </button>
@@ -435,15 +444,6 @@ export default function PetLogPage() {
                   필터를 조정해보세요
                 </p>
               </motion.div>
-            )}
-
-            {/* Activity Panel */}
-            {visibleLogIds.length > 0 && (
-              <FeedActivityPanel
-                logIds={visibleLogIds}
-                onOpen={handleActivityOpen}
-                formatTimeAgo={formatTimeAgo}
-              />
             )}
           </div>
 
@@ -543,16 +543,33 @@ export default function PetLogPage() {
           onClose={() => {
             setIsDrawerOpen(false)
             setSelectedReview(null)
-            setInitialTab('details')
-            setInitialThreadId(undefined)
           }}
           onStatusChange={handleStatusChange}
           formatTimeAgo={formatTimeAgo}
           formatDate={formatDate}
           comments={comments}
           onCommentSubmit={handleCommentSubmit}
-          initialTab={initialTab}
-          initialThreadId={initialThreadId}
+        />
+
+        {/* FAB Button */}
+        <button
+          onClick={() => setIsLogFormOpen(true)}
+          className="fixed bottom-6 right-6 z-40 rounded-full bg-[#3056F5] text-white w-14 h-14 text-2xl shadow-lg hover:bg-[#2648e6] transition-all duration-200 active:scale-95 flex items-center justify-center"
+          aria-label="새 로그 작성"
+        >
+          +
+        </button>
+
+        {/* Log Form Dialog */}
+        <LogFormDialog
+          open={isLogFormOpen}
+          onOpenChange={setIsLogFormOpen}
+          title="새 로그 작성"
+          onSuccess={() => {
+            // Refetch reviews (in a real app, this would invalidate queries)
+            // For now, we'll just close the dialog
+            setIsLogFormOpen(false)
+          }}
         />
       </main>
     </div>

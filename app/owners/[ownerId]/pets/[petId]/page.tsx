@@ -14,6 +14,8 @@ import PetLogsTabs from '@/components/pet/PetLogsTabs'
 import CategorySection from '@/components/pet/CategorySection'
 import LogDetailDrawer from '@/components/pet/LogDetailDrawer'
 import AuthDialog from '@/app/components/auth/AuthDialog'
+import LogFormDialog from '@/components/log/LogFormDialog'
+import FeedActivityPanel from '@/components/activity/FeedActivityPanel'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
 
@@ -31,6 +33,16 @@ export default function PetHistoryPage() {
   const petId = params.petId as string
   const tabParam = searchParams.get('tab') as Category | 'all' | null
 
+  // Validate tab parameter - only allow valid categories or 'all'
+  const validCategories: Category[] = ['feed', 'snack', 'supplement', 'toilet']
+  const isValidTab = tabParam === 'all' || (tabParam && validCategories.includes(tabParam as Category))
+  const validatedTab = isValidTab ? (tabParam as Category | 'all') : 'all'
+
+  // Type guard function
+  const isCategory = (tab: Category | 'all'): tab is Category => {
+    return tab !== 'all'
+  }
+
   const [owner, setOwner] = useState<Owner | null>(null)
   const [pet, setPet] = useState<Pet | null>(null)
   const [logs, setLogs] = useState<ReviewLog[]>([])
@@ -41,7 +53,10 @@ export default function PetHistoryPage() {
   const [selectedLog, setSelectedLog] = useState<ReviewLog | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<Category | 'all'>(tabParam || 'all')
+  const [isLogFormOpen, setIsLogFormOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<Category | 'all'>(validatedTab)
+  const [initialTab, setInitialTab] = useState<'details' | 'comments' | 'qa'>('details')
+  const [initialThreadId, setInitialThreadId] = useState<string | undefined>(undefined)
 
   // Load data
   useEffect(() => {
@@ -242,6 +257,26 @@ export default function PetHistoryPage() {
     setIsDrawerOpen(true)
   }
 
+  // Handle activity panel open
+  const handleActivityOpen = (params: {
+    logId: string
+    tab: 'details' | 'comments' | 'qa'
+    threadId?: string
+  }) => {
+    const log = logs.find((l) => l.id === params.logId)
+    if (log) {
+      setSelectedLog(log)
+      setInitialTab(params.tab)
+      setInitialThreadId(params.threadId)
+      setIsDrawerOpen(true)
+    }
+  }
+
+  // Get visible log IDs (for activity panel)
+  const visibleLogIds = useMemo(() => {
+    return logs.map((l) => l.id)
+  }, [logs])
+
   const handleStatusChange = (logId: string, newStatus: 'feeding' | 'paused' | 'completed') => {
     setLogs((prev) =>
       prev.map((log) => {
@@ -366,13 +401,22 @@ export default function PetHistoryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Pet Profile Header */}
-        <PetProfileHeader
-          pet={pet}
-          owner={owner}
-          logs={logs}
-          calculateAge={calculateAge}
-        />
+        {/* Header with Add Button */}
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <PetProfileHeader
+            pet={pet}
+            owner={owner}
+            logs={logs}
+            calculateAge={calculateAge}
+          />
+          <button
+            onClick={() => setIsLogFormOpen(true)}
+            className="rounded-xl bg-[#3056F5] text-white px-4 py-2 text-sm font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#3056F5] focus:ring-offset-2 whitespace-nowrap"
+            aria-label="새 로그 추가"
+          >
+            + 새 로그 추가
+          </button>
+        </div>
 
         {/* Tabs */}
         <PetLogsTabs
@@ -454,7 +498,7 @@ export default function PetHistoryPage() {
             )}
           </>
         ) : (
-          groupedLogs[activeTab].length > 0 && (
+          isCategory(activeTab) && groupedLogs[activeTab] && groupedLogs[activeTab].length > 0 && (
             <CategorySection
               category={activeTab}
               logs={groupedLogs[activeTab]}
@@ -483,6 +527,15 @@ export default function PetHistoryPage() {
             <p className="text-sm text-gray-600">첫 번째 급여 기록을 작성해보세요!</p>
           </motion.div>
         )}
+
+        {/* Activity Panel */}
+        {visibleLogIds.length > 0 && (
+          <FeedActivityPanel
+            logIds={visibleLogIds}
+            onOpen={handleActivityOpen}
+            formatTimeAgo={formatTimeAgo}
+          />
+        )}
       </main>
 
       {/* Log Detail Drawer */}
@@ -494,6 +547,8 @@ export default function PetHistoryPage() {
         onClose={() => {
           setIsDrawerOpen(false)
           setSelectedLog(null)
+          setInitialTab('details')
+          setInitialThreadId(undefined)
         }}
         onStatusChange={handleStatusChange}
         formatTimeAgo={formatTimeAgo}
@@ -502,12 +557,45 @@ export default function PetHistoryPage() {
         comments={comments}
         onCommentSubmit={handleCommentSubmit}
         onAuthRequired={() => setIsAuthDialogOpen(true)}
+        qaThreads={qaThreads}
+        qaPosts={qaPosts}
+        onQAThreadCreate={handleQAThreadCreate}
+        onQAPostSubmit={handleQAPostSubmit}
+        onAcceptAnswer={handleAcceptAnswer}
+        onUpvote={handleUpvote}
+        getAuthorInfo={getOwnerInfo}
+        initialTab={initialTab}
+        initialThreadId={initialThreadId}
       />
 
       {/* Auth Dialog */}
       <AuthDialog
         isOpen={isAuthDialogOpen}
         onClose={() => setIsAuthDialogOpen(false)}
+      />
+
+      {/* Log Form Dialog */}
+      <LogFormDialog
+        open={isLogFormOpen}
+        onOpenChange={setIsLogFormOpen}
+        title={pet ? `${pet.name} 새 로그 작성` : '새 로그 작성'}
+        defaultValues={pet ? { petId: pet.id } : undefined}
+        onSuccess={() => {
+          // Refetch logs for this pet
+          const supabase = getBrowserClient()
+          const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+
+          if (hasSupabase && supabase) {
+            getLogsByOwnerPet(ownerId, petId).then((logsData) => {
+              setLogs(logsData as unknown as ReviewLog[])
+            }).catch((error) => {
+              console.error('[PetHistoryPage] Error refetching logs:', error)
+            })
+          } else {
+            // Reload mock data
+            setLogs(mockReviewLogs.filter((l) => l.ownerId === ownerId && l.petId === petId))
+          }
+        }}
       />
     </div>
   )

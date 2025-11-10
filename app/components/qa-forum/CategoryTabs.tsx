@@ -35,14 +35,14 @@ export default function CategoryTabs({
         <button
           key={category.value}
           onClick={() => onSelectCategory(category.value)}
-          className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 flex items-center space-x-2 ${
+          className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 flex items-center space-x-2 text-sm ${
             selectedCategory === category.value
               ? 'bg-blue-500 text-white shadow-md'
               : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
           }`}
         >
-          <span>{category.emoji}</span>
-          <span>{category.label}</span>
+          <span className="text-base">{category.emoji}</span>
+          <span className="text-[15px] font-medium">{category.label}</span>
         </button>
       ))}
     </div>

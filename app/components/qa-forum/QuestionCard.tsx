@@ -65,8 +65,8 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
           <span className="text-lg">{question.categoryEmoji}</span>
-          <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-            {question.category}
+          <span className="text-sm font-medium text-gray-600 tracking-wide">
+            {question.category.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF]+[\u200D\uFE0F]*[\uD83C-\uDBFF\uDC00-\uDFFF]*[\u200D\uFE0F]*\s*/, '')}
           </span>
         </div>
         <div className="flex items-center space-x-1">

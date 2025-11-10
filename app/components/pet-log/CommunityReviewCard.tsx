@@ -88,12 +88,12 @@ export default function CommunityReviewCard({
         </div>
       </header>
 
-      <p className="text-sm text-gray-900 leading-relaxed bg-gray-50 rounded-2xl px-4 py-3 line-clamp-3 flex-shrink-0 min-h-[4.5rem] mb-3 text-[15px]">
+      <p className="text-sm text-gray-900 leading-relaxed bg-gray-50 rounded-2xl px-4 py-3 line-clamp-3 flex-shrink-0 h-[5rem] mb-3 text-[15px] flex items-start">
         {excerpt}
       </p>
 
       {(displayedContinueReasons.length > 0 || displayedStopReasons.length > 0 || totalHiddenReasons > 0) && (
-      <div className="flex flex-wrap gap-2 flex-shrink-0 min-h-[2rem] mb-1">
+      <div className="flex flex-wrap gap-2 flex-shrink-0 mb-1">
         {displayedContinueReasons.map((t) => (
           <span
             key={t}
