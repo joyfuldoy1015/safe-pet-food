@@ -1,7 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 type FeedStatus = "in_progress" | "stopped" | "completed";
 
@@ -44,17 +44,64 @@ const statusMap: Record<
   },
 };
 
+// 기간 계산 함수 (년/개월)
+function calculateDuration(since: string, until?: string): string | null {
+  if (!until) return null;
+  
+  try {
+    // "2024.06.01." 형식에서 날짜 추출
+    const sinceDate = new Date(since.replace(/\./g, '-').slice(0, -1));
+    const untilDate = new Date(until.replace(/\./g, '-').slice(0, -1));
+    
+    if (isNaN(sinceDate.getTime()) || isNaN(untilDate.getTime())) {
+      return null;
+    }
+    
+    const years = untilDate.getFullYear() - sinceDate.getFullYear();
+    const months = untilDate.getMonth() - sinceDate.getMonth();
+    
+    let totalMonths = years * 12 + months;
+    if (untilDate.getDate() < sinceDate.getDate()) {
+      totalMonths -= 1;
+    }
+    
+    const calculatedYears = Math.floor(totalMonths / 12);
+    const calculatedMonths = totalMonths % 12;
+    
+    if (calculatedYears > 0 && calculatedMonths > 0) {
+      return `(${calculatedYears}년 ${calculatedMonths}개월)`;
+    } else if (calculatedYears > 0) {
+      return `(${calculatedYears}년)`;
+    } else if (calculatedMonths > 0) {
+      return `(${calculatedMonths}개월)`;
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export default function PetLogCard(props: PetLogCardProps) {
   const s = statusMap[props.status] || statusMap.in_progress;
+  const [isExpanded, setIsExpanded] = useState(false);
   
   // 첫 문장 Bold 처리
   const reviewText = props.review || '';
   const [first, ...rest] = reviewText.split(/(?<=\.)\s/);
   const restText = rest.join(" ").trim();
+  
+  // 본문이 긴지 확인 (대략 150자 이상)
+  const isLongText = reviewText.length > 150;
+  const displayText = isExpanded ? reviewText : (first ? `${first.trim()}${restText ? ' ' + restText : ''}` : reviewText);
+  const shouldTruncate = isLongText && !isExpanded;
+  
+  // 기간 계산
+  const duration = calculateDuration(props.since, props.until);
 
   return (
     <article
-      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-sm hover:shadow-md transition-all"
+      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-sm hover:shadow-md transition-all flex flex-col h-full min-h-[400px]"
       role="article"
       aria-label={`${props.brand} ${props.product} 후기`}
     >
@@ -63,6 +110,7 @@ export default function PetLogCard(props: PetLogCardProps) {
         <span aria-label="급여 기간">
           since {props.since}
           {props.until && ` - ${props.until}`}
+          {duration && ` ${duration}`}
         </span>
         <span
           className={`px-2 py-0.5 rounded-full text-xs font-medium border ${s.className}`}
@@ -101,33 +149,61 @@ export default function PetLogCard(props: PetLogCardProps) {
 
       {/* 작성자 & 반려동물 정보 */}
       <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
-        {props.avatarUrl ? (
-          <img
-            src={props.avatarUrl}
-            alt={props.authorName}
-            className="w-6 h-6 rounded-full"
-          />
-        ) : (
-          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-            🐾
-          </div>
-        )}
         <span className="font-semibold text-gray-900">{props.authorName}</span>
         <span>· {props.petName} ({props.petAgeYears}세 · {props.petWeightKg}kg)</span>
       </div>
 
-      {/* 본문 (첫 문장 Bold + 2~3줄 클램프) */}
+      {/* 본문 (첫 문장 Bold + 말줄임 처리) */}
       {reviewText && (
-        <p className="mt-4 text-[15px] leading-7 text-gray-900">
-          {first ? (
+        <div className="mt-4 flex-1">
+          {!isExpanded ? (
             <>
-              <span className="font-semibold">{first.trim()}</span>
-              {restText && <span className="text-gray-600 line-clamp-3"> {restText}</span>}
+              {first ? (
+                <p className="text-[15px] leading-7 text-gray-900">
+                  <span className="font-semibold">{first.trim()}</span>
+                  {restText && (
+                    <span className={`text-gray-600 ${shouldTruncate ? 'line-clamp-2' : ''}`}>
+                      {' '}{restText}
+                    </span>
+                  )}
+                </p>
+              ) : (
+                <p className={`text-[15px] leading-7 text-gray-600 ${shouldTruncate ? 'line-clamp-3' : ''}`}>
+                  {reviewText}
+                </p>
+              )}
+              {shouldTruncate && (
+                <button
+                  onClick={() => setIsExpanded(true)}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  aria-label="전체 내용 보기"
+                >
+                  ... 더보기
+                </button>
+              )}
             </>
           ) : (
-            <span className="text-gray-600 line-clamp-3">{reviewText}</span>
+            <>
+              {first ? (
+                <p className="text-[15px] leading-7 text-gray-900">
+                  <span className="font-semibold">{first.trim()}</span>
+                  {restText && <span className="text-gray-600"> {restText}</span>}
+                </p>
+              ) : (
+                <p className="text-[15px] leading-7 text-gray-600">
+                  {reviewText}
+                </p>
+              )}
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                aria-label="내용 접기"
+              >
+                접기
+              </button>
+            </>
           )}
-        </p>
+        </div>
       )}
 
       {/* 하단 메트릭 */}
