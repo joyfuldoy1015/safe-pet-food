@@ -86,14 +86,11 @@ export default function PetLogCard(props: PetLogCardProps) {
   const s = statusMap[props.status] || statusMap.in_progress;
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // 첫 문장 Bold 처리
+  // 본문 텍스트
   const reviewText = props.review || '';
-  const [first, ...rest] = reviewText.split(/(?<=\.)\s/);
-  const restText = rest.join(" ").trim();
   
   // 본문이 긴지 확인 (대략 150자 이상)
   const isLongText = reviewText.length > 150;
-  const displayText = isExpanded ? reviewText : (first ? `${first.trim()}${restText ? ' ' + restText : ''}` : reviewText);
   const shouldTruncate = isLongText && !isExpanded;
   
   // 기간 계산
@@ -153,25 +150,14 @@ export default function PetLogCard(props: PetLogCardProps) {
         <span>· {props.petName} ({props.petAgeYears}세 · {props.petWeightKg}kg)</span>
       </div>
 
-      {/* 본문 (첫 문장 Bold + 말줄임 처리) */}
+      {/* 본문 (말줄임 처리) */}
       {reviewText && (
         <div className="mt-4 flex-1">
           {!isExpanded ? (
             <>
-              {first ? (
-                <p className="text-[15px] leading-7 text-gray-900">
-                  <span className="font-semibold">{first.trim()}</span>
-                  {restText && (
-                    <span className={`text-gray-600 ${shouldTruncate ? 'line-clamp-2' : ''}`}>
-                      {' '}{restText}
-                    </span>
-                  )}
-                </p>
-              ) : (
-                <p className={`text-[15px] leading-7 text-gray-600 ${shouldTruncate ? 'line-clamp-3' : ''}`}>
-                  {reviewText}
-                </p>
-              )}
+              <p className={`text-[15px] leading-7 text-gray-600 ${shouldTruncate ? 'line-clamp-3' : ''}`}>
+                {reviewText}
+              </p>
               {shouldTruncate && (
                 <button
                   onClick={() => setIsExpanded(true)}
@@ -184,16 +170,9 @@ export default function PetLogCard(props: PetLogCardProps) {
             </>
           ) : (
             <>
-              {first ? (
-                <p className="text-[15px] leading-7 text-gray-900">
-                  <span className="font-semibold">{first.trim()}</span>
-                  {restText && <span className="text-gray-600"> {restText}</span>}
-                </p>
-              ) : (
-                <p className="text-[15px] leading-7 text-gray-600">
-                  {reviewText}
-                </p>
-              )}
+              <p className="text-[15px] leading-7 text-gray-600">
+                {reviewText}
+              </p>
               <button
                 onClick={() => setIsExpanded(false)}
                 className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -207,7 +186,7 @@ export default function PetLogCard(props: PetLogCardProps) {
       )}
 
       {/* 하단 메트릭 */}
-      <div className="mt-4 flex items-center gap-5 text-sm text-gray-500">
+      <div className="mt-4 flex items-center justify-end gap-5 text-sm text-gray-500">
         <span aria-label="좋아요">❤️ {props.likes.toLocaleString()}</span>
         <span aria-label="댓글">💬 {props.comments.toLocaleString()}</span>
         <span aria-label="조회수">👀 {props.views.toLocaleString()}</span>
