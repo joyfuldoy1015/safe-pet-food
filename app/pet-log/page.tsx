@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle, User, TrendingUp, Plus } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
 import { mockReviewLogs, mockOwners, mockPets, mockComments } from '@/lib/mock/review-log'
-import CommunityReviewCard from '@/app/components/pet-log/CommunityReviewCard'
+import PetLogCard from '@/components/petlogs/PetLogCard'
 import FeedFilters from '@/app/components/pet-log/FeedFilters'
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
 import LogFormDialog from '@/components/log/LogFormDialog'
@@ -56,6 +56,31 @@ export default function PetLogPage() {
       month: '2-digit',
       day: '2-digit'
     }).replace(/\./g, '.').replace(/\s/g, '')
+  }
+
+  // Format date for PetLogCard (YYYY.MM.DD.)
+  const formatDateForCard = (dateString: string): string => {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}.${month}.${day}.`
+  }
+
+  // Extract numeric age from calculateAge result
+  // Returns age in years (converts months to approximate years: 12 months = 1 year)
+  const extractAgeNumber = (ageString: string): number => {
+    const yearMatch = ageString.match(/(\d+)세/)
+    if (yearMatch) {
+      return parseInt(yearMatch[1], 10)
+    }
+    const monthMatch = ageString.match(/(\d+)개월/)
+    if (monthMatch) {
+      // Convert months to approximate years (e.g., 6 months = 0.5 years, but we'll round to 1)
+      const months = parseInt(monthMatch[1], 10)
+      return Math.max(1, Math.floor(months / 12))
+    }
+    return 0
   }
 
   const calculateAge = (birthDate: string): string => {
@@ -375,6 +400,16 @@ export default function PetLogPage() {
                   const { owner, pet } = getOwnerAndPet(review)
                   if (!owner || !pet) return null
 
+                  // Map status to PetLogCard format
+                  const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
+                    'feeding': 'in_progress',
+                    'paused': 'stopped',
+                    'completed': 'completed'
+                  }
+
+                  const petAge = calculateAge(pet.birthDate)
+                  const petAgeNumber = extractAgeNumber(petAge)
+
                   return (
                     <motion.div
                       key={review.id}
@@ -382,33 +417,24 @@ export default function PetLogPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                     >
-                      <CommunityReviewCard
-                        title={`${review.brand} · ${review.product}`}
-                        rating={review.rating}
-                        recommend={review.recommend}
-                        status={review.status}
-                        periodLabel={
-                          review.status === 'feeding'
-                            ? `since ${formatDate(review.periodStart)}`
-                            : review.periodEnd
-                            ? `${formatDate(review.periodStart)} ~ ${formatDate(review.periodEnd)} (총 ${review.durationDays}일)`
-                            : formatDate(review.periodStart)
-                        }
-                        owner={{
-                          nickname: owner.nickname,
-                          pet: pet.name,
-                          meta: `${calculateAge(pet.birthDate)} · ${pet.weightKg}kg`
-                        }}
-                        continueReasons={review.continueReasons}
-                        stopReasons={review.stopReasons}
-                        excerpt={review.excerpt}
-                        metrics={{
-                          likes: review.likes,
-                          comments: review.commentsCount,
-                          views: review.views
-                        }}
-                        onOpenDetail={() => handleViewDetail(review.id)}
+                      <PetLogCard
+                        since={formatDateForCard(review.periodStart)}
+                        status={statusMap[review.status] || 'in_progress'}
+                        brand={review.brand}
+                        product={review.product}
+                        rating={review.rating || 0}
+                        recommended={review.recommend}
+                        authorName={owner.nickname}
+                        petName={pet.name}
+                        petAgeYears={petAgeNumber}
+                        petWeightKg={pet.weightKg || 0}
+                        review={review.excerpt || ''}
+                        likes={review.likes}
+                        comments={review.commentsCount}
+                        views={review.views}
                         onAsk={() => handleQuestionClick(review.id)}
+                        onDetail={() => handleViewDetail(review.id)}
+                        avatarUrl={owner.avatarUrl}
                       />
                     </motion.div>
                   )
