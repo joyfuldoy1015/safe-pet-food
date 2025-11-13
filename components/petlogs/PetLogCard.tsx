@@ -44,11 +44,12 @@ const statusMap: Record<
 };
 
 export default function PetLogCard(props: PetLogCardProps) {
-  const s = statusMap[props.status];
+  const s = statusMap[props.status] || statusMap.in_progress;
   
   // 첫 문장 Bold 처리
-  const [first, ...rest] = props.review.split(/(?<=\.)\s/);
-  const restText = rest.join(" ");
+  const reviewText = props.review || '';
+  const [first, ...rest] = reviewText.split(/(?<=\.)\s/);
+  const restText = rest.join(" ").trim();
 
   return (
     <article
@@ -72,7 +73,7 @@ export default function PetLogCard(props: PetLogCardProps) {
         <button
           className="hover:underline"
           type="button"
-          onClick={props.onDetail}
+          onClick={() => props.onDetail?.()}
           aria-label={`${props.brand} · ${props.product} 제품 상세로 이동`}
         >
           {props.brand} · {props.product}
@@ -112,10 +113,18 @@ export default function PetLogCard(props: PetLogCardProps) {
       </div>
 
       {/* 본문 (첫 문장 Bold + 2~3줄 클램프) */}
-      <p className="mt-4 text-[15px] leading-7 text-gray-900">
-        <span className="font-semibold">{first?.trim()}</span>{" "}
-        <span className="text-gray-600 line-clamp-3">{restText}</span>
-      </p>
+      {reviewText && (
+        <p className="mt-4 text-[15px] leading-7 text-gray-900">
+          {first ? (
+            <>
+              <span className="font-semibold">{first.trim()}</span>
+              {restText && <span className="text-gray-600 line-clamp-3"> {restText}</span>}
+            </>
+          ) : (
+            <span className="text-gray-600 line-clamp-3">{reviewText}</span>
+          )}
+        </p>
+      )}
 
       {/* 하단 메트릭 */}
       <div className="mt-4 flex items-center gap-5 text-sm text-gray-500">
@@ -128,14 +137,14 @@ export default function PetLogCard(props: PetLogCardProps) {
       <div className="mt-4 flex gap-2">
         <button
           className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-          onClick={props.onAsk}
+          onClick={() => props.onAsk?.()}
           aria-label="질문하기"
         >
           질문하기
         </button>
         <button
           className="flex-1 px-4 py-2.5 rounded-xl bg-[#3056F5] text-white text-sm font-medium hover:bg-[#2648e6] transition-all duration-200 shadow-sm hover:shadow-md"
-          onClick={props.onDetail}
+          onClick={() => props.onDetail?.()}
           aria-label="자세히 보기"
         >
           자세히 보기
