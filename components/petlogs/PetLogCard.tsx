@@ -7,6 +7,7 @@ type FeedStatus = "in_progress" | "stopped" | "completed";
 
 export interface PetLogCardProps {
   since: string;                 // "2024.10.02."
+  until?: string;                // "2025.10.31." (optional, for completed/stopped)
   status: FeedStatus;            // "in_progress" | "stopped" | "completed"
   brand: string;                 // "로얄캐닌"
   product: string;               // "골든 리트리버 어덜트"
@@ -34,11 +35,11 @@ const statusMap: Record<
     className: "bg-green-100 text-green-700 border-green-200",
   },
   stopped: {
-    label: "중지",
+    label: "급여 중지",
     className: "bg-red-100 text-red-700 border-red-200",
   },
   completed: {
-    label: "완료",
+    label: "급여 완료",
     className: "bg-gray-100 text-gray-700 border-gray-200",
   },
 };
@@ -59,7 +60,10 @@ export default function PetLogCard(props: PetLogCardProps) {
     >
       {/* 상단: 날짜 좌측 / 상태 우측 */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-        <span aria-label="급여 시작일">📅 since {props.since}</span>
+        <span aria-label="급여 기간">
+          since {props.since}
+          {props.until && ` - ${props.until}`}
+        </span>
         <span
           className={`px-2 py-0.5 rounded-full text-xs font-medium border ${s.className}`}
           aria-label={`상태: ${s.label}`}

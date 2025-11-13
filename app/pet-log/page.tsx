@@ -419,6 +419,11 @@ export default function PetLogPage() {
                     >
                       <PetLogCard
                         since={formatDateForCard(review.periodStart)}
+                        until={
+                          (review.status === 'completed' || review.status === 'paused') && review.periodEnd
+                            ? formatDateForCard(review.periodEnd)
+                            : undefined
+                        }
                         status={statusMap[review.status] || 'in_progress'}
                         brand={review.brand}
                         product={review.product}
