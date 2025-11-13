@@ -193,16 +193,9 @@ export default function PetLogCard(props: PetLogCardProps) {
       </div>
 
       {/* 버튼 */}
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4">
         <button
-          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-          onClick={() => props.onAsk?.()}
-          aria-label="질문하기"
-        >
-          질문하기
-        </button>
-        <button
-          className="flex-1 px-4 py-2.5 rounded-xl bg-[#3056F5] text-white text-sm font-medium hover:bg-[#2648e6] transition-all duration-200 shadow-sm hover:shadow-md"
+          className="w-full px-4 py-2.5 rounded-xl bg-[#3056F5] text-white text-sm font-medium hover:bg-[#2648e6] transition-all duration-200 shadow-sm hover:shadow-md"
           onClick={() => props.onDetail?.()}
           aria-label="자세히 보기"
         >
