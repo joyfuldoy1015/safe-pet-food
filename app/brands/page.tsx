@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Star, Shield, AlertTriangle, CheckCircle, Users, ArrowLeft, Search, Filter, BarChart3, MessageSquare } from 'lucide-react'
+import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
+import { mockReviewLogs } from '@/lib/mock/review-log'
 
 interface Brand {
   id: string
@@ -20,6 +22,7 @@ interface Brand {
   established_year: number
   country: string
   certifications: string[]
+  safiScore?: SafiResult
 }
 
 export default function BrandsPage() {
@@ -31,6 +34,44 @@ export default function BrandsPage() {
   useEffect(() => {
     fetchBrands()
   }, [])
+
+  // Calculate SAFI scores for each brand
+  const brandsWithSafi = useMemo(() => {
+    return brands.map(brand => {
+      // Get reviews for this brand
+      const brandReviews = mockReviewLogs.filter(review => review.brand === brand.name)
+      
+      // SAFI 계산을 위한 리뷰 데이터 변환
+      const safiReviews = brandReviews.map(review => ({
+        stoolScore: (review as any).stool_score || null,
+        allergySymptoms: (review as any).allergy_symptoms || null,
+        vomiting: (review as any).vomiting || null,
+        appetiteChange: (review as any).appetite_change || null
+      }))
+
+      // 브랜드 리콜 이력
+      const recallHistory = brand.recall_history.map(recall => ({
+        date: recall.date,
+        severity: (recall.severity === 'high' ? 'high' : recall.severity === 'medium' ? 'medium' : 'low') as 'high' | 'medium' | 'low'
+      }))
+
+      // 제품들의 원재료 정보 (현재는 product_lines만 있으므로 빈 배열로 처리)
+      // 실제로는 브랜드 상세 페이지에서 제품 정보를 가져와야 함
+      const allIngredients: string[] = []
+
+      // SAFI 점수 계산
+      const safiResult = calculateSafiScore({
+        reviews: safiReviews,
+        recallHistory,
+        ingredients: allIngredients
+      })
+
+      return {
+        ...brand,
+        safiScore: safiResult
+      }
+    })
+  }, [brands])
 
   const fetchBrands = async () => {
     try {
@@ -57,7 +98,7 @@ export default function BrandsPage() {
     return Math.max(0, Math.min(5, score))
   }
 
-  const filteredAndSortedBrands = brands
+  const filteredAndSortedBrands = brandsWithSafi
     .filter(brand => 
       brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       brand.manufacturer.toLowerCase().includes(searchTerm.toLowerCase())
@@ -289,6 +330,35 @@ export default function BrandsPage() {
                             <div className="font-semibold text-gray-900">{transparencyScore.toFixed(1)}/5.0</div>
                           </div>
                         </div>
+
+                        {/* SAFI Score */}
+                        {brand.safiScore && (
+                          <div className="mb-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-blue-600" />
+                                <span className="text-sm font-medium text-gray-700">SAFI 안전성 점수</span>
+                              </div>
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getSafiLevelColor(brand.safiScore.level)}`}>
+                                {getSafiLevelLabel(brand.safiScore.level)}
+                              </span>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-2xl font-bold text-gray-900">{brand.safiScore.overallScore.toFixed(1)}</span>
+                              <span className="text-sm text-gray-500">/ 100</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-500 ${
+                                  brand.safiScore.level === 'SAFE' ? 'bg-green-500' :
+                                  brand.safiScore.level === 'NORMAL' ? 'bg-yellow-500' :
+                                  'bg-red-500'
+                                }`}
+                                style={{ width: `${brand.safiScore.overallScore}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Recall Info */}
                         <div className="flex items-center justify-between pt-4 border-t border-gray-200">

@@ -30,8 +30,12 @@ import {
   Flag,
   HelpCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  BarChart3
 } from 'lucide-react'
+import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
+import { mockReviewLogs } from '@/lib/mock/review-log'
+import SafiEvaluationDialog from '@/components/safi/SafiEvaluationDialog'
 
 interface BrandQuestion {
   id: string
@@ -717,6 +721,9 @@ export default function BrandDetailPage() {
   const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false)
   const [expandedProducts, setExpandedProducts] = useState<Record<string, Record<string, boolean>>>({})
   const [defaultVote, setDefaultVote] = useState<'yes' | 'no'>('yes')
+  const [safiScore, setSafiScore] = useState<SafiResult | null>(null)
+  const [isSafiDialogOpen, setIsSafiDialogOpen] = useState(false)
+  const [selectedProductForSafi, setSelectedProductForSafi] = useState<string | null>(null)
 
   useEffect(() => {
     // API에서 브랜드 데이터 가져오기
@@ -800,6 +807,9 @@ export default function BrandDetailPage() {
     // 평가 데이터 가져오기
     fetchEvaluationData()
     
+    // SAFI 점수 계산
+    calculateSafiForBrand()
+    
     // URL 파라미터 확인 (평가 성공 시)
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('evaluation') === 'success') {
@@ -809,6 +819,14 @@ export default function BrandDetailPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandName])
+
+  // 브랜드 데이터가 로드되면 SAFI 점수 계산
+  useEffect(() => {
+    if (brand) {
+      calculateSafiForBrand()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brand])
 
   const fetchVoteData = async () => {
     try {
@@ -832,6 +850,40 @@ export default function BrandDetailPage() {
     } catch (error) {
       console.error('평가 데이터 가져오기 실패:', error)
     }
+  }
+
+  const calculateSafiForBrand = () => {
+    if (!brand) return
+
+    // 브랜드의 리뷰 로그 가져오기 (현재는 mock 데이터 사용)
+    const brandReviews = mockReviewLogs.filter(review => review.brand === brand.name)
+    
+    // SAFI 계산을 위한 리뷰 데이터 변환
+    // ReviewLog 타입에 SAFI 필드가 없을 수 있으므로 안전하게 처리
+    const safiReviews = brandReviews.map(review => ({
+      stoolScore: (review as any).stool_score || null,
+      allergySymptoms: (review as any).allergy_symptoms || null,
+      vomiting: (review as any).vomiting || null,
+      appetiteChange: (review as any).appetite_change || null
+    }))
+
+    // 브랜드 리콜 이력
+    const recallHistory = brand.recall_history.map(recall => ({
+      date: recall.date,
+      severity: recall.severity
+    }))
+
+    // 제품들의 원재료 정보 (모든 제품의 원재료 합치기)
+    const allIngredients = brand.products.flatMap(product => product.ingredients || [])
+
+    // SAFI 점수 계산
+    const safiResult = calculateSafiScore({
+      reviews: safiReviews,
+      recallHistory,
+      ingredients: allIngredients
+    })
+
+    setSafiScore(safiResult)
   }
 
   const handleVote = async (vote: 'yes' | 'no') => {
@@ -1452,6 +1504,173 @@ export default function BrandDetailPage() {
           </div>
         </div>
 
+        {/* SAFI 안전성 점수 섹션 */}
+        {safiScore && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Shield className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">🛡️ SAFI 안전성 점수</h2>
+                  <p className="text-sm text-gray-600">Safety & Fit Index - 제품 안전성 종합 평가</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 전체 점수 */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">종합 안전성 점수</p>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-4xl font-bold text-gray-900">{safiScore.overallScore.toFixed(1)}</span>
+                    <span className="text-lg text-gray-500">/ 100</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border ${getSafiLevelColor(safiScore.level)}`}>
+                    <Shield className="h-4 w-4 mr-2" />
+                    {getSafiLevelLabel(safiScore.level)}
+                  </span>
+                </div>
+              </div>
+              
+              {/* 진행 바 */}
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                <div 
+                  className={`h-3 rounded-full transition-all duration-500 ${
+                    safiScore.level === 'SAFE' ? 'bg-green-500' :
+                    safiScore.level === 'NORMAL' ? 'bg-yellow-500' :
+                    'bg-red-500'
+                  }`}
+                  style={{ width: `${safiScore.overallScore}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500">
+                {safiScore.level === 'SAFE' && '✅ 안전한 제품으로 평가됩니다'}
+                {safiScore.level === 'NORMAL' && '⚠️ 보통 수준의 안전성을 가진 제품입니다'}
+                {safiScore.level === 'CAUTION' && '⚠️ 주의가 필요한 제품입니다'}
+              </p>
+            </div>
+
+            {/* 세부 지수 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* A. Side Effect Index */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">A. 부작용 지수</span>
+                  <span className="text-xs text-gray-500">35%</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.A.toFixed(1)}</div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-blue-500 h-1.5 rounded-full"
+                    style={{ width: `${safiScore.detail.A}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">알레르기·구토 발생률</p>
+              </div>
+
+              {/* B. Stool Condition Index */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">B. 변 상태 지수</span>
+                  <span className="text-xs text-gray-500">25%</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.B.toFixed(1)}</div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-green-500 h-1.5 rounded-full"
+                    style={{ width: `${safiScore.detail.B}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">평균 변 상태 점수</p>
+              </div>
+
+              {/* C. Appetite Index */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">C. 식욕 지수</span>
+                  <span className="text-xs text-gray-500">10%</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.C.toFixed(1)}</div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-yellow-500 h-1.5 rounded-full"
+                    style={{ width: `${safiScore.detail.C}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">식욕 변화 평가</p>
+              </div>
+
+              {/* D. Ingredient Safety Index */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">D. 원재료 안전 지수</span>
+                  <span className="text-xs text-gray-500">20%</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.D.toFixed(1)}</div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-purple-500 h-1.5 rounded-full"
+                    style={{ width: `${safiScore.detail.D}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">원재료 안전성 평가</p>
+              </div>
+
+              {/* E. Brand Trust Index */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-medium text-gray-600">E. 브랜드 신뢰 지수</span>
+                  <span className="text-xs text-gray-500">10%</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.E.toFixed(1)}</div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-indigo-500 h-1.5 rounded-full"
+                    style={{ width: `${safiScore.detail.E}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">리콜 이력 기반 평가</p>
+              </div>
+            </div>
+
+            {/* 평가 기준 안내 */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-start space-x-2 text-sm text-gray-600">
+                <BarChart3 className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-gray-700 mb-1">평가 기준</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs">
+                    <li>80점 이상: 안전 (SAFE) - 안전한 제품으로 평가</li>
+                    <li>60~79점: 보통 (NORMAL) - 보통 수준의 안전성</li>
+                    <li>60점 미만: 주의 (CAUTION) - 주의가 필요한 제품</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* 평가하기 버튼 */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setSelectedProductForSafi(null)
+                  setIsSafiDialogOpen(true)
+                }}
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              >
+                <Shield className="h-5 w-5" />
+                <span>SAFI 평가하기</span>
+              </button>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                로그인한 회원만 평가할 수 있습니다
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* 브랜드 질문하기 섹션 */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
@@ -1680,6 +1899,18 @@ export default function BrandDetailPage() {
           </div>
         </div>
       )}
+
+      {/* SAFI 평가 다이얼로그 */}
+      <SafiEvaluationDialog
+        open={isSafiDialogOpen}
+        onOpenChange={setIsSafiDialogOpen}
+        brandName={brandName}
+        productName={selectedProductForSafi || undefined}
+        onSuccess={() => {
+          // SAFI 점수 재계산
+          calculateSafiForBrand()
+        }}
+      />
     </div>
   )
 } 

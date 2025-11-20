@@ -29,19 +29,23 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowRight, ChevronRight, TrendingUp, ArrowUp, MessageCircle } from 'lucide-react'
 import Hero from '@/components/home/Hero'
 import FeatureCards from '@/components/home/FeatureCards'
 import FeedTabs, { FeedTab } from '@/components/home/FeedTabs'
 import UnifiedCard from '@/components/home/UnifiedCard'
+import PetLogCard from '@/components/petlogs/PetLogCard'
 import { getPopular, getRecent, getQA, getReviews, type UnifiedFeedItem } from '@/lib/data/feed'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import questionsData from '@/data/questions.json'
+import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
 
 const PREVIEW_ITEMS_PER_TAB = 6
 
 export default function Home() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<FeedTab>('popular')
   const [feedItems, setFeedItems] = useState<UnifiedFeedItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -104,6 +108,59 @@ export default function Home() {
     return `${Math.floor(diffInSeconds / 31536000)}년 전`
   }
 
+  // Format date for PetLogCard (YYYY.MM.DD.)
+  const formatDateForCard = (dateString: string): string => {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}.${month}.${day}.`
+  }
+
+  // Extract numeric age from calculateAge result
+  const extractAgeNumber = (ageString: string): number => {
+    const yearMatch = ageString.match(/(\d+)세/)
+    if (yearMatch) {
+      return parseInt(yearMatch[1], 10)
+    }
+    const monthMatch = ageString.match(/(\d+)개월/)
+    if (monthMatch) {
+      const months = parseInt(monthMatch[1], 10)
+      return Math.max(1, Math.floor(months / 12))
+    }
+    return 0
+  }
+
+  const calculateAge = (birthDate: string): string => {
+    const birth = new Date(birthDate)
+    const now = new Date()
+    const years = now.getFullYear() - birth.getFullYear()
+    const months = now.getMonth() - birth.getMonth()
+    if (months < 0) {
+      return `${years - 1}세`
+    }
+    if (years > 0) {
+      return `${years}세`
+    }
+    return `${months}개월`
+  }
+
+  // Handle review detail navigation
+  const handleViewDetail = (reviewId: string) => {
+    const review = mockReviewLogs.find((r) => r.id === reviewId)
+    if (review) {
+      router.push(`/owners/${review.ownerId}/pets/${review.petId}`)
+    }
+  }
+
+  // Handle question click
+  const handleQuestionClick = (reviewId: string) => {
+    const review = mockReviewLogs.find((r) => r.id === reviewId)
+    if (review) {
+      router.push(`/owners/${review.ownerId}/pets/${review.petId}?tab=qa`)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section (Top 20-30%) */}
@@ -142,16 +199,96 @@ export default function Home() {
         ) : feedItems.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {feedItems.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
-                </motion.div>
-              ))}
+              {feedItems.map((item, index) => {
+                // For review items, use PetLogCard
+                if (item.kind === 'review') {
+                  const review = mockReviewLogs.find((r) => r.id === item.id)
+                  if (!review) {
+                    // Fallback to UnifiedCard if review not found
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
+                      </motion.div>
+                    )
+                  }
+
+                  const owner = mockOwners.find((o) => o.id === review.ownerId)
+                  const pet = mockPets.find((p) => p.id === review.petId)
+                  if (!owner || !pet) {
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
+                      </motion.div>
+                    )
+                  }
+
+                  // Map status to PetLogCard format
+                  const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
+                    'feeding': 'in_progress',
+                    'paused': 'stopped',
+                    'completed': 'completed'
+                  }
+
+                  const petAge = calculateAge(pet.birthDate)
+                  const petAgeNumber = extractAgeNumber(petAge)
+
+                  return (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <PetLogCard
+                        since={formatDateForCard(review.periodStart)}
+                        until={
+                          (review.status === 'completed' || review.status === 'paused') && review.periodEnd
+                            ? formatDateForCard(review.periodEnd)
+                            : undefined
+                        }
+                        status={statusMap[review.status] || 'in_progress'}
+                        brand={review.brand}
+                        product={review.product}
+                        rating={review.rating || 0}
+                        recommended={review.recommend}
+                        authorName={owner.nickname}
+                        petName={pet.name}
+                        petAgeYears={petAgeNumber}
+                        petWeightKg={pet.weightKg || 0}
+                        review={review.excerpt || ''}
+                        likes={review.likes}
+                        comments={review.commentsCount}
+                        views={review.views}
+                        onAsk={() => handleQuestionClick(review.id)}
+                        onDetail={() => handleViewDetail(review.id)}
+                        avatarUrl={owner.avatarUrl}
+                      />
+                    </motion.div>
+                  )
+                }
+
+                // For Q&A items, use UnifiedCard
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
+                  </motion.div>
+                )
+              })}
             </div>
 
             {/* See All Button */}
