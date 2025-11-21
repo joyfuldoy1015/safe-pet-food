@@ -1,6 +1,6 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { Star, Heart, MessageSquare, Eye } from "lucide-react";
 import React, { useState } from "react";
 
 type FeedStatus = "in_progress" | "stopped" | "completed";
@@ -98,10 +98,18 @@ export default function PetLogCard(props: PetLogCardProps) {
 
   return (
     <article
-      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-sm hover:shadow-md transition-all flex flex-col h-full min-h-[400px]"
+      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full min-h-[400px] group"
       role="article"
       aria-label={`${props.brand} ${props.product} 후기`}
     >
+      {/* 카테고리 배지 - 급여 후기 */}
+      <div className="mb-3">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+          <span>📝</span>
+          <span>급여 후기</span>
+        </span>
+      </div>
+
       {/* 상단: 날짜 좌측 / 상태 우측 */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
         <span aria-label="급여 기간">
@@ -118,7 +126,7 @@ export default function PetLogCard(props: PetLogCardProps) {
       </div>
 
       {/* 제품명 */}
-      <h3 className="mt-2 text-xl font-extrabold tracking-tight text-gray-900">
+      <h3 className="mt-2 text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors">
         <button
           className="hover:underline"
           type="button"
@@ -186,10 +194,21 @@ export default function PetLogCard(props: PetLogCardProps) {
       )}
 
       {/* 하단 메트릭 */}
-      <div className="mt-4 flex items-center justify-end gap-5 text-sm text-gray-500">
-        <span aria-label="좋아요">❤️ {props.likes.toLocaleString()}</span>
-        <span aria-label="댓글">💬 {props.comments.toLocaleString()}</span>
-        <span aria-label="조회수">👀 {props.views.toLocaleString()}</span>
+      <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-4 text-xs text-gray-600">
+          <span className="inline-flex items-center gap-1" aria-label="좋아요">
+            <Heart className="h-3.5 w-3.5 text-red-500" />
+            <span>{props.likes.toLocaleString()}</span>
+          </span>
+          <span className="inline-flex items-center gap-1" aria-label="댓글">
+            <MessageSquare className="h-3.5 w-3.5 text-blue-500" />
+            <span>{props.comments.toLocaleString()}</span>
+          </span>
+          <span className="inline-flex items-center gap-1" aria-label="조회수">
+            <Eye className="h-3.5 w-3.5 text-gray-500" />
+            <span>{props.views.toLocaleString()}</span>
+          </span>
+        </div>
       </div>
 
       {/* 버튼 */}

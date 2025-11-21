@@ -342,20 +342,22 @@ export default function CommunityQAForumPage() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Questions Feed */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2">
             {displayedQuestions.length > 0 ? (
               <>
-                {displayedQuestions.map((question) => (
-                  <QuestionCard
-                    key={question.id}
-                    question={{
-                      ...question,
-                      isUpvoted: userVotes[question.id] || false
-                    }}
-                    onUpvote={handleUpvote}
-                    formatTimeAgo={formatTimeAgo}
-                  />
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {displayedQuestions.map((question) => (
+                    <QuestionCard
+                      key={question.id}
+                      question={{
+                        ...question,
+                        isUpvoted: userVotes[question.id] || false
+                      }}
+                      onUpvote={handleUpvote}
+                      formatTimeAgo={formatTimeAgo}
+                    />
+                  ))}
+                </div>
 
                 {/* Load More Button */}
                 {hasMore && (
