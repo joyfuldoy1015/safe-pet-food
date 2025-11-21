@@ -3,6 +3,9 @@ import { getAdminClient, isAdmin } from '@/lib/supa/serverAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
+// Force dynamic rendering (uses headers)
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/admin/stats
  * 대시보드 통계 데이터 조회

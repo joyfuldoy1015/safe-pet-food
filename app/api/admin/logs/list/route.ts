@@ -4,6 +4,9 @@ import { parsePaginationParams, parseSortParams, buildFilterQuery, buildDateRang
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
+// Force dynamic rendering (uses headers)
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/admin/logs/list
  * 로그 목록 조회 (필터, 정렬, 페이지네이션 지원)

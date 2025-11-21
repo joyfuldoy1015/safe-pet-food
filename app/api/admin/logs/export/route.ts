@@ -3,6 +3,9 @@ import { getAdminClient, isAdmin } from '@/lib/supa/serverAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
+// Force dynamic rendering (uses headers)
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/admin/logs/export
  * 로그 데이터를 CSV 형식으로 내보내기

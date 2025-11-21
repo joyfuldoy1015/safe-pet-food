@@ -2,13 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supa/serverAdmin'
 import { parsePaginationParams, parseSortParams, buildFilterQuery } from '@/lib/supa/adminQueries'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/admin/users/list
  * 사용자 목록 조회
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getAdminClient()
+    let supabase
+    try {
+      supabase = getAdminClient()
+    } catch (error) {
+      console.error('[API /admin/users/list] Admin client error:', error)
+      return NextResponse.json(
+        { error: 'Admin credentials not configured', details: 'SUPABASE_SERVICE_ROLE_KEY is required' },
+        { status: 503 }
+      )
+    }
     
     // 파라미터 파싱
     const searchParams = request.nextUrl.searchParams

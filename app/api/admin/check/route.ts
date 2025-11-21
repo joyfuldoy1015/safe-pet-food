@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient, isAdmin } from '@/lib/supa/serverAdmin'
 import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
+
+// Force dynamic rendering (uses headers)
+export const dynamic = 'force-dynamic'
 
 /**
  * Check if current user is admin
