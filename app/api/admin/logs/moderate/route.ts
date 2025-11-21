@@ -3,6 +3,9 @@ import { getAdminClient, setAdminStatus, isModerator } from '@/lib/supa/serverAd
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
+// Force dynamic rendering (uses headers)
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/admin/logs/moderate
  * 로그 모더레이션 (hide/unhide/delete/restore)
