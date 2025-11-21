@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signIn } from 'next-auth/react'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
 import { 
@@ -60,24 +59,65 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    
+    // 입력값 검증
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 입력해주세요.')
+      setIsLoading(false)
+      return
+    }
+
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      const supabase = getBrowserClient()
+      
+      // Supabase 클라이언트 확인
+      if (!supabase) {
+        alert('인증 서비스에 연결할 수 없습니다. 환경 변수를 확인해주세요.')
+        console.error('Supabase client is not available')
+        setIsLoading(false)
+        return
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
       })
       
-      if (result?.ok) {
-        // 로그인 성공 시 현재 페이지에서 리다이렉트하거나 새로고침
-        window.location.href = redirectTo
+      if (error) {
+        console.error('Login error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        })
+        
+        // 에러 타입에 따른 메시지
+        let errorMessage = '로그인에 실패했습니다.'
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.'
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = '이메일 인증이 필요합니다. 이메일을 확인해주세요.'
+        } else if (error.message.includes('User not found')) {
+          errorMessage = '등록되지 않은 이메일입니다. 회원가입을 먼저 진행해주세요.'
+        }
+        
+        alert(errorMessage)
+        setIsLoading(false)
+        return
+      }
+
+      if (data?.user) {
+        console.log('Login successful:', data.user.email)
+        // 로그인 성공 - 세션이 로드될 때까지 기다린 후 리다이렉트
+        // useAuth 훅이 세션을 로드하는 시간을 주기 위해 약간의 지연
+        await new Promise(resolve => setTimeout(resolve, 800))
+        router.push(redirectTo)
       } else {
-        alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
-        console.error('Login failed:', result?.error)
+        alert('로그인에 실패했습니다. 다시 시도해주세요.')
+        setIsLoading(false)
       }
     } catch (error) {
-      console.error('Login error:', error)
-      alert('로그인 중 오류가 발생했습니다.')
-    } finally {
+      console.error('Unexpected login error:', error)
+      alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
       setIsLoading(false)
     }
   }
