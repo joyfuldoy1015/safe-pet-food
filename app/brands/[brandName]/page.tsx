@@ -744,7 +744,7 @@ export default function BrandDetailPage() {
               manufacturing_locations: [], // TODO: 추후 추가
               established_year: apiData.established_year,
               certifications: apiData.certifications || [],
-              brand_description: apiData.brand_description || '',
+              brand_description: apiData.description || apiData.brand_description || '',
               manufacturing_info: apiData.manufacturing_info || '',
               brand_pros: apiData.brand_pros || [],
               brand_cons: apiData.brand_cons || [],
@@ -870,7 +870,7 @@ export default function BrandDetailPage() {
     // 브랜드 리콜 이력
     const recallHistory = brand.recall_history.map(recall => ({
       date: recall.date,
-      severity: recall.severity
+      severity: (recall.severity === 'high' ? 'high' : recall.severity === 'medium' ? 'medium' : 'low') as 'high' | 'medium' | 'low'
     }))
 
     // 제품들의 원재료 정보 (모든 제품의 원재료 합치기)
@@ -976,7 +976,9 @@ export default function BrandDetailPage() {
   }
 
   const recommendationPercentage = voteData ? voteData.recommendation_percentage : 
-    Math.round((brand.community_feedback.recommend_yes / brand.community_feedback.total_votes) * 100)
+    brand.community_feedback.total_votes > 0 
+      ? Math.round((brand.community_feedback.recommend_yes / brand.community_feedback.total_votes) * 100)
+      : 0
 
     return (
     <div className="min-h-screen bg-gray-50">
@@ -1439,7 +1441,9 @@ export default function BrandDetailPage() {
                     <div className="flex flex-col justify-center">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600 mb-1">
-                          {Math.round((product.community_feedback.recommend_yes / product.community_feedback.total_votes) * 100)}%
+                          {product.community_feedback.total_votes > 0 
+                            ? Math.round((product.community_feedback.recommend_yes / product.community_feedback.total_votes) * 100)
+                            : 0}%
                 </div>
                 <p className="text-sm text-gray-600 mb-3">
                           {product.community_feedback.total_votes}명이 평가
