@@ -78,6 +78,34 @@ export default function LoginPage() {
         return
       }
 
+      // 환경 변수 확인
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      console.log('[Login] Supabase config check:', {
+        url: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : 'missing',
+        key: supabaseKey ? 'set' : 'missing',
+        urlValid: supabaseUrl?.match(/^https:\/\/[a-z0-9-]+\.supabase\.co$/) ? 'valid' : 'invalid'
+      })
+      
+      if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+        alert('Supabase 환경 변수가 설정되지 않았습니다.\n\n.env.local 파일에 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 설정해주세요.\n\n자세한 내용은 docs/SUPABASE_EMAIL_PASSWORD_SETUP.md를 참고하세요.')
+        console.error('Supabase environment variables not set:', {
+          url: supabaseUrl ? 'set' : 'missing',
+          key: supabaseKey ? 'set' : 'missing'
+        })
+        setIsLoading(false)
+        return
+      }
+
+      // URL 형식 검증
+      if (!supabaseUrl.match(/^https:\/\/[a-z0-9-]+\.supabase\.co$/)) {
+        alert(`Supabase URL 형식이 올바르지 않습니다.\n\n현재 URL: ${supabaseUrl}\n\n올바른 형식: https://[project-id].supabase.co\n\nSupabase 대시보드 → Settings → API에서 올바른 URL을 확인해주세요.`)
+        console.error('Invalid Supabase URL format:', supabaseUrl)
+        setIsLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password,
