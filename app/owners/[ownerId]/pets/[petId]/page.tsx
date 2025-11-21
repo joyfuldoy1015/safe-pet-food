@@ -64,33 +64,49 @@ export default function PetHistoryPage() {
       setIsLoading(true)
 
       const supabase = getBrowserClient()
-      const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+      const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                          process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
 
       if (hasSupabase && supabase) {
         try {
-          const [ownerData, petData, logsData] = await Promise.all([
+          // 타임아웃 설정 (10초)
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), 10000)
+          )
+
+          const dataPromise = Promise.all([
             getOwner(ownerId),
             getPet(petId),
             getLogsByOwnerPet(ownerId, petId)
           ])
 
+          const [ownerData, petData, logsData] = await Promise.race([
+            dataPromise,
+            timeoutPromise
+          ]) as [any, any, any]
+
           if (ownerData && petData) {
             setOwner(ownerData as unknown as Owner)
             setPet(petData as unknown as Pet)
             setLogs(logsData as unknown as ReviewLog[])
+            setIsLoading(false)
           } else {
             // Fallback to mock
+            console.warn('[PetHistoryPage] Supabase data not found, using mock data')
             loadMockData()
+            setIsLoading(false)
           }
         } catch (error) {
           console.error('[PetHistoryPage] Error loading data:', error)
+          // 에러 발생 시 mock 데이터로 fallback
           loadMockData()
+          setIsLoading(false)
         }
       } else {
+        // Supabase가 설정되지 않았으면 mock 데이터 사용
         loadMockData()
+        setIsLoading(false)
       }
-
-      setIsLoading(false)
     }
 
     const loadMockData = () => {
@@ -99,6 +115,11 @@ export default function PetHistoryPage() {
 
       if (!mockOwner || !mockPet) {
         // 404 - owner/pet mismatch
+        // 데이터를 찾지 못해도 로딩 상태는 해제해야 함
+        setOwner(null)
+        setPet(null)
+        setLogs([])
+        setComments([])
         return
       }
 
