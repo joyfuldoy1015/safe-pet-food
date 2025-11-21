@@ -63,47 +63,59 @@ export default function PetHistoryPage() {
     const loadData = async () => {
       setIsLoading(true)
 
-      const supabase = getBrowserClient()
-      const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL && 
-                          process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          console.warn('[PetHistoryPage] Supabase client not available, using mock data')
+          loadMockData()
+          setIsLoading(false)
+          return
+        }
 
-      if (hasSupabase && supabase) {
-        try {
-          // 타임아웃 설정 (10초)
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Request timeout')), 10000)
-          )
+        // Supabase 클라이언트의 URL 확인 (placeholder인지 체크)
+        // Supabase 클라이언트는 내부적으로 supabaseUrl 속성을 가지고 있음
+        const clientUrl = (supabase as any).supabaseUrl || ''
+        const isPlaceholder = clientUrl === 'https://placeholder.supabase.co' || 
+                             clientUrl.includes('placeholder') ||
+                             !clientUrl
 
-          const dataPromise = Promise.all([
-            getOwner(ownerId),
-            getPet(petId),
-            getLogsByOwnerPet(ownerId, petId)
-          ])
+        if (isPlaceholder) {
+          console.log('[PetHistoryPage] Placeholder Supabase client detected, using mock data')
+          loadMockData()
+          setIsLoading(false)
+          return
+        }
 
-          const [ownerData, petData, logsData] = await Promise.race([
-            dataPromise,
-            timeoutPromise
-          ]) as [any, any, any]
+        // 타임아웃 설정 (5초로 단축)
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 5000)
+        )
 
-          if (ownerData && petData) {
-            setOwner(ownerData as unknown as Owner)
-            setPet(petData as unknown as Pet)
-            setLogs(logsData as unknown as ReviewLog[])
-            setIsLoading(false)
-          } else {
-            // Fallback to mock
-            console.warn('[PetHistoryPage] Supabase data not found, using mock data')
-            loadMockData()
-            setIsLoading(false)
-          }
-        } catch (error) {
-          console.error('[PetHistoryPage] Error loading data:', error)
-          // 에러 발생 시 mock 데이터로 fallback
+        const dataPromise = Promise.all([
+          getOwner(ownerId),
+          getPet(petId),
+          getLogsByOwnerPet(ownerId, petId)
+        ])
+
+        const [ownerData, petData, logsData] = await Promise.race([
+          dataPromise,
+          timeoutPromise
+        ]) as [any, any, any]
+
+        if (ownerData && petData) {
+          setOwner(ownerData as unknown as Owner)
+          setPet(petData as unknown as Pet)
+          setLogs(logsData as unknown as ReviewLog[])
+          setIsLoading(false)
+        } else {
+          // Fallback to mock
+          console.warn('[PetHistoryPage] Supabase data not found, using mock data')
           loadMockData()
           setIsLoading(false)
         }
-      } else {
-        // Supabase가 설정되지 않았으면 mock 데이터 사용
+      } catch (error) {
+        console.error('[PetHistoryPage] Error loading data:', error)
+        // 에러 발생 시 mock 데이터로 fallback
         loadMockData()
         setIsLoading(false)
       }
