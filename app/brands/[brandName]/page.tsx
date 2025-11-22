@@ -1044,13 +1044,13 @@ export default function BrandDetailPage() {
           {/* 브랜드 정보 */}
           <div className="mt-6 pt-6 border-t border-gray-100">
             <h3 className="text-sm font-medium text-gray-900 mb-3">📖 {brand.name}에 대해서</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">{brand.brand_description}</p>
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{brand.brand_description}</p>
       </div>
 
           {/* 제조 및 소싱 정보 */}
           <div className="mt-6 pt-6 border-t border-gray-100">
             <h3 className="text-sm font-medium text-gray-900 mb-3">🏭 제조 및 소싱에 대해서</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">{brand.manufacturing_info}</p>
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{brand.manufacturing_info}</p>
           </div>
 
 
