@@ -118,9 +118,7 @@ export default function FeedFilters({
             <option value="not-recommended">비추천</option>
           </select>
         </div>
-        </div>
       </div>
     </div>
   )
 }
-
