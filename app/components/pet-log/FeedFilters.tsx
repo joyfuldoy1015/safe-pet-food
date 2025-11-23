@@ -37,13 +37,13 @@ export default function FeedFilters({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
         {/* Species Filter */}
         <div className="min-w-[120px] sm:min-w-0">
-          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2.5">
             반려동물
           </label>
           <select
             value={selectedSpecies}
             onChange={(e) => onSpeciesChange(e.target.value as 'all' | 'dog' | 'cat')}
-            className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
+            className="w-full px-3 sm:px-3 py-3 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
           >
             <option value="all">전체</option>
             <option value="dog">🐕 강아지</option>
@@ -53,13 +53,13 @@ export default function FeedFilters({
 
         {/* Category Filter */}
         <div className="min-w-[120px] sm:min-w-0">
-          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2.5">
             제품군
           </label>
           <select
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value as typeof selectedCategory)}
-            className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
+            className="w-full px-3 sm:px-3 py-3 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
           >
             <option value="all">전체</option>
             <option value="feed">🍽️ 사료</option>
@@ -71,13 +71,13 @@ export default function FeedFilters({
 
         {/* Status Filter */}
         <div className="min-w-[120px] sm:min-w-0">
-          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2.5">
             상태
           </label>
           <select
             value={selectedStatus}
             onChange={(e) => onStatusChange(e.target.value as typeof selectedStatus)}
-            className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
+            className="w-full px-3 sm:px-3 py-3 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
           >
             <option value="all">전체</option>
             <option value="feeding">급여 중</option>
@@ -88,13 +88,13 @@ export default function FeedFilters({
 
         {/* Rating Filter */}
         <div className="min-w-[120px] sm:min-w-0">
-          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2.5">
             평점
           </label>
           <select
             value={selectedRating}
             onChange={(e) => onRatingChange(Number(e.target.value))}
-            className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
+            className="w-full px-3 sm:px-3 py-3 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
           >
             <option value={0}>전체</option>
             <option value={5}>5점</option>
@@ -105,13 +105,13 @@ export default function FeedFilters({
 
         {/* Recommend Filter */}
         <div className="min-w-[120px] sm:min-w-0">
-          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2.5">
             추천
           </label>
           <select
             value={selectedRecommend}
             onChange={(e) => onRecommendChange(e.target.value as typeof selectedRecommend)}
-            className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
+            className="w-full px-3 sm:px-3 py-3 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm sm:text-base"
           >
             <option value="all">전체</option>
             <option value="recommended">추천</option>
