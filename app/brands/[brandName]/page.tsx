@@ -1043,28 +1043,28 @@ export default function BrandDetailPage() {
 
           {/* 브랜드 정보 */}
           <div className="mt-6 pt-6 border-t border-gray-100">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">📖 {brand.name}에 대해서</h3>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{brand.brand_description}</p>
+            <h3 className="text-base font-medium text-gray-900 mb-3">📖 {brand.name}에 대해서</h3>
+            <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">{brand.brand_description}</p>
       </div>
 
           {/* 제조 및 소싱 정보 */}
           <div className="mt-6 pt-6 border-t border-gray-100">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">🏭 제조 및 소싱에 대해서</h3>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{brand.manufacturing_info}</p>
+            <h3 className="text-base font-medium text-gray-900 mb-3">🏭 제조 및 소싱에 대해서</h3>
+            <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">{brand.manufacturing_info}</p>
           </div>
 
 
           {/* 리콜 이력 */}
           {brand.recall_history.length > 0 && (
             <div className="mt-6 pt-6 border-t border-gray-100">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">⚠️ 리콜 이력</h3>
+              <h3 className="text-base font-medium text-gray-900 mb-3">⚠️ 리콜 이력</h3>
               <div className="space-y-3">
                 {brand.recall_history.map((recall, index) => (
                   <div key={index} className={`p-3 rounded-lg ${getSeverityColor(recall.severity)}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <AlertTriangle className="h-4 w-4" />
-                        <span className="text-sm font-medium">{recall.reason}</span>
+                        <span className="text-base font-medium">{recall.reason}</span>
                       </div>
                       <span className="text-xs text-gray-600">{recall.date}</span>
                     </div>
@@ -1085,7 +1085,7 @@ export default function BrandDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 신뢰하는 이유 */}
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                <h3 className="text-base font-medium text-gray-900 mb-3 flex items-center">
                   <ThumbsUp className="h-4 w-4 text-green-600 mr-2" />
                   신뢰하는 이유
                 </h3>
@@ -1093,7 +1093,7 @@ export default function BrandDetailPage() {
                   {brand.brand_pros.map((pro, index) => (
                     <div key={index} className="flex items-start space-x-2">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-gray-700">{pro}</p>
+                      <p className="text-base text-gray-700">{pro}</p>
                     </div>
                   ))}
                 </div>
@@ -1101,7 +1101,7 @@ export default function BrandDetailPage() {
 
               {/* 보완하면 좋은 점 */}
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                <h3 className="text-base font-medium text-gray-900 mb-3 flex items-center">
                   <AlertTriangle className="h-4 w-4 text-orange-600 mr-2" />
                   보완하면 좋은 점
                 </h3>
@@ -1109,7 +1109,7 @@ export default function BrandDetailPage() {
                   {brand.brand_cons.map((con, index) => (
                     <div key={index} className="flex items-start space-x-2">
                       <AlertTriangle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-gray-700">{con}</p>
+                      <p className="text-base text-gray-700">{con}</p>
                     </div>
                   ))}
                 </div>
