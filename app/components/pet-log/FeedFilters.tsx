@@ -34,8 +34,7 @@ export default function FeedFilters({
         <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
         <h3 className="text-base sm:text-lg font-bold text-gray-900">필터</h3>
       </div>
-      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-        <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 min-w-max sm:min-w-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
         {/* Species Filter */}
         <div className="min-w-[120px] sm:min-w-0">
           <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
