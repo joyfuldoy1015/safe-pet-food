@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { 
   Eye, 
   EyeOff, 
@@ -10,13 +11,19 @@ import {
   Lock, 
   User
 } from 'lucide-react'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 
 
 
 export default function SignupPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/'
+  
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,6 +38,30 @@ export default function SignupPage() {
   
   // 임시로 관리자 계정 여부를 설정 (실제로는 로그인 상태에서 가져와야 함)
   const isAdmin = true // 실제 구현 시 로그인 상태에서 관리자 권한 확인
+
+  const handleGoogleSignup = async () => {
+    setIsLoading(true)
+    try {
+      const supabase = getBrowserClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+        }
+      })
+      
+      if (error) {
+        console.error('Google signup error:', error)
+        alert('Google 회원가입에 실패했습니다.')
+        setIsLoading(false)
+      }
+      // 성공 시 리디렉션되므로 setIsLoading(false)는 호출하지 않음
+    } catch (error) {
+      console.error('Google signup error:', error)
+      alert('회원가입 중 오류가 발생했습니다.')
+      setIsLoading(false)
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -87,9 +118,13 @@ export default function SignupPage() {
           
           {/* Social Signup Buttons */}
           <div className="space-y-3">
-            <button className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={handleGoogleSignup}
+              disabled={isLoading}
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Image src="https://developers.google.com/identity/images/g-logo.png" alt="Google" width={20} height={20} className="mr-3" />
-              Google로 회원가입
+              {isLoading ? '처리 중...' : 'Google로 회원가입'}
             </button>
             
             <button className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors">
