@@ -56,6 +56,30 @@ export default function LoginPage() {
     }
   }
 
+  const handleKakaoLogin = async () => {
+    setIsLoading(true)
+    try {
+      const supabase = getBrowserClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+        }
+      })
+      
+      if (error) {
+        console.error('Kakao login error:', error)
+        alert('카카오 로그인에 실패했습니다.')
+        setIsLoading(false)
+      }
+      // 성공 시 리디렉션되므로 setIsLoading(false)는 호출하지 않음
+    } catch (error) {
+      console.error('Kakao login error:', error)
+      alert('로그인 중 오류가 발생했습니다.')
+      setIsLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -175,9 +199,13 @@ export default function LoginPage() {
               {isLoading ? '로그인 중...' : 'Google로 로그인'}
             </button>
             
-            <button className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors">
+            <button 
+              onClick={handleKakaoLogin}
+              disabled={isLoading}
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <span className="mr-3 text-lg">💬</span>
-              카카오로 로그인
+              {isLoading ? '로그인 중...' : '카카오로 로그인'}
             </button>
           </div>
 

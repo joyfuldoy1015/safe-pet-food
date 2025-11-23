@@ -63,6 +63,30 @@ export default function SignupPage() {
     }
   }
 
+  const handleKakaoSignup = async () => {
+    setIsLoading(true)
+    try {
+      const supabase = getBrowserClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+        }
+      })
+      
+      if (error) {
+        console.error('Kakao signup error:', error)
+        alert('카카오 회원가입에 실패했습니다.')
+        setIsLoading(false)
+      }
+      // 성공 시 리디렉션되므로 setIsLoading(false)는 호출하지 않음
+    } catch (error) {
+      console.error('Kakao signup error:', error)
+      alert('회원가입 중 오류가 발생했습니다.')
+      setIsLoading(false)
+    }
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -127,9 +151,13 @@ export default function SignupPage() {
               {isLoading ? '처리 중...' : 'Google로 회원가입'}
             </button>
             
-            <button className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors">
+            <button 
+              onClick={handleKakaoSignup}
+              disabled={isLoading}
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <span className="mr-3 text-lg">💬</span>
-              카카오로 회원가입
+              {isLoading ? '처리 중...' : '카카오로 회원가입'}
             </button>
           </div>
 
