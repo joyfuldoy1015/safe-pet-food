@@ -288,11 +288,11 @@ export default function ExplorePage() {
         {/* Filters and Sort */}
         <div className="mb-6 space-y-4">
           {/* Sort Options */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium text-gray-700">정렬:</span>
             <button
               onClick={() => setSortOption('popular')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
                 sortOption === 'popular'
                   ? 'bg-orange-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -302,7 +302,7 @@ export default function ExplorePage() {
             </button>
             <button
               onClick={() => setSortOption('recent')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
                 sortOption === 'recent'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -312,7 +312,7 @@ export default function ExplorePage() {
             </button>
             <button
               onClick={() => setSortOption('recommended')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
                 sortOption === 'recommended'
                   ? 'bg-green-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
