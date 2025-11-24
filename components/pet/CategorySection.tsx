@@ -97,6 +97,7 @@ export default function CategorySection({
                 qaPosts={getQAPostsForLog?.(log.id) || []}
                 formatTimeAgo={formatTimeAgo}
                 getAuthorInfo={getOwnerInfo}
+                category={category}
               />
             </motion.div>
           )

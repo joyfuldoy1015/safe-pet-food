@@ -16,6 +16,7 @@ interface LogCompactCardProps {
   qaPosts?: QAPostWithAuthor[]
   formatTimeAgo?: (date: string) => string
   getAuthorInfo?: (authorId: string) => { nickname: string; avatarUrl?: string } | null
+  category?: 'feed' | 'snack' | 'supplement' | 'toilet'
 }
 
 /**
@@ -32,7 +33,8 @@ export default function LogCompactCard({
   qaThreads = [],
   qaPosts = [],
   formatTimeAgo,
-  getAuthorInfo
+  getAuthorInfo,
+  category
 }: LogCompactCardProps) {
   const [showComments, setShowComments] = useState(false)
   const [showQA, setShowQA] = useState(false)
@@ -57,6 +59,17 @@ export default function LogCompactCard({
       ? 'bg-gray-100 text-gray-700 border-gray-200'
       : 'bg-red-50 text-red-700 border-red-200'
 
+  // 카테고리별 테두리 색상과 그림자 설정
+  const categoryStyle = category
+    ? category === 'feed'
+      ? 'border-blue-300 shadow-md shadow-blue-100/50 hover:shadow-lg hover:shadow-blue-200/50'
+      : category === 'snack'
+      ? 'border-green-300 shadow-md shadow-green-100/50 hover:shadow-lg hover:shadow-green-200/50'
+      : category === 'supplement'
+      ? 'border-purple-300 shadow-md shadow-purple-100/50 hover:shadow-lg hover:shadow-purple-200/50'
+      : 'border-orange-300 shadow-md shadow-orange-100/50 hover:shadow-lg hover:shadow-orange-200/50'
+    : 'border-gray-200 shadow-md shadow-gray-200/50 hover:shadow-lg hover:shadow-gray-300/50'
+
   const formatDateForBadge = (dateString: string) => {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) return dateString
@@ -66,10 +79,14 @@ export default function LogCompactCard({
     return `${year}.${month}.${day}.`
   }
 
+  const reviewText = log.excerpt || (log.notes ?? '')
+  const displayedContinueReasons = (log.continueReasons || []).slice(0, 3)
+  const displayedStopReasons = (log.stopReasons || []).slice(0, 3)
+
   return (
     <article
       onClick={onOpenDetail}
-      className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+      className={`rounded-2xl border-2 bg-white p-4 ${categoryStyle} transition-all cursor-pointer`}
     >
       {/* Top badges */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
@@ -97,6 +114,35 @@ export default function LogCompactCard({
               {log.recommend ? '추천' : '비추천'}
             </span>
           )}
+        </div>
+      )}
+
+      {/* Review excerpt */}
+      {reviewText && (
+        <p className="text-sm text-gray-600 leading-6 mb-3 line-clamp-3">
+          {reviewText}
+        </p>
+      )}
+
+      {/* Pros / Cons tags */}
+      {(displayedContinueReasons.length > 0 || displayedStopReasons.length > 0) && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {displayedContinueReasons.map((reason) => (
+            <span
+              key={`pro-${reason}`}
+              className="px-2 py-0.5 rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700 text-xs"
+            >
+              장점: {reason}
+            </span>
+          ))}
+          {displayedStopReasons.map((reason) => (
+            <span
+              key={`con-${reason}`}
+              className="px-2 py-0.5 rounded-full border border-rose-100 bg-rose-50 text-rose-700 text-xs"
+            >
+              단점: {reason}
+            </span>
+          ))}
         </div>
       )}
 
@@ -140,7 +186,7 @@ export default function LogCompactCard({
             e.stopPropagation()
             onOpenDetail()
           }}
-          className="px-3 py-1.5 bg-[#3056F5] text-white rounded-lg text-xs font-medium hover:bg-[#2648e6] transition-colors"
+          className="px-4 sm:px-5 py-1.5 bg-[#3056F5] text-white rounded-lg text-xs font-medium hover:bg-[#2648e6] transition-colors"
         >
           상세
         </button>
