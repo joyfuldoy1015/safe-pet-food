@@ -464,27 +464,33 @@ export default function LogDetailDrawer({
 
                   {/* Comment Form */}
                   <form onSubmit={handleCommentSubmit} className="mt-6 pt-6 border-t border-gray-200">
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder={user ? '댓글을 작성해주세요...' : '로그인이 필요합니다. 클릭하여 로그인하세요.'}
-                      onClick={() => {
-                        if (!user && onAuthRequired) {
-                          onAuthRequired()
-                        }
-                      }}
-                      disabled={!user}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm resize-none disabled:bg-gray-50 disabled:cursor-pointer"
-                    />
-                    {user && (
-                      <div className="flex justify-end mt-3">
+                    {user ? (
+                      <>
+                        <textarea
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="댓글을 작성해주세요..."
+                          rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm resize-none"
+                        />
+                        <div className="flex justify-end mt-3">
+                          <button
+                            type="submit"
+                            disabled={!newComment.trim()}
+                            className="px-4 py-2 bg-[#3056F5] text-white rounded-xl text-sm font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            댓글 작성
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 text-sm text-gray-600">
                         <button
-                          type="submit"
-                          disabled={!newComment.trim()}
-                          className="px-4 py-2 bg-[#3056F5] text-white rounded-xl text-sm font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          type="button"
+                          onClick={() => onAuthRequired?.()}
+                          className="w-full px-4 py-3 border border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[#3056F5] hover:text-[#3056F5] transition-colors"
                         >
-                          댓글 작성
+                          로그인이 필요합니다. 클릭하여 로그인하세요.
                         </button>
                       </div>
                     )}

@@ -13,6 +13,8 @@ interface UseAuthReturn {
   session: Session | null
   isLoading: boolean
   signIn: (email: string) => Promise<{ error: Error | null }>
+  signInWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>
+  signInWithProvider: (provider: 'google' | 'kakao') => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -163,12 +165,50 @@ export function useAuth(): UseAuthReturn {
     }
   }
 
+  const signInWithProvider = async (provider: 'google' | 'kakao'): Promise<{ error: Error | null }> => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
+
+      if (error) {
+        return { error }
+      }
+
+      return { error: null }
+    } catch (error) {
+      return { error: error as Error }
+    }
+  }
+
+  const signInWithPassword = async (email: string, password: string): Promise<{ error: Error | null }> => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (error) {
+        return { error }
+      }
+
+      return { error: null }
+    } catch (error) {
+      return { error: error as Error }
+    }
+  }
+
   return {
     user,
     profile,
     session,
     isLoading,
     signIn,
+    signInWithPassword,
+    signInWithProvider,
     signOut,
     refreshProfile
   }
