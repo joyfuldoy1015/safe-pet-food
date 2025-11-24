@@ -1,15 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Star, Heart, MessageSquare, Eye, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react'
+import { Star, Heart, MessageSquare, Eye, ChevronDown, ChevronUp } from 'lucide-react'
 import type { ReviewLog, Comment, QAThread, QAPostWithAuthor } from '@/lib/types/review-log'
 
 interface LogCompactCardProps {
   log: ReviewLog
   owner: { nickname: string }
   pet: { name: string; birthDate: string; weightKg?: number }
-  formatPeriodLabel: (status: 'feeding' | 'paused' | 'completed', start: string, end?: string, days?: number) => string
-  calculateAge: (birthDate: string) => string
   onOpenDetail: () => void
   bestAnswerExcerpt?: string | null
   latestCommentExcerpt?: string | null
@@ -27,8 +25,6 @@ export default function LogCompactCard({
   log,
   owner,
   pet,
-  formatPeriodLabel,
-  calculateAge,
   onOpenDetail,
   bestAnswerExcerpt,
   latestCommentExcerpt,
@@ -38,96 +34,71 @@ export default function LogCompactCard({
   formatTimeAgo,
   getAuthorInfo
 }: LogCompactCardProps) {
-  const [showAllReasons, setShowAllReasons] = useState(false)
   const [showComments, setShowComments] = useState(false)
   const [showQA, setShowQA] = useState(false)
 
+  const isUsageCategory = log.category === 'toilet'
+  const statusLabelMap: Record<'feeding' | 'paused' | 'completed', string> = isUsageCategory
+    ? {
+        feeding: '사용 중',
+        paused: '사용 중지',
+        completed: '사용 완료'
+      }
+    : {
+        feeding: '급여 중',
+        paused: '급여 중지',
+        completed: '급여 완료'
+      }
+
   const statusColor =
     log.status === 'feeding'
-      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      ? 'bg-green-50 text-green-700 border-green-200'
       : log.status === 'completed'
-      ? 'bg-blue-50 text-blue-700 border-blue-200'
-      : 'bg-gray-50 text-gray-700 border-gray-200'
+      ? 'bg-gray-100 text-gray-700 border-gray-200'
+      : 'bg-red-50 text-red-700 border-red-200'
 
-  const displayedContinueReasons = showAllReasons
-    ? log.continueReasons || []
-    : (log.continueReasons || []).slice(0, 3)
-  const displayedStopReasons = showAllReasons
-    ? log.stopReasons || []
-    : (log.stopReasons || []).slice(0, 3)
-
-  const hiddenContinueCount = (log.continueReasons?.length || 0) - displayedContinueReasons.length
-  const hiddenStopCount = (log.stopReasons?.length || 0) - displayedStopReasons.length
-  const totalHidden = hiddenContinueCount + hiddenStopCount
+  const formatDateForBadge = (dateString: string) => {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return dateString
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}.${month}.${day}.`
+  }
 
   return (
     <article
       onClick={onOpenDetail}
       className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
     >
-      {/* Header */}
-      <div className="mb-3">
-        <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-1">
-          {log.brand} · {log.product}
-        </h3>
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border font-medium ${statusColor}`}
-          >
-            <CalendarDays size={12} />
-            {formatPeriodLabel(log.status, log.periodStart, log.periodEnd, log.durationDays)}
-          </span>
-          {typeof log.rating === 'number' && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-50 text-yellow-800 text-xs border border-yellow-200">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  size={10}
-                  className={i < Math.round(log.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                />
-              ))}
-              <b className="ml-1">{log.rating.toFixed(1)}</b>
-              {log.recommend !== undefined && (
-                <span className="ml-1">{log.recommend ? '👍' : '👎'}</span>
-              )}
-            </span>
-          )}
-        </div>
+      {/* Top badges */}
+      <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+        <span>
+          since {formatDateForBadge(log.periodStart)}
+          {log.periodEnd && ` - ${formatDateForBadge(log.periodEnd)}`}
+        </span>
+        <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${statusColor}`}>
+          {statusLabelMap[log.status]}
+        </span>
       </div>
 
-      {/* Reasons */}
-      {(log.continueReasons && log.continueReasons.length > 0) ||
-      (log.stopReasons && log.stopReasons.length > 0) ? (
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          {displayedContinueReasons.map((reason) => (
-            <span
-              key={reason}
-              className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs border border-emerald-100 whitespace-nowrap"
-            >
-              계속: {reason}
+      {/* Product info */}
+      <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+        {log.brand} · {log.product}
+      </h3>
+      {typeof log.rating === 'number' && (
+        <div className="flex items-center gap-2 mb-3">
+          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <span className="text-base font-semibold text-gray-900">
+            {log.rating.toFixed(1)}
+          </span>
+          {log.recommend !== undefined && (
+            <span className="px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 text-xs border border-yellow-200">
+              {log.recommend ? '추천' : '비추천'}
             </span>
-          ))}
-          {displayedStopReasons.map((reason) => (
-            <span
-              key={reason}
-              className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-xs border border-rose-100 whitespace-nowrap"
-            >
-              중지: {reason}
-            </span>
-          ))}
-          {totalHidden > 0 && !showAllReasons && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowAllReasons(true)
-              }}
-              className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200 hover:bg-gray-200 transition-colors whitespace-nowrap"
-            >
-              +{totalHidden}
-            </button>
           )}
         </div>
-      ) : null}
+      )}
 
       {/* Comment Teaser */}
       {(bestAnswerExcerpt || latestCommentExcerpt) && (

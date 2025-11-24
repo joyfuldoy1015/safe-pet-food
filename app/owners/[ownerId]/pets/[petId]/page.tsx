@@ -5,7 +5,6 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { getOwner, getPet, getLogsByOwnerPet } from '@/lib/supa/queries'
 import { groupByCategory, sortLogs, filterByTab, getCategoryStats } from '@/lib/group'
-import { formatPeriodLabel } from '@/lib/period'
 import type { ReviewLog, Pet, Owner, Comment, Category, QAThread, QAPost, QAPostWithAuthor } from '@/lib/types/review-log'
 import { mockReviewLogs, mockOwners, mockPets, mockComments, mockQAThreads, mockQAPosts } from '@/lib/mock/review-log'
 import { getThreadsByLog, getPostsByThread, getBestAnswerExcerpt } from '@/lib/supa/queries'
@@ -458,8 +457,6 @@ export default function PetHistoryPage() {
                 category="feed"
                 logs={groupedLogs.feed}
                 onLogClick={handleLogClick}
-                formatPeriodLabel={formatPeriodLabel}
-                calculateAge={calculateAge}
                 getPetInfo={getPetInfo}
                 getOwnerInfo={getOwnerInfo}
                 getBestAnswerExcerpt={getBestAnswerExcerptForLog}
@@ -475,8 +472,6 @@ export default function PetHistoryPage() {
                 category="snack"
                 logs={groupedLogs.snack}
                 onLogClick={handleLogClick}
-                formatPeriodLabel={formatPeriodLabel}
-                calculateAge={calculateAge}
                 getPetInfo={getPetInfo}
                 getOwnerInfo={getOwnerInfo}
                 getBestAnswerExcerpt={getBestAnswerExcerptForLog}
@@ -492,8 +487,6 @@ export default function PetHistoryPage() {
                 category="supplement"
                 logs={groupedLogs.supplement}
                 onLogClick={handleLogClick}
-                formatPeriodLabel={formatPeriodLabel}
-                calculateAge={calculateAge}
                 getPetInfo={getPetInfo}
                 getOwnerInfo={getOwnerInfo}
                 getBestAnswerExcerpt={getBestAnswerExcerptForLog}
@@ -509,8 +502,6 @@ export default function PetHistoryPage() {
                 category="toilet"
                 logs={groupedLogs.toilet}
                 onLogClick={handleLogClick}
-                formatPeriodLabel={formatPeriodLabel}
-                calculateAge={calculateAge}
                 getPetInfo={getPetInfo}
                 getOwnerInfo={getOwnerInfo}
                 getBestAnswerExcerpt={getBestAnswerExcerptForLog}
@@ -528,8 +519,6 @@ export default function PetHistoryPage() {
               category={activeTab}
               logs={groupedLogs[activeTab]}
               onLogClick={handleLogClick}
-              formatPeriodLabel={formatPeriodLabel}
-              calculateAge={calculateAge}
               getPetInfo={getPetInfo}
               getOwnerInfo={getOwnerInfo}
               getBestAnswerExcerpt={getBestAnswerExcerptForLog}

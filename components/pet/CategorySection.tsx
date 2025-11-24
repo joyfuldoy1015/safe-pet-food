@@ -12,8 +12,6 @@ interface CategorySectionProps {
   category: 'feed' | 'snack' | 'supplement' | 'toilet'
   logs: ReviewLog[]
   onLogClick: (log: ReviewLog) => void
-  formatPeriodLabel: (status: 'feeding' | 'paused' | 'completed', start: string, end?: string, days?: number) => string
-  calculateAge: (birthDate: string) => string
   getPetInfo: (petId: string) => { name: string; birthDate: string; weightKg?: number } | null
   getOwnerInfo: (ownerId: string) => { nickname: string } | null
   getBestAnswerExcerpt?: (logId: string) => string | null
@@ -38,8 +36,6 @@ export default function CategorySection({
   category,
   logs,
   onLogClick,
-  formatPeriodLabel,
-  calculateAge,
   getPetInfo,
   getOwnerInfo,
   getBestAnswerExcerpt,
@@ -93,8 +89,6 @@ export default function CategorySection({
                 log={log}
                 owner={owner}
                 pet={pet}
-                formatPeriodLabel={formatPeriodLabel}
-                calculateAge={calculateAge}
                 onOpenDetail={() => onLogClick(log)}
                 bestAnswerExcerpt={getBestAnswerExcerpt?.(log.id)}
                 latestCommentExcerpt={getLatestCommentExcerpt?.(log.id)}
