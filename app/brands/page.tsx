@@ -272,7 +272,7 @@ export default function BrandsPage() {
                     <Link
                       key={brand.id}
                       href={`/brands/${encodeURIComponent(brand.name)}`}
-                      className="block bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group"
+                      className="block bg-white rounded-2xl border border-white/70 shadow-[0_25px_60px_-30px_rgba(15,23,42,0.55)] hover:shadow-[0_32px_70px_-35px_rgba(15,23,42,0.65)] hover:-translate-y-0.5 transition-all duration-300 group"
                     >
                       <div className="p-6">
                         {/* Header */}
