@@ -3,18 +3,25 @@ import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
 // 프로덕션 환경에서 NEXTAUTH_SECRET 필수 체크
+// 주의: 빌드 타임에는 체크하지 않음 (Vercel 빌드 시 환경 변수가 아직 로드되지 않을 수 있음)
+// 런타임에 NextAuth가 사용될 때 secret이 없으면 NextAuth 자체에서 에러 발생
 const getNextAuthSecret = () => {
   const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET
   
-  if (process.env.NODE_ENV === 'production' && !secret) {
-    throw new Error(
-      'NEXTAUTH_SECRET or AUTH_SECRET environment variable is required in production. ' +
-      'Please set it in your environment variables.'
-    )
+  if (!secret) {
+    // 개발 환경에서만 fallback 허용
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[NextAuth] Using development-only secret. Set NEXTAUTH_SECRET in production!')
+      return 'development-only-secret-do-not-use-in-production'
+    }
+    // 프로덕션 빌드 시에는 빈 문자열 반환
+    // 실제 런타임에서 NextAuth가 사용될 때 secret이 없으면 NextAuth가 에러를 발생시킴
+    // 빌드 타임에는 에러를 던지지 않아야 Vercel에서 빌드가 성공함
+    // Vercel 환경 변수는 빌드 후 런타임에 로드됨
+    return ''
   }
   
-  // 개발 환경에서만 fallback 허용
-  return secret || 'development-only-secret-do-not-use-in-production'
+  return secret
 }
 
 // 개발 환경에서만 테스트 계정 제공
