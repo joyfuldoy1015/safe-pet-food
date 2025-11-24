@@ -1,9 +1,10 @@
 import { getSupabaseClient } from './client'
 import type { Database } from '@/lib/types/database'
+import type { ReviewLog as ClientReviewLog } from '@/lib/types/review-log'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type Pet = Database['public']['Tables']['pets']['Row']
-type ReviewLog = Database['public']['Tables']['review_logs']['Row']
+type ReviewLogRow = Database['public']['Tables']['review_logs']['Row']
 
 /**
  * Get owner profile by ID
@@ -54,7 +55,7 @@ export async function getPet(petId: string): Promise<Pet | null> {
 export async function getLogsByOwnerPet(
   ownerId: string,
   petId: string
-): Promise<ReviewLog[]> {
+): Promise<ClientReviewLog[]> {
   const supabase = getSupabaseClient()
   if (!supabase) return []
 
@@ -71,7 +72,7 @@ export async function getLogsByOwnerPet(
     return []
   }
 
-  return data || []
+  return (data || []).map(transformReviewLogRow)
 }
 
 /**
@@ -166,5 +167,31 @@ export async function getBestAnswerExcerpt(logId: string): Promise<string | null
   }
 
   return (data as { excerpt?: string })?.excerpt || null
+}
+
+function transformReviewLogRow(row: ReviewLogRow): ClientReviewLog {
+  return {
+    id: row.id,
+    petId: row.pet_id,
+    ownerId: row.owner_id,
+    category: row.category as ClientReviewLog['category'],
+    brand: row.brand || '',
+    product: row.product || '',
+    status: row.status as ClientReviewLog['status'],
+    periodStart: row.period_start || row.created_at,
+    periodEnd: row.period_end || undefined,
+    durationDays: row.duration_days || undefined,
+    rating: typeof row.rating === 'number' ? row.rating : undefined,
+    recommend: row.recommend ?? undefined,
+    continueReasons: Array.isArray(row.continue_reasons) ? row.continue_reasons : [],
+    stopReasons: Array.isArray(row.stop_reasons) ? row.stop_reasons : [],
+    excerpt: row.excerpt || '',
+    notes: row.notes || undefined,
+    likes: row.likes || 0,
+    commentsCount: row.comments_count || 0,
+    views: row.views || 0,
+    createdAt: row.created_at || new Date().toISOString(),
+    updatedAt: row.updated_at || row.created_at || new Date().toISOString()
+  }
 }
 
