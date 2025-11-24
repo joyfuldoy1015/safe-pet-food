@@ -109,6 +109,7 @@ interface Brand {
   manufacturing_info: string
   brand_pros: string[]
   brand_cons: string[]
+  product_lines?: string[]
   recall_history: Array<{
     date: string
     reason: string
@@ -748,6 +749,7 @@ export default function BrandDetailPage() {
               manufacturing_info: apiData.manufacturing_info || '',
               brand_pros: apiData.brand_pros || [],
               brand_cons: apiData.brand_cons || [],
+              product_lines: apiData.product_lines || [],
               transparency_score: 75, // 기본 점수
               recall_history: apiData.recall_history || [],
               ingredient_disclosure: {
@@ -1172,29 +1174,57 @@ export default function BrandDetailPage() {
             </div>
           </div>
 
-          {/* 제품 개수 요약 */}
+          {/* 제품 라인업 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">📦 제품 라인업</h2>
             
-            <div className="text-center mb-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
-                {brand.products.length}개
-                    </div>
-              <p className="text-sm text-gray-600">등록된 제품</p>
+            {brand.product_lines && brand.product_lines.length > 0 ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
+                    {brand.product_lines.length}개
                   </div>
-
-            <div className="space-y-3">
-              {brand.products.map((product, index) => (
-                <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl">{product.image}</div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 text-sm">{product.name}</p>
-                    <p className="text-xs text-gray-500 line-clamp-1">{product.description}</p>
+                  <p className="text-sm text-gray-600">제품 라인</p>
                 </div>
+
+                <div className="space-y-3">
+                  {brand.product_lines.map((line, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-2xl">📦</div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 text-base">{line}</p>
+                      </div>
                     </div>
-              ))}
+                  ))}
+                </div>
+              </>
+            ) : brand.products && brand.products.length > 0 ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
+                    {brand.products.length}개
                   </div>
+                  <p className="text-sm text-gray-600">등록된 제품</p>
+                </div>
+
+                <div className="space-y-3">
+                  {brand.products.map((product, index) => (
+                    <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-2xl">{product.image}</div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 text-sm">{product.name}</p>
+                        <p className="text-xs text-gray-500 line-clamp-1">{product.description}</p>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">등록된 제품 라인업이 없습니다.</p>
+              </div>
+            )}
+          </div>
                     </div>
                       
         {/* 제품군별 상세 정보 */}

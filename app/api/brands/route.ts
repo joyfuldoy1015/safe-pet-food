@@ -36,6 +36,26 @@ const transformJsonToSupabaseFormat = (jsonData: any) => {
 
 // Supabase 데이터를 JSON 형식으로 변환
 const transformSupabaseToJsonFormat = (supabaseData: any) => {
+  // product_lines 처리: 배열이거나 텍스트 필드일 수 있음
+  let productLines: string[] = []
+  if (supabaseData.product_lines) {
+    // 이미 배열인 경우
+    if (Array.isArray(supabaseData.product_lines)) {
+      productLines = supabaseData.product_lines
+    } else {
+      // 문자열인 경우 (product_lines_text 등)
+      productLines = [supabaseData.product_lines]
+    }
+  } else if (supabaseData.product_lines_text) {
+    // product_lines_text 필드가 있는 경우 (쉼표로 구분된 문자열 또는 배열)
+    if (Array.isArray(supabaseData.product_lines_text)) {
+      productLines = supabaseData.product_lines_text
+    } else if (typeof supabaseData.product_lines_text === 'string') {
+      // 쉼표로 구분된 문자열을 배열로 변환
+      productLines = supabaseData.product_lines_text.split(',').map((line: string) => line.trim()).filter((line: string) => line.length > 0)
+    }
+  }
+
   return {
     id: supabaseData.id,
     name: supabaseData.name,
@@ -46,7 +66,7 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     manufacturing_info: supabaseData.manufacturing_info || '',
     recall_history: supabaseData.recall_history,
     overall_rating: parseFloat(supabaseData.overall_rating) || 0,
-    product_lines: supabaseData.product_lines || [],
+    product_lines: productLines,
     established_year: supabaseData.established_year,
     certifications: supabaseData.certifications || [],
     image: supabaseData.image,
