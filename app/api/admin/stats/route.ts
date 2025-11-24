@@ -6,6 +6,7 @@ import type { Database } from '@/lib/types/database'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 /**
  * GET /api/admin/stats

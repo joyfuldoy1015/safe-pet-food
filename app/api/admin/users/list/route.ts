@@ -5,6 +5,7 @@ import { parsePaginationParams, parseSortParams, buildFilterQuery } from '@/lib/
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 /**
  * GET /api/admin/users/list
