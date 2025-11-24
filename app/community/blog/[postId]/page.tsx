@@ -342,10 +342,14 @@ export default function BlogPostPage({ params }: { params: { postId: string } })
 
         {/* Article Content */}
         <div className="prose prose-lg max-w-none mb-12">
-          <div 
-            className="whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br>') }}
-          />
+          <div className="whitespace-pre-wrap">
+            {post.content.split('\n').map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                {index < post.content.split('\n').length - 1 && <br />}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
         {/* Article Footer */}
