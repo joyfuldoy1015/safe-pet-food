@@ -75,6 +75,7 @@ export function useAuth(): UseAuthReturn {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[useAuth] Auth state changed:', event, session?.user?.email)
         if (mounted) {
           setSession(session)
           setUser(session?.user ?? null)
@@ -84,9 +85,30 @@ export function useAuth(): UseAuthReturn {
           } else {
             setProfile(null)
           }
+          
+          // 로그인 성공 시 로딩 상태 해제
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            setIsLoading(false)
+          }
         }
       }
     )
+
+    // URL에서 auth=success 파라미터가 있으면 세션을 다시 확인
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.get('auth') === 'success') {
+        // URL 파라미터 제거
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete('auth')
+        window.history.replaceState({}, '', newUrl.toString())
+        
+        // 세션 다시 로드
+        setTimeout(() => {
+          loadSession()
+        }, 500)
+      }
+    }
 
     return () => {
       mounted = false

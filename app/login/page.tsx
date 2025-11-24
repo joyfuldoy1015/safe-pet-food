@@ -159,10 +159,30 @@ export default function LoginPage() {
 
       if (data?.user) {
         console.log('Login successful:', data.user.email)
-        // 로그인 성공 - 세션이 로드될 때까지 기다린 후 리다이렉트
-        // useAuth 훅이 세션을 로드하는 시간을 주기 위해 약간의 지연
-        await new Promise(resolve => setTimeout(resolve, 800))
-        router.push(redirectTo)
+        // 세션이 확실히 설정될 때까지 대기
+        let sessionLoaded = false
+        let attempts = 0
+        const maxAttempts = 10
+        
+        while (!sessionLoaded && attempts < maxAttempts) {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.user) {
+            sessionLoaded = true
+            // 세션이 로드된 후 약간의 지연을 주어 useAuth가 업데이트될 시간 제공
+            await new Promise(resolve => setTimeout(resolve, 300))
+            router.push(redirectTo)
+            router.refresh() // 페이지 새로고침으로 상태 동기화
+            break
+          }
+          await new Promise(resolve => setTimeout(resolve, 200))
+          attempts++
+        }
+        
+        if (!sessionLoaded) {
+          // 세션 로드 실패 시에도 리다이렉트 (세션은 쿠키에 있을 수 있음)
+          router.push(redirectTo)
+          router.refresh()
+        }
       } else {
         alert('로그인에 실패했습니다. 다시 시도해주세요.')
         setIsLoading(false)

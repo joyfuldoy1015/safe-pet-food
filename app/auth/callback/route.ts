@@ -19,10 +19,26 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (error) {
-      return NextResponse.redirect(new URL(`/?error=${error.message}`, requestUrl))
+      console.error('[Auth Callback] Error exchanging code for session:', error)
+      return NextResponse.redirect(new URL(`/?error=${encodeURIComponent(error.message)}`, requestUrl))
+    }
+
+    // 세션이 성공적으로 설정되었는지 확인
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      console.warn('[Auth Callback] Session not found after code exchange')
     }
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl))
+  // 리다이렉트 URL에 세션 새로고침을 위한 플래그 추가
+  const redirectUrl = new URL(next, requestUrl)
+  redirectUrl.searchParams.set('auth', 'success')
+  
+  const response = NextResponse.redirect(redirectUrl)
+  
+  // 세션 쿠키가 제대로 설정되도록 헤더 추가
+  response.headers.set('Cache-Control', 'no-store, must-revalidate')
+  
+  return response
 }
 
