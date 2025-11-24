@@ -59,16 +59,21 @@ export default function LogCompactCard({
       ? 'bg-gray-100 text-gray-700 border-gray-200'
       : 'bg-red-50 text-red-700 border-red-200'
 
-  // 카테고리별 테두리 색상과 그림자 설정
-  const categoryStyle = category
-    ? category === 'feed'
-      ? 'border-blue-300 shadow-md shadow-blue-100/50 hover:shadow-lg hover:shadow-blue-200/50'
-      : category === 'snack'
-      ? 'border-green-300 shadow-md shadow-green-100/50 hover:shadow-lg hover:shadow-green-200/50'
-      : category === 'supplement'
-      ? 'border-purple-300 shadow-md shadow-purple-100/50 hover:shadow-lg hover:shadow-purple-200/50'
-      : 'border-orange-300 shadow-md shadow-orange-100/50 hover:shadow-lg hover:shadow-orange-200/50'
-    : 'border-gray-200 shadow-md shadow-gray-200/50 hover:shadow-lg hover:shadow-gray-300/50'
+  // 카테고리별 그림자만으로 시각적 구분
+  const categoryShadowMap: Record<
+    NonNullable<LogCompactCardProps['category']> | 'default',
+    string
+  > = {
+    feed: 'shadow-[0_16px_40px_-18px_rgba(15,23,42,0.45)] hover:shadow-[0_22px_55px_-20px_rgba(15,23,42,0.55)]',
+    snack:
+      'shadow-[0_16px_40px_-18px_rgba(15,118,110,0.35)] hover:shadow-[0_22px_55px_-20px_rgba(15,118,110,0.45)]',
+    supplement:
+      'shadow-[0_16px_40px_-18px_rgba(109,40,217,0.35)] hover:shadow-[0_22px_55px_-20px_rgba(109,40,217,0.45)]',
+    toilet:
+      'shadow-[0_16px_40px_-18px_rgba(194,65,12,0.35)] hover:shadow-[0_22px_55px_-20px_rgba(194,65,12,0.45)]',
+    default: 'shadow-[0_14px_35px_-18px_rgba(15,23,42,0.35)] hover:shadow-[0_20px_50px_-22px_rgba(15,23,42,0.45)]'
+  }
+  const categoryShadow = category ? categoryShadowMap[category] : categoryShadowMap.default
 
   const formatDateForBadge = (dateString: string) => {
     const date = new Date(dateString)
@@ -86,7 +91,7 @@ export default function LogCompactCard({
   return (
     <article
       onClick={onOpenDetail}
-      className={`rounded-2xl border-2 bg-white p-4 ${categoryStyle} transition-all cursor-pointer`}
+      className={`rounded-2xl border border-white/70 bg-white p-4 transition-all cursor-pointer ${categoryShadow}`}
     >
       {/* Top badges */}
       <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
