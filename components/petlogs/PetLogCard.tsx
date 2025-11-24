@@ -4,6 +4,7 @@ import { Star, Heart, MessageSquare, Eye } from "lucide-react";
 import React, { useState } from "react";
 
 type FeedStatus = "in_progress" | "stopped" | "completed";
+type PetLogCategory = "feed" | "snack" | "supplement" | "toilet" | string;
 
 export interface PetLogCardProps {
   since: string;                 // "2024.10.02."
@@ -21,12 +22,13 @@ export interface PetLogCardProps {
   likes: number;                 // 89
   comments: number;              // 23
   views: number;                 // 1247
+  category?: PetLogCategory;     // feed | snack | supplement | toilet
   onAsk?: () => void;
   onDetail?: () => void;
   avatarUrl?: string;
 }
 
-const statusMap: Record<
+const feedingStatusMap: Record<
   FeedStatus,
   { label: string; className: string }
 > = {
@@ -43,6 +45,26 @@ const statusMap: Record<
     className: "bg-gray-100 text-gray-700 border-gray-200",
   },
 };
+
+const usageStatusMap: Record<
+  FeedStatus,
+  { label: string; className: string }
+> = {
+  in_progress: {
+    label: "사용 중",
+    className: "bg-green-100 text-green-700 border-green-200",
+  },
+  stopped: {
+    label: "사용 중지",
+    className: "bg-red-100 text-red-700 border-red-200",
+  },
+  completed: {
+    label: "사용 완료",
+    className: "bg-gray-100 text-gray-700 border-gray-200",
+  },
+};
+
+const usageCategories: PetLogCategory[] = ["toilet"];
 
 // 기간 계산 함수 (년/개월)
 function calculateDuration(since: string, until?: string): string | null {
@@ -83,6 +105,8 @@ function calculateDuration(since: string, until?: string): string | null {
 }
 
 export default function PetLogCard(props: PetLogCardProps) {
+  const isUsageCategory = props.category && usageCategories.includes(props.category);
+  const statusMap = isUsageCategory ? usageStatusMap : feedingStatusMap;
   const s = statusMap[props.status] || statusMap.in_progress;
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -106,7 +130,7 @@ export default function PetLogCard(props: PetLogCardProps) {
       <div className="mb-3">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
           <span>📝</span>
-          <span>급여 후기</span>
+          <span>{isUsageCategory ? "사용 후기" : "급여 후기"}</span>
         </span>
       </div>
 

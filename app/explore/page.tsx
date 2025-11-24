@@ -392,6 +392,7 @@ export default function ExplorePage() {
                         status={statusMap[review.status] || 'in_progress'}
                         brand={review.brand}
                         product={review.product}
+                        category={review.category}
                         rating={review.rating || 0}
                         recommended={review.recommend}
                         authorName={owner.nickname}
