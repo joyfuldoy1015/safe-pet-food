@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supa/serverAdmin'
 import { parsePaginationParams, parseSortParams, buildFilterQuery } from '@/lib/supa/adminQueries'
 
-// Force dynamic rendering
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 /**
  * GET /api/admin/users/list

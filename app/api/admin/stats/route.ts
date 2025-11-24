@@ -3,8 +3,9 @@ import { getAdminClient, isAdmin } from '@/lib/supa/serverAdmin'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
-// Force dynamic rendering (uses headers)
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 /**
  * GET /api/admin/stats

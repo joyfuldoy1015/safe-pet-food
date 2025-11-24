@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient, isAdmin } from '@/lib/supa/serverAdmin'
 import { createClient } from '@supabase/supabase-js'
 
-// Force dynamic rendering (uses headers)
+// Force dynamic rendering + disable caching (uses headers & auth)
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
 
 /**
  * Check if current user is admin
