@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useSession, signOut } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 import { 
   Calculator, 
   Star, 
@@ -55,11 +56,30 @@ const categories = {
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { data: session, status } = useSession()
-  const isLoggedIn = status === 'authenticated'
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user, profile, signOut, isLoading, refreshProfile } = useAuth()
+  const isLoggedIn = !!user
+
+  // URL에서 auth=success 파라미터가 있으면 세션 새로고침
+  useEffect(() => {
+    if (searchParams?.get('auth') === 'success') {
+      // URL 파라미터 제거
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('auth')
+      window.history.replaceState({}, '', newUrl.toString())
+      
+      // 페이지 새로고침으로 세션 상태 동기화
+      // 약간의 지연을 주어 쿠키가 설정될 시간 제공
+      setTimeout(() => {
+        router.refresh()
+      }, 300)
+    }
+  }, [searchParams, router])
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' })
+    await signOut()
+    window.location.href = '/'
   }
 
   return (
@@ -125,10 +145,14 @@ export default function Header() {
           
           {/* 로그인/회원가입 또는 로그아웃 버튼 */}
           <div className="hidden md:flex items-center space-x-2">
-            {isLoggedIn ? (
+            {isLoading ? (
+              <div className="px-4 py-2 bg-gray-100 rounded-lg animate-pulse">
+                <div className="w-20 h-5 bg-gray-200 rounded"></div>
+              </div>
+            ) : isLoggedIn ? (
               <>
                 <span className="text-black font-medium text-sm">
-                  {session?.user?.name || session?.user?.email || '사용자'}
+                  {profile?.nickname || user?.email || '사용자'}
                 </span>
                 <button
                   onClick={handleLogout}
@@ -178,10 +202,14 @@ export default function Header() {
               </div>
             ))}
             <div className="flex flex-col space-y-2 px-2 mt-4">
-              {isLoggedIn ? (
+              {isLoading ? (
+                <div className="px-4 py-2 bg-gray-100 rounded-lg animate-pulse">
+                  <div className="w-20 h-5 bg-gray-200 rounded"></div>
+                </div>
+              ) : isLoggedIn ? (
                 <>
                   <div className="px-4 py-2 text-black font-medium">
-                    {session?.user?.name || session?.user?.email || '사용자'}
+                    {profile?.nickname || user?.email || '사용자'}
                   </div>
                   <button
                     onClick={() => {

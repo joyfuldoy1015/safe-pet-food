@@ -169,8 +169,11 @@ export default function LoginPage() {
           if (session?.user) {
             sessionLoaded = true
             // 세션이 로드된 후 약간의 지연을 주어 useAuth가 업데이트될 시간 제공
-            await new Promise(resolve => setTimeout(resolve, 300))
-            router.push(redirectTo)
+            await new Promise(resolve => setTimeout(resolve, 500))
+            // auth=success 파라미터를 추가하여 Header에서 세션 새로고침 트리거
+            const redirectUrl = new URL(redirectTo, window.location.origin)
+            redirectUrl.searchParams.set('auth', 'success')
+            router.push(redirectUrl.toString())
             router.refresh() // 페이지 새로고침으로 상태 동기화
             break
           }
@@ -180,7 +183,9 @@ export default function LoginPage() {
         
         if (!sessionLoaded) {
           // 세션 로드 실패 시에도 리다이렉트 (세션은 쿠키에 있을 수 있음)
-          router.push(redirectTo)
+          const redirectUrl = new URL(redirectTo, window.location.origin)
+          redirectUrl.searchParams.set('auth', 'success')
+          router.push(redirectUrl.toString())
           router.refresh()
         }
       } else {

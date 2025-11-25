@@ -77,6 +77,7 @@ export function useAuth(): UseAuthReturn {
       async (event, session) => {
         console.log('[useAuth] Auth state changed:', event, session?.user?.email)
         if (mounted) {
+          // 세션 상태 즉시 업데이트
           setSession(session)
           setUser(session?.user ?? null)
 
@@ -90,6 +91,11 @@ export function useAuth(): UseAuthReturn {
           if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             setIsLoading(false)
           }
+          
+          // 로그아웃 시에도 로딩 상태 해제
+          if (event === 'SIGNED_OUT') {
+            setIsLoading(false)
+          }
         }
       }
     )
@@ -98,16 +104,16 @@ export function useAuth(): UseAuthReturn {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       if (urlParams.get('auth') === 'success') {
-        // URL 파라미터 제거
-        const newUrl = new URL(window.location.href)
-        newUrl.searchParams.delete('auth')
-        window.history.replaceState({}, '', newUrl.toString())
-        
-        // 세션 다시 로드
+        // 세션 다시 로드 (약간의 지연을 주어 쿠키가 설정될 시간 제공)
         setTimeout(() => {
           loadSession()
         }, 500)
       }
+    }
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
     }
 
     return () => {
