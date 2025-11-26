@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { User, LogOut, Settings, Heart, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -90,30 +91,30 @@ export default function AuthButton() {
               </div>
               
               <div className="py-1">
-                <a
+                <Link
                   href="/profile"
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <User className="h-4 w-4" />
                   내 프로필
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/pets"
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Heart className="h-4 w-4" />
                   내 반려동물
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/settings"
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
                   설정
-                </a>
+                </Link>
               </div>
 
               <div className="border-t border-gray-100 pt-1">
