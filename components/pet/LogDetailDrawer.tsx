@@ -141,10 +141,10 @@ export default function LogDetailDrawer({
             <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-xl font-semibold sm:font-bold text-gray-900 truncate">
+                  <h2 className="text-lg sm:text-2xl font-semibold sm:font-bold text-gray-900 truncate">
                     {log.brand}
                   </h2>
-                  <p className="text-xs sm:text-sm text-gray-600 truncate">{log.product}</p>
+                  <p className="text-sm sm:text-base text-gray-600 truncate">{log.product}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -187,13 +187,13 @@ export default function LogDetailDrawer({
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 space-y-3">
               {isOwner && onStatusChange && (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                  <span className="text-xs sm:text-sm font-medium text-gray-700">상태:</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-700">상태:</span>
                   <div className="flex gap-2 flex-wrap">
                     {(['feeding', 'paused', 'completed'] as const).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleStatusChange(s)}
-                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-sm sm:text-base font-medium transition-colors ${
                           log.status === s
                             ? statusConfig[s].color
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -216,9 +216,9 @@ export default function LogDetailDrawer({
                       />
                     ))}
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{log.rating.toFixed(1)}</span>
+                  <span className="text-base font-medium text-gray-700">{log.rating.toFixed(1)}</span>
                   {log.recommend !== undefined && (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-base text-gray-600">
                       {log.recommend ? '👍 추천' : '👎 비추천'}
                     </span>
                   )}
@@ -228,14 +228,14 @@ export default function LogDetailDrawer({
 
             {/* Pet Info */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">반려동물 정보</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">반려동물 정보</h3>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-xl">
                   {pet.species === 'dog' ? '🐕' : '🐱'}
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{pet.name}</div>
-                  <div className="text-xs sm:text-sm text-gray-600">
+                  <div className="text-sm sm:text-base text-gray-600">
                     {pet.species === 'dog' ? '강아지' : '고양이'} · {calculateAge(pet.birthDate)}
                     {pet.weightKg && ` · ${pet.weightKg}kg`}
                   </div>
@@ -247,9 +247,9 @@ export default function LogDetailDrawer({
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
-                <span className="text-xs sm:text-sm font-medium text-gray-900">급여 기간</span>
+                <span className="text-sm sm:text-base font-medium text-gray-900">급여 기간</span>
               </div>
-              <p className="text-xs sm:text-sm text-gray-700">
+              <p className="text-sm sm:text-base text-gray-700">
                 {formatDate(log.periodStart)}
                 {log.periodEnd && ` ~ ${formatDate(log.periodEnd)}`}
                 {!log.periodEnd && ' ~ 현재'}
@@ -261,7 +261,7 @@ export default function LogDetailDrawer({
             <div className="flex border-b border-gray-200">
               <button
                 onClick={() => setActiveTab('details')}
-                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-medium transition-colors ${
                   activeTab === 'details'
                     ? 'text-[#3056F5] border-b-2 border-[#3056F5]'
                     : 'text-gray-600 hover:text-gray-900'
@@ -271,7 +271,7 @@ export default function LogDetailDrawer({
               </button>
               <button
                 onClick={() => setActiveTab('comments')}
-                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors relative ${
+                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-medium transition-colors relative ${
                   activeTab === 'comments'
                     ? 'text-[#3056F5] border-b-2 border-[#3056F5]'
                     : 'text-gray-600 hover:text-gray-900'
@@ -279,14 +279,14 @@ export default function LogDetailDrawer({
               >
                 댓글
                 {reviewComments.length > 0 && (
-                  <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">
+                  <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-sm">
                     {reviewComments.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('qa')}
-                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-colors relative ${
+                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-medium transition-colors relative ${
                   activeTab === 'qa'
                     ? 'text-[#3056F5] border-b-2 border-[#3056F5]'
                     : 'text-gray-600 hover:text-gray-900'
@@ -294,7 +294,7 @@ export default function LogDetailDrawer({
               >
                 Q&A
                 {qaThreads.length > 0 && (
-                  <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-xs">
+                  <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-sm">
                     {qaThreads.length}
                   </span>
                 )}
@@ -311,7 +311,7 @@ export default function LogDetailDrawer({
                       onClick={() => toggleSection('reason')}
                       className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
                     >
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">급여 이유/목표</span>
+                      <span className="text-sm sm:text-base font-semibold text-gray-900">급여 이유/목표</span>
                       {expandedSections.has('reason') ? (
                         <ChevronUp className="h-5 w-5 text-gray-600" />
                       ) : (
@@ -326,17 +326,17 @@ export default function LogDetailDrawer({
                           exit={{ height: 0, opacity: 0 }}
                           className="px-3 sm:px-4 py-2 sm:py-3"
                         >
-                          <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-line">
+                          <p className="text-sm sm:text-base text-gray-700 whitespace-pre-line">
                             {log.notes || log.excerpt}
                           </p>
                           {log.continueReasons && log.continueReasons.length > 0 && (
                             <div className="mt-3">
-                              <p className="text-xs font-medium text-gray-600 mb-2">계속하는 이유:</p>
+                              <p className="text-sm font-medium text-gray-600 mb-2">계속하는 이유:</p>
                               <div className="flex flex-wrap gap-2">
                                 {log.continueReasons.map((reason) => (
                                   <span
                                     key={reason}
-                                    className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs border border-emerald-100"
+                                    className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-sm border border-emerald-100"
                                   >
                                     {reason}
                                   </span>
@@ -355,7 +355,7 @@ export default function LogDetailDrawer({
                       onClick={() => toggleSection('changes')}
                       className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
                     >
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">관찰된 변화</span>
+                      <span className="text-sm sm:text-base font-semibold text-gray-900">관찰된 변화</span>
                       {expandedSections.has('changes') ? (
                         <ChevronUp className="h-5 w-5 text-gray-600" />
                       ) : (
@@ -370,7 +370,7 @@ export default function LogDetailDrawer({
                           exit={{ height: 0, opacity: 0 }}
                           className="px-3 sm:px-4 py-2 sm:py-3"
                         >
-                          <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-line">
+                          <p className="text-sm sm:text-base text-gray-700 whitespace-pre-line">
                             {log.notes || '관찰된 변화가 기록되지 않았습니다.'}
                           </p>
                         </motion.div>
@@ -385,7 +385,7 @@ export default function LogDetailDrawer({
                         onClick={() => toggleSection('stop')}
                         className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-colors"
                       >
-                        <span className="text-xs sm:text-sm font-semibold text-gray-900">중지/교체 이유</span>
+                        <span className="text-sm sm:text-base font-semibold text-gray-900">중지/교체 이유</span>
                         {expandedSections.has('stop') ? (
                           <ChevronUp className="h-5 w-5 text-gray-600" />
                         ) : (
@@ -404,7 +404,7 @@ export default function LogDetailDrawer({
                               {log.stopReasons.map((reason) => (
                                 <span
                                   key={reason}
-                                  className="px-2 py-1 rounded-full bg-rose-50 text-rose-700 text-xs border border-rose-100"
+                                  className="px-2 py-1 rounded-full bg-rose-50 text-rose-700 text-sm border border-rose-100"
                                 >
                                   {reason}
                                 </span>
@@ -417,7 +417,7 @@ export default function LogDetailDrawer({
                   )}
 
                   {/* Metrics */}
-                  <div className="flex items-center gap-3 sm:gap-6 pt-3 sm:pt-4 border-t border-gray-200 text-xs sm:text-sm text-gray-600">
+                  <div className="flex items-center gap-3 sm:gap-6 pt-3 sm:pt-4 border-t border-gray-200 text-sm sm:text-base text-gray-600">
                     <div className="flex items-center gap-2">
                       <Heart className="h-4 w-4" />
                       <span>{log.likes}</span>
@@ -457,7 +457,7 @@ export default function LogDetailDrawer({
                     ) : (
                       <div className="text-center py-12">
                         <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-sm text-gray-500">아직 댓글이 없습니다.</p>
+                        <p className="text-base text-gray-500">아직 댓글이 없습니다.</p>
                       </div>
                     )}
                   </div>
@@ -466,25 +466,25 @@ export default function LogDetailDrawer({
                   <form onSubmit={handleCommentSubmit} className="mt-6 pt-6 border-t border-gray-200">
                     {user ? (
                       <>
-                        <textarea
-                          value={newComment}
-                          onChange={(e) => setNewComment(e.target.value)}
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
                           placeholder="댓글을 작성해주세요..."
-                          rows={3}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm resize-none"
-                        />
-                        <div className="flex justify-end mt-3">
-                          <button
-                            type="submit"
-                            disabled={!newComment.trim()}
-                            className="px-4 py-2 bg-[#3056F5] text-white rounded-xl text-sm font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            댓글 작성
+                      rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
+                    />
+                      <div className="flex justify-end mt-3">
+                        <button
+                          type="submit"
+                          disabled={!newComment.trim()}
+                          className="px-4 py-2 bg-[#3056F5] text-white rounded-xl text-base font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          댓글 작성
                           </button>
                         </div>
                       </>
                     ) : (
-                      <div className="flex flex-col items-center gap-3 text-sm text-gray-600">
+                      <div className="flex flex-col items-center gap-3 text-base text-gray-600">
                         <button
                           type="button"
                           onClick={() => onAuthRequired?.()}
@@ -510,7 +510,7 @@ export default function LogDetailDrawer({
                                 onQAThreadCreate(log.id, title)
                               }
                             }}
-                            className="w-full px-4 py-2 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors"
+                            className="w-full px-4 py-2 bg-[#3056F5] text-white rounded-lg text-base font-medium hover:bg-[#2648e6] transition-colors"
                           >
                             + 새 질문하기
                           </button>
@@ -530,7 +530,7 @@ export default function LogDetailDrawer({
                   ) : (
                     <div className="text-center py-12 text-gray-500">
                       <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p className="text-sm">아직 질문이 없습니다.</p>
+                      <p className="text-base">아직 질문이 없습니다.</p>
                     </div>
                   )}
                 </>
