@@ -162,16 +162,14 @@ export default function Header() {
               <>
                 <Link 
                   href="/login" 
-                  className="text-black hover:text-gray-700 font-medium transition-colors flex items-center gap-2"
+                  className="text-black hover:text-gray-700 font-medium transition-colors"
                 >
-                  {isLoading && <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>}
                   로그인
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                  className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors"
                 >
-                  {isLoading && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
                   회원가입
                 </Link>
               </>
@@ -226,18 +224,16 @@ export default function Header() {
                 <>
                   <Link 
                     href="/login" 
-                    className="text-black hover:text-gray-700 font-medium py-2 text-left flex items-center gap-2" 
+                    className="text-black hover:text-gray-700 font-medium py-2 text-left" 
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {isLoading && <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>}
                     로그인
                   </Link>
                   <Link 
                     href="/signup" 
-                    className="bg-black text-white px-4 py-2 rounded-lg font-medium text-center flex items-center justify-center gap-2" 
+                    className="bg-black text-white px-4 py-2 rounded-lg font-medium text-center" 
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {isLoading && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
                     회원가입
                   </Link>
                 </>

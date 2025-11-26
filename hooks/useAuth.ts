@@ -34,6 +34,7 @@ export function useAuth(): UseAuthReturn {
   // Load initial session and profile
   useEffect(() => {
     let mounted = true
+    let initialLoadComplete = false
 
     const loadProfile = async (userId: string, userEmail?: string) => {
       try {
@@ -86,6 +87,7 @@ export function useAuth(): UseAuthReturn {
             setProfile(null)
             setSession(null)
             setIsLoading(false)
+            initialLoadComplete = true
           }
           return
         }
@@ -101,20 +103,37 @@ export function useAuth(): UseAuthReturn {
             setProfile(null)
           }
           setIsLoading(false)
+          initialLoadComplete = true
         }
       } catch (error) {
         console.error('Error in loadSession:', error)
         if (mounted) {
           setIsLoading(false)
+          initialLoadComplete = true
         }
       }
     }
 
+    // 초기 로드 시작
     loadSession()
 
-    // Listen for auth changes
+    // 안전장치: 3초 후에도 로딩이 끝나지 않으면 강제로 해제
+    const timeoutId = setTimeout(() => {
+      if (mounted && !initialLoadComplete) {
+        console.warn('[useAuth] Initial load timeout, forcing isLoading to false')
+        setIsLoading(false)
+        initialLoadComplete = true
+      }
+    }, 3000)
+
+    // Listen for auth changes (초기 로드 이후의 변경사항만 처리)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // INITIAL_SESSION 이벤트는 무시 (loadSession에서 처리)
+        if (event === 'INITIAL_SESSION') {
+          return
+        }
+
         console.log('[useAuth] Auth state changed:', event, session?.user?.email)
         if (mounted) {
           // 세션 상태 즉시 업데이트
@@ -146,6 +165,7 @@ export function useAuth(): UseAuthReturn {
 
     return () => {
       mounted = false
+      clearTimeout(timeoutId)
       subscription.unsubscribe()
     }
   }, [])
