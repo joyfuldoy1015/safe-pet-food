@@ -126,15 +126,20 @@ export function useAuth(): UseAuthReturn {
       }
     }, 3000)
 
-    // Listen for auth changes (초기 로드 이후의 변경사항만 처리)
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // INITIAL_SESSION 이벤트는 무시 (loadSession에서 처리)
+        console.log('[useAuth] Auth state changed:', event, session?.user?.email)
+        
+        // INITIAL_SESSION 이벤트는 loadSession과 중복될 수 있으므로
+        // initialLoadComplete가 false일 때만 처리 (아직 로드 중이면 무시)
         if (event === 'INITIAL_SESSION') {
-          return
+          if (mounted && !initialLoadComplete) {
+            // loadSession이 아직 실행 중이면 이 이벤트는 무시
+            return
+          }
         }
 
-        console.log('[useAuth] Auth state changed:', event, session?.user?.email)
         if (mounted) {
           // 세션 상태 즉시 업데이트
           setSession(session)
@@ -148,6 +153,11 @@ export function useAuth(): UseAuthReturn {
           
           // 프로필 로드 완료 후 항상 로딩 상태 해제
           setIsLoading(false)
+          
+          // 초기 로드가 완료되지 않았다면 완료로 표시
+          if (!initialLoadComplete) {
+            initialLoadComplete = true
+          }
         }
       }
     )

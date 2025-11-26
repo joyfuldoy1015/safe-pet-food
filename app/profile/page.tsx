@@ -27,8 +27,19 @@ export default function ProfilePage() {
 
   // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login?redirect=/profile')
+    // 로딩 중이면 기다림
+    if (authLoading) {
+      return
+    }
+    
+    // 로딩이 완료되었고 사용자가 없으면 리다이렉트
+    // 약간의 지연을 주어 세션이 완전히 로드될 시간 제공
+    if (!user) {
+      const timer = setTimeout(() => {
+        router.push('/login?redirect=/profile')
+      }, 100)
+      
+      return () => clearTimeout(timer)
     }
   }, [user, authLoading, router])
 
