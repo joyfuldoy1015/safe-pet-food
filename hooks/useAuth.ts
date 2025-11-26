@@ -35,6 +35,46 @@ export function useAuth(): UseAuthReturn {
   useEffect(() => {
     let mounted = true
 
+    const loadProfile = async (userId: string, userEmail?: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+
+        if (error) {
+          // Profile might not exist yet, create it
+          if (error.code === 'PGRST116') {
+            const nickname = userEmail?.split('@')[0] || '사용자'
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: userId,
+                nickname
+              })
+              .select()
+              .single()
+
+            if (createError) {
+              console.error('Error creating profile:', createError)
+              if (mounted) setProfile(null)
+            } else if (newProfile && mounted) {
+              setProfile(newProfile)
+            }
+          } else {
+            console.error('Error loading profile:', error)
+            if (mounted) setProfile(null)
+          }
+        } else if (data && mounted) {
+          setProfile(data)
+        }
+      } catch (error) {
+        console.error('Error in loadProfile:', error)
+        if (mounted) setProfile(null)
+      }
+    }
+
     const loadSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
@@ -56,7 +96,7 @@ export function useAuth(): UseAuthReturn {
 
           // Load profile if user exists
           if (session?.user) {
-            await loadProfile(session.user.id)
+            await loadProfile(session.user.id, session.user.email)
           } else {
             setProfile(null)
           }
@@ -82,20 +122,13 @@ export function useAuth(): UseAuthReturn {
           setUser(session?.user ?? null)
 
           if (session?.user) {
-            await loadProfile(session.user.id)
+            await loadProfile(session.user.id, session.user.email)
           } else {
             setProfile(null)
           }
           
-          // 로그인 성공 시 로딩 상태 해제
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            setIsLoading(false)
-          }
-          
-          // 로그아웃 시에도 로딩 상태 해제
-          if (event === 'SIGNED_OUT') {
-            setIsLoading(false)
-          }
+          // 프로필 로드 완료 후 항상 로딩 상태 해제
+          setIsLoading(false)
         }
       }
     )
@@ -116,45 +149,6 @@ export function useAuth(): UseAuthReturn {
       subscription.unsubscribe()
     }
   }, [])
-
-  const loadProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        // Profile might not exist yet, create it
-        if (error.code === 'PGRST116') {
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: userId,
-              nickname: user?.email?.split('@')[0] || '사용자'
-            })
-            .select()
-            .single()
-
-          if (createError) {
-            console.error('Error creating profile:', createError)
-            setProfile(null)
-          } else if (newProfile) {
-            setProfile(newProfile)
-          }
-        } else {
-          console.error('Error loading profile:', error)
-          setProfile(null)
-        }
-      } else {
-        setProfile(data)
-      }
-    } catch (error) {
-      console.error('Error in loadProfile:', error)
-      setProfile(null)
-    }
-  }
 
   const signIn = async (email: string): Promise<{ error: Error | null }> => {
     try {
@@ -184,7 +178,18 @@ export function useAuth(): UseAuthReturn {
 
   const refreshProfile = async (): Promise<void> => {
     if (user) {
-      await loadProfile(user.id)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('Error loading profile:', error)
+        setProfile(null)
+      } else {
+        setProfile(data)
+      }
     }
   }
 
