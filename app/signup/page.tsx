@@ -43,10 +43,11 @@ export default function SignupPage() {
     setIsLoading(true)
     try {
       const supabase = getBrowserClient()
+      const petProfileRedirect = '/pet-log/pets/new'
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(petProfileRedirect)}`
         }
       })
       
@@ -67,10 +68,11 @@ export default function SignupPage() {
     setIsLoading(true)
     try {
       const supabase = getBrowserClient()
+      const petProfileRedirect = '/pet-log/pets/new'
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(petProfileRedirect)}`
         }
       })
       
@@ -108,7 +110,7 @@ export default function SignupPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!agreeTerms || !agreePrivacy) {
       alert('약관에 동의해주세요.')
@@ -122,8 +124,80 @@ export default function SignupPage() {
       alert('비밀번호가 일치하지 않습니다.')
       return
     }
-    // 회원가입 로직 구현
-    console.log('Signup attempt:', formData)
+
+    setIsLoading(true)
+
+    try {
+      const supabase = getBrowserClient()
+      
+      // Supabase 클라이언트 확인
+      if (!supabase) {
+        alert('인증 서비스에 연결할 수 없습니다. 환경 변수를 확인해주세요.')
+        console.error('Supabase client is not available')
+        setIsLoading(false)
+        return
+      }
+
+      // 환경 변수 확인
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      
+      if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
+        alert('Supabase 환경 변수가 설정되지 않았습니다.\n\n.env.local 파일에 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 설정해주세요.')
+        console.error('Supabase environment variables not set')
+        setIsLoading(false)
+        return
+      }
+
+      // 회원가입
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email.trim(),
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            nickname: formData.name
+          }
+        }
+      })
+
+      if (error) {
+        console.error('Signup error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        })
+        
+        // 에러 타입에 따른 메시지
+        let errorMessage = '회원가입에 실패했습니다.'
+        if (error.message.includes('User already registered')) {
+          errorMessage = '이미 등록된 이메일입니다. 로그인을 시도해주세요.'
+        } else if (error.message.includes('Password')) {
+          errorMessage = '비밀번호가 너무 짧습니다. 8자 이상 입력해주세요.'
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = '올바른 이메일 주소를 입력해주세요.'
+        }
+        
+        alert(errorMessage)
+        setIsLoading(false)
+        return
+      }
+
+      if (data?.user) {
+        console.log('Signup successful:', data.user.email)
+        // 회원가입 성공 - 반려동물 프로필 입력 페이지로 리다이렉트
+        // 세션이 로드될 때까지 기다린 후 리다이렉트
+        await new Promise(resolve => setTimeout(resolve, 500))
+        router.push('/pet-log/pets/new')
+      } else {
+        alert('회원가입에 실패했습니다. 다시 시도해주세요.')
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.error('Unexpected signup error:', error)
+      alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -334,9 +408,10 @@ export default function SignupPage() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+                disabled={isLoading}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                회원가입
+                {isLoading ? '처리 중...' : '회원가입'}
               </button>
             </div>
 
