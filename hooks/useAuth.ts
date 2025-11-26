@@ -115,11 +115,6 @@ export function useAuth(): UseAuthReturn {
       mounted = false
       subscription.unsubscribe()
     }
-
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
   }, [])
 
   const loadProfile = async (userId: string) => {

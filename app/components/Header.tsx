@@ -145,11 +145,7 @@ export default function Header() {
           
           {/* 로그인/회원가입 또는 로그아웃 버튼 */}
           <div className="hidden md:flex items-center space-x-2">
-            {isLoading ? (
-              <div className="px-4 py-2 bg-gray-100 rounded-lg animate-pulse">
-                <div className="w-20 h-5 bg-gray-200 rounded"></div>
-              </div>
-            ) : isLoggedIn ? (
+            {isLoggedIn ? (
               <>
                 <span className="text-black font-medium text-sm">
                   {profile?.nickname || user?.email || '사용자'}
@@ -164,10 +160,18 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/login" className="text-black hover:text-gray-700 font-medium transition-colors">
+                <Link 
+                  href="/login" 
+                  className="text-black hover:text-gray-700 font-medium transition-colors flex items-center gap-2"
+                >
+                  {isLoading && <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>}
                   로그인
                 </Link>
-                <Link href="/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                <Link 
+                  href="/signup" 
+                  className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                  {isLoading && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
                   회원가입
                 </Link>
               </>
@@ -202,11 +206,7 @@ export default function Header() {
               </div>
             ))}
             <div className="flex flex-col space-y-2 px-2 mt-4">
-              {isLoading ? (
-                <div className="px-4 py-2 bg-gray-100 rounded-lg animate-pulse">
-                  <div className="w-20 h-5 bg-gray-200 rounded"></div>
-                </div>
-              ) : isLoggedIn ? (
+              {isLoggedIn ? (
                 <>
                   <div className="px-4 py-2 text-black font-medium">
                     {profile?.nickname || user?.email || '사용자'}
@@ -224,10 +224,20 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-black hover:text-gray-700 font-medium py-2 text-left" onClick={() => setMobileMenuOpen(false)}>
+                  <Link 
+                    href="/login" 
+                    className="text-black hover:text-gray-700 font-medium py-2 text-left flex items-center gap-2" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {isLoading && <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>}
                     로그인
                   </Link>
-                  <Link href="/signup" className="bg-black text-white px-4 py-2 rounded-lg font-medium text-center" onClick={() => setMobileMenuOpen(false)}>
+                  <Link 
+                    href="/signup" 
+                    className="bg-black text-white px-4 py-2 rounded-lg font-medium text-center flex items-center justify-center gap-2" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {isLoading && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
                     회원가입
                   </Link>
                 </>
