@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, LogOut, Settings, Heart, ChevronDown } from 'lucide-react'
+import { User, LogOut, Settings, Heart, ChevronDown, Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import AuthDialog from './AuthDialog'
 
@@ -21,22 +21,21 @@ export default function AuthButton() {
     setIsMenuOpen(false)
   }
 
-  if (isLoading) {
-    return (
-      <div className="px-4 py-2 bg-gray-100 rounded-xl animate-pulse">
-        <div className="w-20 h-5 bg-gray-200 rounded"></div>
-      </div>
-    )
+  const handleOpenDialog = () => {
+    setIsAuthDialogOpen(true)
   }
 
   if (!user) {
     return (
       <>
         <button
-          onClick={() => setIsAuthDialogOpen(true)}
-          className="px-4 py-2 bg-[#3056F5] text-white rounded-xl font-medium hover:bg-[#2648e6] transition-colors text-sm"
+          onClick={handleOpenDialog}
+          className="px-4 py-2 bg-[#3056F5] text-white rounded-xl font-medium hover:bg-[#2648e6] transition-colors text-sm flex items-center gap-2"
         >
-          로그인
+          {isLoading && (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          )}
+          <span>{isLoading ? '확인 중...' : '로그인'}</span>
         </button>
         <AuthDialog
           isOpen={isAuthDialogOpen}
