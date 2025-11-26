@@ -147,9 +147,12 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-2">
             {isLoggedIn ? (
               <>
-                <span className="text-black font-medium text-sm">
+                <Link 
+                  href="/profile"
+                  className="text-black hover:text-gray-700 font-medium text-sm transition-colors"
+                >
                   {profile?.nickname || user?.email || '사용자'}
-                </span>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="text-black hover:text-gray-700 font-medium transition-colors flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-yellow-300"
@@ -206,9 +209,13 @@ export default function Header() {
             <div className="flex flex-col space-y-2 px-2 mt-4">
               {isLoggedIn ? (
                 <>
-                  <div className="px-4 py-2 text-black font-medium">
+                  <Link
+                    href="/profile"
+                    className="px-4 py-2 text-black font-medium hover:bg-yellow-300 rounded-lg block"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     {profile?.nickname || user?.email || '사용자'}
-                  </div>
+                  </Link>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false)
