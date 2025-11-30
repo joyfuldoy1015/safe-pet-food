@@ -14,6 +14,75 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [nickname, setNickname] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  // 세션 확인을 위한 추가 체크
+  useEffect(() => {
+    let mounted = true
+    let redirectTimer: NodeJS.Timeout | null = null
+
+    const checkSession = async () => {
+      // useAuth가 로딩 중이면 기다림
+      if (authLoading) {
+        setIsCheckingAuth(true)
+        return
+      }
+
+      try {
+        // useAuth에서 이미 사용자가 있으면 세션 확인 완료
+        if (user) {
+          setIsCheckingAuth(false)
+          return
+        }
+
+        // useAuth에서 사용자가 없으면 직접 세션 확인
+        const supabase = getBrowserClient()
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Session check error:', error)
+        }
+        
+        // 세션 확인 완료
+        if (mounted) {
+          setIsCheckingAuth(false)
+        }
+        
+        // 세션이 없고 로딩도 완료되었으면 리다이렉트
+        if (!session && !authLoading && mounted) {
+          // 충분한 지연을 주어 모든 상태 업데이트가 완료되도록 함
+          redirectTimer = setTimeout(() => {
+            if (mounted) {
+              router.push('/login?redirect=/profile')
+            }
+          }, 500)
+        }
+      } catch (error) {
+        console.error('Error checking session:', error)
+        if (mounted) {
+          setIsCheckingAuth(false)
+        }
+        // 에러 발생 시에도 로딩이 완료되었고 사용자가 없으면 리다이렉트
+        if (!authLoading && !user && mounted) {
+          redirectTimer = setTimeout(() => {
+            if (mounted) {
+              router.push('/login?redirect=/profile')
+            }
+          }, 500)
+        }
+      }
+    }
+
+    // 초기 세션 확인
+    checkSession()
+
+    return () => {
+      mounted = false
+      if (redirectTimer) {
+        clearTimeout(redirectTimer)
+      }
+    }
+  }, [router, authLoading, user])
 
   useEffect(() => {
     if (profile) {
@@ -24,24 +93,6 @@ export default function ProfilePage() {
       setNickname(user.email?.split('@')[0] || '사용자')
     }
   }, [profile, user, authLoading])
-
-  // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
-  useEffect(() => {
-    // 로딩 중이면 기다림
-    if (authLoading) {
-      return
-    }
-    
-    // 로딩이 완료되었고 사용자가 없으면 리다이렉트
-    // 약간의 지연을 주어 세션이 완전히 로드될 시간 제공
-    if (!user) {
-      const timer = setTimeout(() => {
-        router.push('/login?redirect=/profile')
-      }, 100)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [user, authLoading, router])
 
   const handleSave = async () => {
     if (!user) return
@@ -88,7 +139,8 @@ export default function ProfilePage() {
     setIsEditing(false)
   }
 
-  if (authLoading) {
+  // 로딩 중이거나 세션 확인 중이면 로딩 화면 표시
+  if (authLoading || isCheckingAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
         <div className="text-center">
@@ -99,8 +151,16 @@ export default function ProfilePage() {
     )
   }
 
+  // 세션 확인이 완료되었고 사용자가 없으면 아무것도 렌더링하지 않음 (리다이렉트 중)
   if (!user) {
-    return null
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3056F5] mx-auto mb-4"></div>
+          <p className="text-gray-600">인증 확인 중...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
