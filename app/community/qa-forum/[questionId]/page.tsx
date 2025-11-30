@@ -500,10 +500,10 @@ export default function QuestionDetailPage() {
                       className={`h-5 w-5 ${question.isUpvoted ? 'fill-current' : ''}`}
                     />
                     <span className="font-medium">Upvote</span>
+                    <span className="text-lg font-semibold">
+                      {question.votes}
+                    </span>
                   </button>
-                  <span className="text-lg font-semibold text-gray-700">
-                    {question.votes}
-                  </span>
                 </div>
                 <div className="flex items-center space-x-4 text-gray-600">
                   <div className="flex items-center space-x-2">
