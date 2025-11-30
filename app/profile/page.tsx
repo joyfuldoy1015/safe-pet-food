@@ -16,6 +16,22 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
+  // URL에서 auth=success 파라미터 확인 및 세션 새로고침
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('auth') === 'success') {
+      // URL에서 파라미터 제거
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('auth')
+      window.history.replaceState({}, '', newUrl.toString())
+      
+      // 세션 새로고침을 위해 페이지 새로고침 (약간의 지연을 주어 쿠키가 설정될 시간 제공)
+      setTimeout(() => {
+        window.location.reload()
+      }, 300)
+    }
+  }, [])
+
   // 세션 확인을 위한 추가 체크
   useEffect(() => {
     let mounted = true
@@ -35,13 +51,34 @@ export default function ProfilePage() {
           return
         }
 
-        // useAuth에서 사용자가 없으면 직접 세션 확인
-        const supabase = getBrowserClient()
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // useAuth에서 사용자가 없으면 직접 세션 확인 (최대 3번 재시도)
+        let retryCount = 0
+        const maxRetries = 3
         
-        if (error) {
-          console.error('Session check error:', error)
+        const attemptSessionCheck = async (): Promise<boolean> => {
+          const supabase = getBrowserClient()
+          const { data: { session }, error } = await supabase.auth.getSession()
+          
+          if (error) {
+            console.error('Session check error:', error)
+          }
+          
+          if (session?.user) {
+            // 세션을 찾았으면 성공
+            return true
+          }
+          
+          // 세션을 찾지 못했고 재시도 횟수가 남았으면 재시도
+          if (retryCount < maxRetries) {
+            retryCount++
+            await new Promise(resolve => setTimeout(resolve, 500)) // 500ms 대기
+            return attemptSessionCheck()
+          }
+          
+          return false
         }
+
+        const hasSession = await attemptSessionCheck()
         
         // 세션 확인 완료
         if (mounted) {
@@ -49,7 +86,7 @@ export default function ProfilePage() {
         }
         
         // 세션이 없고 로딩도 완료되었으면 리다이렉트
-        if (!session && !authLoading && mounted) {
+        if (!hasSession && !authLoading && mounted) {
           // 충분한 지연을 주어 모든 상태 업데이트가 완료되도록 함
           redirectTimer = setTimeout(() => {
             if (mounted) {
