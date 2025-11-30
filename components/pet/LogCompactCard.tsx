@@ -227,16 +227,16 @@ export default function LogCompactCard({
                     return (
                       <div key={comment.id} className="py-1.5">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-gray-700">
+                          <span className="text-sm font-medium text-gray-700">
                             {author?.nickname || '익명'}
                           </span>
                           {formatTimeAgo && (
-                            <span className="text-xs text-gray-400">
+                            <span className="text-sm text-gray-400">
                               {formatTimeAgo(comment.createdAt)}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-600 line-clamp-2">{comment.content}</p>
+                        <p className="text-sm text-gray-600 line-clamp-2">{comment.content}</p>
                       </div>
                     )
                   })}
