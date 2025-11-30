@@ -43,10 +43,12 @@ export default function BrandsPage() {
       
       // SAFI 계산을 위한 리뷰 데이터 변환
       const safiReviews = brandReviews.map(review => ({
-        stoolScore: (review as any).stool_score || null,
-        allergySymptoms: (review as any).allergy_symptoms || null,
-        vomiting: (review as any).vomiting || null,
-        appetiteChange: (review as any).appetite_change || null
+        stoolScore: review.stool_score ?? null,
+        allergySymptoms: review.allergy_symptoms ? ['allergy'] : null,
+        vomiting: review.vomiting ?? null,
+        appetiteChange: review.appetite_change 
+          ? (review.appetite_change.toUpperCase() as 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED')
+          : null
       }))
 
       // 브랜드 리콜 이력
@@ -76,10 +78,24 @@ export default function BrandsPage() {
   const fetchBrands = async () => {
     try {
       const response = await fetch('/api/brands')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
       const data = await response.json()
-      setBrands(data)
+      // API 응답이 배열인지 확인
+      if (Array.isArray(data)) {
+        setBrands(data)
+      } else if (data.error) {
+        console.error('API error:', data.error)
+        setBrands([])
+      } else {
+        // 예상치 못한 응답 형식
+        console.warn('Unexpected API response format:', data)
+        setBrands([])
+      }
     } catch (error) {
       console.error('Failed to fetch brands:', error)
+      setBrands([])
     } finally {
       setLoading(false)
     }

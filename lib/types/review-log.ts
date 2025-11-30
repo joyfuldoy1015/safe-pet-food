@@ -42,6 +42,11 @@ export interface ReviewLog {
   views: number
   createdAt: string
   updatedAt: string
+  // SAFI 계산을 위한 옵셔널 필드
+  stool_score?: number | null
+  allergy_symptoms?: boolean | null
+  vomiting?: boolean | null
+  appetite_change?: 'increased' | 'decreased' | 'no_change' | null
 }
 
 export interface Comment {

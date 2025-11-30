@@ -206,14 +206,31 @@ export default function ConsumerEvaluationPage() {
   const handleSubmit = async () => {
     if (isSubmitting) return
     
+    // 필수 필드 검증
+    const overallRating = calculateOverallRating()
+    if (overallRating === 0) {
+      alert('최소 1개 이상의 평가 항목에 점수를 매겨주세요.')
+      return
+    }
+
+    if (!evaluation.pet_info.species) {
+      alert('반려동물 종류를 선택해주세요.')
+      return
+    }
+
+    if (!evaluation.pet_info.age) {
+      alert('반려동물 나이를 입력해주세요.')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const finalEvaluation = {
         ...evaluation,
-        overall_rating: calculateOverallRating()
+        overall_rating: overallRating
       }
 
-      const response = await fetch(`/api/brands/${brandName}/evaluate`, {
+      const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}/evaluate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,13 +239,16 @@ export default function ConsumerEvaluationPage() {
       })
 
       if (response.ok) {
+        const result = await response.json()
         // 성공 시 브랜드 상세 페이지로 이동
-        router.push(`/brands/${brandName}?evaluation=success`)
+        router.push(`/brands/${encodeURIComponent(brandName)}?evaluation=success`)
       } else {
-        console.error('평가 제출 실패')
+        const errorData = await response.json().catch(() => ({}))
+        alert(errorData.error || '평가 제출에 실패했습니다. 다시 시도해주세요.')
       }
     } catch (error) {
       console.error('평가 제출 오류:', error)
+      alert('평가 제출 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
       setIsSubmitting(false)
     }

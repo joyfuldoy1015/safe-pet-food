@@ -125,3 +125,4 @@ ORDER BY ordinal_position;
 3. **API 엔드포인트 구현**: `docs/ADMIN_SETUP_GUIDE.md` 참조
 
 
+

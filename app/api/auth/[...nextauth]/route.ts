@@ -36,34 +36,34 @@ const getProviders = () => {
   // 개발 환경에서만 Credentials Provider 추가
   if (process.env.NODE_ENV === 'development') {
     providers.push(
-      CredentialsProvider({
-        name: 'Credentials',
-        credentials: {
-          email: { label: 'Email', type: 'email' },
-          password: { label: 'Password', type: 'password' }
-        },
-        async authorize(credentials) {
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
           // 개발 환경에서만 사용되는 테스트 계정
-          const testAccounts = [
-            { email: 'test@example.com', password: 'test1234', name: '테스트 사용자', id: '1' },
-            { email: 'admin@example.com', password: 'admin1234', name: '관리자', id: '2' },
-            { email: 'user@example.com', password: 'user1234', name: '일반 사용자', id: '3' }
-          ]
-          
-          const user = testAccounts.find(
-            account => account.email === credentials?.email && account.password === credentials?.password
-          )
-          
-          if (user) {
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-            }
+        const testAccounts = [
+          { email: 'test@example.com', password: 'test1234', name: '테스트 사용자', id: '1' },
+          { email: 'admin@example.com', password: 'admin1234', name: '관리자', id: '2' },
+          { email: 'user@example.com', password: 'user1234', name: '일반 사용자', id: '3' }
+        ]
+        
+        const user = testAccounts.find(
+          account => account.email === credentials?.email && account.password === credentials?.password
+        )
+        
+        if (user) {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
           }
-          
-          return null
         }
+        
+        return null
+      }
       })
     )
   }

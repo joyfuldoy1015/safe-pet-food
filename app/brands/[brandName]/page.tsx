@@ -730,19 +730,19 @@ export default function BrandDetailPage() {
     // API에서 브랜드 데이터 가져오기
     const fetchBrandData = async () => {
       try {
-        const response = await fetch(`/api/brands?search=${encodeURIComponent(brandName)}`)
+        const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}`)
         if (response.ok) {
-          const brands = await response.json()
-          if (brands && brands.length > 0) {
+          const apiData = await response.json()
+          if (apiData && !apiData.error) {
             // Supabase에서 가져온 데이터를 Brand 형식으로 변환
-            const apiData = brands[0]
+            // API 응답 데이터를 Brand 형식으로 변환
             const brandData: Brand = {
               id: apiData.id || brandName.toLowerCase().replace(/\s+/g, '-'),
               name: apiData.name,
               logo: '🐾', // 기본 로고
               manufacturer: apiData.manufacturer,
-              country_of_origin: apiData.country,
-              manufacturing_locations: [], // TODO: 추후 추가
+              country_of_origin: apiData.country || apiData.country_of_origin,
+              manufacturing_locations: apiData.manufacturing_locations || [],
               established_year: apiData.established_year,
               certifications: apiData.certifications || [],
               brand_description: apiData.description || apiData.brand_description || '',
@@ -750,14 +750,14 @@ export default function BrandDetailPage() {
               brand_pros: apiData.brand_pros || [],
               brand_cons: apiData.brand_cons || [],
               product_lines: apiData.product_lines || [],
-              transparency_score: 75, // 기본 점수
+              transparency_score: apiData.transparency_score || 75,
               recall_history: apiData.recall_history || [],
-              ingredient_disclosure: {
+              ingredient_disclosure: apiData.ingredient_disclosure || {
                 fully_disclosed: 0,
                 partially_disclosed: 0,
                 not_disclosed: 0
               },
-              nutrition_analysis: {
+              nutrition_analysis: apiData.nutrition_analysis || {
                 protein: 0,
                 fat: 0,
                 carbohydrates: 0,
@@ -765,31 +765,35 @@ export default function BrandDetailPage() {
                 moisture: 0,
                 calories_per_100g: 0
               },
-              consumer_ratings: {
+              consumer_ratings: apiData.consumer_ratings || {
                 palatability: 0,
                 digestibility: 0,
                 coat_quality: 0,
                 stool_quality: 0,
                 overall_satisfaction: 0
               },
-              expert_reviews: [],
-              ingredients: [],
-              community_feedback: {
+              expert_reviews: apiData.expert_reviews || [],
+              ingredients: apiData.ingredients || [],
+              community_feedback: apiData.community_feedback || {
                 recommend_yes: 0,
                 recommend_no: 0,
                 total_votes: 0
               },
-              qa_section: [], // TODO: 추후 추가
-              products: [] // TODO: 추후 추가
+              qa_section: apiData.qa_section || [],
+              products: apiData.products || []
             }
-    setBrand(brandData)
+            setBrand(brandData)
           } else {
-            // API에 데이터가 없으면 레거시 데이터 사용
+            // API에 데이터가 없거나 에러가 있으면 레거시 데이터 사용
             const legacyData = getBrandDataLegacy(brandName)
             setBrand(legacyData)
           }
+        } else if (response.status === 404) {
+          // 404 에러 시 레거시 데이터 사용
+          const legacyData = getBrandDataLegacy(brandName)
+          setBrand(legacyData)
         } else {
-          // API 오류 시 레거시 데이터 사용
+          // 기타 API 오류 시 레거시 데이터 사용
           const legacyData = getBrandDataLegacy(brandName)
           setBrand(legacyData)
         }
@@ -832,10 +836,15 @@ export default function BrandDetailPage() {
 
   const fetchVoteData = async () => {
     try {
-      const response = await fetch(`/api/brands/${brandName}/vote`)
+      const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}/vote`)
       if (response.ok) {
         const data = await response.json()
-        setVoteData(data)
+        if (data && !data.error) {
+          setVoteData(data)
+        }
+      } else if (response.status !== 404) {
+        // 404는 데이터가 없는 것이므로 정상, 다른 에러만 로깅
+        console.warn('투표 데이터 로딩 실패:', response.status)
       }
     } catch (error) {
       console.error('투표 데이터 로딩 오류:', error)
@@ -844,10 +853,15 @@ export default function BrandDetailPage() {
 
   const fetchEvaluationData = async () => {
     try {
-      const response = await fetch(`/api/brands/${brandName}/evaluate`)
+      const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}/evaluate`)
       if (response.ok) {
         const data = await response.json()
-        setEvaluationData(data)
+        if (data && !data.error) {
+          setEvaluationData(data)
+        }
+      } else if (response.status !== 404) {
+        // 404는 데이터가 없는 것이므로 정상, 다른 에러만 로깅
+        console.warn('평가 데이터 가져오기 실패:', response.status)
       }
     } catch (error) {
       console.error('평가 데이터 가져오기 실패:', error)
@@ -861,12 +875,13 @@ export default function BrandDetailPage() {
     const brandReviews = mockReviewLogs.filter(review => review.brand === brand.name)
     
     // SAFI 계산을 위한 리뷰 데이터 변환
-    // ReviewLog 타입에 SAFI 필드가 없을 수 있으므로 안전하게 처리
     const safiReviews = brandReviews.map(review => ({
-      stoolScore: (review as any).stool_score || null,
-      allergySymptoms: (review as any).allergy_symptoms || null,
-      vomiting: (review as any).vomiting || null,
-      appetiteChange: (review as any).appetite_change || null
+      stoolScore: review.stool_score ?? null,
+      allergySymptoms: review.allergy_symptoms ? ['allergy'] : null,
+      vomiting: review.vomiting ?? null,
+      appetiteChange: review.appetite_change 
+        ? (review.appetite_change.toUpperCase() as 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED')
+        : null
     }))
 
     // 브랜드 리콜 이력
@@ -896,7 +911,7 @@ export default function BrandDetailPage() {
       // 임시 사용자 ID (실제로는 로그인 시스템에서 가져옴)
       const userId = `user-${Date.now()}`
       
-      const response = await fetch(`/api/brands/${brandName}/vote`, {
+      const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}/vote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -906,14 +921,20 @@ export default function BrandDetailPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setVoteData(data)
-        // 투표 후 기본값 상태 업데이트
-        setDefaultVote(vote)
+        if (data && !data.error) {
+          setVoteData(data)
+          // 투표 후 기본값 상태 업데이트
+          setDefaultVote(vote)
+        } else {
+          alert(data?.error || '투표 처리 중 오류가 발생했습니다.')
+        }
       } else {
-        console.error('투표 실패')
+        const errorData = await response.json().catch(() => ({}))
+        alert(errorData.error || '투표에 실패했습니다. 다시 시도해주세요.')
       }
     } catch (error) {
       console.error('투표 오류:', error)
+      alert('투표 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
       setIsVoting(false)
     }
@@ -1200,31 +1221,31 @@ export default function BrandDetailPage() {
               </>
             ) : brand.products && brand.products.length > 0 ? (
               <>
-                <div className="text-center mb-6">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">
-                    {brand.products.length}개
-                  </div>
-                  <p className="text-sm text-gray-600">등록된 제품</p>
-                </div>
-
-                <div className="space-y-3">
-                  {brand.products.map((product, index) => (
-                    <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="text-2xl">{product.image}</div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900 text-sm">{product.name}</p>
-                        <p className="text-xs text-gray-500 line-clamp-1">{product.description}</p>
-                      </div>
+            <div className="text-center mb-6">
+              <div className="text-4xl font-bold text-blue-600 mb-2">
+                {brand.products.length}개
                     </div>
-                  ))}
+              <p className="text-sm text-gray-600">등록된 제품</p>
+                  </div>
+
+            <div className="space-y-3">
+              {brand.products.map((product, index) => (
+                <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl">{product.image}</div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 text-sm">{product.name}</p>
+                    <p className="text-xs text-gray-500 line-clamp-1">{product.description}</p>
                 </div>
+                    </div>
+              ))}
+                  </div>
               </>
             ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500">등록된 제품 라인업이 없습니다.</p>
               </div>
             )}
-          </div>
+                    </div>
                     </div>
                       
         {/* 제품군별 상세 정보 */}

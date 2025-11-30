@@ -106,15 +106,15 @@ export default function LogCompactCard({
 
       {/* Product info */}
       <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
-        {log.brand} · {log.product}
-      </h3>
+          {log.brand} · {log.product}
+        </h3>
       {typeof log.rating === 'number' && (
         <div className="flex items-center gap-2 mb-3">
           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
           <span className="text-base font-semibold text-gray-900">
             {log.rating.toFixed(1)}
           </span>
-          {log.recommend !== undefined && (
+              {log.recommend !== undefined && (
             <span className="px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 text-xs border border-yellow-200">
               {log.recommend ? '추천' : '비추천'}
             </span>

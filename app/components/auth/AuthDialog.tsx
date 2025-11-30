@@ -95,8 +95,8 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
             <X className="h-5 w-5 text-gray-500" />
           </button>
 
-          <>
-            <div className="text-center mb-6">
+            <>
+              <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">로그인</h2>
               <p className="text-sm text-gray-600">Safe Pet Food에 오신 것을 환영합니다</p>
             </div>
@@ -137,28 +137,28 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200" />
-              </div>
+                </div>
               <div className="relative flex justify-center text-xs text-gray-500">
                 <span className="px-2 bg-white">또는 이메일로 로그인</span>
               </div>
-            </div>
+              </div>
 
             <form onSubmit={handlePasswordLogin} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  이메일 주소
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-                  disabled={isLoading}
-                />
-              </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    이메일 주소
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                    disabled={isLoading}
+                  />
+                </div>
 
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
@@ -186,27 +186,27 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
                 </div>
               </div>
 
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 bg-[#3056F5] text-white rounded-xl font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>로그인 중...</span>
-                  </>
-                ) : (
-                  <span>이메일로 로그인</span>
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                    {error}
+                  </div>
                 )}
-              </button>
-            </form>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 bg-[#3056F5] text-white rounded-xl font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>로그인 중...</span>
+                    </>
+                  ) : (
+                  <span>이메일로 로그인</span>
+                  )}
+                </button>
+              </form>
           </>
         </motion.div>
       </div>
