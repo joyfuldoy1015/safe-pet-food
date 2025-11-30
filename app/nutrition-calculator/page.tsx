@@ -326,9 +326,17 @@ export default function NutritionCalculator() {
     const shareText = `🧪 우리 댕냥이 사료 영양성분 분석 결과: ${result.total_score.toFixed(1)}점 (${result.overall_grade})! 건조물질 기준 과학적 분석으로 더 정확한 영양 평가를 받아보세요. 🐾`
     const shareUrl = generateShareUrl()
 
+    if (platform === 'instagram') {
+      // 인스타그램은 직접 링크만 제공
+      const instagramText = `${shareText}\n\n${shareUrl}`
+      navigator.clipboard.writeText(instagramText).then(() => {
+        alert('인스타그램에 공유할 내용이 클립보드에 복사되었습니다!')
+      })
+      return
+    }
+
     const urls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
       kakao: `https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
     }
 
@@ -680,10 +688,10 @@ export default function NutritionCalculator() {
                 </button>
                 
                 <button
-                  onClick={() => handleSNSShare('facebook')}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+                  onClick={() => handleSNSShare('instagram')}
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
                 >
-                  📘 페이스북으로 공유하기
+                  📸 인스타그램으로 공유하기
                 </button>
               </div>
               
