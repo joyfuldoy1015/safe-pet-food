@@ -68,10 +68,23 @@ export default function PetProfileHeader({
 
             {/* Name & Info */}
             <div className="flex-1 min-w-0">
-              {/* Name */}
-              <h1 className="text-3xl md:text-4xl font-bold text-[#0D1B2A] mb-4 tracking-tight">
-                {pet.name}
-              </h1>
+              {/* Name & Add Button Row */}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold text-[#0D1B2A] tracking-tight">
+                  {pet.name}
+                </h1>
+                {/* Add Log Button - Top Right */}
+                {onAddLog && (
+                  <button
+                    onClick={onAddLog}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0D1B2A] text-white text-sm font-semibold hover:bg-[#1B263B] transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#0D1B2A] focus:ring-offset-2 whitespace-nowrap flex-shrink-0"
+                    aria-label="새 로그 추가"
+                  >
+                    <Plus className="h-4 w-4" />
+                    새 로그 추가
+                  </button>
+                )}
+              </div>
 
               {/* Key Info: Age, Weight, Owner */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
@@ -101,20 +114,6 @@ export default function PetProfileHeader({
               )}
             </div>
           </div>
-
-          {/* Right: Add Log Button */}
-          {onAddLog && (
-            <div className="flex md:justify-end">
-              <button
-                onClick={onAddLog}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0D1B2A] text-white text-sm font-semibold hover:bg-[#1B263B] transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#0D1B2A] focus:ring-offset-2 whitespace-nowrap"
-                aria-label="새 로그 추가"
-              >
-                <Plus className="h-4 w-4" />
-                새 로그 추가
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
