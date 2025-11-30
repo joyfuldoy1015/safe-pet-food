@@ -172,17 +172,17 @@ export default function LogCompactCard({
 
       {/* Metrics & Actions */}
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div className="flex items-center gap-3 text-xs text-gray-600">
+        <div className="flex items-center gap-3 text-sm text-gray-600">
           <span className="inline-flex items-center gap-1">
-            <Heart size={12} />
+            <Heart size={14} />
             {log.likes}
           </span>
           <span className="inline-flex items-center gap-1">
-            <MessageSquare size={12} />
+            <MessageSquare size={14} />
             {log.commentsCount}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Eye size={12} />
+            <Eye size={14} />
             {log.views}
           </span>
         </div>
@@ -191,7 +191,7 @@ export default function LogCompactCard({
             e.stopPropagation()
             onOpenDetail()
           }}
-          className="px-4 sm:px-5 py-1.5 bg-[#3056F5] text-white rounded-lg text-xs font-medium hover:bg-[#2648e6] transition-colors"
+          className="px-4 sm:px-5 py-1.5 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors"
         >
           상세
         </button>
@@ -208,7 +208,7 @@ export default function LogCompactCard({
                   e.stopPropagation()
                   setShowComments(!showComments)
                 }}
-                className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                className="w-full flex items-center justify-between px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <span className="flex items-center gap-2">
                   <MessageSquare size={14} />
