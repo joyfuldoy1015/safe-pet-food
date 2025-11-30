@@ -52,11 +52,11 @@ export default function NotFound() {
               <div className="text-sm text-gray-600">적정 칼로리와 급여량</div>
             </Link>
             <Link
-              href="/feed-grade-analyzer"
+              href="/brands"
               className="p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
             >
-              <div className="font-medium text-gray-900">사료 등급 분석</div>
-              <div className="text-sm text-gray-600">5가지 기준 분석</div>
+              <div className="font-medium text-gray-900">브랜드 평가</div>
+              <div className="text-sm text-gray-600">브랜드 투명성 평가</div>
             </Link>
             <Link
               href="/pet-log"

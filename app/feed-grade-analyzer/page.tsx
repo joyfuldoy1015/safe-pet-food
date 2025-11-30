@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   Calculator, 
   TrendingUp, 
@@ -263,6 +264,25 @@ const criteriaOptions = {
 }
 
 export default function FeedGradeAnalyzer() {
+  const router = useRouter()
+  
+  // 페이지 접근 시 홈으로 리다이렉트 (서비스에서 제외됨)
+  useEffect(() => {
+    router.replace('/')
+  }, [router])
+  
+  // 리다이렉트 중 로딩 화면 표시
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3056F5] mx-auto mb-4"></div>
+        <p className="text-gray-600">페이지를 이동하는 중...</p>
+      </div>
+    </div>
+  )
+  
+  // 아래 코드는 서비스에서 제외되어 실행되지 않음
+  /*
   const [formData, setFormData] = useState<FeedAnalysisInput>({
     ingredient_quality: 'medium',
     ingredient_transparency: 'medium',
