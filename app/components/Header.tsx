@@ -20,7 +20,8 @@ import {
   X,
   BookOpen,
   LogOut,
-  Search
+  Search,
+  User
 } from 'lucide-react'
 
 const categories = {
@@ -149,9 +150,11 @@ export default function Header() {
               <>
                 <Link 
                   href="/profile"
-                  className="text-black hover:text-gray-700 font-medium text-sm transition-colors"
+                  className="text-black hover:text-gray-700 font-medium text-sm transition-colors px-3 py-2 rounded-lg hover:bg-yellow-300 flex items-center gap-2"
+                  title="마이 페이지"
                 >
-                  {profile?.nickname || user?.email || '사용자'}
+                  <User className="h-4 w-4" />
+                  <span>{profile?.nickname || user?.email || '사용자'}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -211,11 +214,15 @@ export default function Header() {
                 <>
                   <Link
                     href="/profile"
-                    className="px-4 py-2 text-black font-medium hover:bg-yellow-300 rounded-lg block"
+                    className="px-4 py-2 text-black font-medium hover:bg-yellow-300 rounded-lg flex items-center gap-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {profile?.nickname || user?.email || '사용자'}
+                    <User className="h-4 w-4" />
+                    <span>마이 페이지</span>
                   </Link>
+                  <div className="px-4 py-2 text-sm text-gray-600">
+                    {profile?.nickname || user?.email || '사용자'}
+                  </div>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false)

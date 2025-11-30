@@ -119,7 +119,7 @@ export default function ProfilePage() {
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
               <User className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">내 프로필</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">마이 페이지</h1>
           </div>
         </div>
 
