@@ -120,11 +120,20 @@ export default function PetLogCard(props: PetLogCardProps) {
   // 기간 계산
   const duration = calculateDuration(props.since, props.until);
 
+  const handleCardClick = () => {
+    props.onDetail?.()
+  }
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+  }
+
   return (
     <article
-      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full min-h-[400px] group"
+      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full min-h-[400px] group cursor-pointer"
       role="article"
       aria-label={`${props.brand} ${props.product} 후기`}
+      onClick={handleCardClick}
     >
       {/* 카테고리 배지 - 급여 후기 */}
       <div className="mb-3">
@@ -151,14 +160,7 @@ export default function PetLogCard(props: PetLogCardProps) {
 
       {/* 제품명 */}
       <h3 className="mt-2 text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors">
-        <button
-          className="hover:underline"
-          type="button"
-          onClick={() => props.onDetail?.()}
-          aria-label={`${props.brand} · ${props.product} 제품 상세로 이동`}
-        >
-          {props.brand} · {props.product}
-        </button>
+        {props.brand} · {props.product}
       </h3>
 
       {/* 별점 + 추천 */}
@@ -192,7 +194,10 @@ export default function PetLogCard(props: PetLogCardProps) {
               </p>
               {shouldTruncate && (
                 <button
-                  onClick={() => setIsExpanded(true)}
+                  onClick={(e) => {
+                    handleButtonClick(e)
+                    setIsExpanded(true)
+                  }}
                   className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                   aria-label="전체 내용 보기"
                 >
@@ -206,7 +211,10 @@ export default function PetLogCard(props: PetLogCardProps) {
                 {reviewText}
               </p>
               <button
-                onClick={() => setIsExpanded(false)}
+                onClick={(e) => {
+                  handleButtonClick(e)
+                  setIsExpanded(false)
+                }}
                 className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                 aria-label="내용 접기"
               >
@@ -239,7 +247,10 @@ export default function PetLogCard(props: PetLogCardProps) {
       <div className="mt-4">
         <button
           className="w-full px-4 py-2.5 rounded-xl bg-[#3056F5] text-white text-sm font-medium hover:bg-[#2648e6] transition-all duration-200 shadow-sm hover:shadow-md"
-          onClick={() => props.onDetail?.()}
+          onClick={(e) => {
+            handleButtonClick(e)
+            props.onDetail?.()
+          }}
           aria-label="자세히 보기"
         >
           자세히 보기
