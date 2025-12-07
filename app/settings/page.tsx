@@ -194,11 +194,11 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* 위험 구역 */}
+          {/* 주의 */}
           <div className="bg-white rounded-2xl shadow-lg border border-red-200 p-6">
             <div className="flex items-center gap-3 mb-6">
               <Trash2 className="w-5 h-5 text-red-500" />
-              <h2 className="text-xl font-semibold text-gray-900">위험 구역</h2>
+              <h2 className="text-xl font-semibold text-gray-900">주의</h2>
             </div>
             <div className="space-y-4">
               <div>
