@@ -517,36 +517,36 @@ function ReviewLogFormContent({
           </div>
         </div>
 
-        {/* Brand & Product */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-2">
-              브랜드 <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="brand"
-              type="text"
-              value={formData.brand || ''}
-              onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-              placeholder="예: 로얄캐닌"
-            />
-          </div>
-          <div>
-            <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-2">
-              제품명 <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="product"
-              type="text"
-              value={formData.product || ''}
-              onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-              placeholder="예: 어덜트 라지 브리드"
-            />
-          </div>
+        {/* Brand */}
+        <div>
+          <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-2">
+            브랜드 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="brand"
+            type="text"
+            value={formData.brand || ''}
+            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            placeholder="예: 로얄캐닌"
+          />
+        </div>
+
+        {/* Product */}
+        <div>
+          <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-2">
+            제품명 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="product"
+            type="text"
+            value={formData.product || ''}
+            onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+            required
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            placeholder="예: 어덜트 라지 브리드"
+          />
         </div>
 
         {/* Status */}
@@ -574,85 +574,85 @@ function ReviewLogFormContent({
           </div>
         </div>
 
-        {/* Period */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="period_start" className="block text-sm font-medium text-gray-700 mb-2">
-              시작일 <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="period_start"
-              type="date"
-              value={formData.period_start || ''}
-              onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
-              required
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="period_end" className="block text-sm font-medium text-gray-700 mb-2">
-              종료일 {formData.status === 'completed' && <span className="text-red-500">*</span>}
-            </label>
-            <input
-              id="period_end"
-              type="date"
-              value={formData.period_end || ''}
-              onChange={(e) => setFormData({ ...formData, period_end: e.target.value || null })}
-              required={formData.status === 'completed'}
-              disabled={formData.status === 'feeding'}
-              min={formData.period_start || undefined}
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
-          </div>
+        {/* Period Start */}
+        <div>
+          <label htmlFor="period_start" className="block text-sm font-medium text-gray-700 mb-2">
+            시작일 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="period_start"
+            type="date"
+            value={formData.period_start || ''}
+            onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
+            required
+            max={new Date().toISOString().split('T')[0]}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+          />
         </div>
 
-        {/* Rating & Recommend */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-2">
-              평점 (1-5)
-            </label>
-            <input
-              id="rating"
-              type="number"
-              min="1"
-              max="5"
-              step="0.1"
-              value={formData.rating || ''}
-              onChange={(e) => setFormData({ ...formData, rating: e.target.value ? Number(e.target.value) : null })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              추천 여부
-            </label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, recommend: true })}
-                className={`flex-1 px-4 py-3 rounded-xl border-2 transition-colors ${
-                  formData.recommend === true
-                    ? 'border-green-500 bg-green-50 text-green-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                👍 추천
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, recommend: false })}
-                className={`flex-1 px-4 py-3 rounded-xl border-2 transition-colors ${
-                  formData.recommend === false
-                    ? 'border-red-500 bg-red-50 text-red-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                👎 비추천
-              </button>
-            </div>
+        {/* Period End */}
+        <div>
+          <label htmlFor="period_end" className="block text-sm font-medium text-gray-700 mb-2">
+            종료일 {formData.status === 'completed' && <span className="text-red-500">*</span>}
+          </label>
+          <input
+            id="period_end"
+            type="date"
+            value={formData.period_end || ''}
+            onChange={(e) => setFormData({ ...formData, period_end: e.target.value || null })}
+            required={formData.status === 'completed'}
+            disabled={formData.status === 'feeding'}
+            min={formData.period_start || undefined}
+            max={new Date().toISOString().split('T')[0]}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* Rating */}
+        <div>
+          <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-2">
+            평점 (1-5)
+          </label>
+          <input
+            id="rating"
+            type="number"
+            min="1"
+            max="5"
+            step="0.1"
+            value={formData.rating || ''}
+            onChange={(e) => setFormData({ ...formData, rating: e.target.value ? Number(e.target.value) : null })}
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+          />
+        </div>
+
+        {/* Recommend */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            추천 여부
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, recommend: true })}
+              className={`flex-1 px-4 py-3 rounded-xl border-2 transition-colors ${
+                formData.recommend === true
+                  ? 'border-green-500 bg-green-50 text-green-700'
+                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              }`}
+            >
+              👍 추천
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, recommend: false })}
+              className={`flex-1 px-4 py-3 rounded-xl border-2 transition-colors ${
+                formData.recommend === false
+                  ? 'border-red-500 bg-red-50 text-red-700'
+                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              }`}
+            >
+              👎 비추천
+            </button>
           </div>
         </div>
 
