@@ -32,92 +32,12 @@ export default function ProfilePage() {
     }
   }, [])
 
-  // 세션 확인을 위한 추가 체크
+  // 세션 확인 - useAuth의 결과만 사용 (중복 확인 제거로 성능 개선)
   useEffect(() => {
-    let mounted = true
-    let redirectTimer: NodeJS.Timeout | null = null
-
-    const checkSession = async () => {
-      // useAuth가 로딩 중이면 기다림
-      if (authLoading) {
-        setIsCheckingAuth(true)
-        return
-      }
-
-      try {
-        // useAuth에서 이미 사용자가 있으면 세션 확인 완료
-        if (user) {
-          setIsCheckingAuth(false)
-          return
-        }
-
-        // useAuth에서 사용자가 없으면 직접 세션 확인 (최대 3번 재시도)
-        let retryCount = 0
-        const maxRetries = 3
-        
-        const attemptSessionCheck = async (): Promise<boolean> => {
-          const supabase = getBrowserClient()
-          const { data: { session }, error } = await supabase.auth.getSession()
-          
-          if (error) {
-            console.error('Session check error:', error)
-          }
-          
-          if (session?.user) {
-            // 세션을 찾았으면 성공
-            return true
-          }
-          
-          // 세션을 찾지 못했고 재시도 횟수가 남았으면 재시도
-          if (retryCount < maxRetries) {
-            retryCount++
-            await new Promise(resolve => setTimeout(resolve, 500)) // 500ms 대기
-            return attemptSessionCheck()
-          }
-          
-          return false
-        }
-
-        const hasSession = await attemptSessionCheck()
-        
-        // 세션 확인 완료
-        if (mounted) {
-          setIsCheckingAuth(false)
-        }
-        
-        // 세션이 없고 로딩도 완료되었으면 리다이렉트
-        if (!hasSession && !authLoading && mounted) {
-          // 충분한 지연을 주어 모든 상태 업데이트가 완료되도록 함
-          redirectTimer = setTimeout(() => {
-            if (mounted) {
-              router.push('/login?redirect=/profile')
-            }
-          }, 500)
-        }
-      } catch (error) {
-        console.error('Error checking session:', error)
-        if (mounted) {
-          setIsCheckingAuth(false)
-        }
-        // 에러 발생 시에도 로딩이 완료되었고 사용자가 없으면 리다이렉트
-        if (!authLoading && !user && mounted) {
-          redirectTimer = setTimeout(() => {
-            if (mounted) {
-              router.push('/login?redirect=/profile')
-            }
-          }, 500)
-        }
-      }
-    }
-
-    // 초기 세션 확인
-    checkSession()
-
-    return () => {
-      mounted = false
-      if (redirectTimer) {
-        clearTimeout(redirectTimer)
-      }
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/profile')
+    } else if (!authLoading && user) {
+      setIsCheckingAuth(false)
     }
   }, [router, authLoading, user])
 
@@ -148,8 +68,10 @@ export default function ProfilePage() {
         })
 
       if (error) {
-        console.error('Error updating profile:', error)
-        alert('프로필 업데이트에 실패했습니다.')
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error updating profile:', error)
+        }
+        alert('프로필 업데이트에 실패했습니다. 잠시 후 다시 시도해주세요.')
         setIsSaving(false)
         return
       }
@@ -158,8 +80,10 @@ export default function ProfilePage() {
       setIsEditing(false)
       alert('프로필이 업데이트되었습니다.')
     } catch (error) {
-      console.error('Unexpected error:', error)
-      alert('프로필 업데이트 중 오류가 발생했습니다.')
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Unexpected error:', error)
+      }
+      alert('프로필 업데이트 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
     } finally {
       setIsSaving(false)
     }
@@ -243,15 +167,48 @@ export default function ProfilePage() {
                 </div>
               )}
               {isEditing && (
-                <button
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors"
-                  onClick={() => {
-                    // TODO: 이미지 업로드 기능 구현
-                    alert('이미지 업로드 기능은 준비 중입니다.')
-                  }}
-                >
-                  <Camera className="w-4 h-4" />
-                </button>
+                <>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      
+                      // 파일 크기 제한 (5MB)
+                      if (file.size > 5 * 1024 * 1024) {
+                        alert('이미지 크기는 5MB 이하여야 합니다.')
+                        return
+                      }
+                      
+                      // 파일 타입 확인
+                      if (!file.type.startsWith('image/')) {
+                        alert('이미지 파일만 업로드 가능합니다.')
+                        return
+                      }
+                      
+                      try {
+                        // FileReader로 이미지를 Data URL로 변환
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          const result = reader.result as string
+                          setAvatarUrl(result)
+                        }
+                        reader.readAsDataURL(file)
+                      } catch (error) {
+                        alert('이미지 업로드 중 오류가 발생했습니다.')
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="avatar-upload"
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </label>
+                </>
               )}
             </div>
             {!isEditing && (

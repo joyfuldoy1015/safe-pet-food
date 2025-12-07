@@ -52,7 +52,18 @@ export default function ReviewDetailModal({
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newComment.trim()) return
-    // TODO: Submit comment
+    
+    // 댓글 추가
+    const newCommentObj: Comment = {
+      id: `comment-${Date.now()}`,
+      logId: review.id,
+      authorId: 'current-user', // 실제로는 useAuth에서 가져와야 함
+      content: newComment.trim(),
+      createdAt: new Date().toISOString(),
+      parentId: undefined
+    }
+    
+    setComments([...comments, newCommentObj])
     setNewComment('')
   }
 
@@ -232,16 +243,16 @@ export default function ReviewDetailModal({
                               allComments={comments}
                               formatTimeAgo={formatTimeAgo}
                               onReply={(content, parentId) => {
-                                // TODO: Implement reply functionality
-                                const newComment: Comment = {
+                                // 답글 추가
+                                const newReply: Comment = {
                                   id: `comment-${Date.now()}`,
                                   logId: review.id,
-                                  authorId: 'current-user',
-                                  content,
+                                  authorId: 'current-user', // 실제로는 useAuth에서 가져와야 함
+                                  content: content.trim(),
                                   createdAt: new Date().toISOString(),
                                   parentId
                                 }
-                                setComments([...comments, newComment])
+                                setComments([...comments, newReply])
                               }}
                             />
                           ))
