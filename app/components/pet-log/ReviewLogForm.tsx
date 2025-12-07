@@ -359,8 +359,7 @@ export default function ReviewLogForm({
                 onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
                 required
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm box-border"
-                style={{ boxSizing: 'border-box' }}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
               />
             </div>
 
@@ -377,8 +376,7 @@ export default function ReviewLogForm({
                 required={formData.status === 'completed'}
                 min={formData.period_start || undefined}
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm box-border"
-                style={{ boxSizing: 'border-box' }}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
               />
             </div>
 
