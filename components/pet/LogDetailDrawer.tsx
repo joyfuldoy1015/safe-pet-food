@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2 } from 'lucide-react'
+import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2, ExternalLink } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPost, QAPostWithAuthor } from '@/lib/types/review-log'
 import CommentThread from '@/app/components/pet-log/CommentThread'
 import QAThreadList from './QAThreadList'
@@ -63,6 +64,7 @@ export default function LogDetailDrawer({
   initialThreadId
 }: LogDetailDrawerProps) {
   const { user } = useAuth()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'details' | 'comments' | 'qa'>(initialTab)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['reason', 'changes']))
   const [newComment, setNewComment] = useState('')
@@ -147,7 +149,27 @@ export default function LogDetailDrawer({
                   <p className="text-sm sm:text-base text-gray-600 truncate">{log.product}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                {/* Rating in Header */}
+                {log.rating && (
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          className={i < Math.round(log.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{log.rating.toFixed(1)}</span>
+                    {log.recommend !== undefined && (
+                      <span className="text-sm text-gray-600">
+                        {log.recommend ? '👍' : '👎'}
+                      </span>
+                    )}
+                  </div>
+                )}
                 {isOwner && (
                   <>
                     {onEdit && (
@@ -183,9 +205,9 @@ export default function LogDetailDrawer({
               </div>
             </div>
 
-            {/* Status & Rating */}
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 space-y-3">
-              {isOwner && onStatusChange && (
+            {/* Status */}
+            {isOwner && onStatusChange && (
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                   <span className="text-sm sm:text-base font-medium text-gray-700">상태:</span>
                   <div className="flex gap-2 flex-wrap">
@@ -204,43 +226,22 @@ export default function LogDetailDrawer({
                     ))}
                   </div>
                 </div>
-              )}
-              {log.rating && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={i < Math.round(log.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-base font-medium text-gray-700">{log.rating.toFixed(1)}</span>
-                  {log.recommend !== undefined && (
-                    <span className="text-base text-gray-600">
-                      {log.recommend ? '👍 추천' : '👎 비추천'}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Pet Info */}
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">반려동물 정보</h3>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-xl">
-                  {pet.species === 'dog' ? '🐕' : '🐱'}
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">{pet.name}</div>
-                  <div className="text-sm sm:text-base text-gray-600">
-                    {pet.species === 'dog' ? '강아지' : '고양이'} · {calculateAge(pet.birthDate)}
-                    {pet.weightKg && ` · ${pet.weightKg}kg`}
-                  </div>
-                </div>
               </div>
+            )}
+
+            {/* Product Detail Link */}
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+              <button
+                onClick={() => {
+                  const brandName = encodeURIComponent(log.brand)
+                  router.push(`/brands/${brandName}`)
+                  onClose()
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
+              >
+                <span>제품에 대해 자세히 알아보기</span>
+                <ExternalLink className="h-4 w-4" />
+              </button>
             </div>
 
             {/* Period */}
