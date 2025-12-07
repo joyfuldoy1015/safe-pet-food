@@ -19,11 +19,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [isKakaoLoading, setIsKakaoLoading] = useState(false)
+  const [isEmailLoading, setIsEmailLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const redirectTo = searchParams.get('redirect') || '/'
+  
+  // 전체 로딩 상태 (어떤 버튼이든 로딩 중이면 true)
+  const isLoading = isGoogleLoading || isKakaoLoading || isEmailLoading
 
   // If already logged in, redirect
   useEffect(() => {
@@ -33,7 +38,7 @@ export default function LoginPage() {
   }, [user, redirectTo, router])
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true)
+    setIsGoogleLoading(true)
     try {
       const supabase = getBrowserClient()
       const { error } = await supabase.auth.signInWithOAuth({
@@ -46,18 +51,18 @@ export default function LoginPage() {
       if (error) {
         console.error('Google login error:', error)
         alert('Google 로그인에 실패했습니다.')
-        setIsLoading(false)
+        setIsGoogleLoading(false)
       }
-      // 성공 시 리디렉션되므로 setIsLoading(false)는 호출하지 않음
+      // 성공 시 리디렉션되므로 setIsGoogleLoading(false)는 호출하지 않음
     } catch (error) {
       console.error('Google login error:', error)
       alert('로그인 중 오류가 발생했습니다.')
-      setIsLoading(false)
+      setIsGoogleLoading(false)
     }
   }
 
   const handleKakaoLogin = async () => {
-    setIsLoading(true)
+    setIsKakaoLoading(true)
     try {
       const supabase = getBrowserClient()
       const { error } = await supabase.auth.signInWithOAuth({
@@ -70,24 +75,24 @@ export default function LoginPage() {
       if (error) {
         console.error('Kakao login error:', error)
         alert('카카오 로그인에 실패했습니다.')
-        setIsLoading(false)
+        setIsKakaoLoading(false)
       }
-      // 성공 시 리디렉션되므로 setIsLoading(false)는 호출하지 않음
+      // 성공 시 리디렉션되므로 setIsKakaoLoading(false)는 호출하지 않음
     } catch (error) {
       console.error('Kakao login error:', error)
       alert('로그인 중 오류가 발생했습니다.')
-      setIsLoading(false)
+      setIsKakaoLoading(false)
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setIsEmailLoading(true)
     
     // 입력값 검증
     if (!email || !password) {
       alert('이메일과 비밀번호를 입력해주세요.')
-      setIsLoading(false)
+      setIsEmailLoading(false)
       return
     }
 
@@ -98,7 +103,7 @@ export default function LoginPage() {
       if (!supabase) {
         alert('인증 서비스에 연결할 수 없습니다. 환경 변수를 확인해주세요.')
         console.error('Supabase client is not available')
-        setIsLoading(false)
+        setIsEmailLoading(false)
         return
       }
 
@@ -118,7 +123,7 @@ export default function LoginPage() {
           url: supabaseUrl ? 'set' : 'missing',
           key: supabaseKey ? 'set' : 'missing'
         })
-        setIsLoading(false)
+        setIsEmailLoading(false)
         return
       }
 
@@ -126,7 +131,7 @@ export default function LoginPage() {
       if (!supabaseUrl.match(/^https:\/\/[a-z0-9-]+\.supabase\.co$/)) {
         alert(`Supabase URL 형식이 올바르지 않습니다.\n\n현재 URL: ${supabaseUrl}\n\n올바른 형식: https://[project-id].supabase.co\n\nSupabase 대시보드 → Settings → API에서 올바른 URL을 확인해주세요.`)
         console.error('Invalid Supabase URL format:', supabaseUrl)
-        setIsLoading(false)
+        setIsEmailLoading(false)
         return
       }
 
@@ -153,7 +158,7 @@ export default function LoginPage() {
         }
         
         alert(errorMessage)
-        setIsLoading(false)
+        setIsEmailLoading(false)
         return
       }
 
@@ -190,12 +195,12 @@ export default function LoginPage() {
         }
       } else {
         alert('로그인에 실패했습니다. 다시 시도해주세요.')
-        setIsLoading(false)
+        setIsEmailLoading(false)
       }
     } catch (error) {
       console.error('Unexpected login error:', error)
       alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
-      setIsLoading(false)
+      setIsEmailLoading(false)
     }
   }
 
@@ -221,7 +226,7 @@ export default function LoginPage() {
               className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image src="https://developers.google.com/identity/images/g-logo.png" alt="Google" width={20} height={20} className="mr-3" />
-              {isLoading ? '로그인 중...' : 'Google로 로그인'}
+              {isGoogleLoading ? '로그인 중...' : 'Google로 로그인'}
             </button>
             
             <button 
@@ -230,7 +235,7 @@ export default function LoginPage() {
               className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-yellow-400 text-sm font-medium text-black hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="mr-3 text-lg">💬</span>
-              {isLoading ? '로그인 중...' : '카카오로 로그인'}
+              {isKakaoLoading ? '로그인 중...' : '카카오로 로그인'}
             </button>
           </div>
 
@@ -311,7 +316,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? '로그인 중...' : '비밀번호로 로그인'}
+                  {isEmailLoading ? '로그인 중...' : '비밀번호로 로그인'}
                 </button>
               </div>
             </form>
