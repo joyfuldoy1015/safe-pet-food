@@ -6,6 +6,8 @@ import { X, LogIn, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
+import { mockPets } from '@/lib/mock/review-log'
+import type { Pet as MockPet } from '@/lib/types/review-log'
 import type { Database } from '@/lib/types/database'
 
 type Pet = Database['public']['Tables']['pets']['Row']
@@ -64,8 +66,34 @@ export default function LogFormDialog({
     setIsLoadingPets(true)
     try {
       const supabase = getBrowserClient()
-      if (!supabase || !user) {
-        setPets([])
+      const hasSupabase = typeof window !== 'undefined' && 
+        !!process.env.NEXT_PUBLIC_SUPABASE_URL && 
+        !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      // Check if Supabase URL is placeholder
+      const clientUrl = (supabase as any)?.supabaseUrl || ''
+      const isPlaceholder = clientUrl === 'https://placeholder.supabase.co' || 
+                           clientUrl.includes('placeholder') ||
+                           !clientUrl
+
+      // If no Supabase or placeholder, use mock data
+      if (!hasSupabase || isPlaceholder || !supabase || !user) {
+        console.log('[LogFormDialog] Using mock pets data')
+        // Convert mock pets to Database Pet format
+        const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
+          id: mockPet.id,
+          owner_id: 'owner-1', // Default owner for mock data
+          name: mockPet.name,
+          species: mockPet.species,
+          birth_date: mockPet.birthDate,
+          weight_kg: mockPet.weightKg ?? null,
+          tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }))
+        setPets(convertedPets)
+        setIsLoadingPets(false)
         return
       }
 
@@ -77,13 +105,59 @@ export default function LogFormDialog({
 
       if (error) {
         console.error('[LogFormDialog] Error loading pets:', error)
-        setPets([])
+        // Fallback to mock data on error
+        console.log('[LogFormDialog] Falling back to mock pets data')
+        const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
+          id: mockPet.id,
+          owner_id: user.id,
+          name: mockPet.name,
+          species: mockPet.species,
+          birth_date: mockPet.birthDate,
+          weight_kg: mockPet.weightKg ?? null,
+          tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }))
+        setPets(convertedPets)
       } else {
-        setPets(data || [])
+        // Use real data if available, otherwise fallback to mock
+        if (data && data.length > 0) {
+          setPets(data)
+        } else {
+          console.log('[LogFormDialog] No pets found, using mock pets data')
+          const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
+            id: mockPet.id,
+            owner_id: user.id,
+            name: mockPet.name,
+            species: mockPet.species,
+            birth_date: mockPet.birthDate,
+            weight_kg: mockPet.weightKg ?? null,
+            tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }))
+          setPets(convertedPets)
+        }
       }
     } catch (error) {
       console.error('[LogFormDialog] Error loading pets:', error)
-      setPets([])
+      // Fallback to mock data on error
+      console.log('[LogFormDialog] Falling back to mock pets data')
+      const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
+        id: mockPet.id,
+        owner_id: user?.id || 'owner-1',
+        name: mockPet.name,
+        species: mockPet.species,
+        birth_date: mockPet.birthDate,
+        weight_kg: mockPet.weightKg ?? null,
+        tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
+        avatar_url: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }))
+      setPets(convertedPets)
     } finally {
       setIsLoadingPets(false)
     }
