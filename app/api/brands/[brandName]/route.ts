@@ -12,8 +12,65 @@ const isSupabaseConfigured = () => {
   )
 }
 
+// 성분 공개 상태 자동 계산 함수
+function calculateIngredientDisclosure(ingredients: Array<{
+  name: string
+  percentage?: number
+  disclosure_level?: 'full' | 'partial' | 'none'
+}>): {
+  fully_disclosed: number
+  partially_disclosed: number
+  not_disclosed: number
+} {
+  if (!ingredients || ingredients.length === 0) {
+    return { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0 }
+  }
+
+  let totalPercentage = 0
+  let fullyDisclosed = 0
+  let partiallyDisclosed = 0
+  let notDisclosed = 0
+
+  ingredients.forEach(ing => {
+    // percentage가 있으면 사용, 없으면 균등 분배
+    const percentage = ing.percentage || (100 / ingredients.length)
+    totalPercentage += percentage
+
+    const disclosureLevel = ing.disclosure_level || 'none'
+    switch (disclosureLevel) {
+      case 'full':
+        fullyDisclosed += percentage
+        break
+      case 'partial':
+        partiallyDisclosed += percentage
+        break
+      case 'none':
+        notDisclosed += percentage
+        break
+    }
+  })
+
+  // 정규화 (총합이 100%가 되도록)
+  const normalizer = totalPercentage > 0 ? 100 / totalPercentage : 1
+
+  return {
+    fully_disclosed: Math.round(fullyDisclosed * normalizer),
+    partially_disclosed: Math.round(partiallyDisclosed * normalizer),
+    not_disclosed: Math.round(notDisclosed * normalizer)
+  }
+}
+
 // Supabase 데이터를 JSON 형식으로 변환
-const transformSupabaseToJsonFormat = (supabaseData: any) => {
+const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
+  name: string
+  percentage?: number
+  disclosure_level?: 'full' | 'partial' | 'none'
+}>) => {
+  // ingredients 배열이 있으면 자동 계산, 없으면 기본값
+  const ingredientDisclosure = ingredients && ingredients.length > 0
+    ? calculateIngredientDisclosure(ingredients)
+    : { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0 }
+
   return {
     id: supabaseData.id,
     name: supabaseData.name,
@@ -31,7 +88,9 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     image: supabaseData.image,
     brand_pros: supabaseData.brand_pros || [],
     brand_cons: supabaseData.brand_cons || [],
-    transparency_score: supabaseData.transparency_score || 75
+    transparency_score: supabaseData.transparency_score || 75,
+    ingredient_disclosure: ingredientDisclosure,
+    ingredients: ingredients || []
   }
 }
 
@@ -52,7 +111,11 @@ export async function GET(
           .single()
 
         if (!error && data) {
-          const brand = transformSupabaseToJsonFormat(data)
+          // Supabase에서 ingredients 데이터 가져오기 (향후 확장 가능)
+          // 현재는 brands 테이블에 ingredients 필드가 없으므로 null로 처리
+          const ingredients = data.ingredients || null
+          
+          const brand = transformSupabaseToJsonFormat(data, ingredients)
           
           // Get reviews for this brand (현재는 reviews 테이블이 없으므로 JSON 사용)
           const brandReviews = reviewsData.filter(review => review.brand_id === brand.id)
@@ -85,6 +148,21 @@ export async function GET(
       )
     }
 
+    // ingredients 배열이 있으면 ingredient_disclosure 자동 계산
+    let ingredientDisclosure = brand.ingredient_disclosure || {
+      fully_disclosed: 0,
+      partially_disclosed: 0,
+      not_disclosed: 0
+    }
+    
+    // ingredients 배열이 있고 disclosure_level이 있으면 자동 계산
+    if (brand.ingredients && Array.isArray(brand.ingredients) && brand.ingredients.length > 0) {
+      const hasDisclosureLevels = brand.ingredients.some((ing: any) => ing.disclosure_level)
+      if (hasDisclosureLevels) {
+        ingredientDisclosure = calculateIngredientDisclosure(brand.ingredients)
+      }
+    }
+
     // Get reviews for this brand
     const brandReviews = reviewsData.filter((review: any) => review.brand_id === brand.id)
     
@@ -96,6 +174,7 @@ export async function GET(
     
     return NextResponse.json({
       ...brand,
+      ingredient_disclosure: ingredientDisclosure,
       reviews: brandReviews,
       review_stats: reviewStats,
       trust_metrics: trustMetrics
