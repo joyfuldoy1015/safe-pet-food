@@ -1164,16 +1164,16 @@ export default function BrandDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 투명성 점수 */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">🔍 투명성 점수</h2>
-            
+        {/* 투명성 점수 */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">🔍 투명성 점수</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 전체 점수 */}
-            <div className="text-center mb-6">
+            <div className="text-center">
               <div className={`text-4xl font-bold ${getTransparencyColor(brand.transparency_score)} mb-2`}>
                 {brand.transparency_score}점
-                </div>
+              </div>
               <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
                 <div 
                   className={`h-3 rounded-full ${getTransparencyBgColor(brand.transparency_score)}`}
@@ -1196,7 +1196,7 @@ export default function BrandDetailPage() {
                 <span className="text-sm font-medium text-green-600">
                   {brand.ingredient_disclosure.fully_disclosed}%
                 </span>
-                </div>
+              </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Minus className="h-4 w-4 text-yellow-500" />
