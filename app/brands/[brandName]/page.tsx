@@ -1533,21 +1533,24 @@ export default function BrandDetailPage() {
             <div className="space-y-4">
                       {product.consumer_reviews.map((review) => (
                         <div key={review.id} className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
+                  <div className="mb-3">
+                    {/* 사용자명 */}
+                    <div className="flex items-center space-x-2 mb-2">
                       <User className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm font-medium text-gray-700">{review.user_name}</span>
-                              <div className="flex items-center">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star 
-                                    key={star} 
-                                    className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                                  />
-                                ))}
+                      <span className="text-sm font-medium text-gray-700">{review.user_name}</span>
+                      <span className="text-xs text-gray-500">{review.date}</span>
                     </div>
+                    {/* 별점 */}
+                    <div className="flex items-center mb-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                          key={star} 
+                          className={`h-4 w-4 ${star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                        />
+                      ))}
                     </div>
-                            <span className="text-xs text-gray-500">{review.date}</span>
                   </div>
+                          {/* 후기 내용 */}
                           <p className="text-sm text-gray-700 mb-2 leading-relaxed">{review.comment}</p>
                           <div className="flex items-center justify-between">
                             <button className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors">
