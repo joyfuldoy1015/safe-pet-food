@@ -1227,8 +1227,7 @@ export default function BrandDetailPage() {
             {brand.products.map((product) => (
               <div key={product.id} className="border border-gray-200 rounded-lg p-6">
                 {/* 제품 헤더 */}
-                <div className="flex items-start space-x-4 mb-6">
-                  <div className="text-4xl">{product.image}</div>
+                <div className="mb-6">
                   <div className="flex-1">
                     {/* 제품명과 인증 마크 (데스크톱: 가로 배치, 모바일: 세로 배치) */}
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2 gap-2 md:gap-0">
