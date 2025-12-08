@@ -1,0 +1,216 @@
+[
+  {
+    "id": "1",
+    "name": "로얄캐닌",
+    "manufacturer": "마스 펫케어 코리아",
+    "description": "프랑스의 프리미엄 펫푸드 브랜드로, 50년 이상의 연구와 개발을 통해 반려동물의 건강과 영양에 특화된 사료를 제공합니다. 수의학적 전문성과 과학적 접근을 바탕으로 각 품종과 생애주기에 맞는 맞춤형 영양 솔루션을 제공합니다.",
+    "recall_history": [
+      {
+        "date": "2019-03-15",
+        "reason": "비타민D 과다 함유",
+        "severity": "medium",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.2,
+    "product_lines": ["성견용", "퍼피", "소형견", "대형견", "처방식"],
+    "established_year": 1968,
+    "country": "프랑스",
+    "certifications": ["AAFCO", "ISO 9001"],
+    "image": "/brands/royal-canin.jpg"
+  },
+  {
+    "id": "2", 
+    "name": "힐스",
+    "manufacturer": "힐스 펫 뉴트리션",
+    "description": "1939년 설립된 미국의 수의학 전문 브랜드로, 수의사와 함께 개발한 처방식 사료로 유명합니다. 과학적 연구를 바탕으로 한 영양학적 접근과 수의학적 전문성을 통해 반려동물의 특별한 건강 요구사항을 충족시킵니다.",
+    "recall_history": [
+      {
+        "date": "2019-01-31",
+        "reason": "비타민D 독성 수준",
+        "severity": "high",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.0,
+    "product_lines": ["사이언스 다이어트", "프리스크립션 다이어트"],
+    "established_year": 1939,
+    "country": "미국",
+    "certifications": ["AAFCO", "FDA"],
+    "image": "/brands/hills.jpg"
+  },
+  {
+    "id": "3",
+    "name": "오리젠",
+    "manufacturer": "챔피언 펫푸드",
+    "recall_history": [],
+    "overall_rating": 4.7,
+    "product_lines": ["오리지널", "식스 피쉬", "퍼피", "시니어"],
+    "established_year": 1985,
+    "country": "캐나다",
+    "certifications": ["CFIA", "AAFCO"],
+    "image": "/brands/orijen.jpg"
+  },
+  {
+    "id": "4",
+    "name": "아카나",
+    "manufacturer": "챔피언 펫푸드",
+    "recall_history": [],
+    "overall_rating": 4.5,
+    "product_lines": ["클래식", "레지오날", "싱글즈"],
+    "established_year": 1985,
+    "country": "캐나다", 
+    "certifications": ["CFIA", "AAFCO"],
+    "image": "/brands/acana.jpg"
+  },
+  {
+    "id": "5",
+    "name": "퓨리나 프로플랜",
+    "manufacturer": "네슬레 퓨리나",
+    "recall_history": [
+      {
+        "date": "2016-03-18",
+        "reason": "비타민/미네랄 불충분",
+        "severity": "low",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 3.8,
+    "product_lines": ["옵티라이프", "옵티웨이트", "포커스"],
+    "established_year": 1986,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/purina-proplan.jpg"
+  },
+  {
+    "id": "6",
+    "name": "내추럴발란스",
+    "manufacturer": "Dick Van Patten's Natural Balance Pet Foods",
+    "recall_history": [
+      {
+        "date": "2018-08-15", 
+        "reason": "살모넬라 오염 가능성",
+        "severity": "high",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 3.9,
+    "product_lines": ["울트라 프리미엄", "리미티드 인그리디언트"],
+    "established_year": 1989,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/natural-balance.jpg"
+  },
+  {
+    "id": "7",
+    "name": "웰니스",
+    "manufacturer": "Wellness Pet Company",
+    "recall_history": [
+      {
+        "date": "2017-05-10",
+        "reason": "비타민D 과다",
+        "severity": "medium",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.3,
+    "product_lines": ["코어", "심플", "컴플릿 헬스"],
+    "established_year": 1997,
+    "country": "미국",
+    "certifications": ["AAFCO", "USDA"],
+    "image": "/brands/wellness.jpg"
+  },
+  {
+    "id": "8",
+    "name": "블루 버팔로",
+    "manufacturer": "General Mills",
+    "recall_history": [
+      {
+        "date": "2016-11-02",
+        "reason": "잠재적 살모넬라 오염",
+        "severity": "medium",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.1,
+    "product_lines": ["라이프 프로텍션", "프리덤", "베이직"],
+    "established_year": 2002,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/blue-buffalo.jpg"
+  },
+  {
+    "id": "9",
+    "name": "캔디드",
+    "manufacturer": "Candidae Pet Foods",
+    "recall_history": [],
+    "overall_rating": 4.4,
+    "product_lines": ["올 그레인 프리", "리미티드 인그리디언트"],
+    "established_year": 1996,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/candidae.jpg"
+  },
+  {
+    "id": "10",
+    "name": "프로바이오틱스",
+    "manufacturer": "Pro Plan",
+    "recall_history": [
+      {
+        "date": "2015-09-15",
+        "reason": "비타민/미네랄 불균형",
+        "severity": "low",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 3.7,
+    "product_lines": ["포커스", "옵티라이프", "옵티웨이트"],
+    "established_year": 1986,
+    "country": "미국",
+    "certifications": ["AAFCO"],
+    "image": "/brands/probiotics.jpg"
+  },
+  {
+    "id": "11",
+    "name": "지바",
+    "manufacturer": "ZIVA Pet Foods",
+    "recall_history": [],
+    "overall_rating": 4.6,
+    "product_lines": ["프리미엄", "내추럴", "그레인프리"],
+    "established_year": 2010,
+    "country": "독일",
+    "certifications": ["EU", "AAFCO"],
+    "image": "/brands/ziva.jpg"
+  },
+  {
+    "id": "12",
+    "name": "고우",
+    "manufacturer": "GO! Solutions",
+    "recall_history": [],
+    "overall_rating": 4.2,
+    "product_lines": ["스킨 앤 코트", "스마트 웨이트", "스마트 트레인"],
+    "established_year": 2006,
+    "country": "캐나다",
+    "certifications": ["CFIA", "AAFCO"],
+    "image": "/brands/go.jpg"
+  },
+  {
+    "id": "13",
+    "name": "내가 추가한 브랜드",
+    "manufacturer": "내 제조사",
+    "recall_history": [
+      {
+        "date": "2023-01-15",
+        "reason": "예시 리콜 사유",
+        "severity": "low",
+        "resolved": true
+      }
+    ],
+    "overall_rating": 4.5,
+    "product_lines": ["프리미엄", "내추럴"],
+    "established_year": 2020,
+    "country": "한국",
+    "certifications": ["KFIA"],
+    "image": "/brands/my-brand.jpg"
+  }
+] 

@@ -41,6 +41,9 @@ async function migrateBrands() {
 
     for (const brand of brandsData) {
       try {
+        // 각 요청 사이에 약간의 지연 추가 (Rate limiting 방지)
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         // Supabase에 삽입 (image 컬럼 제외 - 추후 추가 가능)
         const { data, error } = await supabase
           .from('brands')
@@ -55,8 +58,10 @@ async function migrateBrands() {
             recall_history: brand.recall_history || [],
             brand_description: brand.description || brand.brand_description || '',
             manufacturing_info: brand.manufacturing_info || '',
+            manufacturing_locations: brand.manufacturing_locations || [],
             brand_pros: brand.brand_pros || [],
-            brand_cons: brand.brand_cons || []
+            brand_cons: brand.brand_cons || [],
+            transparency_score: brand.transparency_score || 75
             // image 컬럼은 테이블에 추가 후 다시 마이그레이션 가능
           })
           .select()
@@ -66,7 +71,9 @@ async function migrateBrands() {
           // 중복 키 오류는 무시 (이미 존재하는 데이터)
           if (error.code === '23505') {
             console.log(`⚠️  이미 존재: ${brand.name}`)
+            successCount++ // 이미 존재하는 것도 성공으로 간주
           } else {
+            console.error(`❌ 오류: ${brand.name}`, error.code, error.message)
             throw error
           }
         } else {
@@ -74,8 +81,15 @@ async function migrateBrands() {
           successCount++
         }
       } catch (error: any) {
-        console.error(`❌ 실패: ${brand.name}`, error.message)
+        const errorMsg = error.message || String(error)
+        const errorCode = error.code || 'UNKNOWN'
+        console.error(`❌ 실패: ${brand.name}`, `[${errorCode}]`, errorMsg)
         errorCount++
+        
+        // 네트워크 오류인 경우 더 자세한 정보 출력
+        if (errorMsg.includes('fetch failed') || errorMsg.includes('network')) {
+          console.error(`   → 네트워크 연결 문제일 수 있습니다. Supabase URL을 확인해주세요.`)
+        }
       }
     }
 

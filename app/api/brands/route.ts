@@ -30,6 +30,7 @@ const transformJsonToSupabaseFormat = (jsonData: any) => {
     manufacturing_info: jsonData.manufacturing_info || '',
     brand_pros: jsonData.brand_pros || [],
     brand_cons: jsonData.brand_cons || [],
+    transparency_score: jsonData.transparency_score || 75,
     image: jsonData.image || null
   }
 }
@@ -64,6 +65,7 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     description: supabaseData.brand_description,
     brand_description: supabaseData.brand_description,
     manufacturing_info: supabaseData.manufacturing_info || '',
+    manufacturing_locations: supabaseData.manufacturing_locations || [],
     recall_history: supabaseData.recall_history,
     overall_rating: parseFloat(supabaseData.overall_rating) || 0,
     product_lines: productLines,
@@ -71,7 +73,8 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     certifications: supabaseData.certifications || [],
     image: supabaseData.image,
     brand_pros: supabaseData.brand_pros || [],
-    brand_cons: supabaseData.brand_cons || []
+    brand_cons: supabaseData.brand_cons || [],
+    transparency_score: supabaseData.transparency_score || 75
   }
 }
 

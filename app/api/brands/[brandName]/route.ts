@@ -20,6 +20,9 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     manufacturer: supabaseData.manufacturer,
     country: supabaseData.country,
     description: supabaseData.brand_description,
+    brand_description: supabaseData.brand_description,
+    manufacturing_info: supabaseData.manufacturing_info || '',
+    manufacturing_locations: supabaseData.manufacturing_locations || [],
     recall_history: supabaseData.recall_history,
     overall_rating: parseFloat(supabaseData.overall_rating) || 0,
     product_lines: supabaseData.product_lines || [],
@@ -27,7 +30,8 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     certifications: supabaseData.certifications || [],
     image: supabaseData.image,
     brand_pros: supabaseData.brand_pros || [],
-    brand_cons: supabaseData.brand_cons || []
+    brand_cons: supabaseData.brand_cons || [],
+    transparency_score: supabaseData.transparency_score || 75
   }
 }
 

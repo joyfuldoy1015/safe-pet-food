@@ -22,6 +22,7 @@ interface Brand {
   established_year: number
   country: string
   certifications: string[]
+  transparency_score?: number // 100점 만점
   safiScore?: SafiResult
 }
 
@@ -101,18 +102,8 @@ export default function BrandsPage() {
     }
   }
 
-  const getTransparencyScore = (brand: Brand) => {
-    const recallCount = brand.recall_history.length
-    const highSeverityCount = brand.recall_history.filter(r => r.severity === 'high').length
-    const unresolvedCount = brand.recall_history.filter(r => !r.resolved).length
-    
-    let score = 5
-    score -= recallCount * 0.5
-    score -= highSeverityCount * 1
-    score -= unresolvedCount * 2
-    
-    return Math.max(0, Math.min(5, score))
-  }
+  // 투명성 점수는 Supabase의 transparency_score 필드를 사용 (100점 만점)
+  // getTransparencyScore 함수는 제거하고 brand.transparency_score 직접 사용
 
   const filteredAndSortedBrands = brandsWithSafi
     .filter(brand => 
@@ -126,7 +117,7 @@ export default function BrandsPage() {
         case 'name':
           return a.name.localeCompare(b.name)
         case 'transparency':
-          return getTransparencyScore(b) - getTransparencyScore(a)
+          return (b.transparency_score || 75) - (a.transparency_score || 75)
         default:
           return 0
       }
@@ -148,13 +139,13 @@ export default function BrandsPage() {
   }
 
   const getTransparencyBadge = (brand: Brand) => {
-    const transparencyScore = getTransparencyScore(brand)
-    if (transparencyScore >= 4.5) {
-      return { color: 'bg-green-100 text-green-800 border border-green-200', icon: CheckCircle, text: '투명' }
-    } else if (transparencyScore >= 3) {
-      return { color: 'bg-yellow-100 text-yellow-800 border border-yellow-200', icon: Shield, text: '보통' }
+    const transparencyScore = brand.transparency_score || 75 // 100점 만점 기준
+    if (transparencyScore >= 80) {
+      return { color: 'bg-green-100 text-green-800 border border-green-200', icon: CheckCircle, text: '매우 투명' }
+    } else if (transparencyScore >= 60) {
+      return { color: 'bg-yellow-100 text-yellow-800 border border-yellow-200', icon: Shield, text: '보통 투명' }
     } else {
-      return { color: 'bg-red-100 text-red-800 border border-red-200', icon: AlertTriangle, text: '불투명' }
+      return { color: 'bg-red-100 text-red-800 border border-red-200', icon: AlertTriangle, text: '투명성 부족' }
     }
   }
 
@@ -282,7 +273,7 @@ export default function BrandsPage() {
                 {filteredAndSortedBrands.map((brand) => {
                   const transparencyBadge = getTransparencyBadge(brand)
                   const TransparencyIcon = transparencyBadge.icon
-                  const transparencyScore = getTransparencyScore(brand)
+                  const transparencyScore = brand.transparency_score || 75 // 100점 만점
                   
                   return (
                     <Link
@@ -343,7 +334,7 @@ export default function BrandsPage() {
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="text-xs text-gray-500 mb-1">투명성 점수</div>
-                            <div className="font-semibold text-gray-900">{transparencyScore.toFixed(1)}/5.0</div>
+                            <div className="font-semibold text-gray-900">{transparencyScore}/100</div>
                           </div>
                         </div>
 
