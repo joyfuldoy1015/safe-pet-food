@@ -1274,16 +1274,14 @@ export default function BrandDetailPage() {
 
                 {/* 제품 상세 정보 - 드롭다운 */}
                 {expandedProducts[product.id]?.expanded && (
-                  <div className="border-t border-gray-200 pt-6 pb-6 px-0">
+                  <div className="border-t border-gray-200 p-6">
                     {/* 제품 설명 */}
                     {product.description && (
-                      <div className="px-6 mb-6">
-                        <p className="text-gray-600 leading-relaxed">{product.description}</p>
-                      </div>
+                      <p className="text-gray-600 leading-relaxed mb-6">{product.description}</p>
                     )}
 
                 {/* 드롭다운 섹션들 */}
-                <div className="space-y-4 px-6">
+                <div className="space-y-4">
                   {/* 1. 원산지, 제조국, 제조 공장 정보 */}
                   <div className="border border-gray-200 rounded-lg">
                     <button
@@ -1457,7 +1455,7 @@ export default function BrandDetailPage() {
               </div>
 
           {/* 소비자 평가 */}
-                <div className="mt-6 pt-6 border-t border-gray-200 px-6">
+                <div className="mt-6 pt-6 border-t border-gray-200">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <Star className="h-5 w-5 text-yellow-500 mr-2" />
                     소비자 평가
@@ -1526,7 +1524,7 @@ export default function BrandDetailPage() {
           </div>
 
                   {/* 소비자 리뷰 */}
-                  <div className="mt-6 pt-6 border-t border-gray-200 px-6">
+                  <div className="mt-6 pt-6 border-t border-gray-200">
                     <h5 className="text-md font-semibold text-gray-900 mb-4 flex items-center">
                       <MessageSquare className="h-4 w-4 text-blue-500 mr-2" />
                       소비자 리뷰 ({product.consumer_reviews.length})
