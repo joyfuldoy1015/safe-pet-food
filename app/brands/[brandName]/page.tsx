@@ -733,9 +733,30 @@ export default function BrandDetailPage() {
         const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}`)
         if (response.ok) {
           const apiData = await response.json()
+          
+          console.log('[Frontend] API Response:', {
+            brandName: brandName,
+            hasProducts: !!apiData.products,
+            productsLength: apiData.products?.length || 0,
+            products: apiData.products
+          })
+          
           if (apiData && !apiData.error) {
             // Supabase에서 가져온 데이터를 Brand 형식으로 변환
             // API 응답 데이터를 Brand 형식으로 변환
+            const apiProducts = apiData.products && Array.isArray(apiData.products) && apiData.products.length > 0 
+              ? apiData.products 
+              : null
+            
+            const legacyProducts = getBrandDataLegacy(brandName).products || []
+            
+            console.log('[Frontend] Products decision:', {
+              apiProductsCount: apiProducts?.length || 0,
+              legacyProductsCount: legacyProducts.length,
+              willUseApiProducts: !!apiProducts,
+              willUseLegacyProducts: !apiProducts && legacyProducts.length > 0
+            })
+            
             const brandData: Brand = {
               id: apiData.id || brandName.toLowerCase().replace(/\s+/g, '-'),
               name: apiData.name,
@@ -780,8 +801,10 @@ export default function BrandDetailPage() {
                 total_votes: 0
               },
               qa_section: apiData.qa_section || [],
-              products: (apiData.products && apiData.products.length > 0) ? apiData.products : (getBrandDataLegacy(brandName).products || [])
+              products: apiProducts || legacyProducts
             }
+            
+            console.log('[Frontend] Final brand data products count:', brandData.products.length)
             setBrand(brandData)
           } else {
             // API에 데이터가 없거나 에러가 있으면 레거시 데이터 사용

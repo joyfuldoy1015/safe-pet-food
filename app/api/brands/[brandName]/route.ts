@@ -143,13 +143,29 @@ export async function GET(
           // Get products for this brand from Supabase
           let products: any[] = []
           try {
+            console.log('[API] Fetching products for brand_id:', data.id, 'brand_name:', brandName)
             const { data: productsData, error: productsError } = await supabase
               .from('products')
               .select('*')
               .eq('brand_id', data.id)
               .order('created_at', { ascending: true })
             
+            console.log('[API] Products query result:', {
+              hasData: !!productsData,
+              dataLength: productsData?.length || 0,
+              error: productsError ? {
+                message: productsError.message,
+                code: productsError.code,
+                details: productsError.details
+              } : null
+            })
+            
+            if (productsError) {
+              console.error('[API] Products query error:', productsError)
+            }
+            
             if (!productsError && productsData && productsData.length > 0) {
+              console.log('[API] Found', productsData.length, 'products for brand:', brandName)
               products = productsData.map((product: any) => ({
                 id: product.id,
                 name: product.name,
@@ -175,9 +191,14 @@ export async function GET(
                 },
                 consumer_reviews: product.consumer_reviews || []
               }))
+            } else {
+              console.log('[API] No products found for brand:', brandName, 'brand_id:', data.id)
             }
-          } catch (productsError) {
-            console.warn('Failed to fetch products from Supabase:', productsError)
+          } catch (productsError: any) {
+            console.error('[API] Exception while fetching products:', {
+              message: productsError?.message,
+              stack: productsError?.stack
+            })
           }
           
           // Get reviews for this brand (현재는 reviews 테이블이 없으므로 JSON 사용)
@@ -189,13 +210,22 @@ export async function GET(
           // Calculate trust metrics based on brand data and reviews
           const trustMetrics = calculateTrustMetrics(brand, brandReviews)
           
-          return NextResponse.json({
+          const responseData = {
             ...brand,
             products: products.length > 0 ? products : [], // Supabase에 products가 없으면 빈 배열 (레거시 데이터는 프론트엔드에서 처리)
             reviews: brandReviews,
             review_stats: reviewStats,
             trust_metrics: trustMetrics
+          }
+          
+          console.log('[API] Response data:', {
+            brandName: brandName,
+            productsCount: responseData.products.length,
+            hasProducts: responseData.products.length > 0,
+            brandId: data.id
           })
+          
+          return NextResponse.json(responseData)
         }
       } catch (supabaseError) {
         console.warn('Supabase error, falling back to JSON:', supabaseError)
