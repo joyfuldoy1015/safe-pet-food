@@ -166,30 +166,78 @@ export async function GET(
             
             if (!productsError && productsData && productsData.length > 0) {
               console.log('[API] Found', productsData.length, 'products for brand:', brandName)
-              products = productsData.map((product: any) => ({
-                id: product.id,
-                name: product.name,
-                image: product.image || '📦',
-                description: product.description || '',
-                certifications: product.certifications || [],
-                origin_info: product.origin_info || {},
-                ingredients: product.ingredients || [],
-                guaranteed_analysis: product.guaranteed_analysis || {},
-                pros: product.pros || [],
-                cons: product.cons || [],
-                consumer_ratings: product.consumer_ratings || {
-                  palatability: 0,
-                  digestibility: 0,
-                  coat_quality: 0,
-                  stool_quality: 0,
-                  overall_satisfaction: 0
-                },
-                community_feedback: product.community_feedback || {
-                  recommend_yes: 0,
-                  recommend_no: 0,
-                  total_votes: 0
-                },
-                consumer_reviews: product.consumer_reviews || []
+              
+              // 각 제품에 대해 실제 사용자 리뷰 조회
+              products = await Promise.all(productsData.map(async (product: any) => {
+                // review_logs에서 해당 브랜드/제품명으로 리뷰 조회
+                let userReviews: any[] = []
+                try {
+                  // review_logs에서 해당 브랜드/제품명으로 리뷰 조회
+                  let reviewQuery = supabase
+                    .from('review_logs')
+                    .select(`
+                      id,
+                      rating,
+                      excerpt,
+                      owner_id,
+                      created_at,
+                      likes,
+                      profiles!review_logs_owner_id_fkey(nickname)
+                    `)
+                    .eq('brand', brandName)
+                    .eq('product', product.name)
+                    .not('rating', 'is', null) // 평점이 있는 리뷰만
+                    .order('created_at', { ascending: false })
+                    .limit(10) // 최대 10개만
+                  
+                  // admin_status 필드가 있으면 필터링 (없을 수도 있음)
+                  // RLS 정책에서 이미 처리되므로 여기서는 선택적 필터링
+                  const { data: reviewLogs, error: reviewError } = await reviewQuery
+                  
+                  if (!reviewError && reviewLogs && reviewLogs.length > 0) {
+                    userReviews = reviewLogs.map((log: any) => ({
+                      id: log.id,
+                      user_name: log.profiles?.nickname || '익명',
+                      rating: log.rating || 0,
+                      comment: log.excerpt || '',
+                      date: log.created_at ? new Date(log.created_at).toISOString().split('T')[0] : '',
+                      helpful_count: log.likes || 0
+                    }))
+                    console.log('[API] Found', userReviews.length, 'user reviews for product:', product.name)
+                  }
+                } catch (reviewError: any) {
+                  console.warn('[API] Error fetching reviews for product:', product.name, reviewError)
+                }
+                
+                // Supabase의 consumer_reviews와 병합 (우선순위: review_logs > Supabase)
+                const supabaseReviews = product.consumer_reviews || []
+                const mergedReviews = [...userReviews, ...supabaseReviews].slice(0, 10) // 최대 10개
+                
+                return {
+                  id: product.id,
+                  name: product.name,
+                  image: product.image || '📦',
+                  description: product.description || '',
+                  certifications: product.certifications || [],
+                  origin_info: product.origin_info || {},
+                  ingredients: product.ingredients || [],
+                  guaranteed_analysis: product.guaranteed_analysis || {},
+                  pros: product.pros || [],
+                  cons: product.cons || [],
+                  consumer_ratings: product.consumer_ratings || {
+                    palatability: 0,
+                    digestibility: 0,
+                    coat_quality: 0,
+                    stool_quality: 0,
+                    overall_satisfaction: 0
+                  },
+                  community_feedback: product.community_feedback || {
+                    recommend_yes: 0,
+                    recommend_no: 0,
+                    total_votes: 0
+                  },
+                  consumer_reviews: mergedReviews
+                }
               }))
             } else {
               console.log('[API] No products found for brand:', brandName, 'brand_id:', data.id)
