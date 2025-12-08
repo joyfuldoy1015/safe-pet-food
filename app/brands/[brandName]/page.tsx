@@ -1259,16 +1259,27 @@ export default function BrandDetailPage() {
                 <div className="flex items-start space-x-4 mb-6">
                   <div className="text-4xl">{product.image}</div>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
+                    {/* 제품명과 인증 마크 (데스크톱: 가로 배치, 모바일: 세로 배치) */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2 gap-2 md:gap-0">
                       <h3 className="text-xl font-semibold text-gray-900">{product.name}</h3>
-                      <div className="flex flex-wrap gap-1">
+                      {/* 데스크톱: 제품명 옆에 표시 */}
+                      <div className="hidden md:flex flex-wrap gap-1">
                         {product.certifications.map((cert, idx) => (
                           <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-medium">
                             <Shield className="h-3 w-3 mr-1" />
                             {cert}
                           </span>
                         ))}
-                  </div>
+                      </div>
+                    </div>
+                    {/* 모바일: 제품명 아래에 인증 마크 표시 */}
+                    <div className="flex md:hidden flex-wrap gap-1 mb-2">
+                      {product.certifications.map((cert, idx) => (
+                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-medium">
+                          <Shield className="h-3 w-3 mr-1" />
+                          {cert}
+                        </span>
+                      ))}
                     </div>
                     <p className="text-gray-600 leading-relaxed">{product.description}</p>
                   </div>
