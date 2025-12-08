@@ -139,6 +139,46 @@ export async function GET(
           
           const brand = transformSupabaseToJsonFormat(data, ingredients || undefined)
           
+          // Get products for this brand from Supabase
+          let products: any[] = []
+          try {
+            const { data: productsData, error: productsError } = await supabase
+              .from('products')
+              .select('*')
+              .eq('brand_id', data.id)
+              .order('created_at', { ascending: true })
+            
+            if (!productsError && productsData && productsData.length > 0) {
+              products = productsData.map((product: any) => ({
+                id: product.id,
+                name: product.name,
+                image: product.image || '📦',
+                description: product.description || '',
+                certifications: product.certifications || [],
+                origin_info: product.origin_info || {},
+                ingredients: product.ingredients || [],
+                guaranteed_analysis: product.guaranteed_analysis || {},
+                pros: product.pros || [],
+                cons: product.cons || [],
+                consumer_ratings: product.consumer_ratings || {
+                  palatability: 0,
+                  digestibility: 0,
+                  coat_quality: 0,
+                  stool_quality: 0,
+                  overall_satisfaction: 0
+                },
+                community_feedback: product.community_feedback || {
+                  recommend_yes: 0,
+                  recommend_no: 0,
+                  total_votes: 0
+                },
+                consumer_reviews: product.consumer_reviews || []
+              }))
+            }
+          } catch (productsError) {
+            console.warn('Failed to fetch products from Supabase:', productsError)
+          }
+          
           // Get reviews for this brand (현재는 reviews 테이블이 없으므로 JSON 사용)
           const brandReviews = reviewsData.filter(review => review.brand_id === brand.id)
           
@@ -150,6 +190,7 @@ export async function GET(
           
           return NextResponse.json({
             ...brand,
+            products: products.length > 0 ? products : brand.products || [],
             reviews: brandReviews,
             review_stats: reviewStats,
             trust_metrics: trustMetrics
