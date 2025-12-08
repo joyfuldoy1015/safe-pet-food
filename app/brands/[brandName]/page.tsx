@@ -1535,9 +1535,11 @@ export default function BrandDetailPage() {
                         <div key={review.id} className="bg-gray-50 rounded-lg p-4">
                   <div className="mb-3">
                     {/* 사용자명 */}
-                    <div className="flex items-center space-x-2 mb-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-700">{review.user_name}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-700">{review.user_name}</span>
+                      </div>
                       <span className="text-xs text-gray-500">{review.date}</span>
                     </div>
                     {/* 별점 */}
