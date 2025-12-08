@@ -191,7 +191,7 @@ export async function GET(
           
           return NextResponse.json({
             ...brand,
-            products: products.length > 0 ? products : brand.products || [],
+            products: products.length > 0 ? products : [], // Supabase에 products가 없으면 빈 배열 (레거시 데이터는 프론트엔드에서 처리)
             reviews: brandReviews,
             review_stats: reviewStats,
             trust_metrics: trustMetrics

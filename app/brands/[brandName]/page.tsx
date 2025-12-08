@@ -780,7 +780,7 @@ export default function BrandDetailPage() {
                 total_votes: 0
               },
               qa_section: apiData.qa_section || [],
-              products: apiData.products || []
+              products: (apiData.products && apiData.products.length > 0) ? apiData.products : (getBrandDataLegacy(brandName).products || [])
             }
             setBrand(brandData)
           } else {
