@@ -90,7 +90,8 @@ const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
     brand_cons: supabaseData.brand_cons || [],
     transparency_score: supabaseData.transparency_score || 75,
     ingredient_disclosure: ingredientDisclosure,
-    ingredients: ingredients || []
+    ingredients: ingredients || [],
+    products: [] // products는 별도로 조회하여 추가됨
   }
 }
 
@@ -212,17 +213,17 @@ export async function GET(
     }
 
     // ingredients 배열이 있으면 ingredient_disclosure 자동 계산
-    let ingredientDisclosure = brand.ingredient_disclosure || {
+    let ingredientDisclosure = (brand as any).ingredient_disclosure || {
       fully_disclosed: 0,
       partially_disclosed: 0,
       not_disclosed: 0
     }
     
     // ingredients 배열이 있고 disclosure_level이 있으면 자동 계산
-    if (brand.ingredients && Array.isArray(brand.ingredients) && brand.ingredients.length > 0) {
-      const hasDisclosureLevels = brand.ingredients.some((ing: any) => ing.disclosure_level)
+    if ((brand as any).ingredients && Array.isArray((brand as any).ingredients) && (brand as any).ingredients.length > 0) {
+      const hasDisclosureLevels = (brand as any).ingredients.some((ing: any) => ing.disclosure_level)
       if (hasDisclosureLevels) {
-        ingredientDisclosure = calculateIngredientDisclosure(brand.ingredients)
+        ingredientDisclosure = calculateIngredientDisclosure((brand as any).ingredients)
       }
     }
 
