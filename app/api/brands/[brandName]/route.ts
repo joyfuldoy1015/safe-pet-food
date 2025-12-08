@@ -111,11 +111,33 @@ export async function GET(
           .single()
 
         if (!error && data) {
-          // Supabase에서 ingredients 데이터 가져오기 (향후 확장 가능)
-          // 현재는 brands 테이블에 ingredients 필드가 없으므로 null로 처리
-          const ingredients = data.ingredients || null
+          // Supabase에서 ingredients 데이터 가져오기
+          // JSONB 필드를 파싱하여 배열로 변환
+          let ingredients: Array<{
+            name: string
+            percentage?: number
+            source?: string
+            disclosure_level?: 'full' | 'partial' | 'none'
+          }> | null = null
           
-          const brand = transformSupabaseToJsonFormat(data, ingredients)
+          if (data.ingredients) {
+            try {
+              // JSONB 필드가 이미 파싱된 객체/배열인 경우
+              if (Array.isArray(data.ingredients)) {
+                ingredients = data.ingredients
+              } else if (typeof data.ingredients === 'string') {
+                // 문자열인 경우 JSON 파싱
+                ingredients = JSON.parse(data.ingredients)
+              } else {
+                ingredients = []
+              }
+            } catch (e) {
+              console.warn('Failed to parse ingredients:', e)
+              ingredients = []
+            }
+          }
+          
+          const brand = transformSupabaseToJsonFormat(data, ingredients || undefined)
           
           // Get reviews for this brand (현재는 reviews 테이블이 없으므로 JSON 사용)
           const brandReviews = reviewsData.filter(review => review.brand_id === brand.id)

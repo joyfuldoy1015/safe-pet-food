@@ -35,6 +35,52 @@ const transformJsonToSupabaseFormat = (jsonData: any) => {
   }
 }
 
+// 성분 공개 상태 자동 계산 함수
+function calculateIngredientDisclosure(ingredients: Array<{
+  name: string
+  percentage?: number
+  disclosure_level?: 'full' | 'partial' | 'none'
+}>): {
+  fully_disclosed: number
+  partially_disclosed: number
+  not_disclosed: number
+} {
+  if (!ingredients || ingredients.length === 0) {
+    return { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0 }
+  }
+
+  let totalPercentage = 0
+  let fullyDisclosed = 0
+  let partiallyDisclosed = 0
+  let notDisclosed = 0
+
+  ingredients.forEach(ing => {
+    const percentage = ing.percentage || (100 / ingredients.length)
+    totalPercentage += percentage
+
+    const disclosureLevel = ing.disclosure_level || 'none'
+    switch (disclosureLevel) {
+      case 'full':
+        fullyDisclosed += percentage
+        break
+      case 'partial':
+        partiallyDisclosed += percentage
+        break
+      case 'none':
+        notDisclosed += percentage
+        break
+    }
+  })
+
+  const normalizer = totalPercentage > 0 ? 100 / totalPercentage : 1
+
+  return {
+    fully_disclosed: Math.round(fullyDisclosed * normalizer),
+    partially_disclosed: Math.round(partiallyDisclosed * normalizer),
+    not_disclosed: Math.round(notDisclosed * normalizer)
+  }
+}
+
 // Supabase 데이터를 JSON 형식으로 변환
 const transformSupabaseToJsonFormat = (supabaseData: any) => {
   // product_lines 처리: 배열이거나 텍스트 필드일 수 있음
@@ -57,6 +103,32 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     }
   }
 
+  // ingredients 처리: JSONB 필드를 배열로 변환
+  let ingredients: Array<{
+    name: string
+    percentage?: number
+    source?: string
+    disclosure_level?: 'full' | 'partial' | 'none'
+  }> = []
+  
+  if (supabaseData.ingredients) {
+    try {
+      if (Array.isArray(supabaseData.ingredients)) {
+        ingredients = supabaseData.ingredients
+      } else if (typeof supabaseData.ingredients === 'string') {
+        ingredients = JSON.parse(supabaseData.ingredients)
+      }
+    } catch (e) {
+      console.warn('Failed to parse ingredients:', e)
+      ingredients = []
+    }
+  }
+
+  // ingredient_disclosure 자동 계산
+  const ingredientDisclosure = ingredients.length > 0
+    ? calculateIngredientDisclosure(ingredients)
+    : { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0 }
+
   return {
     id: supabaseData.id,
     name: supabaseData.name,
@@ -74,7 +146,9 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     image: supabaseData.image,
     brand_pros: supabaseData.brand_pros || [],
     brand_cons: supabaseData.brand_cons || [],
-    transparency_score: supabaseData.transparency_score || 75
+    transparency_score: supabaseData.transparency_score || 75,
+    ingredients: ingredients,
+    ingredient_disclosure: ingredientDisclosure
   }
 }
 
