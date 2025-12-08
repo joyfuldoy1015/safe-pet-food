@@ -211,21 +211,26 @@ export default function SafiEvaluationDialog({
                     변 상태 점수 <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">급여 기간 동안의 평균적인 변 상태를 평가해주세요</p>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="space-y-2">
                     {[1, 2, 3, 4, 5].map((score) => (
                       <button
                         key={score}
                         type="button"
                         onClick={() => setFormData({ ...formData, stoolScore: score })}
-                        className={`px-4 py-3 rounded-xl border-2 transition-colors text-sm font-medium ${
+                        className={`w-full px-4 py-3 rounded-xl border-2 transition-colors text-sm font-medium flex items-center justify-between ${
                           formData.stoolScore === score
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'border-gray-300 text-gray-700 hover:border-gray-400'
                         }`}
                       >
-                        {score}점
-                        {score === 1 && <span className="block text-xs mt-1 text-gray-500">매우 나쁨</span>}
-                        {score === 5 && <span className="block text-xs mt-1 text-gray-500">매우 좋음</span>}
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{score}점</span>
+                          {score === 1 && <span className="text-xs text-gray-500">매우 나쁨</span>}
+                          {score === 2 && <span className="text-xs text-gray-500">나쁨</span>}
+                          {score === 3 && <span className="text-xs text-gray-500">보통</span>}
+                          {score === 4 && <span className="text-xs text-gray-500">좋음</span>}
+                          {score === 5 && <span className="text-xs text-gray-500">매우 좋음</span>}
+                        </div>
                       </button>
                     ))}
                   </div>
