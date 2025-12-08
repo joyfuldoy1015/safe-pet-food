@@ -1026,7 +1026,7 @@ export default function BrandDetailPage() {
       ? Math.round((brand.community_feedback.recommend_yes / brand.community_feedback.total_votes) * 100)
       : 0
 
-    return (
+  return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
@@ -1217,59 +1217,7 @@ export default function BrandDetailPage() {
               </div>
             </div>
           </div>
-
-          {/* 제품 라인업 */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">📦 제품 라인업</h2>
-            
-            {brand.product_lines && brand.product_lines.length > 0 ? (
-              <>
-                <div className="text-center mb-6">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">
-                    {brand.product_lines.length}개
-                  </div>
-                  <p className="text-sm text-gray-600">제품 라인</p>
-                </div>
-
-                <div className="space-y-3">
-                  {brand.product_lines.map((line, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="text-2xl">📦</div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900 text-base">{line}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : brand.products && brand.products.length > 0 ? (
-              <>
-            <div className="text-center mb-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
-                {brand.products.length}개
-                    </div>
-              <p className="text-sm text-gray-600">등록된 제품</p>
-                  </div>
-
-            <div className="space-y-3">
-              {brand.products.map((product, index) => (
-                <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl">{product.image}</div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 text-sm">{product.name}</p>
-                    <p className="text-xs text-gray-500 line-clamp-1">{product.description}</p>
-                </div>
-                    </div>
-              ))}
-                  </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">등록된 제품 라인업이 없습니다.</p>
-              </div>
-            )}
-                    </div>
-                    </div>
+        </div>
                       
         {/* 제품군별 상세 정보 */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
