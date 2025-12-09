@@ -248,7 +248,7 @@ export default function LogDetailDrawer({
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
-                <span className="text-sm sm:text-base font-medium text-gray-900">급여 기간</span>
+                <span className="text-sm sm:text-base font-bold text-gray-900">급여 기간</span>
               </div>
               <p className="text-sm sm:text-base text-gray-700">
                 {formatDate(log.periodStart)}
