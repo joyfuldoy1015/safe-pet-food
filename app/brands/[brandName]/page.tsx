@@ -725,6 +725,10 @@ export default function BrandDetailPage() {
   const [safiScore, setSafiScore] = useState<SafiResult | null>(null)
   const [isSafiDialogOpen, setIsSafiDialogOpen] = useState(false)
   const [selectedProductForSafi, setSelectedProductForSafi] = useState<string | null>(null)
+  // 리뷰별 '도움됨' 클릭 상태 추적 (reviewId -> isHelpful)
+  const [helpfulStates, setHelpfulStates] = useState<Record<string, boolean>>({})
+  // 리뷰별 helpful_count 로컬 상태 (optimistic update용)
+  const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     // API에서 브랜드 데이터 가져오기
@@ -747,6 +751,17 @@ export default function BrandDetailPage() {
             const apiProducts = apiData.products && Array.isArray(apiData.products) && apiData.products.length > 0 
               ? apiData.products 
               : null
+            
+            // helpfulCounts 초기화 (각 리뷰의 초기 helpful_count 저장)
+            const initialHelpfulCounts: Record<string, number> = {}
+            if (apiProducts && Array.isArray(apiProducts)) {
+              apiProducts.forEach((product: ProductInfo) => {
+                product.consumer_reviews?.forEach((review) => {
+                  initialHelpfulCounts[review.id] = review.helpful_count || 0
+                })
+              })
+            }
+            setHelpfulCounts(initialHelpfulCounts)
             
             const legacyProducts = getBrandDataLegacy(brandName).products || []
             
@@ -1018,6 +1033,77 @@ export default function BrandDetailPage() {
         expanded: !prev[productId]?.expanded
       }
     }))
+  }
+
+  // '도움됨' 버튼 클릭 핸들러
+  const handleHelpfulClick = async (reviewId: string, productId: string, reviewIndex: number) => {
+    if (!brand) return
+
+    const isCurrentlyHelpful = helpfulStates[reviewId] || false
+    const currentCount = helpfulCounts[reviewId] ?? 
+      brand.products.find(p => p.id === productId)?.consumer_reviews[reviewIndex]?.helpful_count ?? 0
+
+    // Optimistic update: 즉시 UI 반영
+    const newIsHelpful = !isCurrentlyHelpful
+    const increment = newIsHelpful ? 1 : -1
+    const newCount = Math.max(0, currentCount + increment)
+
+    setHelpfulStates(prev => ({
+      ...prev,
+      [reviewId]: newIsHelpful
+    }))
+    setHelpfulCounts(prev => ({
+      ...prev,
+      [reviewId]: newCount
+    }))
+
+    // API 호출로 서버 업데이트
+    try {
+      const response = await fetch(`/api/review-logs/${reviewId}/helpful`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ increment })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Failed to update helpful count:', errorData)
+        
+        // 실패 시 롤백
+        setHelpfulStates(prev => ({
+          ...prev,
+          [reviewId]: isCurrentlyHelpful
+        }))
+        setHelpfulCounts(prev => ({
+          ...prev,
+          [reviewId]: currentCount
+        }))
+        alert('도움됨 업데이트에 실패했습니다. 다시 시도해주세요.')
+        return
+      }
+
+      const data = await response.json()
+      // 서버 응답으로 최종 값 업데이트
+      setHelpfulCounts(prev => ({
+        ...prev,
+        [reviewId]: data.likes
+      }))
+    } catch (error) {
+      console.error('Error updating helpful count:', error)
+      
+      // 에러 시 롤백
+      setHelpfulStates(prev => ({
+        ...prev,
+        [reviewId]: isCurrentlyHelpful
+      }))
+      setHelpfulCounts(prev => ({
+        ...prev,
+        [reviewId]: currentCount
+      }))
+      alert('도움됨 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.')
+    }
   }
 
   if (!brand) {
@@ -1531,7 +1617,11 @@ export default function BrandDetailPage() {
                     </h5>
             
             <div className="space-y-4">
-                      {product.consumer_reviews.map((review) => (
+                      {product.consumer_reviews.map((review, reviewIndex) => {
+                        const isHelpful = helpfulStates[review.id] || false
+                        const displayCount = helpfulCounts[review.id] ?? review.helpful_count ?? 0
+                        
+                        return (
                         <div key={review.id} className="bg-gray-50 rounded-lg p-4">
                   <div className="mb-3">
                     {/* 사용자명 */}
@@ -1555,13 +1645,21 @@ export default function BrandDetailPage() {
                           {/* 후기 내용 */}
                           <p className="text-sm text-gray-700 mb-2 leading-relaxed">{review.comment}</p>
                           <div className="flex items-center justify-between">
-                            <button className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors">
-                              <ThumbsUp className="h-3 w-3" />
-                              <span>도움됨 {review.helpful_count}</span>
+                            <button 
+                              onClick={() => handleHelpfulClick(review.id, product.id, reviewIndex)}
+                              className={`flex items-center space-x-1 text-xs transition-colors ${
+                                isHelpful 
+                                  ? 'text-blue-600 hover:text-blue-700' 
+                                  : 'text-gray-500 hover:text-blue-500'
+                              }`}
+                            >
+                              <ThumbsUp className={`h-3 w-3 ${isHelpful ? 'fill-current' : ''}`} />
+                              <span>도움됨 {displayCount}</span>
                             </button>
                           </div>
               </div>
-              ))}
+                        )
+                      })}
             </div>
                   </div>
                 </div>
