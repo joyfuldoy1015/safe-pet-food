@@ -1064,7 +1064,11 @@ export default function BrandDetailPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ increment })
+        body: JSON.stringify({ 
+          increment,
+          productId,
+          brandName: brand.name
+        })
       })
 
       if (!response.ok) {
