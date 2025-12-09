@@ -164,7 +164,13 @@ export async function GET(request: NextRequest) {
     // Supabase 사용 가능하면 Supabase에서 가져오기
     if (isSupabaseConfigured()) {
       try {
-        let query = supabase.from('brands').select('*')
+        // products 테이블과 조인하여 각 브랜드의 제품 개수도 함께 가져오기
+        let query = supabase
+          .from('brands')
+          .select(`
+            *,
+            products(id)
+          `)
 
         // 검색 필터
         if (search) {
@@ -187,8 +193,18 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query
 
         if (!error && data && data.length > 0) {
-          // Supabase 데이터를 JSON 형식으로 변환
-          const transformedData = data.map(transformSupabaseToJsonFormat)
+          // Supabase 데이터를 JSON 형식으로 변환하고 products 개수 추가
+          const transformedData = data.map((brandData: any) => {
+            const transformed = transformSupabaseToJsonFormat(brandData)
+            // products 개수 추가 (products 배열의 길이)
+            const productsCount = Array.isArray(brandData.products) 
+              ? brandData.products.length 
+              : 0
+            return {
+              ...transformed,
+              products_count: productsCount
+            }
+          })
           return NextResponse.json(transformedData, {
             status: 200,
             headers: {

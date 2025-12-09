@@ -19,6 +19,7 @@ interface Brand {
   }>
   overall_rating: number
   product_lines: string[]
+  products_count?: number // products 테이블의 실제 제품 개수
   established_year: number
   country: string
   certifications: string[]
@@ -330,7 +331,11 @@ export default function BrandsPage() {
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="text-xs text-gray-500 mb-1">제품 라인</div>
-                            <div className="font-semibold text-gray-900">{brand.product_lines.length}개</div>
+                            <div className="font-semibold text-gray-900">
+                              {brand.products_count !== undefined 
+                                ? `${brand.products_count}개` 
+                                : `${brand.product_lines.length}개`}
+                            </div>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="text-xs text-gray-500 mb-1">투명성 점수</div>
