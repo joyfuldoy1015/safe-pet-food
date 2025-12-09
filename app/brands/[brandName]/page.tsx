@@ -1231,7 +1231,7 @@ export default function BrandDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 신뢰하는 이유 */}
               <div>
-                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+                <h3 className="text-base font-medium text-gray-900 mb-3 flex items-center">
                   <ThumbsUp className="h-4 w-4 text-green-600 mr-2" />
                   신뢰하는 이유
                 </h3>
@@ -1247,7 +1247,7 @@ export default function BrandDetailPage() {
 
               {/* 보완하면 좋은 점 */}
               <div>
-                <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
+                <h3 className="text-base font-medium text-gray-900 mb-3 flex items-center">
                   <AlertTriangle className="h-4 w-4 text-orange-600 mr-2" />
                   보완하면 좋은 점
                 </h3>
