@@ -44,6 +44,14 @@ export async function PUT(
     const body = await request.json()
     const { increment, productId, brandName } = body
 
+    console.log('[API] Helpful update request:', {
+      reviewId,
+      increment,
+      productId,
+      brandName,
+      isUUID: isUUID(reviewId)
+    })
+
     if (typeof increment !== 'number' || (increment !== 1 && increment !== -1)) {
       return NextResponse.json(
         { error: 'increment must be 1 or -1' },
@@ -53,6 +61,7 @@ export async function PUT(
 
     // UUID 형식이면 review_logs 테이블에서 업데이트
     if (isUUID(reviewId)) {
+      console.log('[API] Processing UUID review ID - updating review_logs table')
       // 현재 likes 값 조회
       const { data: currentReview, error: fetchError } = await supabase
         .from('review_logs')
@@ -94,7 +103,10 @@ export async function PUT(
       })
     } else {
       // UUID가 아니면 products 테이블의 consumer_reviews JSONB 업데이트
+      console.log('[API] Processing non-UUID review ID - updating products.consumer_reviews JSONB')
+      
       if (!productId || !brandName) {
+        console.error('[API] Missing required parameters:', { productId, brandName })
         return NextResponse.json(
           { error: 'productId and brandName are required for non-UUID review IDs' },
           { status: 400 }
@@ -107,6 +119,16 @@ export async function PUT(
         .select('id')
         .eq('name', brandName)
         .single()
+
+      console.log('[API] Brand lookup:', {
+        brandName,
+        brandData,
+        brandError: brandError ? {
+          message: brandError.message,
+          code: brandError.code,
+          details: brandError.details
+        } : null
+      })
 
       if (brandError || !brandData) {
         return NextResponse.json(
@@ -122,6 +144,20 @@ export async function PUT(
         .eq('brand_id', brandData.id)
         .single()
 
+      console.log('[API] Product lookup:', {
+        productId,
+        brandId: brandData.id,
+        productData: productData ? {
+          hasConsumerReviews: !!productData.consumer_reviews,
+          reviewsCount: Array.isArray(productData.consumer_reviews) ? productData.consumer_reviews.length : 0
+        } : null,
+        productError: productError ? {
+          message: productError.message,
+          code: productError.code,
+          details: productError.details
+        } : null
+      })
+
       if (productError || !productData) {
         return NextResponse.json(
           { error: 'Product not found', details: productError?.message },
@@ -136,8 +172,18 @@ export async function PUT(
         [key: string]: any
       }>
 
+      console.log('[API] Searching for review in consumer_reviews:', {
+        reviewId,
+        reviewsCount: reviews.length,
+        reviewIds: reviews.map((r: any) => r.id)
+      })
+
       const reviewIndex = reviews.findIndex((r: any) => r.id === reviewId)
       if (reviewIndex === -1) {
+        console.error('[API] Review not found in consumer_reviews:', {
+          reviewId,
+          availableIds: reviews.map((r: any) => r.id)
+        })
         return NextResponse.json(
           { error: 'Review not found in product consumer_reviews' },
           { status: 404 }
@@ -149,6 +195,13 @@ export async function PUT(
       const newCount = Math.max(0, currentCount + increment)
       reviews[reviewIndex].helpful_count = newCount
 
+      console.log('[API] Updating consumer_reviews:', {
+        reviewIndex,
+        currentCount,
+        increment,
+        newCount
+      })
+
       // products 테이블 업데이트
       const { data: updatedProduct, error: updateError } = await supabase
         .from('products')
@@ -157,8 +210,17 @@ export async function PUT(
         .select('consumer_reviews')
         .single()
 
+      console.log('[API] Product update result:', {
+        success: !updateError,
+        updateError: updateError ? {
+          message: updateError.message,
+          code: updateError.code,
+          details: updateError.details
+        } : null
+      })
+
       if (updateError) {
-        console.error('Failed to update product consumer_reviews:', updateError)
+        console.error('[API] Failed to update product consumer_reviews:', updateError)
         return NextResponse.json(
           { error: 'Failed to update review', details: updateError.message },
           { status: 500 }
