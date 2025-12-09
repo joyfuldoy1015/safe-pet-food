@@ -143,7 +143,7 @@ export default function LogDetailDrawer({
             <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 <div className="min-w-0">
-                  <h2 className="text-lg sm:text-2xl font-semibold sm:font-bold text-gray-900 truncate">
+                  <h2 className="text-xl sm:text-3xl font-bold text-gray-900 truncate">
                     {log.brand}
                   </h2>
                   <p className="text-sm sm:text-base text-gray-600 truncate">{log.product}</p>
