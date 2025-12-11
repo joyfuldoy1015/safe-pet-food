@@ -497,37 +497,35 @@ export default function WritePostPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/pet-log" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">커뮤니티 포스트 작성</h1>
-                <p className="text-gray-600">우리 아이의 급여 경험을 다른 집사들과 공유해보세요</p>
-              </div>
-            </div>
-            
-            {/* 단계 표시 */}
-            <div className="flex items-center space-x-2">
-              {[1, 2, 3].map((step) => (
-                <div key={step} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step === currentStep 
-                      ? 'bg-purple-600 text-white' 
-                      : step < currentStep 
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {step < currentStep ? <CheckCircle className="h-4 w-4" /> : step}
+          <div className="flex items-start space-x-4 mb-6">
+            <Link href="/pet-log" className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-1">
+              <ArrowLeft className="h-5 w-5 text-gray-600" />
+            </Link>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">커뮤니티 포스트 작성</h1>
+              <p className="text-gray-600 mb-4">우리 아이의 급여 경험을 다른 집사들과 공유해보세요</p>
+              
+              {/* 단계 표시 - 행으로 정렬 */}
+              <div className="flex items-center justify-start space-x-2">
+                {[1, 2, 3].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      step === currentStep 
+                        ? 'bg-purple-600 text-white' 
+                        : step < currentStep 
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {step < currentStep ? <CheckCircle className="h-4 w-4" /> : step}
+                    </div>
+                    {step < 3 && (
+                      <div className={`w-8 h-0.5 mx-2 ${
+                        step < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                      }`} />
+                    )}
                   </div>
-                  {step < 3 && (
-                    <div className={`w-8 h-0.5 mx-2 ${
-                      step < currentStep ? 'bg-green-500' : 'bg-gray-200'
-                    }`} />
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -689,37 +687,42 @@ export default function WritePostPage() {
                 <div className="space-y-4">
                   {feedingRecords.map((record) => (
                     <div key={record.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{categoryConfig[record.category].icon}</span>
-                          <div>
-                            <h3 className="font-bold text-gray-900">{record.productName}</h3>
-                            <p className="text-sm text-gray-600">{record.brand}</p>
+                      {/* 행으로 정렬된 레이아웃 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        {/* 왼쪽: 아이콘, 제품 정보 */}
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          <span className="text-2xl flex-shrink-0">{categoryConfig[record.category].icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-bold text-gray-900 truncate">{record.productName}</h3>
+                            <p className="text-sm text-gray-600 truncate">{record.brand}</p>
                           </div>
                         </div>
+                        
+                        {/* 중앙: 카테고리, 상태, 평가 정보 - 행으로 정렬 */}
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${categoryConfig[record.category].color}`}>
+                            {record.category}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${statusConfig[record.status].color}`}>
+                            {record.status}
+                          </span>
+                          <div className="flex items-center space-x-1 whitespace-nowrap">
+                            <span className="text-gray-600">기호성:</span>
+                            <div className="flex items-center">{renderStars(record.palatability)}</div>
+                          </div>
+                          <div className="flex items-center space-x-1 whitespace-nowrap">
+                            <span className="text-gray-600">만족도:</span>
+                            <div className="flex items-center">{renderStars(record.satisfaction)}</div>
+                          </div>
+                        </div>
+                        
+                        {/* 오른쪽: 삭제 버튼 */}
                         <button
                           onClick={() => removeFeedingRecord(record.id)}
-                          className="p-1 text-red-500 hover:bg-red-50 rounded"
+                          className="p-1 text-red-500 hover:bg-red-50 rounded flex-shrink-0 self-start sm:self-center"
                         >
                           <X className="h-4 w-4" />
                         </button>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryConfig[record.category].color}`}>
-                          {record.category}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusConfig[record.status].color}`}>
-                          {record.status}
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <span>기호성:</span>
-                          {renderStars(record.palatability)}
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span>만족도:</span>
-                          {renderStars(record.satisfaction)}
-                        </div>
                       </div>
                     </div>
                   ))}

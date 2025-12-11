@@ -78,7 +78,29 @@ export function useAuth(): UseAuthReturn {
 
     const loadSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // 세션 로드 시 타임아웃 설정 (3초)
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session load timeout')), 3000)
+        )
+        
+        let sessionData
+        try {
+          sessionData = await Promise.race([sessionPromise, timeoutPromise]) as Awaited<ReturnType<typeof supabase.auth.getSession>>
+        } catch (timeoutError) {
+          // 타임아웃 발생 시 세션이 없다고 가정하고 즉시 로딩 해제
+          console.warn('[useAuth] Session load timeout, assuming no session')
+          if (mounted) {
+            setUser(null)
+            setProfile(null)
+            setSession(null)
+            setIsLoading(false)
+            initialLoadComplete = true
+          }
+          return
+        }
+        
+        const { data: { session }, error } = sessionData
         
         if (error) {
           console.error('Error loading session:', error)
@@ -96,18 +118,26 @@ export function useAuth(): UseAuthReturn {
           setSession(session)
           setUser(session?.user ?? null)
 
-          // Load profile if user exists
+          // Load profile if user exists (비동기로 처리하여 로딩 상태를 먼저 해제)
           if (session?.user) {
-            await loadProfile(session.user.id, session.user.email)
+            // 프로필 로드는 백그라운드에서 처리하고 먼저 로딩 상태 해제
+            setIsLoading(false)
+            initialLoadComplete = true
+            loadProfile(session.user.id, session.user.email).catch(err => {
+              console.error('Error loading profile in background:', err)
+            })
           } else {
             setProfile(null)
+            setIsLoading(false)
+            initialLoadComplete = true
           }
-          setIsLoading(false)
-          initialLoadComplete = true
         }
       } catch (error) {
         console.error('Error in loadSession:', error)
         if (mounted) {
+          setUser(null)
+          setProfile(null)
+          setSession(null)
           setIsLoading(false)
           initialLoadComplete = true
         }
@@ -117,8 +147,8 @@ export function useAuth(): UseAuthReturn {
     // 초기 로드 시작
     loadSession()
 
-    // 안전장치: 10초 후에도 로딩이 끝나지 않으면 강제로 해제
-    // 타임아웃을 늘려서 네트워크 지연 시에도 정상 작동하도록 함
+    // 안전장치: 5초 후에도 로딩이 끝나지 않으면 강제로 해제
+    // 로그아웃 후 로그인 페이지 접근 시 빠른 응답을 위해 타임아웃 단축
     const timeoutId = setTimeout(() => {
       if (mounted && !initialLoadComplete) {
         // 개발 환경에서만 경고 표시 (프로덕션에서는 조용히 처리)
@@ -128,7 +158,7 @@ export function useAuth(): UseAuthReturn {
         setIsLoading(false)
         initialLoadComplete = true
       }
-    }, 10000) // 3초에서 10초로 증가
+    }, 5000) // 5초로 단축 (로그아웃 후 빠른 응답을 위해)
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

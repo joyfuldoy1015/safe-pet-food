@@ -212,8 +212,25 @@ export default function LoginPage() {
     }
   }
 
-  // 로딩 중이면 로딩 화면 표시
-  if (authLoading) {
+  // 로딩 중이면 로딩 화면 표시 (최대 2초만 표시, 그 이후에는 로그인 폼 표시)
+  const [showLoading, setShowLoading] = useState(true)
+  
+  useEffect(() => {
+    // 2초 후에는 로딩 화면을 숨기고 로그인 폼 표시 (세션 확인은 백그라운드에서 계속)
+    const timer = setTimeout(() => {
+      setShowLoading(false)
+    }, 2000)
+    
+    // authLoading이 false가 되면 즉시 로딩 화면 숨김
+    if (!authLoading) {
+      setShowLoading(false)
+      clearTimeout(timer)
+    }
+    
+    return () => clearTimeout(timer)
+  }, [authLoading])
+  
+  if (authLoading && showLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50 flex items-center justify-center">
         <div className="text-center">
