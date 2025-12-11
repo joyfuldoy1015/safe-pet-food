@@ -24,18 +24,18 @@ export default function LoginPage() {
   const [isEmailLoading, setIsEmailLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const redirectTo = searchParams.get('redirect') || '/'
   
   // 전체 로딩 상태 (어떤 버튼이든 로딩 중이면 true)
   const isLoading = isGoogleLoading || isKakaoLoading || isEmailLoading
 
-  // If already logged in, redirect
+  // If already logged in, redirect (auth loading 완료 후에만 체크)
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user) {
       router.push(redirectTo)
     }
-  }, [user, redirectTo, router])
+  }, [user, authLoading, redirectTo, router])
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true)
@@ -210,6 +210,30 @@ export default function LoginPage() {
       alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
       setIsEmailLoading(false)
     }
+  }
+
+  // 로딩 중이면 로딩 화면 표시
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로그인 상태 확인 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 이미 로그인된 경우 아무것도 렌더링하지 않음 (리다이렉트 중)
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">리다이렉트 중...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

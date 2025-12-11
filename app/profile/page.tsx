@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { User, Mail, Calendar, Save, ArrowLeft, Camera } from 'lucide-react'
+import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfilePage() {
@@ -314,6 +314,34 @@ export default function ProfilePage() {
               <div>
                 <h3 className="font-medium text-gray-900">내 반려동물</h3>
                 <p className="text-sm text-gray-600">반려동물 관리</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            href="/pet-log/posts/write"
+            className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Plus className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">후기 작성</h3>
+                <p className="text-sm text-gray-600">급여 후기 작성하기</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            href="/pet-log"
+            className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <User className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">급여 후기</h3>
+                <p className="text-sm text-gray-600">커뮤니티 둘러보기</p>
               </div>
             </div>
           </Link>

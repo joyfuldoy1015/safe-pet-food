@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/hooks/useAuth'
 
 // 제품 카테고리 타입
 type ProductCategory = '사료' | '간식' | '영양제' | '화장실'
@@ -352,12 +352,12 @@ export default function PetLogPostDetail() {
   const [replyContent, setReplyContent] = useState('')
   const [showLoginModal, setShowLoginModal] = useState(false)
   
-  // 로그인 상태 관리 - NextAuth 세션 사용
-  const { data: session, status } = useSession()
-  const isLoggedIn = status === 'authenticated'
-  const currentUser = session?.user ? {
-    id: (session.user as any).id || session.user.email || 'unknown',
-    name: session.user.name || session.user.email || '사용자'
+  // 로그인 상태 관리 - Supabase Auth 사용
+  const { user, profile } = useAuth()
+  const isLoggedIn = !!user
+  const currentUser = user ? {
+    id: user.id || 'unknown',
+    name: profile?.nickname || user.email || '사용자'
   } : null
 
   // 댓글 작성 함수

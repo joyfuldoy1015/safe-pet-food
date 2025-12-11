@@ -107,8 +107,21 @@ export default function SettingsPage() {
   }
 
   const handleLogout = async () => {
-    await signOut()
-    router.push('/')
+    try {
+      // 로그아웃 처리
+      await signOut()
+      
+      // 세션 정리 완료 대기
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // 페이지 완전 새로고침으로 세션 상태 동기화 (OAuth 세션 정리를 위해)
+      // window.location.href 대신 window.location.replace를 사용하여 히스토리에 남기지 않음
+      window.location.replace('/')
+    } catch (error) {
+      console.error('로그아웃 오류:', error)
+      // 에러가 있어도 홈으로 리다이렉트 (강제 새로고침)
+      window.location.replace('/')
+    }
   }
 
   if (authLoading) {

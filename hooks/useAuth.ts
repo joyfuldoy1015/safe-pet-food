@@ -117,14 +117,18 @@ export function useAuth(): UseAuthReturn {
     // 초기 로드 시작
     loadSession()
 
-    // 안전장치: 3초 후에도 로딩이 끝나지 않으면 강제로 해제
+    // 안전장치: 10초 후에도 로딩이 끝나지 않으면 강제로 해제
+    // 타임아웃을 늘려서 네트워크 지연 시에도 정상 작동하도록 함
     const timeoutId = setTimeout(() => {
       if (mounted && !initialLoadComplete) {
-        console.warn('[useAuth] Initial load timeout, forcing isLoading to false')
+        // 개발 환경에서만 경고 표시 (프로덕션에서는 조용히 처리)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[useAuth] Initial load timeout, forcing isLoading to false')
+        }
         setIsLoading(false)
         initialLoadComplete = true
       }
-    }, 3000)
+    }, 10000) // 3초에서 10초로 증가
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -200,10 +204,93 @@ export function useAuth(): UseAuthReturn {
   }
 
   const signOut = async (): Promise<void> => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setProfile(null)
-    setSession(null)
+    console.log('[useAuth] signOut 함수 호출됨')
+    try {
+      // 로컬 상태 즉시 정리 (UI 반응성 향상)
+      console.log('[useAuth] 로컬 상태 정리 시작')
+      setUser(null)
+      setProfile(null)
+      setSession(null)
+      console.log('[useAuth] 로컬 상태 정리 완료')
+      
+      // Supabase 세션 정리
+      try {
+        console.log('[useAuth] Supabase signOut 호출 시작')
+        const { error } = await supabase.auth.signOut()
+        
+        if (error) {
+          console.error('[useAuth] Sign out error:', error)
+        } else {
+          console.log('[useAuth] Supabase session cleared successfully')
+        }
+      } catch (signOutError) {
+        console.error('[useAuth] Error during Supabase signOut:', signOutError)
+      }
+      
+      // 로컬 스토리지 및 쿠키 정리
+      if (typeof window !== 'undefined') {
+        try {
+          // 1. localStorage 정리
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+          if (supabaseUrl) {
+            const projectRef = supabaseUrl.split('//')[1]?.split('.')[0]
+            if (projectRef) {
+              // Supabase의 기본 세션 키 형식: sb-{project-ref}-auth-token
+              const sessionKey = `sb-${projectRef}-auth-token`
+              localStorage.removeItem(sessionKey)
+            }
+          }
+          
+          // 모든 Supabase 관련 키 제거
+          const keysToRemove: string[] = []
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i)
+            if (key && (
+              key.startsWith('user_') || 
+              key.startsWith('sb-') || 
+              key.startsWith('supabase.auth.')
+            )) {
+              keysToRemove.push(key)
+            }
+          }
+          keysToRemove.forEach(key => localStorage.removeItem(key))
+          
+          // 2. 쿠키 정리 (Supabase 세션 쿠키)
+          const cookiesToRemove = [
+            `sb-${supabaseUrl?.split('//')[1]?.split('.')[0]}-auth-token`,
+            'sb-auth-token',
+            'supabase.auth.token'
+          ]
+          
+          cookiesToRemove.forEach(cookieName => {
+            // 현재 도메인과 상위 도메인에서 쿠키 삭제
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+            
+            // 서브도메인도 고려
+            const domainParts = window.location.hostname.split('.')
+            if (domainParts.length > 1) {
+              const baseDomain = '.' + domainParts.slice(-2).join('.')
+              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${baseDomain};`
+            }
+          })
+          
+          console.log('[useAuth] Local storage and cookies cleared')
+        } catch (storageError) {
+          console.warn('[useAuth] Error clearing storage:', storageError)
+        }
+      }
+      
+      // 세션이 완전히 정리될 때까지 약간 대기
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+    } catch (error) {
+      console.error('[useAuth] Unexpected error during sign out:', error)
+      // 에러가 있어도 로컬 상태는 정리
+      setUser(null)
+      setProfile(null)
+      setSession(null)
+    }
   }
 
   const refreshProfile = async (): Promise<void> => {

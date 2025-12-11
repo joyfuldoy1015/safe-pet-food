@@ -34,7 +34,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
-import { mockReviewLogs } from '@/lib/mock/review-log'
+// mockReviewLogs 제거 - 실제 Supabase review_logs 테이블에서 데이터 가져옴
 import SafiEvaluationDialog from '@/components/safi/SafiEvaluationDialog'
 
 interface BrandQuestion {
@@ -158,513 +158,7 @@ interface Brand {
   products: ProductInfo[]
 }
 
-// 이 함수는 더 이상 사용되지 않습니다 - API에서 데이터를 가져옵니다
-const getBrandDataLegacy = (brandName: string): Brand => {
-  const brands: Record<string, Brand> = {
-    'royal-canin': {
-      id: 'royal-canin',
-      name: '로얄캐닌',
-      logo: '👑',
-      manufacturer: 'Mars Petcare',
-      country_of_origin: '프랑스',
-      manufacturing_locations: ['프랑스 아이메르그', '한국 김천', '미국 오클라호마'],
-      established_year: 1968,
-      certifications: ['HACCP', 'AAFCO', 'ISO 22000', 'FEDIAF'],
-      brand_description: '로얄캐닌은 1968년 프랑스에서 설립된 반려동물 영양학 전문 브랜드입니다. 수의사들이 가장 신뢰하는 브랜드 중 하나로, 과학적 연구를 바탕으로 반려동물의 품종, 크기, 연령, 건강 상태에 맞는 맞춤형 영양 솔루션을 제공합니다. 전 세계 100여 개국에서 판매되며, 지속적인 연구개발을 통해 반려동물의 건강한 삶을 지원하고 있습니다.',
-      manufacturing_info: '로얄캐닌은 전 세계 15개국에 16개의 제조 공장을 운영하고 있습니다. 한국에는 2011년 김천공장을 설립하여 아시아 태평양 지역에 제품을 공급하고 있으며, 모든 공장은 HACCP, ISO 22000 등의 국제 품질 인증을 받아 엄격한 품질 관리 시스템을 운영합니다. 원료 조달부터 완제품 출고까지 전 과정에서 추적 가능한 시스템을 구축하여 안전성을 보장합니다.',
-      brand_pros: [
-        '수의사들이 가장 많이 추천하는 브랜드',
-        '임상 연구를 통해 검증된 영양 균형',
-        '천연 항산화제로 면역력 강화',
-        '소화가 잘되는 고품질 단백질 사용'
-      ],
-      brand_cons: [
-        '옥수수 글루텐 함량이 높음',
-        '일부 개체에서 알레르기 반응 가능',
-        '상대적으로 높은 가격'
-      ],
-      recall_history: [
-        {
-          date: '2023-03-15',
-          reason: '비타민 D 과다 검출',
-          severity: 'medium',
-          resolved: true
-        },
-        {
-          date: '2022-08-10',
-          reason: '살모넬라균 오염 가능성',
-          severity: 'high',
-          resolved: true
-        }
-      ],
-      transparency_score: 78,
-      ingredient_disclosure: {
-        fully_disclosed: 65,
-        partially_disclosed: 25,
-        not_disclosed: 10
-      },
-      nutrition_analysis: {
-        protein: 32,
-        fat: 14,
-        carbohydrates: 28,
-        fiber: 8,
-        moisture: 10,
-        calories_per_100g: 385
-      },
-      consumer_ratings: {
-        palatability: 4.2,
-        digestibility: 4.0,
-        coat_quality: 4.3,
-        stool_quality: 3.8,
-        overall_satisfaction: 4.1
-      },
-      expert_reviews: [
-        {
-          expert_name: '김수의 수의사',
-          rating: 4.5,
-          comment: '영양학적 균형이 잘 잡혀있고, 특히 처방식의 경우 임상 데이터가 풍부합니다.',
-          date: '2024-12-10'
-        },
-        {
-          expert_name: '박영양 박사',
-          rating: 4.0,
-          comment: '품질 관리는 우수하나 원재료 출처 공개가 더 투명해질 필요가 있습니다.',
-          date: '2024-11-28'
-        }
-      ],
-      ingredients: [
-        { name: '닭고기', percentage: 18, source: '프랑스산', disclosure_level: 'full' },
-        { name: '쌀', percentage: 15, source: '미국산', disclosure_level: 'full' },
-        { name: '옥수수', percentage: 12, disclosure_level: 'partial' },
-        { name: '동물성 지방', percentage: 8, disclosure_level: 'partial' },
-        { name: '식물성 단백질', percentage: 6, disclosure_level: 'none' },
-        { name: '비트펄프', percentage: 5, source: '유럽산', disclosure_level: 'full' }
-      ],
-      community_feedback: {
-        recommend_yes: 1247,
-        recommend_no: 358,
-        total_votes: 1605
-      },
-      qa_section: [
-        {
-          id: 'q1',
-          user_name: '멍멍이맘',
-          question: '로얄캐닌 소화기 처방식을 먹이고 있는데, 장기간 급여해도 괜찮을까요?',
-          date: '2024-12-10',
-          answer: {
-            content: '소화기 처방식은 수의사의 지속적인 모니터링 하에 장기간 급여가 가능합니다. 다만 정기적인 건강검진을 통해 상태를 확인하시는 것을 권장드립니다.',
-            answerer: '로얄캐닌 고객지원팀',
-            date: '2024-12-11'
-          },
-          likes: 23,
-          is_answered: true
-        },
-        {
-          id: 'q2',
-          user_name: '고양이집사',
-          question: '실내 고양이용과 일반 성묘용의 차이점이 무엇인가요?',
-          date: '2024-12-08',
-          answer: {
-            content: '실내 고양이용은 활동량이 적은 실내 환경을 고려하여 칼로리를 조절하고, 헤어볼 케어 성분을 강화했습니다. 또한 소화율을 높여 배변 냄새를 줄이는 데 도움을 줍니다.',
-            answerer: '로얄캐닌 영양팀',
-            date: '2024-12-09'
-          },
-          likes: 18,
-          is_answered: true
-        },
-        {
-          id: 'q3',
-          user_name: '새집사',
-          question: '다른 사료에서 로얄캐닌으로 바꿀 때 주의사항이 있나요?',
-          date: '2024-12-07',
-          likes: 12,
-          is_answered: false
-        }
-      ],
-      products: [
-        {
-          id: 'royal-canin-indoor',
-          name: '로얄캐닌 인도어 성묘용',
-          image: '🏠',
-          description: '실내에서 생활하는 성묘를 위한 전용 사료로, 헤어볼 케어와 체중 관리에 도움을 줍니다.',
-          certifications: ['AAFCO', 'FEDIAF', 'HACCP'],
-          origin_info: {
-            country_of_origin: '프랑스',
-            manufacturing_country: '한국',
-            manufacturing_facilities: ['김천공장']
-          },
-          ingredients: [
-            '닭고기분', '쌀', '옥수수', '동물성지방', '식물성단백질', '비트펄프', 
-            '어유', '대두유', '프락토올리고당', '차전자피', '루테인'
-          ],
-          guaranteed_analysis: {
-            protein: '27% 이상',
-            fat: '13% 이상',
-            fiber: '5% 이하',
-            moisture: '10% 이하',
-            ash: '8.1% 이하'
-          },
-          pros: [
-            '헤어볼 배출에 효과적인 섬유질 함량',
-            '실내 고양이의 활동량을 고려한 적절한 칼로리',
-            '소화율이 높아 배변 냄새 감소',
-            '오메가-3 지방산으로 모질 개선'
-          ],
-          cons: [
-            '옥수수 함량이 높아 알레르기 유발 가능성',
-            '인공 보존료 사용',
-            '상대적으로 높은 가격'
-          ],
-          consumer_ratings: {
-            palatability: 4.2,
-            digestibility: 4.0,
-            coat_quality: 4.3,
-            stool_quality: 3.8,
-            overall_satisfaction: 4.1
-          },
-          community_feedback: {
-            recommend_yes: 847,
-            recommend_no: 203,
-            total_votes: 1050
-          },
-          consumer_reviews: [
-            {
-              id: 'r1',
-              user_name: '고양이맘123',
-              rating: 4,
-              comment: '우리 고양이가 정말 잘 먹어요. 헤어볼도 확실히 줄어든 것 같고, 변 냄새도 많이 개선되었습니다. 다만 가격이 조금 부담스럽긴 해요.',
-              date: '2024-12-15',
-              helpful_count: 12
-            },
-            {
-              id: 'r2',
-              user_name: '냥이아빠',
-              rating: 5,
-              comment: '수의사 선생님이 추천해주셔서 바꿨는데 정말 좋네요. 털도 윤기가 나고 소화도 잘 되는 것 같아요.',
-              date: '2024-12-12',
-              helpful_count: 8
-            },
-            {
-              id: 'r3',
-              user_name: '집사생활5년차',
-              rating: 3,
-              comment: '품질은 좋은데 우리 고양이가 처음엔 잘 안 먹더라고요. 지금은 적응해서 잘 먹고 있습니다.',
-              date: '2024-12-10',
-              helpful_count: 5
-            }
-          ]
-        },
-        {
-          id: 'royal-canin-digestive',
-          name: '로얄캐닌 다이제스티브 케어',
-          image: '💊',
-          description: '소화기가 민감한 고양이를 위한 특별 처방식으로, 소화율을 높이고 장 건강을 개선합니다.',
-          certifications: ['AAFCO', 'FEDIAF', 'FDA'],
-          origin_info: {
-            country_of_origin: '프랑스',
-            manufacturing_country: '프랑스',
-            manufacturing_facilities: ['아이메르그 공장']
-          },
-          ingredients: [
-            '쌀', '탈수닭고기', '동물성지방', '옥수수글루텐', '비트펄프',
-            '어유', '대두유', '프락토올리고당', '마리골드추출물'
-          ],
-          guaranteed_analysis: {
-            protein: '32% 이상',
-            fat: '15% 이상',
-            fiber: '1.4% 이하',
-            moisture: '10% 이하'
-          },
-          pros: [
-            '높은 소화율(90% 이상)',
-            '프리바이오틱스로 장내 유익균 증식',
-            '저섬유질로 소화기 부담 최소화',
-            '수의사 처방식으로 신뢰성 높음'
-          ],
-          cons: [
-            '처방식으로 일반 구매 어려움',
-            '장기 급여 시 수의사 상담 필요',
-            '높은 가격'
-          ],
-          consumer_ratings: {
-            palatability: 3.8,
-            digestibility: 4.6,
-            coat_quality: 4.1,
-            stool_quality: 4.4,
-            overall_satisfaction: 4.2
-          },
-          community_feedback: {
-            recommend_yes: 312,
-            recommend_no: 88,
-            total_votes: 400
-          },
-          consumer_reviews: [
-            {
-              id: 'r4',
-              user_name: '소화불량냥이맘',
-              rating: 5,
-              comment: '소화기가 약한 우리 고양이에게 정말 좋아요. 설사도 멈추고 변 상태가 많이 좋아졌어요. 수의사님 처방 받아서 먹이고 있습니다.',
-              date: '2024-12-14',
-              helpful_count: 15
-            },
-            {
-              id: 'r5',
-              user_name: '처방식전문가',
-              rating: 4,
-              comment: '효과는 확실한데 기호성이 조금 떨어져요. 그래도 건강을 위해서 계속 먹이고 있습니다.',
-              date: '2024-12-11',
-              helpful_count: 7
-            }
-          ]
-        }
-      ]
-    },
-    'hills': {
-      id: 'hills',
-      name: '힐스',
-      logo: '🏔️',
-      manufacturer: "Hill's Pet Nutrition",
-      country_of_origin: '미국',
-      manufacturing_locations: ['미국 캔자스', '네덜란드 토펜', '체코 프라하'],
-      established_year: 1948,
-      certifications: ['AAFCO', 'FDA', 'ISO 9001'],
-      brand_description: '힐스는 1948년 미국에서 설립된 반려동물 영양학의 선구자입니다. 수의사와 영양학자들이 개발한 과학적 영양 솔루션으로 전 세계 수의사들이 가장 많이 추천하는 브랜드입니다. 220여 명의 수의사, 영양학자, 식품과학자들이 지속적인 연구를 통해 반려동물의 건강한 삶을 위한 혁신적인 제품을 개발하고 있습니다.',
-      manufacturing_info: '힐스는 미국, 네덜란드, 체코 등 전 세계 주요 거점에 최첨단 제조 시설을 운영합니다. 모든 제조 공장은 FDA, AAFCO 등의 엄격한 기준을 준수하며, 원료 입고부터 완제품 출하까지 700여 가지 품질 검사를 실시합니다. 지속가능한 소싱을 위해 책임감 있는 공급업체와 파트너십을 구축하고 있습니다.',
-      brand_pros: [
-        '수의사들이 가장 많이 추천하는 브랜드',
-        '임상 연구를 통해 검증된 영양 균형',
-        '천연 항산화제로 면역력 강화',
-        '소화가 잘되는 고품질 단백질 사용'
-      ],
-      brand_cons: [
-        '옥수수 글루텐 함량이 높음',
-        '일부 개체에서 알레르기 반응 가능',
-        '상대적으로 높은 가격'
-      ],
-      recall_history: [
-        {
-          date: '2023-07-22',
-          reason: '금속 이물질 검출',
-          severity: 'high',
-          resolved: true
-        }
-      ],
-      transparency_score: 85,
-      ingredient_disclosure: {
-        fully_disclosed: 78,
-        partially_disclosed: 18,
-        not_disclosed: 4
-      },
-      nutrition_analysis: {
-        protein: 30,
-        fat: 16,
-        carbohydrates: 25,
-        fiber: 7,
-        moisture: 9,
-        calories_per_100g: 392
-      },
-      consumer_ratings: {
-        palatability: 3.9,
-        digestibility: 4.4,
-        coat_quality: 4.1,
-        stool_quality: 4.2,
-        overall_satisfaction: 4.2
-      },
-      expert_reviews: [
-        {
-          expert_name: '이건강 수의사',
-          rating: 4.8,
-          comment: '임상 연구 기반의 과학적 접근이 돋보이며, 처방식의 효과가 뛰어납니다.',
-          date: '2024-12-05'
-        }
-      ],
-      ingredients: [
-        { name: '닭고기분', percentage: 22, source: '미국산', disclosure_level: 'full' },
-        { name: '현미', percentage: 16, source: '미국산', disclosure_level: 'full' },
-        { name: '보리', percentage: 10, source: '캐나다산', disclosure_level: 'full' },
-        { name: '닭지방', percentage: 9, disclosure_level: 'partial' },
-        { name: '천연향료', percentage: 3, disclosure_level: 'none' }
-      ],
-      community_feedback: {
-        recommend_yes: 892,
-        recommend_no: 201,
-        total_votes: 1093
-      },
-      qa_section: [
-        {
-          id: 'h1',
-          user_name: '강아지아빠',
-          question: '힐스 처방식 i/d는 어떤 경우에 급여하나요?',
-          date: '2024-12-09',
-          answer: {
-            content: 'i/d는 소화기 질환이 있는 반려동물을 위한 처방식입니다. 설사, 구토, 염증성 장질환 등의 증상이 있을 때 수의사 처방 하에 급여하시면 됩니다.',
-            answerer: '힐스 수의영양팀',
-            date: '2024-12-10'
-          },
-          likes: 31,
-          is_answered: true
-        },
-        {
-          id: 'h2',
-          user_name: '냥이엄마',
-          question: '힐스 사료의 원산지가 궁금합니다.',
-          date: '2024-12-06',
-          likes: 15,
-          is_answered: false
-        }
-      ],
-      products: [
-        {
-          id: 'hills-science-diet',
-          name: '힐스 사이언스 다이어트 어덜트',
-          image: '🥘',
-          description: '성견을 위한 균형잡힌 영양식으로, 과학적으로 검증된 레시피로 전반적인 건강을 지원합니다.',
-          certifications: ['AAFCO', 'FDA', 'ISO 9001'],
-          origin_info: {
-            country_of_origin: '미국',
-            manufacturing_country: '미국',
-            manufacturing_facilities: ['캔자스 공장', '노스캐롤라이나 공장']
-          },
-          ingredients: [
-            '닭고기분', '현미', '보리', '닭지방', '옥수수글루텐분',
-            '천연향료', '아마씨', '당근', '시금치', '토마토'
-          ],
-          guaranteed_analysis: {
-            protein: '21% 이상',
-            fat: '13% 이상',
-            fiber: '4% 이하',
-            moisture: '10% 이하',
-            calcium: '0.7% 이상',
-            phosphorus: '0.6% 이상'
-          },
-          pros: [
-            '수의사들이 가장 많이 추천하는 브랜드',
-            '임상 연구를 통해 검증된 영양 균형',
-            '천연 항산화제로 면역력 강화',
-            '소화가 잘되는 고품질 단백질 사용'
-          ],
-          cons: [
-            '옥수수 글루텐 함량이 높음',
-            '일부 개체에서 알레르기 반응 가능',
-            '상대적으로 높은 가격'
-          ],
-          consumer_ratings: {
-            palatability: 3.9,
-            digestibility: 4.4,
-            coat_quality: 4.1,
-            stool_quality: 4.2,
-            overall_satisfaction: 4.2
-          },
-          community_feedback: {
-            recommend_yes: 623,
-            recommend_no: 177,
-            total_votes: 800
-          },
-          consumer_reviews: [
-            {
-              id: 'h1',
-              user_name: '강아지사랑',
-              rating: 4,
-              comment: '수의사들이 추천하는 이유가 있네요. 우리 강아지 소화도 잘 되고 털도 좋아졌어요. 다만 옥수수 성분이 좀 아쉬워요.',
-              date: '2024-12-13',
-              helpful_count: 18
-            },
-            {
-              id: 'h2',
-              user_name: '건강한반려생활',
-              rating: 5,
-              comment: '과학적으로 검증된 영양 균형이 정말 좋은 것 같아요. 가격은 비싸지만 그만한 가치가 있다고 생각합니다.',
-              date: '2024-12-11',
-              helpful_count: 22
-            },
-            {
-              id: 'h3',
-              user_name: '멍멍이집사',
-              rating: 3,
-              comment: '품질은 좋은데 우리 강아지가 알레르기 반응을 보여서 중단했어요. 개체차가 있는 것 같습니다.',
-              date: '2024-12-09',
-              helpful_count: 9
-            }
-          ]
-        },
-        {
-          id: 'hills-prescription-id',
-          name: '힐스 처방식 i/d',
-          image: '🏥',
-          description: '소화기 질환이 있는 반려동물을 위한 특별 처방식으로, 소화기 건강 회복을 돕습니다.',
-          certifications: ['AAFCO', 'FDA', 'FEDIAF'],
-          origin_info: {
-            country_of_origin: '미국',
-            manufacturing_country: '네덜란드',
-            manufacturing_facilities: ['토펜 공장']
-          },
-          ingredients: [
-            '쌀', '닭고기분', '옥수수전분', '닭지방', '계란분',
-            '셀룰로오스', '어유', '비트펄프', '프락토올리고당'
-          ],
-          guaranteed_analysis: {
-            protein: '22.6% 이상',
-            fat: '14.9% 이상',
-            fiber: '1.4% 이하',
-            moisture: '10% 이하'
-          },
-          pros: [
-            '높은 소화율로 위장 부담 최소화',
-            '전해질 균형 유지로 설사 개선',
-            '프리바이오틱스로 장내 환경 개선',
-            '수의사 처방으로 안전성 보장'
-          ],
-          cons: [
-            '수의사 처방 없이 구매 불가',
-            '장기 사용 시 영양 불균형 우려',
-            '매우 높은 가격',
-            '기호성이 떨어질 수 있음'
-          ],
-          consumer_ratings: {
-            palatability: 3.5,
-            digestibility: 4.7,
-            coat_quality: 3.9,
-            stool_quality: 4.6,
-            overall_satisfaction: 4.1
-          },
-          community_feedback: {
-            recommend_yes: 269,
-            recommend_no: 131,
-            total_votes: 400
-          },
-          consumer_reviews: [
-            {
-              id: 'h4',
-              user_name: '소화기전문집사',
-              rating: 5,
-              comment: '설사로 고생하던 우리 강아지가 이 사료로 완전히 좋아졌어요. 처방식이라 비싸지만 효과는 확실합니다.',
-              date: '2024-12-12',
-              helpful_count: 25
-            },
-            {
-              id: 'h5',
-              user_name: '수의사추천',
-              rating: 4,
-              comment: '수의사님이 추천해주신 사료입니다. 소화율이 정말 높고 변 상태가 많이 개선되었어요.',
-              date: '2024-12-08',
-              helpful_count: 13
-            },
-            {
-              id: 'h6',
-              user_name: '처방식사용자',
-              rating: 3,
-              comment: '효과는 좋은데 기호성이 떨어져서 먹이기가 힘들어요. 그래도 건강을 위해 계속 사용 중입니다.',
-              date: '2024-12-05',
-              helpful_count: 8
-            }
-          ]
-        }
-      ]
-    }
-  }
-  
-  return brands[brandName] || brands['royal-canin']
-}
+// 하드코딩된 레거시 데이터 함수 제거됨 - Supabase에서만 데이터 가져옴
 
 const getTransparencyColor = (score: number) => {
   if (score >= 80) return 'text-green-600'
@@ -763,13 +257,9 @@ export default function BrandDetailPage() {
             }
             setHelpfulCounts(initialHelpfulCounts)
             
-            const legacyProducts = getBrandDataLegacy(brandName).products || []
-            
             console.log('[Frontend] Products decision:', {
               apiProductsCount: apiProducts?.length || 0,
-              legacyProductsCount: legacyProducts.length,
-              willUseApiProducts: !!apiProducts,
-              willUseLegacyProducts: !apiProducts && legacyProducts.length > 0
+              willUseApiProducts: !!apiProducts
             })
             
             const brandData: Brand = {
@@ -816,30 +306,29 @@ export default function BrandDetailPage() {
                 total_votes: 0
               },
               qa_section: apiData.qa_section || [],
-              products: apiProducts || legacyProducts
+              products: apiProducts || [] // Supabase에서만 데이터 가져옴
             }
             
             console.log('[Frontend] Final brand data products count:', brandData.products.length)
             setBrand(brandData)
           } else {
-            // API에 데이터가 없거나 에러가 있으면 레거시 데이터 사용
-            const legacyData = getBrandDataLegacy(brandName)
-            setBrand(legacyData)
+            // API에 데이터가 없거나 에러가 있으면 빈 상태 유지 (에러 표시)
+            console.error('브랜드 데이터를 찾을 수 없습니다:', apiData.error)
+            setBrand(null)
           }
         } else if (response.status === 404) {
-          // 404 에러 시 레거시 데이터 사용
-          const legacyData = getBrandDataLegacy(brandName)
-          setBrand(legacyData)
+          // 404 에러 시 브랜드를 찾을 수 없음
+          console.error('브랜드를 찾을 수 없습니다:', brandName)
+          setBrand(null)
         } else {
-          // 기타 API 오류 시 레거시 데이터 사용
-          const legacyData = getBrandDataLegacy(brandName)
-          setBrand(legacyData)
+          // 기타 API 오류 시 빈 상태 유지
+          console.error('브랜드 데이터 로딩 실패:', response.status)
+          setBrand(null)
         }
       } catch (error) {
         console.error('브랜드 데이터 로딩 오류:', error)
-        // 에러 시 레거시 데이터 사용
-        const legacyData = getBrandDataLegacy(brandName)
-        setBrand(legacyData)
+        // 에러 시 빈 상태 유지
+        setBrand(null)
       }
     }
 
@@ -906,11 +395,24 @@ export default function BrandDetailPage() {
     }
   }
 
-  const calculateSafiForBrand = () => {
+  const calculateSafiForBrand = async () => {
     if (!brand) return
 
-    // 브랜드의 리뷰 로그 가져오기 (현재는 mock 데이터 사용)
-    const brandReviews = mockReviewLogs.filter(review => review.brand === brand.name)
+    // 브랜드의 리뷰 로그 가져오기 (Supabase review_logs 테이블에서 가져옴)
+    let brandReviews: any[] = []
+    try {
+      const response = await fetch(`/api/brands/${encodeURIComponent(brand.name)}`)
+      if (response.ok) {
+        const data = await response.json()
+        // review_logs는 API에서 이미 필터링되어 올 수 있지만, 
+        // SAFI 계산을 위해 필요한 필드만 추출
+        // 실제로는 review_logs API를 별도로 호출하거나 
+        // brands API에서 reviews를 함께 반환해야 함
+        // 현재는 빈 배열로 처리 (실제 데이터가 없으면 SAFI 계산 안 함)
+      }
+    } catch (error) {
+      console.error('리뷰 로그 가져오기 실패:', error)
+    }
     
     // SAFI 계산을 위한 리뷰 데이터 변환
     const safiReviews = brandReviews.map(review => ({

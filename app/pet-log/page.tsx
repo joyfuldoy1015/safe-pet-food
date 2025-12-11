@@ -12,6 +12,7 @@ import LogDrawer from '@/app/components/pet-log/LogDrawer'
 import LogFormDialog from '@/components/log/LogFormDialog'
 import FeedingLeaderboard from '@/components/rank/FeedingLeaderboard'
 import { useAuth } from '@/hooks/useAuth'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 type SortOption = 'popular' | 'recent' | 'completed'
 
@@ -26,6 +27,135 @@ export default function PetLogPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [isLogFormOpen, setIsLogFormOpen] = useState(false)
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true)
+
+  // Fetch reviews from Supabase (review_logs and pet_log_posts)
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setIsLoadingReviews(true)
+      try {
+        const supabase = getBrowserClient()
+        const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && 
+          !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+          !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
+
+        if (!isSupabaseConfigured || !supabase) {
+          console.log('[PetLogPage] Supabase not configured, using mock data')
+          setIsLoadingReviews(false)
+          return
+        }
+
+        const allReviews: ReviewLog[] = []
+
+        // 1. Fetch from review_logs table
+        try {
+          const { data: reviewLogs, error: reviewLogsError } = await supabase
+            .from('review_logs')
+            .select(`
+              *,
+              profiles!review_logs_owner_id_fkey(nickname, avatar_url),
+              pets!review_logs_pet_id_fkey(id, name, species, birth_date, weight_kg)
+            `)
+            .order('created_at', { ascending: false })
+            .limit(100)
+
+          if (!reviewLogsError && reviewLogs) {
+            const transformedReviewLogs: ReviewLog[] = reviewLogs.map((log: any) => ({
+              id: log.id,
+              petId: log.pet_id || '',
+              ownerId: log.owner_id || '',
+              category: log.category || 'feed',
+              brand: log.brand || '',
+              product: log.product || '',
+              status: log.status || 'feeding',
+              periodStart: log.period_start || log.created_at,
+              periodEnd: log.period_end || undefined,
+              durationDays: log.duration_days || undefined,
+              rating: log.rating || undefined,
+              recommend: log.recommend || undefined,
+              continueReasons: log.continue_reasons || undefined,
+              stopReasons: log.stop_reasons || undefined,
+              excerpt: log.excerpt || '',
+              notes: log.notes || undefined,
+              likes: log.likes || 0,
+              commentsCount: log.comments_count || 0,
+              views: log.views || 0,
+              createdAt: log.created_at || new Date().toISOString(),
+              updatedAt: log.updated_at || log.created_at || new Date().toISOString(),
+              stool_score: log.stool_score || undefined,
+              allergy_symptoms: log.allergy_symptoms || undefined,
+              vomiting: log.vomiting || undefined,
+              appetite_change: log.appetite_change || undefined
+            }))
+            allReviews.push(...transformedReviewLogs)
+          }
+        } catch (error) {
+          console.warn('[PetLogPage] Error fetching review_logs:', error)
+        }
+
+        // 2. Fetch from pet_log_posts table and convert to ReviewLog format
+        try {
+          const { data: petLogPosts, error: petLogPostsError } = await supabase
+            .from('pet_log_posts')
+            .select(`
+              *,
+              pet_log_feeding_records(*)
+            `)
+            .order('created_at', { ascending: false })
+            .limit(100)
+
+          if (!petLogPostsError && petLogPosts) {
+            const transformedPetLogPosts: ReviewLog[] = petLogPosts.flatMap((post: any) => {
+              if (!post.pet_log_feeding_records || post.pet_log_feeding_records.length === 0) {
+                return []
+              }
+
+              return post.pet_log_feeding_records.map((record: any) => ({
+                id: `${post.id}-${record.id}`,
+                petId: post.pet_profile_id || `pet-${post.pet_name}`,
+                ownerId: post.user_id || 'unknown',
+                category: record.category === '사료' ? 'feed' : 
+                         record.category === '간식' ? 'snack' :
+                         record.category === '영양제' ? 'supplement' : 'toilet',
+                brand: record.brand || '',
+                product: record.product_name || '',
+                status: record.status === '급여중' ? 'feeding' :
+                       record.status === '급여완료' ? 'completed' : 'paused',
+                periodStart: record.start_date || post.created_at,
+                periodEnd: record.end_date || undefined,
+                durationDays: record.duration ? parseInt(record.duration) : undefined,
+                rating: record.satisfaction || record.palatability || undefined,
+                recommend: record.repurchase_intent || undefined,
+                excerpt: record.comment || '',
+                likes: post.likes || 0,
+                commentsCount: post.comments_count || 0,
+                views: post.views || 0,
+                createdAt: post.created_at || new Date().toISOString(),
+                updatedAt: post.updated_at || post.created_at || new Date().toISOString()
+              }))
+            })
+            allReviews.push(...transformedPetLogPosts)
+          }
+        } catch (error) {
+          console.warn('[PetLogPage] Error fetching pet_log_posts:', error)
+        }
+
+        // Merge with mock data if no Supabase data
+        if (allReviews.length > 0) {
+          setReviews(allReviews)
+        } else {
+          setReviews(mockReviewLogs)
+        }
+      } catch (error) {
+        console.error('[PetLogPage] Error fetching reviews:', error)
+        setReviews(mockReviewLogs)
+      } finally {
+        setIsLoadingReviews(false)
+      }
+    }
+
+    fetchReviews()
+  }, [])
 
   // Filters
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')

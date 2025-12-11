@@ -17,8 +17,28 @@ export default function AuthButton() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
-    await signOut()
-    setIsMenuOpen(false)
+    console.log('[AuthButton] 로그아웃 버튼 클릭됨')
+    try {
+      setIsMenuOpen(false)
+      console.log('[AuthButton] signOut 함수 호출 시작')
+      
+      // 로그아웃 처리
+      await signOut()
+      console.log('[AuthButton] signOut 완료')
+      
+      // 세션 정리 완료 대기
+      await new Promise(resolve => setTimeout(resolve, 500))
+      console.log('[AuthButton] 리다이렉트 시작')
+      
+      // 페이지 완전 새로고침으로 세션 상태 동기화 (OAuth 세션 정리를 위해)
+      // window.location.href 대신 window.location.replace를 사용하여 히스토리에 남기지 않음
+      window.location.replace('/')
+    } catch (error) {
+      console.error('[AuthButton] 로그아웃 오류:', error)
+      // 에러가 있어도 홈으로 리다이렉트 (강제 새로고침)
+      alert('로그아웃 중 오류가 발생했습니다. 홈으로 이동합니다.')
+      window.location.replace('/')
+    }
   }
 
   const handleOpenDialog = () => {
@@ -118,8 +138,14 @@ export default function AuthButton() {
 
               <div className="border-t border-gray-100 pt-1">
                 <button
-                  onClick={handleSignOut}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('[AuthButton] 로그아웃 버튼 클릭 이벤트 발생')
+                    handleSignOut()
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  type="button"
                 >
                   <LogOut className="h-4 w-4" />
                   로그아웃

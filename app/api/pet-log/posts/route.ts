@@ -178,6 +178,70 @@ export async function POST(request: Request) {
         console.error('Failed to create feeding records:', recordsError)
         // 포스트는 생성되었으므로 계속 진행
       }
+
+      // 각 급여 기록을 review_logs 테이블에도 저장 (pet-log 페이지에서 표시하기 위해)
+      try {
+        const reviewLogsToInsert = feedingRecords.map((record: any) => {
+          // category 변환: '사료' -> 'feed', '간식' -> 'snack', '영양제' -> 'supplement', '화장실' -> 'toilet'
+          const categoryMap: Record<string, string> = {
+            '사료': 'feed',
+            '간식': 'snack',
+            '영양제': 'supplement',
+            '화장실': 'toilet'
+          }
+          
+          // status 변환: '급여중' -> 'feeding', '급여완료' -> 'completed', '급여중지' -> 'paused'
+          const statusMap: Record<string, string> = {
+            '급여중': 'feeding',
+            '급여완료': 'completed',
+            '급여중지': 'paused'
+          }
+
+          // duration에서 숫자 추출 (예: "3개월" -> 90일, "1년" -> 365일)
+          let durationDays: number | undefined = undefined
+          if (record.duration) {
+            const monthMatch = record.duration.match(/(\d+)개월/)
+            const yearMatch = record.duration.match(/(\d+)년/)
+            if (yearMatch) {
+              durationDays = parseInt(yearMatch[1]) * 365
+            } else if (monthMatch) {
+              durationDays = parseInt(monthMatch[1]) * 30
+            }
+          }
+
+          return {
+            pet_id: post.petProfileId || null,
+            owner_id: post.ownerId || post.user_id || '',
+            category: categoryMap[record.category] || 'feed',
+            brand: record.brand || '',
+            product: record.productName || '',
+            status: statusMap[record.status] || 'feeding',
+            period_start: record.startDate || new Date().toISOString().split('T')[0],
+            period_end: record.endDate || null,
+            duration_days: durationDays,
+            rating: record.satisfaction || record.palatability || null,
+            recommend: record.repurchaseIntent || null,
+            excerpt: record.comment || '',
+            likes: 0,
+            comments_count: 0,
+            views: 0
+          }
+        })
+
+        const { error: reviewLogsError } = await supabase
+          .from('review_logs')
+          .insert(reviewLogsToInsert)
+
+        if (reviewLogsError) {
+          console.warn('Failed to create review_logs (non-critical):', reviewLogsError)
+          // review_logs 저장 실패는 치명적이지 않으므로 계속 진행
+        } else {
+          console.log('✅ review_logs에 저장되었습니다:', reviewLogsToInsert.length, '개')
+        }
+      } catch (reviewLogsError) {
+        console.warn('Error creating review_logs (non-critical):', reviewLogsError)
+        // review_logs 저장 실패는 치명적이지 않으므로 계속 진행
+      }
     }
 
     return NextResponse.json({ 

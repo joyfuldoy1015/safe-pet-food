@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/hooks/useAuth'
 import { 
   Plus, 
   Edit, 
@@ -36,8 +36,8 @@ interface PetProfile {
 
 export default function PetsPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
-  const isLoggedIn = status === 'authenticated'
+  const { user, isLoading: authLoading } = useAuth()
+  const isLoggedIn = !!user
   const [pets, setPets] = useState<PetProfile[]>([])
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [showLoginModal, setShowLoginModal] = useState(false)

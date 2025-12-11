@@ -78,8 +78,26 @@ export default function Header() {
   }, [searchParams, router])
 
   const handleLogout = async () => {
-    await signOut()
-    window.location.href = '/'
+    console.log('[Header] 로그아웃 버튼 클릭됨')
+    try {
+      console.log('[Header] signOut 함수 호출 시작')
+      // 로그아웃 처리
+      await signOut()
+      console.log('[Header] signOut 완료')
+      
+      // 세션 정리 완료 대기
+      await new Promise(resolve => setTimeout(resolve, 500))
+      console.log('[Header] 리다이렉트 시작')
+      
+      // 페이지 완전 새로고침으로 세션 상태 동기화 (OAuth 세션 정리를 위해)
+      // window.location.href 대신 window.location.replace를 사용하여 히스토리에 남기지 않음
+      window.location.replace('/')
+    } catch (error) {
+      console.error('[Header] 로그아웃 오류:', error)
+      // 에러가 있어도 홈으로 리다이렉트 (강제 새로고침)
+      alert('로그아웃 중 오류가 발생했습니다. 홈으로 이동합니다.')
+      window.location.replace('/')
+    }
   }
 
   return (
@@ -156,8 +174,14 @@ export default function Header() {
                   <span>{profile?.nickname || user?.email || '사용자'}</span>
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    console.log('[Header] 로그아웃 버튼 클릭 이벤트 발생')
+                    handleLogout()
+                  }}
                   className="text-black hover:text-gray-700 font-medium transition-colors flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-yellow-300"
+                  type="button"
                 >
                   <LogOut className="h-4 w-4" />
                   로그아웃
@@ -223,11 +247,15 @@ export default function Header() {
                     {profile?.nickname || user?.email || '사용자'}
                   </div>
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      console.log('[Header] 모바일 로그아웃 버튼 클릭 이벤트 발생')
                       setMobileMenuOpen(false)
                       handleLogout()
                     }}
                     className="flex items-center gap-2 text-black hover:text-gray-700 font-medium py-2 text-left px-4 hover:bg-yellow-300 rounded-lg"
+                    type="button"
                   >
                     <LogOut className="h-4 w-4" />
                     로그아웃

@@ -53,8 +53,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const currentPathname = mounted ? pathname : null
 
   const handleLogout = async () => {
-    await signOut()
-    router.push('/')
+    try {
+      // 로그아웃 처리
+      await signOut()
+      
+      // 세션 정리 완료 대기
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // 페이지 완전 새로고침으로 세션 상태 동기화
+      window.location.replace('/')
+    } catch (error) {
+      console.error('로그아웃 오류:', error)
+      // 에러가 있어도 홈으로 리다이렉트
+      window.location.replace('/')
+    }
   }
 
   return (
