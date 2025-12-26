@@ -233,8 +233,14 @@ export default function LogDetailDrawer({
             <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
               <button
                 onClick={() => {
-                  const brandName = encodeURIComponent(log.brand)
-                  router.push(`/brands/${brandName}`)
+                  console.log('[LogDetailDrawer] Brand link clicked:', {
+                    logBrand: log.brand,
+                    logProduct: log.product
+                  })
+                  // Next.js router는 자동으로 URL을 인코딩하므로 수동 인코딩 불필요
+                  const targetUrl = `/brands/${log.brand}`
+                  console.log('[LogDetailDrawer] Navigating to:', targetUrl)
+                  router.push(targetUrl)
                   onClose()
                 }}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
