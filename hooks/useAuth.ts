@@ -78,10 +78,10 @@ export function useAuth(): UseAuthReturn {
 
     const loadSession = async () => {
       try {
-        // 세션 로드 시 타임아웃 설정 (3초)
+        // 세션 로드 시 타임아웃 설정 (10초로 연장 - 네트워크 지연 고려)
         const sessionPromise = supabase.auth.getSession()
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session load timeout')), 3000)
+          setTimeout(() => reject(new Error('Session load timeout')), 10000)
         )
         
         let sessionData
@@ -89,7 +89,10 @@ export function useAuth(): UseAuthReturn {
           sessionData = await Promise.race([sessionPromise, timeoutPromise]) as Awaited<ReturnType<typeof supabase.auth.getSession>>
         } catch (timeoutError) {
           // 타임아웃 발생 시 세션이 없다고 가정하고 즉시 로딩 해제
-          console.warn('[useAuth] Session load timeout, assuming no session')
+          // 개발 환경에서만 경고 표시
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('[useAuth] Session load timeout, assuming no session')
+          }
           if (mounted) {
             setUser(null)
             setProfile(null)
@@ -163,7 +166,10 @@ export function useAuth(): UseAuthReturn {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[useAuth] Auth state changed:', event, session?.user?.email)
+        // 개발 환경에서만 로그 출력
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[useAuth] Auth state changed:', event, session?.user?.email)
+        }
         
         // INITIAL_SESSION 이벤트는 loadSession과 중복될 수 있으므로
         // initialLoadComplete가 false일 때만 처리 (아직 로드 중이면 무시)
