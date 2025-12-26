@@ -1,16 +1,19 @@
-import { createClient } from '@supabase/supabase-js'
+/**
+ * ⚠️ DEPRECATED: Use getBrowserClient() from '@/lib/supabase-client' instead
+ * 
+ * This file is kept for backward compatibility only.
+ * It re-exports the singleton client to prevent multiple GoTrueClient instances.
+ */
 
-// Supabase 프로젝트 URL과 API Key
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+import { getBrowserClient } from '@/lib/supabase-client'
 
-// Supabase 클라이언트 생성
-// 빌드 타임에는 환경 변수가 없을 수 있으므로, 더미 값으로 클라이언트 생성
-// 실제 API 호출 시에는 런타임에서 환경 변수를 확인함
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder'
-)
+/**
+ * @deprecated Use getBrowserClient() directly instead
+ * Re-export singleton client to prevent multiple instances
+ */
+export const supabase = typeof window !== 'undefined' 
+  ? getBrowserClient() 
+  : null as any // Server-side placeholder
 
 // 타입 정의 (데이터베이스 스키마에 맞춰 추후 업데이트)
 export type Brand = {
