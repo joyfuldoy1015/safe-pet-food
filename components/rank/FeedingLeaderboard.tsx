@@ -7,6 +7,45 @@ import { getTopLongest, getTopMentions, getBlended, type Species, type Category,
 
 type TabType = 'trust' | 'popular' | 'recommended'
 
+/**
+ * Mock rankings for development fallback
+ * Used when Supabase views don't exist or timeout occurs
+ */
+function getMockRankings(tab: TabType, category: Category): ProductRanking[] {
+  const mockData: Record<TabType, ProductRanking[]> = {
+    trust: [
+      { category: 'feed', brand: '로얄캐닌', product: '골든 리트리버 어덜트', max_days: 365, logs_count: 12, mentions: 15, last_updated: new Date().toISOString() },
+      { category: 'feed', brand: '힐스', product: '어덜트 라지 브리드', max_days: 180, logs_count: 8, mentions: 10, last_updated: new Date().toISOString() },
+      { category: 'feed', brand: '오리젠', product: '오리지널', max_days: 120, logs_count: 5, mentions: 8, last_updated: new Date().toISOString() },
+      { category: 'snack', brand: '네츄럴발란스', product: '트레이닝 트릿', max_days: 90, logs_count: 15, mentions: 20, last_updated: new Date().toISOString() },
+      { category: 'supplement', brand: '뉴트리코', product: '오메가3 오일', max_days: 60, logs_count: 6, mentions: 9, last_updated: new Date().toISOString() },
+    ],
+    popular: [
+      { category: 'snack', brand: '캣챠', product: '츄르', max_days: 30, logs_count: 25, mentions: 35, last_updated: new Date().toISOString() },
+      { category: 'feed', brand: '로얄캐닌', product: '페르시안 어덜트', max_days: 200, logs_count: 18, mentions: 28, last_updated: new Date().toISOString() },
+      { category: 'feed', brand: '로얄캐닌', product: '골든 리트리버 어덜트', max_days: 365, logs_count: 12, mentions: 15, last_updated: new Date().toISOString() },
+      { category: 'supplement', brand: '뉴트리코', product: '프로바이오틱스', max_days: 45, logs_count: 10, mentions: 14, last_updated: new Date().toISOString() },
+      { category: 'feed', brand: '아카나', product: '그라스랜드', max_days: 150, logs_count: 9, mentions: 12, last_updated: new Date().toISOString() },
+    ],
+    recommended: [
+      { category: 'feed', brand: '로얄캐닌', product: '골든 리트리버 어덜트', max_days: 365, logs_count: 12, mentions: 15, last_updated: new Date().toISOString(), blended_score: 0.95 },
+      { category: 'feed', brand: '로얄캐닌', product: '페르시안 어덜트', max_days: 200, logs_count: 18, mentions: 28, last_updated: new Date().toISOString(), blended_score: 0.92 },
+      { category: 'feed', brand: '힐스', product: '어덜트 라지 브리드', max_days: 180, logs_count: 8, mentions: 10, last_updated: new Date().toISOString(), blended_score: 0.85 },
+      { category: 'snack', brand: '네츄럴발란스', product: '트레이닝 트릿', max_days: 90, logs_count: 15, mentions: 20, last_updated: new Date().toISOString(), blended_score: 0.80 },
+      { category: 'feed', brand: '아카나', product: '그라스랜드', max_days: 150, logs_count: 9, mentions: 12, last_updated: new Date().toISOString(), blended_score: 0.78 },
+    ]
+  }
+
+  let filtered = mockData[tab] || []
+  
+  // Apply category filter
+  if (category && category !== 'all') {
+    filtered = filtered.filter(item => item.category === category)
+  }
+
+  return filtered.slice(0, 10)
+}
+
 interface FeedingLeaderboardProps {
   initialSpecies?: Species
   initialCategory?: Category
@@ -30,9 +69,9 @@ export default function FeedingLeaderboard({
     setError(null)
 
     try {
-      // Add timeout to prevent infinite loading
+      // Shorter timeout for better UX (5초로 단축)
       const timeoutPromise = new Promise<ProductRanking[]>((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000) // 10 second timeout
+        setTimeout(() => reject(new Error('Request timeout')), 5000)
       })
 
       const fetchPromise = (async () => {
@@ -54,12 +93,31 @@ export default function FeedingLeaderboard({
       })()
 
       const data = await Promise.race([fetchPromise, timeoutPromise])
-      setRankings(data || [])
+      
+      // If no data returned, use mock data for development
+      if (!data || data.length === 0) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[FeedingLeaderboard] No data, using mock rankings')
+          setRankings(getMockRankings(activeTab, category))
+        } else {
+          setRankings([])
+        }
+      } else {
+        setRankings(data)
+      }
     } catch (err) {
-      console.error('[FeedingLeaderboard] Error fetching rankings:', err)
-      // If Supabase is not configured or views don't exist, show empty state
-      setRankings([])
-      setError(null) // Don't show error, just show empty state
+      const error = err as Error
+      console.error('[FeedingLeaderboard] Error fetching rankings:', error.message)
+      
+      // Graceful fallback: use mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[FeedingLeaderboard] Using mock data due to error')
+        setRankings(getMockRankings(activeTab, category))
+      } else {
+        setRankings([])
+      }
+      
+      setError(null) // Don't show error UI, just show data or empty state
     } finally {
       setLoading(false)
     }

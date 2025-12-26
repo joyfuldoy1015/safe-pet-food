@@ -31,7 +31,9 @@ export async function getTopLongest({
 }): Promise<ProductRanking[]> {
   const supabase = getSupabaseClient()
   if (!supabase) {
-    console.warn('[getTopLongest] Supabase not configured, returning empty array')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[getTopLongest] Supabase not configured, returning empty array')
+    }
     return []
   }
 
@@ -96,7 +98,9 @@ export async function getTopMentions({
 }): Promise<ProductRanking[]> {
   const supabase = getSupabaseClient()
   if (!supabase) {
-    console.warn('[getTopMentions] Supabase not configured, returning empty array')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[getTopMentions] Supabase not configured, returning empty array')
+    }
     return []
   }
 
@@ -232,7 +236,9 @@ export async function getBlended({
 }): Promise<ProductRanking[]> {
   const supabase = getSupabaseClient()
   if (!supabase) {
-    console.warn('[getBlended] Supabase not configured, returning empty array')
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[getBlended] Supabase not configured, returning empty array')
+    }
     return []
   }
 
