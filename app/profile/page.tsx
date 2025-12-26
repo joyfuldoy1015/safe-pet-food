@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus } from 'lucide-react'
+import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfilePage() {
@@ -15,6 +15,10 @@ export default function ProfilePage() {
   const [nickname, setNickname] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [pets, setPets] = useState<any[]>([])
+  const [recentPosts, setRecentPosts] = useState<any[]>([])
+  const [isLoadingPets, setIsLoadingPets] = useState(true)
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true)
 
   // URL에서 auth=success 파라미터 확인 및 세션 새로고침
   useEffect(() => {
@@ -50,6 +54,66 @@ export default function ProfilePage() {
       setNickname(user.email?.split('@')[0] || '사용자')
     }
   }, [profile, user, authLoading])
+
+  // 반려동물 목록 로드
+  useEffect(() => {
+    const loadPets = async () => {
+      if (!user) return
+      
+      setIsLoadingPets(true)
+      try {
+        const supabase = getBrowserClient()
+        const { data, error } = await supabase
+          .from('pets')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(4)
+
+        if (!error && data) {
+          setPets(data)
+        }
+      } catch (error) {
+        console.error('Failed to load pets:', error)
+      } finally {
+        setIsLoadingPets(false)
+      }
+    }
+
+    if (user) {
+      loadPets()
+    }
+  }, [user])
+
+  // 최근 급여 후기 로드
+  useEffect(() => {
+    const loadRecentPosts = async () => {
+      if (!user) return
+      
+      setIsLoadingPosts(true)
+      try {
+        const supabase = getBrowserClient()
+        const { data, error } = await supabase
+          .from('pet_log_posts')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        if (!error && data) {
+          setRecentPosts(data)
+        }
+      } catch (error) {
+        console.error('Failed to load recent posts:', error)
+      } finally {
+        setIsLoadingPosts(false)
+      }
+    }
+
+    if (user) {
+      loadRecentPosts()
+    }
+  }, [user])
 
   const handleSave = async () => {
     if (!user) return
@@ -301,61 +365,157 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* 내 반려동물 섹션 */}
+        <div className="mt-8 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <PawPrint className="w-5 h-5 text-purple-600" />
+              내 반려동물
+            </h2>
+            <Link
+              href="/pet-log/pets/new"
+              className="flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700 font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              추가
+            </Link>
+          </div>
+          
+          {isLoadingPets ? (
+            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+          ) : pets.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {pets.map((pet) => (
+                <Link
+                  key={pet.id}
+                  href={`/pet-log/pets/${pet.id}`}
+                  className="block p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
+                      {pet.species === 'cat' ? '🐱' : '🐶'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate">{pet.name}</h3>
+                      <p className="text-sm text-gray-600 truncate">
+                        {pet.birth_date && `${new Date().getFullYear() - new Date(pet.birth_date).getFullYear()}세`}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">등록된 반려동물이 없습니다</p>
+              <Link
+                href="/pet-log/pets/new"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                반려동물 등록하기
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* 최근 급여 후기 섹션 */}
+        <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-blue-600" />
+              내 급여 후기
+            </h2>
+            <Link
+              href="/pet-log/posts/write"
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              작성
+            </Link>
+          </div>
+          
+          {isLoadingPosts ? (
+            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+          ) : recentPosts.length > 0 ? (
+            <div className="space-y-3">
+              {recentPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/pet-log/posts/${post.id}`}
+                  className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        {post.pet_name}의 급여 기록
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {post.pet_breed} • {post.total_records}개 기록
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {post.views || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          {post.likes || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle className="w-3 h-3" />
+                          {post.comments_count || 0}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(post.created_at).toLocaleDateString('ko-KR')}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">작성한 급여 후기가 없습니다</p>
+              <Link
+                href="/pet-log/posts/write"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                급여 후기 작성하기
+              </Link>
+            </div>
+          )}
+        </div>
+
         {/* Quick Links */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            href="/pets"
-            className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <User className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">내 반려동물</h3>
-                <p className="text-sm text-gray-600">반려동물 관리</p>
-              </div>
-            </div>
-          </Link>
-          <Link
-            href="/pet-log/posts/write"
-            className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Plus className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">후기 작성</h3>
-                <p className="text-sm text-gray-600">급여 후기 작성하기</p>
-              </div>
-            </div>
-          </Link>
           <Link
             href="/pet-log"
             className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <User className="w-5 h-5 text-green-600" />
+                <MessageCircle className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">급여 후기</h3>
-                <p className="text-sm text-gray-600">커뮤니티 둘러보기</p>
+                <h3 className="font-medium text-gray-900">커뮤니티</h3>
+                <p className="text-sm text-gray-600">펫 로그 둘러보기</p>
               </div>
             </div>
           </Link>
           <Link
-            href="/settings"
+            href="/brands"
             className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                <User className="w-5 h-5 text-gray-600" />
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <PawPrint className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">설정</h3>
-                <p className="text-sm text-gray-600">계정 설정</p>
+                <h3 className="font-medium text-gray-900">브랜드 정보</h3>
+                <p className="text-sm text-gray-600">브랜드 둘러보기</p>
               </div>
             </div>
           </Link>
