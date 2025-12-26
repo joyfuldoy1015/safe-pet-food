@@ -25,19 +25,19 @@ import {
 } from 'lucide-react'
 
 const categories = {
-  '사료/급여': {
+  '브랜드/제품': {
     icon: Coffee,
     color: 'from-orange-500 to-pink-500',
     items: [
-      { name: '사료 성분 계산기', href: '/nutrition-calculator', icon: Calculator, description: '사료의 보장성분표를 입력하면 건물기준으로 영양 점수를 계산해드려요.' },
-      { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
-      { name: '브랜드 평가', href: '/brands', icon: Star, description: '다양한 사료 브랜드의 안전성과 사용자 리뷰를 확인해보세요.' }
+      { name: '브랜드 둘러보기', href: '/brands', icon: Star, description: '다양한 사료 브랜드의 안전성과 투명성을 확인해보세요.' },
+      { name: '제품 검색하기', href: '/search?tab=products', icon: Search, description: '브랜드 구분 없이 모든 제품을 검색하고 비교해보세요.' }
     ]
   },
   '건강/케어': {
     icon: Heart,
     color: 'from-green-500 to-teal-500',
     items: [
+      { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
       { name: '건강검진표 분석기', href: '/health-analyzer', icon: ClipboardList, description: '건강검진 결과를 업로드하면 AI가 상세하게 분석해드려요.' },
       { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이의 적정 하루 물 섭취량을 계산해보세요.' }
     ]

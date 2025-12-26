@@ -38,13 +38,6 @@ export default function NotFound() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
-              href="/nutrition-calculator"
-              className="p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
-            >
-              <div className="font-medium text-gray-900">사료 성분 계산기</div>
-              <div className="text-sm text-gray-600">건물기준 영양 점수 계산</div>
-            </Link>
-            <Link
               href="/calorie-calculator"
               className="p-3 text-left rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
             >

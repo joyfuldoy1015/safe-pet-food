@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Calculator, Star, Heart, ClipboardList, Zap, Droplet, BookOpen, HelpCircle } from 'lucide-react'
+import { Star, ClipboardList, BookOpen, HelpCircle, Search } from 'lucide-react'
 
 interface Feature {
   name: string
@@ -14,32 +14,32 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    name: '사료 성분 계산기',
-    href: '/nutrition-calculator',
-    icon: Calculator,
-    description: '사료의 보장성분표를 입력하면 건물기준으로 영양 점수를 계산해드려요.',
+    name: '사료 브랜드 투명성',
+    href: '/brands',
+    icon: Star,
+    description: '다양한 사료 브랜드의 안전성과 투명성을 확인하고 비교해보세요.',
     color: 'from-orange-500 to-pink-500'
   },
   {
-    name: '건강검진표 분석기',
-    href: '/health-analyzer',
-    icon: ClipboardList,
-    description: '건강검진 결과를 업로드하면 AI가 상세하게 분석해드려요.',
-    color: 'from-green-500 to-teal-500'
+    name: '제품 검색하기',
+    href: '/search?tab=products',
+    icon: Search,
+    description: '브랜드 구분 없이 모든 제품을 검색하고 비교해보세요.',
+    color: 'from-purple-500 to-pink-500'
   },
   {
     name: '펫 로그',
     href: '/pet-log',
     icon: BookOpen,
     description: '우리 아이의 사료/간식 급여 이력을 기록하고 다른 집사들과 공유해보세요.',
-    color: 'from-blue-500 to-purple-500'
+    color: 'from-green-500 to-teal-500'
   },
   {
     name: 'Q&A 포럼',
     href: '/community/qa-forum',
     icon: HelpCircle,
     description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.',
-    color: 'from-purple-500 to-indigo-500'
+    color: 'from-blue-500 to-indigo-500'
   }
 ]
 

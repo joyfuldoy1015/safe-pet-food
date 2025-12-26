@@ -366,10 +366,10 @@ export default function CalorieCalculator() {
                     다시 계산하기
                   </button>
                   <Link
-                    href="/nutrition-calculator"
+                    href="/brands"
                     className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-center"
                   >
-                    영양성분 분석하기
+                    브랜드 평가 보기
                   </Link>
                 </div>
               </div>

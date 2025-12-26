@@ -81,16 +81,22 @@ export interface Database {
           category: 'feed' | 'snack' | 'supplement' | 'toilet'
           brand: string
           product: string
+          product_id: string | null  // 🆕 제품 ID
           status: 'feeding' | 'paused' | 'completed'
           period_start: string
           period_end: string | null
           duration_days: number | null
           rating: number | null
+          palatability_score: number | null  // 🆕 기호성
+          digestibility_score: number | null  // 🆕 소화력
+          coat_quality_score: number | null  // 🆕 털 상태
+          stool_quality_score: number | null  // 🆕 변 상태
           recommend: boolean | null
           continue_reasons: string[] | null
           stop_reasons: string[] | null
           excerpt: string
           notes: string | null
+          helpful_count: number  // 🆕 도움됨 카운트
           likes: number
           views: number
           comments_count: number
@@ -104,16 +110,22 @@ export interface Database {
           category: 'feed' | 'snack' | 'supplement' | 'toilet'
           brand: string
           product: string
+          product_id?: string | null  // 🆕
           status: 'feeding' | 'paused' | 'completed'
           period_start: string
           period_end?: string | null
           duration_days?: number | null
           rating?: number | null
+          palatability_score?: number | null  // 🆕
+          digestibility_score?: number | null  // 🆕
+          coat_quality_score?: number | null  // 🆕
+          stool_quality_score?: number | null  // 🆕
           recommend?: boolean | null
           continue_reasons?: string[] | null
           stop_reasons?: string[] | null
           excerpt: string
           notes?: string | null
+          helpful_count?: number  // 🆕
           likes?: number
           views?: number
           comments_count?: number
@@ -127,16 +139,22 @@ export interface Database {
           category?: 'feed' | 'snack' | 'supplement' | 'toilet'
           brand?: string
           product?: string
+          product_id?: string | null  // 🆕
           status?: 'feeding' | 'paused' | 'completed'
           period_start?: string
           period_end?: string | null
           duration_days?: number | null
           rating?: number | null
+          palatability_score?: number | null  // 🆕
+          digestibility_score?: number | null  // 🆕
+          coat_quality_score?: number | null  // 🆕
+          stool_quality_score?: number | null  // 🆕
           recommend?: boolean | null
           continue_reasons?: string[] | null
           stop_reasons?: string[] | null
           excerpt?: string
           notes?: string | null
+          helpful_count?: number  // 🆕
           likes?: number
           views?: number
           comments_count?: number

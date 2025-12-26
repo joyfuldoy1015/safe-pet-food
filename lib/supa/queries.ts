@@ -7,11 +7,25 @@ type Pet = Database['public']['Tables']['pets']['Row']
 type ReviewLogRow = Database['public']['Tables']['review_logs']['Row']
 
 /**
+ * UUID 형식 검증
+ */
+function isValidUUID(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(id)
+}
+
+/**
  * Get owner profile by ID
  */
 export async function getOwner(ownerId: string): Promise<Profile | null> {
   const supabase = getSupabaseClient()
   if (!supabase) return null
+
+  // UUID 검증: 잘못된 형식이면 쿼리하지 않고 null 반환
+  if (!isValidUUID(ownerId)) {
+    console.log('[getOwner] Invalid UUID format, skipping Supabase query:', ownerId)
+    return null
+  }
 
   const { data, error } = await supabase
     .from('profiles')
@@ -33,6 +47,12 @@ export async function getOwner(ownerId: string): Promise<Profile | null> {
 export async function getPet(petId: string): Promise<Pet | null> {
   const supabase = getSupabaseClient()
   if (!supabase) return null
+
+  // UUID 검증: 잘못된 형식이면 쿼리하지 않고 null 반환
+  if (!isValidUUID(petId)) {
+    console.log('[getPet] Invalid UUID format, skipping Supabase query:', petId)
+    return null
+  }
 
   const { data, error } = await supabase
     .from('pets')
@@ -58,6 +78,12 @@ export async function getLogsByOwnerPet(
 ): Promise<ClientReviewLog[]> {
   const supabase = getSupabaseClient()
   if (!supabase) return []
+
+  // UUID 검증: 잘못된 형식이면 쿼리하지 않고 빈 배열 반환
+  if (!isValidUUID(ownerId) || !isValidUUID(petId)) {
+    console.log('[getLogsByOwnerPet] Invalid UUID format, skipping Supabase query:', { ownerId, petId })
+    return []
+  }
 
   const { data, error } = await supabase
     .from('review_logs')
@@ -110,6 +136,12 @@ export async function getThreadsByLog(logId: string): Promise<any[]> {
   const supabase = getSupabaseClient()
   if (!supabase) return []
 
+  // UUID 검증: 잘못된 형식이면 쿼리하지 않고 빈 배열 반환
+  if (!isValidUUID(logId)) {
+    console.log('[getThreadsByLog] Invalid UUID format, skipping Supabase query:', logId)
+    return []
+  }
+
   const { data, error } = await supabase
     .from('qa_threads')
     .select('*')
@@ -133,6 +165,12 @@ export async function getPostsByThread(threadId: string): Promise<any[]> {
   const supabase = getSupabaseClient()
   if (!supabase) return []
 
+  // UUID 검증: 잘못된 형식이면 쿼리하지 않고 빈 배열 반환
+  if (!isValidUUID(threadId)) {
+    console.log('[getPostsByThread] Invalid UUID format, skipping Supabase query:', threadId)
+    return []
+  }
+
   const { data, error } = await supabase
     .from('qa_posts')
     .select('*')
@@ -154,6 +192,12 @@ export async function getPostsByThread(threadId: string): Promise<any[]> {
 export async function getBestAnswerExcerpt(logId: string): Promise<string | null> {
   const supabase = getSupabaseClient()
   if (!supabase) return null
+
+  // UUID 검증: 잘못된 형식이면 쿼리하지 않고 null 반환
+  if (!isValidUUID(logId)) {
+    console.log('[getBestAnswerExcerpt] Invalid UUID format, skipping Supabase query:', logId)
+    return null
+  }
 
   const { data, error } = await supabase
     .from('qa_best_answer_per_log')

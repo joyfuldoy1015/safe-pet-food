@@ -1,6 +1,14 @@
 import { getSupabaseClient } from '../supa/client'
 
 /**
+ * UUID 형식 검증
+ */
+function isValidUUID(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(id)
+}
+
+/**
  * Get recent comments for given log IDs
  * Only returns visible comments (admin_status='visible')
  */
@@ -12,6 +20,14 @@ export async function getRecentComments(
   const supabase = getSupabaseClient()
   if (!supabase || logIds.length === 0) return []
 
+  // UUID 검증: 잘못된 형식의 ID들을 필터링
+  const validLogIds = logIds.filter(id => isValidUUID(id))
+  
+  if (validLogIds.length === 0) {
+    console.log('[getRecentComments] No valid UUID format IDs, skipping Supabase query')
+    return []
+  }
+
   const { data, error } = await supabase
     .from('comments')
     .select(`
@@ -19,7 +35,7 @@ export async function getRecentComments(
       profiles!comments_author_id_fkey(nickname),
       review_logs!comments_log_id_fkey(id, brand, product)
     `)
-    .in('log_id', logIds)
+    .in('log_id', validLogIds)
     .eq('admin_status', 'visible')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
@@ -44,6 +60,14 @@ export async function getRecentQA(
   const supabase = getSupabaseClient()
   if (!supabase || logIds.length === 0) return []
 
+  // UUID 검증: 잘못된 형식의 ID들을 필터링
+  const validLogIds = logIds.filter(id => isValidUUID(id))
+  
+  if (validLogIds.length === 0) {
+    console.log('[getRecentQA] No valid UUID format IDs, skipping Supabase query')
+    return []
+  }
+
   const { data, error } = await supabase
     .from('qa_posts')
     .select(`
@@ -52,7 +76,7 @@ export async function getRecentQA(
       profiles!qa_posts_author_id_fkey(nickname),
       review_logs!qa_threads_log_id_fkey(id, brand, product)
     `)
-    .in('qa_threads.log_id', logIds)
+    .in('qa_threads.log_id', validLogIds)
     .eq('admin_status', 'visible')
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)

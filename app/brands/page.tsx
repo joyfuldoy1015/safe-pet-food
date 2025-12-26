@@ -399,18 +399,12 @@ export default function BrandsPage() {
                   우리 아이 사료도 분석해보세요! 🔍
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  현재 먹이고 있는 사료의 영양 성분을 분석하고 칼로리 계산까지 한 번에!
+                  현재 먹이고 있는 사료의 칼로리를 계산하고 적정 급여량을 확인하세요!
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
-                    href="/nutrition-calculator"
-                    className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-bold py-3 px-6 rounded-xl transition-all duration-200"
-                  >
-                    성분 분석하기
-                  </Link>
-                  <Link
                     href="/calorie-calculator"
-                    className="inline-block bg-white hover:bg-gray-50 text-gray-900 font-bold py-3 px-6 rounded-xl border border-gray-200 transition-all duration-200"
+                    className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-bold py-3 px-6 rounded-xl transition-all duration-200"
                   >
                     칼로리 계산하기
                   </Link>

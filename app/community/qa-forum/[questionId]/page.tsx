@@ -486,32 +486,37 @@ export default function QuestionDetailPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={handleQuestionUpvote}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                      question.isUpvoted
-                        ? 'text-red-600 bg-red-50 hover:bg-red-100'
-                        : 'text-gray-600 bg-gray-50 hover:bg-gray-100 hover:text-red-600'
-                    }`}
-                  >
-                    <ArrowUp
-                      className={`h-5 w-5 ${question.isUpvoted ? 'fill-current' : ''}`}
-                    />
-                    <span className="font-medium">Upvote</span>
-                    <span className="text-lg font-semibold">
-                      {question.votes}
-                    </span>
-                  </button>
-                </div>
-                <div className="flex items-center space-x-4 text-gray-600">
-                  <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-gray-200">
+                {/* Upvote Button */}
+                <button
+                  onClick={handleQuestionUpvote}
+                  className={`flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg transition-colors ${
+                    question.isUpvoted
+                      ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                      : 'text-gray-600 bg-gray-50 hover:bg-gray-100 hover:text-red-600'
+                  }`}
+                >
+                  <ArrowUp
+                    className={`h-5 w-5 ${question.isUpvoted ? 'fill-current' : ''}`}
+                  />
+                  <span className="font-medium">Upvote</span>
+                  <span className="text-lg font-semibold">
+                    {question.votes}
+                  </span>
+                </button>
+                
+                {/* Answer Count & Report */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 text-gray-600">
+                  <div className="flex items-center space-x-2 px-4 py-2.5 bg-gray-50 rounded-lg">
                     <MessageCircle className="h-5 w-5" />
                     <span className="font-medium">{question.answerCount}개 답변</span>
                   </div>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <button 
+                    className="flex items-center justify-center px-4 py-2.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="신고하기"
+                  >
                     <Flag className="h-5 w-5" />
+                    <span className="ml-2 font-medium sm:hidden">신고</span>
                   </button>
                 </div>
               </div>

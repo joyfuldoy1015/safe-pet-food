@@ -38,10 +38,15 @@ export default function ReviewLogForm({
     category: 'feed',
     brand: '',
     product: '',
+    product_id: null,  // 🆕 제품 ID
     status: 'feeding',
     period_start: new Date().toISOString().split('T')[0],
     period_end: null,
     rating: null,
+    palatability_score: null,  // 🆕 기호성
+    digestibility_score: null,  // 🆕 소화력
+    coat_quality_score: null,  // 🆕 털 상태
+    stool_quality_score: null,  // 🆕 변 상태
     recommend: null,
     continue_reasons: [],
     stop_reasons: [],
@@ -60,10 +65,15 @@ export default function ReviewLogForm({
         category: editData.category,
         brand: editData.brand,
         product: editData.product,
+        product_id: editData.product_id || null,
         status: editData.status,
         period_start: editData.period_start,
         period_end: editData.period_end || null,
         rating: editData.rating || null,
+        palatability_score: editData.palatability_score || null,
+        digestibility_score: editData.digestibility_score || null,
+        coat_quality_score: editData.coat_quality_score || null,
+        stool_quality_score: editData.stool_quality_score || null,
         recommend: editData.recommend ?? null,
         continue_reasons: editData.continue_reasons || [],
         stop_reasons: editData.stop_reasons || [],
@@ -77,10 +87,15 @@ export default function ReviewLogForm({
         category: 'feed',
         brand: '',
         product: '',
+        product_id: null,
         status: 'feeding',
         period_start: new Date().toISOString().split('T')[0],
         period_end: null,
         rating: null,
+        palatability_score: null,
+        digestibility_score: null,
+        coat_quality_score: null,
+        stool_quality_score: null,
         recommend: null,
         continue_reasons: [],
         stop_reasons: [],
@@ -114,11 +129,16 @@ export default function ReviewLogForm({
         category: formData.category as 'feed' | 'snack' | 'supplement' | 'toilet',
         brand: formData.brand as string,
         product: formData.product as string,
+        product_id: formData.product_id || null,  // 🆕 제품 ID
         status: formData.status as 'feeding' | 'paused' | 'completed',
         period_start: formData.period_start as string,
         period_end: formData.period_end || null,
         duration_days: durationDays,
         rating: formData.rating ? Number(formData.rating) : null,
+        palatability_score: formData.palatability_score ? Number(formData.palatability_score) : null,  // 🆕
+        digestibility_score: formData.digestibility_score ? Number(formData.digestibility_score) : null,  // 🆕
+        coat_quality_score: formData.coat_quality_score ? Number(formData.coat_quality_score) : null,  // 🆕
+        stool_quality_score: formData.stool_quality_score ? Number(formData.stool_quality_score) : null,  // 🆕
         recommend: formData.recommend ?? null,
         continue_reasons: formData.continue_reasons && formData.continue_reasons.length > 0 ? formData.continue_reasons : null,
         stop_reasons: formData.stop_reasons && formData.stop_reasons.length > 0 ? formData.stop_reasons : null,
@@ -380,21 +400,172 @@ export default function ReviewLogForm({
               />
             </div>
 
-            {/* Rating */}
-            <div>
-              <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-2">
-                평점 (1-5)
+            {/* 세부 평가 항목 */}
+            <div className="space-y-4 p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border-2 border-blue-100">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">⭐</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">세부 평가</h3>
+                <span className="text-xs text-gray-500 ml-auto">제품 상세 페이지에 반영됩니다</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 rounded-lg">
+                {/* 기호성 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    🍖 기호성
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">반려동물이 잘 먹나요?</p>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, palatability_score: star })}
+                        className="transition-transform hover:scale-110 focus:outline-none"
+                      >
+                        <span className={`text-3xl ${
+                          formData.palatability_score && star <= formData.palatability_score
+                            ? 'filter-none'
+                            : 'opacity-30'
+                        }`}>
+                          ⭐
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {formData.palatability_score && (
+                    <p className="text-sm font-medium text-blue-600 mt-2">
+                      {formData.palatability_score}.0 / 5.0
+                    </p>
+                  )}
+                </div>
+
+                {/* 소화력 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    💚 소화력
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">소화를 잘 시키나요?</p>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, digestibility_score: star })}
+                        className="transition-transform hover:scale-110 focus:outline-none"
+                      >
+                        <span className={`text-3xl ${
+                          formData.digestibility_score && star <= formData.digestibility_score
+                            ? 'filter-none'
+                            : 'opacity-30'
+                        }`}>
+                          ⭐
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {formData.digestibility_score && (
+                    <p className="text-sm font-medium text-blue-600 mt-2">
+                      {formData.digestibility_score}.0 / 5.0
+                    </p>
+                  )}
+                </div>
+
+                {/* 털 상태 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ✨ 털 상태
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">털이 윤기나고 건강한가요?</p>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, coat_quality_score: star })}
+                        className="transition-transform hover:scale-110 focus:outline-none"
+                      >
+                        <span className={`text-3xl ${
+                          formData.coat_quality_score && star <= formData.coat_quality_score
+                            ? 'filter-none'
+                            : 'opacity-30'
+                        }`}>
+                          ⭐
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {formData.coat_quality_score && (
+                    <p className="text-sm font-medium text-blue-600 mt-2">
+                      {formData.coat_quality_score}.0 / 5.0
+                    </p>
+                  )}
+                </div>
+
+                {/* 변 상태 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    💩 변 상태
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">변이 건강한가요?</p>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, stool_quality_score: star })}
+                        className="transition-transform hover:scale-110 focus:outline-none"
+                      >
+                        <span className={`text-3xl ${
+                          formData.stool_quality_score && star <= formData.stool_quality_score
+                            ? 'filter-none'
+                            : 'opacity-30'
+                        }`}>
+                          ⭐
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {formData.stool_quality_score && (
+                    <p className="text-sm font-medium text-blue-600 mt-2">
+                      {formData.stool_quality_score}.0 / 5.0
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 전체 만족도 */}
+            <div className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-100">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ⭐ 전체 만족도
               </label>
-              <input
-                id="rating"
-                type="number"
-                min="1"
-                max="5"
-                step="0.1"
-                value={formData.rating || ''}
-                onChange={(e) => setFormData({ ...formData, rating: e.target.value ? Number(e.target.value) : null })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-              />
+              <p className="text-xs text-gray-500 mb-3">전반적으로 만족하시나요?</p>
+              <div className="flex gap-3 justify-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, rating: star })}
+                    className="transition-transform hover:scale-110 focus:outline-none"
+                  >
+                    <span className={`text-5xl ${
+                      formData.rating && star <= formData.rating
+                        ? 'filter-none'
+                        : 'opacity-30'
+                    }`}>
+                      ⭐
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {formData.rating && (
+                <p className="text-lg font-bold text-orange-600 mt-4 text-center">
+                  {formData.rating}.0 / 5.0
+                </p>
+              )}
             </div>
 
             {/* Recommend */}
