@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle } from 'lucide-react'
+import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -535,6 +535,37 @@ export default function PetLogPostDetail() {
     window.location.href = '/login'
   }
 
+  // 포스트 삭제 핸들러
+  const handleDelete = async () => {
+    if (!confirm('정말로 이 게시글을 삭제하시겠습니까? 삭제된 내용은 복구할 수 없습니다.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/pet-log/posts/${postId}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete post')
+      }
+
+      alert('게시글이 삭제되었습니다.')
+      router.push('/pet-log')
+    } catch (error) {
+      console.error('Failed to delete post:', error)
+      alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.')
+    }
+  }
+
+  // 포스트 수정 페이지로 이동
+  const handleEdit = () => {
+    router.push(`/pet-log/posts/${postId}/edit`)
+  }
+
+  // 작성자 확인
+  const isAuthor = user && post && (post.ownerId === user.id || post.ownerId === user.email)
+
   if (!post) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -770,12 +801,35 @@ export default function PetLogPostDetail() {
               </div>
             </div>
             
-            {/* Right Section: Stats & Action Button */}
-            <div className="flex items-center gap-6 flex-shrink-0">
+            {/* Right Section: Stats & Action Buttons */}
+            <div className="flex items-center gap-4 flex-shrink-0">
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200 text-center">
                 <div className="text-3xl font-bold text-blue-600 mb-1">{post.totalRecords}</div>
                 <div className="text-sm font-semibold text-blue-600">총 기록</div>
               </div>
+              
+              {/* 작성자만 볼 수 있는 수정/삭제 버튼 */}
+              {isAuthor && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleEdit}
+                    className="flex items-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                    title="수정"
+                  >
+                    <Edit className="h-4 w-4" />
+                    <span className="text-sm font-semibold">수정</span>
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                    title="삭제"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="text-sm font-semibold">삭제</span>
+                  </button>
+                </div>
+              )}
+              
               <button
                 onClick={() => {
                   if (isLoggedIn) {
@@ -839,12 +893,32 @@ export default function PetLogPostDetail() {
                   setShowLoginModal(true)
                 }
               }}
-              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-semibold justify-center w-full"
+              className="flex-1 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-semibold justify-center"
             >
               <Award className="h-4 w-4" />
               <span className="whitespace-nowrap">내 경험 공유하기</span>
             </button>
           </div>
+          
+          {/* 작성자만 볼 수 있는 수정/삭제 버튼 (모바일) */}
+          {isAuthor && (
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={handleEdit}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-md text-sm font-semibold"
+              >
+                <Edit className="h-4 w-4" />
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200 shadow-md text-sm font-semibold"
+              >
+                <Trash2 className="h-4 w-4" />
+                삭제
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Category Sections */}

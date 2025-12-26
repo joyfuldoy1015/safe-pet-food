@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,85 +19,49 @@ export async function GET(
   { params }: { params: { postId: string } }
 ) {
   try {
-    const postId = params.postId
+    const { postId } = params
 
-    // Supabase 사용 가능하면 Supabase에서 가져오기
-    if (isSupabaseConfigured()) {
-      try {
-        // 포스트 가져오기
-        const { data: post, error: postError } = await supabase
-          .from('pet_log_posts')
-          .select('*')
-          .eq('id', postId)
-          .single()
-
-        if (!postError && post) {
-          // 급여 기록 가져오기
-          const { data: records } = await supabase
-            .from('pet_log_feeding_records')
-            .select('*')
-            .eq('post_id', postId)
-            .order('created_at', { ascending: false })
-
-          // 댓글 가져오기
-          const { data: comments } = await supabase
-            .from('pet_log_comments')
-            .select('*')
-            .eq('post_id', postId)
-            .order('created_at', { ascending: true })
-
-          // 데이터 형식 변환 (Supabase → JSON 형식)
-          const transformedPost = {
-            ...post,
-            petName: post.pet_name,
-            petBreed: post.pet_breed,
-            petAge: post.pet_age,
-            petWeight: post.pet_weight,
-            ownerName: post.owner_name,
-            ownerId: post.user_id,
-            ownerAvatar: post.owner_avatar,
-            petAvatar: post.pet_avatar,
-            petSpecies: post.pet_species,
-            createdAt: post.created_at,
-            updatedAt: post.updated_at,
-            totalRecords: post.total_records,
-            views: post.views,
-            likes: post.likes,
-            comments: (comments || []).map((comment: any) => ({
-              ...comment,
-              userName: comment.user_name,
-              userAvatar: comment.user_avatar,
-              userId: comment.user_id,
-              createdAt: comment.created_at,
-              replies: comment.replies || []
-            })),
-            totalComments: comments?.length || 0,
-            feedingRecords: (records || []).map((record: any) => ({
-              ...record,
-              productName: record.product_name,
-              startDate: record.start_date,
-              endDate: record.end_date,
-              repurchaseIntent: record.repurchase_intent,
-              sideEffects: record.side_effects || [],
-              benefits: record.benefits || []
-            }))
-          }
-
-          return NextResponse.json(transformedPost, {
-            status: 200,
-            headers: {
-              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
-            }
-          })
-        }
-      } catch (supabaseError) {
-        console.warn('Supabase error, returning null:', supabaseError)
-      }
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: 'Supabase not configured' },
+        { status: 501 }
+      )
     }
 
-    // Supabase가 없거나 데이터가 없으면 null 반환
-    // 클라이언트에서 localStorage fallback 사용
-    return NextResponse.json(null, { status: 404 })
+    // 포스트 조회
+    const { data: post, error: postError } = await supabase
+      .from('pet_log_posts')
+      .select('*')
+      .eq('id', postId)
+      .single()
+
+    if (postError || !post) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      )
+    }
+
+    // 급여 기록 조회
+    const { data: records } = await supabase
+      .from('pet_log_feeding_records')
+      .select('*')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: false })
+
+    // 댓글 조회
+    const { data: comments } = await supabase
+      .from('pet_log_comments')
+      .select('*')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true })
+
+    return NextResponse.json({
+      ...post,
+      feedingRecords: records || [],
+      comments: comments || [],
+      totalComments: comments?.length || 0
+    })
   } catch (error) {
     console.error('Failed to fetch pet log post:', error)
     return NextResponse.json(
@@ -106,12 +71,14 @@ export async function GET(
   }
 }
 
-// PUT - 펫 로그 포스트 업데이트
-export async function PUT(
+// PATCH - 펫 로그 포스트 수정
+export async function PATCH(
   request: NextRequest,
   { params }: { params: { postId: string } }
 ) {
   try {
+    const { postId } = params
+
     if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: 'Supabase not configured' },
@@ -119,34 +86,109 @@ export async function PUT(
       )
     }
 
-    const postId = params.postId
     const body = await request.json()
+    const { post, feedingRecords } = body
 
-    const { data: updatedPost, error } = await supabase
+    // 서버 사이드 Supabase 클라이언트로 인증 확인
+    const serverSupabase = getServerClient()
+    const { data: { user }, error: authError } = await serverSupabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // 기존 포스트 조회 및 권한 확인
+    const { data: existingPost, error: fetchError } = await supabase
+      .from('pet_log_posts')
+      .select('user_id')
+      .eq('id', postId)
+      .single()
+
+    if (fetchError || !existingPost) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      )
+    }
+
+    // 작성자 확인
+    if (existingPost.user_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden - You can only edit your own posts' },
+        { status: 403 }
+      )
+    }
+
+    // 포스트 업데이트
+    const { data: updatedPost, error: updateError } = await supabase
       .from('pet_log_posts')
       .update({
-        pet_name: body.petName,
-        pet_breed: body.petBreed,
-        pet_age: body.petAge,
-        pet_weight: body.petWeight,
-        total_records: body.totalRecords,
-        views: body.views,
-        likes: body.likes,
-        comments_count: body.commentsCount || body.comments?.length || 0
+        pet_name: post.petName,
+        pet_breed: post.petBreed,
+        pet_age: post.petAge,
+        pet_weight: post.petWeight,
+        owner_name: post.ownerName,
+        pet_avatar: post.petAvatar || null,
+        pet_species: post.petSpecies || 'dog',
+        total_records: feedingRecords?.length || 0,
+        updated_at: new Date().toISOString()
       })
       .eq('id', postId)
       .select()
       .single()
 
-    if (error) {
-      console.error('Failed to update post:', error)
+    if (updateError) {
+      console.error('Failed to update post:', updateError)
       return NextResponse.json(
-        { error: 'Failed to update post', details: error.message },
+        { error: 'Failed to update post', details: updateError.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(updatedPost)
+    // 기존 급여 기록 삭제
+    await supabase
+      .from('pet_log_feeding_records')
+      .delete()
+      .eq('post_id', postId)
+
+    // 새로운 급여 기록 추가
+    if (feedingRecords && feedingRecords.length > 0) {
+      const recordsToInsert = feedingRecords.map((record: any) => ({
+        id: record.id,
+        post_id: postId,
+        product_name: record.productName,
+        category: record.category,
+        brand: record.brand || null,
+        start_date: record.startDate,
+        end_date: record.endDate || null,
+        status: record.status,
+        duration: record.duration || '',
+        palatability: record.palatability || 0,
+        satisfaction: record.satisfaction || 0,
+        repurchase_intent: record.repurchaseIntent || false,
+        comment: record.comment || null,
+        price: record.price || null,
+        purchase_location: record.purchaseLocation || null,
+        side_effects: record.sideEffects || [],
+        benefits: record.benefits || []
+      }))
+
+      const { error: recordsError } = await supabase
+        .from('pet_log_feeding_records')
+        .insert(recordsToInsert)
+
+      if (recordsError) {
+        console.error('Failed to update feeding records:', recordsError)
+      }
+    }
+
+    return NextResponse.json({
+      ...updatedPost,
+      feedingRecords: feedingRecords || []
+    })
   } catch (error) {
     console.error('Failed to update pet log post:', error)
     return NextResponse.json(
@@ -162,6 +204,8 @@ export async function DELETE(
   { params }: { params: { postId: string } }
 ) {
   try {
+    const { postId } = params
+
     if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { error: 'Supabase not configured' },
@@ -169,22 +213,66 @@ export async function DELETE(
       )
     }
 
-    const postId = params.postId
+    // 서버 사이드 Supabase 클라이언트로 인증 확인
+    const serverSupabase = getServerClient()
+    const { data: { user }, error: authError } = await serverSupabase.auth.getUser()
 
-    const { error } = await supabase
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // 기존 포스트 조회 및 권한 확인
+    const { data: existingPost, error: fetchError } = await supabase
+      .from('pet_log_posts')
+      .select('user_id')
+      .eq('id', postId)
+      .single()
+
+    if (fetchError || !existingPost) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      )
+    }
+
+    // 작성자 확인
+    if (existingPost.user_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden - You can only delete your own posts' },
+        { status: 403 }
+      )
+    }
+
+    // 연관된 급여 기록 삭제
+    await supabase
+      .from('pet_log_feeding_records')
+      .delete()
+      .eq('post_id', postId)
+
+    // 연관된 댓글 삭제
+    await supabase
+      .from('pet_log_comments')
+      .delete()
+      .eq('post_id', postId)
+
+    // 포스트 삭제
+    const { error: deleteError } = await supabase
       .from('pet_log_posts')
       .delete()
       .eq('id', postId)
 
-    if (error) {
-      console.error('Failed to delete post:', error)
+    if (deleteError) {
+      console.error('Failed to delete post:', deleteError)
       return NextResponse.json(
-        { error: 'Failed to delete post', details: error.message },
+        { error: 'Failed to delete post', details: deleteError.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ message: 'Post deleted successfully' })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Failed to delete pet log post:', error)
     return NextResponse.json(
@@ -193,4 +281,3 @@ export async function DELETE(
     )
   }
 }
-
