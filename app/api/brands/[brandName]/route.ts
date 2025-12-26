@@ -102,16 +102,42 @@ export async function GET(
   try {
     const brandName = decodeURIComponent(params.brandName)
     
-    // Supabase 사용 가능하면 Supabase에서 가져오기
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('brands')
-          .select('*')
-          .eq('name', brandName)
-          .single()
+    console.log('[API brands] Request for brand:', brandName)
+    
+    // Supabase에서만 가져오기 (mock fallback 제거)
+    if (!isSupabaseConfigured()) {
+      console.error('[API brands] Supabase not configured')
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 500 }
+      )
+    }
 
-        if (!error && data) {
+    try {
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('name', brandName)
+        .single()
+
+      if (error) {
+        console.error('[API brands] Supabase error:', error)
+        return NextResponse.json(
+          { error: 'Brand not found' },
+          { status: 404 }
+        )
+      }
+
+      if (!data) {
+        console.error('[API brands] No data returned for brand:', brandName)
+        return NextResponse.json(
+          { error: 'Brand not found' },
+          { status: 404 }
+        )
+      }
+
+      // 브랜드 데이터 변환
+      if (data) {
           // Supabase에서 ingredients 데이터 가져오기
           // JSONB 필드를 파싱하여 배열로 변환
           let ingredients: Array<{
@@ -249,8 +275,8 @@ export async function GET(
             })
           }
           
-          // Get reviews for this brand (현재는 reviews 테이블이 없으므로 JSON 사용)
-          const brandReviews = reviewsData.filter(review => review.brand_id === brand.id)
+          // Get reviews for this brand (현재는 reviews 테이블이 없으므로 빈 배열)
+          const brandReviews: any[] = []
           
           // Calculate review statistics
           const reviewStats = calculateReviewStats(brandReviews)
@@ -275,52 +301,13 @@ export async function GET(
           
           return NextResponse.json(responseData)
         }
-      } catch (supabaseError) {
-        console.warn('Supabase error, falling back to JSON:', supabaseError)
-      }
-    }
-
-    // Fallback: JSON 파일에서 브랜드 데이터 가져오기
-    const brand = brandsData.find((b: any) => b.name === brandName)
-    
-    if (!brand) {
+    } catch (supabaseError) {
+      console.error('[API brands] Supabase error:', supabaseError)
       return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
+        { error: 'Failed to fetch brand data' },
+        { status: 500 }
       )
     }
-
-    // ingredients 배열이 있으면 ingredient_disclosure 자동 계산
-    let ingredientDisclosure = (brand as any).ingredient_disclosure || {
-      fully_disclosed: 0,
-      partially_disclosed: 0,
-      not_disclosed: 0
-    }
-    
-    // ingredients 배열이 있고 disclosure_level이 있으면 자동 계산
-    if ((brand as any).ingredients && Array.isArray((brand as any).ingredients) && (brand as any).ingredients.length > 0) {
-      const hasDisclosureLevels = (brand as any).ingredients.some((ing: any) => ing.disclosure_level)
-      if (hasDisclosureLevels) {
-        ingredientDisclosure = calculateIngredientDisclosure((brand as any).ingredients)
-      }
-    }
-
-    // Get reviews for this brand
-    const brandReviews = reviewsData.filter((review: any) => review.brand_id === brand.id)
-    
-    // Calculate review statistics
-    const reviewStats = calculateReviewStats(brandReviews)
-    
-    // Calculate trust metrics based on brand data and reviews
-    const trustMetrics = calculateTrustMetrics(brand, brandReviews)
-    
-    return NextResponse.json({
-      ...brand,
-      ingredient_disclosure: ingredientDisclosure,
-      reviews: brandReviews,
-      review_stats: reviewStats,
-      trust_metrics: trustMetrics
-    })
   } catch (error) {
     console.error('Failed to fetch brand data:', error)
     return NextResponse.json(
