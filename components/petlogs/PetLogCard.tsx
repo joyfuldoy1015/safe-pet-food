@@ -242,20 +242,6 @@ export default function PetLogCard(props: PetLogCardProps) {
           </span>
         </div>
       </div>
-
-      {/* 버튼 */}
-      <div className="mt-4">
-        <button
-          className="w-full px-4 py-2.5 rounded-xl bg-[#3056F5] text-white text-sm font-medium hover:bg-[#2648e6] transition-all duration-200 shadow-sm hover:shadow-md"
-          onClick={(e) => {
-            handleButtonClick(e)
-            props.onDetail?.()
-          }}
-          aria-label="자세히 보기"
-        >
-          자세히 보기
-        </button>
-      </div>
     </article>
   );
 }
