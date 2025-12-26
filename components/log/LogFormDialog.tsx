@@ -47,20 +47,23 @@ export default function LogFormDialog({
   const [isLoadingPets, setIsLoadingPets] = useState(false)
   const [authTimeout, setAuthTimeout] = useState(false)
 
-  // Safety timeout: if auth loading takes more than 3 seconds, assume not logged in
+  // Safety timeout: if auth loading takes more than 6 seconds, assume not logged in
+  // useAuth의 타임아웃(5초)보다 길게 설정하여 세션 로드 완료를 기다림
   useEffect(() => {
     if (!open) return
 
     const timeoutId = setTimeout(() => {
-      console.warn('[LogFormDialog] Auth loading timeout after 3 seconds')
-      setAuthTimeout(true)
-    }, 3000)
+      if (authLoading) {
+        console.warn('[LogFormDialog] Auth loading timeout after 6 seconds')
+        setAuthTimeout(true)
+      }
+    }, 6000)  // 3초 → 6초로 연장
 
     return () => {
       clearTimeout(timeoutId)
       setAuthTimeout(false)
     }
-  }, [open])
+  }, [open, authLoading])
 
   const loadPets = useCallback(async () => {
     setIsLoadingPets(true)
@@ -190,16 +193,33 @@ export default function LogFormDialog({
     !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   
   // In development mode without Supabase, allow bypassing auth
-  // Only show login required after auth loading is complete or timeout
+  // Show login required only when:
+  // 1. Auth is required (requireAuth = true)
+  // 2. Auth loading is complete OR timeout occurred
+  // 3. No user is logged in
+  // 4. Supabase is configured
   const showLoginRequired = requireAuth && (!authLoading || authTimeout) && !user && hasSupabase
 
   // If Supabase is not configured, show form directly (dev mode)
   const bypassAuth = !hasSupabase
+  
+  // Debug info (개발 환경에서만)
+  if (process.env.NODE_ENV === 'development' && open) {
+    console.log('[LogFormDialog] Auth state:', { 
+      authLoading, 
+      authTimeout, 
+      hasUser: !!user, 
+      showLoginRequired,
+      requireAuth,
+      hasSupabase
+    })
+  }
 
   if (!open) return null
 
-  // Show loading spinner while checking auth status (but not after timeout or if bypassing auth)
-  if (authLoading && !authTimeout && !bypassAuth) {
+  // Show loading spinner while checking auth status
+  // authTimeout이 발생하면 로딩을 중단하고 로그인 화면 표시
+  if (authLoading && !authTimeout && !bypassAuth && requireAuth) {
     return (
       <AnimatePresence>
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
