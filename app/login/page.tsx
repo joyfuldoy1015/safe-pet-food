@@ -33,9 +33,43 @@ export default function LoginPage() {
   // If already logged in, redirect (auth loading 완료 후에만 체크)
   useEffect(() => {
     if (!authLoading && user) {
+      console.log('[Login Page] User logged in, redirecting to:', redirectTo)
       router.push(redirectTo)
+      router.refresh()
     }
   }, [user, authLoading, redirectTo, router])
+
+  // URL에서 auth=success 확인하고 세션 재확인
+  useEffect(() => {
+    const checkSession = async () => {
+      if (searchParams.get('auth') === 'success') {
+        console.log('[Login Page] Auth success detected, checking session...')
+        
+        const supabase = getBrowserClient()
+        
+        // 여러 번 재시도 (OAuth 콜백 후 세션이 즉시 반영되지 않을 수 있음)
+        for (let i = 0; i < 5; i++) {
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          const { data: { session }, error } = await supabase.auth.getSession()
+          
+          console.log(`[Login Page] Session check attempt ${i + 1}:`, {
+            hasSession: !!session,
+            userId: session?.user?.id,
+            error: error?.message
+          })
+          
+          if (session?.user) {
+            console.log('[Login Page] Session found, will redirect via useAuth')
+            // useAuth가 세션을 감지하고 자동으로 리다이렉트할 것임
+            break
+          }
+        }
+      }
+    }
+    
+    checkSession()
+  }, [searchParams])
 
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true)

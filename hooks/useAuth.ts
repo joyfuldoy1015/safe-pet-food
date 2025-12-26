@@ -206,10 +206,35 @@ export function useAuth(): UseAuthReturn {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       if (urlParams.get('auth') === 'success') {
-        // 세션 다시 로드 (약간의 지연을 주어 쿠키가 설정될 시간 제공)
-        setTimeout(() => {
-          loadSession()
-        }, 500)
+        console.log('[useAuth] Auth success parameter detected, reloading session...')
+        
+        // 세션 다시 로드 (여러 번 재시도)
+        const retrySessionLoad = async () => {
+          for (let i = 0; i < 5; i++) {
+            await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
+            
+            const { data: { session }, error } = await supabase.auth.getSession()
+            
+            console.log(`[useAuth] Session reload attempt ${i + 1}:`, {
+              hasSession: !!session,
+              userId: session?.user?.id,
+              error: error?.message
+            })
+            
+            if (session?.user) {
+              console.log('[useAuth] Session found! Updating state...')
+              if (mounted) {
+                setSession(session)
+                setUser(session.user)
+                await loadProfile(session.user.id, session.user.email)
+                setIsLoading(false)
+              }
+              break
+            }
+          }
+        }
+        
+        retrySessionLoad()
       }
     }
 
