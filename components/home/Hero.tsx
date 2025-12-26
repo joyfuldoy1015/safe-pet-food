@@ -15,7 +15,7 @@ export default function Hero({ onCTAClick }: HeroProps) {
   return (
     <section className="bg-gradient-to-b from-yellow-50 to-white py-12 sm:py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
           반려동물과 함께하는 시간<br />
           가장 따뜻한 순간
         </h1>
