@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 import { 
   ArrowLeft, 
   Plus, 
@@ -80,6 +81,9 @@ export default function WritePostPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedPetId = searchParams.get('petId')
+  
+  // 로그인한 사용자 정보 가져오기
+  const { user, profile } = useAuth()
   
   // 등록된 반려동물 프로필 목록
   const [petProfiles, setPetProfiles] = useState<PetProfile[]>([])
@@ -394,6 +398,13 @@ export default function WritePostPage() {
     const postId = `post-${Date.now()}`
     const now = new Date().toISOString().split('T')[0]
     
+    // 로그인 확인
+    if (!user) {
+      alert('로그인이 필요합니다.')
+      router.push('/login')
+      return
+    }
+
     // 포스트 데이터 구성
     const postData = {
       id: postId,
@@ -401,8 +412,8 @@ export default function WritePostPage() {
       petBreed: petInfo.petBreed,
       petAge: petInfo.petAge,
       petWeight: petInfo.petWeight,
-      ownerName: petInfo.ownerName,
-      ownerId: 'current-user', // 실제로는 세션에서 가져옴
+      ownerName: profile?.nickname || user.email || '사용자',
+      ownerId: user.id,
       ownerAvatar: '👤',
       petAvatar: selectedPetProfile && !useNewPet && petProfiles.length > 0
         ? (petProfiles.find(p => p.id === selectedPetProfile)?.species === 'cat' ? '🐱' : '🐕')
