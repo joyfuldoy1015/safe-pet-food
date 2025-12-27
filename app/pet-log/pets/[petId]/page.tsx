@@ -1,540 +1,384 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { 
   ArrowLeft, 
-  Edit, 
-  Plus,
-  Calendar,
   PawPrint,
+  Calendar,
+  Edit,
   Heart,
-  Star,
-  Clock,
-  TrendingUp,
-  Eye,
   MessageCircle,
-  ThumbsUp,
-  Package,
-  Filter
+  Eye,
+  Star,
+  Plus
 } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import { getBrowserClient } from '@/lib/supabase-client'
+import type { Database } from '@/lib/types/database'
 
-interface PetProfile {
-  id: string
-  name: string
-  species: 'dog' | 'cat'
-  birthYear: number
-  age: string
-  gender: 'male' | 'female'
-  neutered: boolean
-  breed: string
-  weight: string
-  allergies: string[]
-  healthConditions: string[]
-  specialNotes: string
-  createdAt: string
-  updatedAt: string
-  ownerId: string
-  ownerName: string
-}
-
-interface FeedingRecord {
-  id: string
-  productName: string
-  category: '사료' | '간식' | '영양제' | '화장실'
-  brand: string
-  startDate: string
-  endDate?: string
-  status: '급여중' | '급여완료' | '급여중지'
-  duration: string
-  palatability: number
-  satisfaction: number
-  repurchaseIntent: boolean
-  comment?: string
-  price?: string
-  purchaseLocation?: string
-  sideEffects?: string[]
-  benefits?: string[]
-}
-
-interface PetLogPost {
-  id: string
-  petName: string
-  petBreed: string
-  petAge: string
-  petWeight: string
-  ownerName: string
-  ownerId: string
-  ownerAvatar: string
-  petAvatar: string
-  petSpecies: 'dog' | 'cat'
-  createdAt: string
-  updatedAt: string
-  totalRecords: number
-  feedingRecords: FeedingRecord[]
-  views: number
-  likes: number
-  comments: number
-  isLiked: boolean
-}
-
-const categoryConfig = {
-  '사료': { icon: '🍽️', color: 'text-blue-600 bg-blue-50 border-blue-200' },
-  '간식': { icon: '🦴', color: 'text-green-600 bg-green-50 border-green-200' },
-  '영양제': { icon: '💊', color: 'text-purple-600 bg-purple-50 border-purple-200' },
-  '화장실': { icon: '🚽', color: 'text-orange-600 bg-orange-50 border-orange-200' }
-}
-
-const statusConfig = {
-  '급여중': { color: 'text-green-700 bg-green-100 border-green-300' },
-  '급여완료': { color: 'text-gray-700 bg-gray-100 border-gray-300' },
-  '급여중지': { color: 'text-red-700 bg-red-100 border-red-300' }
-}
+type Pet = Database['public']['Tables']['pets']['Row']
+type PetLogPost = Database['public']['Tables']['pet_log_posts']['Row']
 
 export default function PetDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { user, isLoading: authLoading } = useAuth()
   const petId = params.petId as string
-  
-  const [pet, setPet] = useState<PetProfile | null>(null)
-  const [posts, setPosts] = useState<PetLogPost[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest'>('recent')
-  const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list')
 
-  // 반려동물 프로필 불러오기
-  useEffect(() => {
-    try {
-      const savedPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
-      const foundPet = savedPets.find((p: PetProfile) => p.id === petId)
-      if (foundPet) {
-        setPet(foundPet)
-      }
-    } catch (error) {
-      console.error('반려동물 프로필 로드 중 오류:', error)
-    }
-  }, [petId])
+  const [pet, setPet] = useState<Pet | null>(null)
+  const [recentPosts, setRecentPosts] = useState<PetLogPost[]>([])
+  const [isLoadingPet, setIsLoadingPet] = useState(true)
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 급여 기록 불러오기
+  // 반려동물 정보 로드
   useEffect(() => {
-    const fetchPosts = async () => {
+    const loadPet = async () => {
+      setIsLoadingPet(true)
+      setError(null)
+      
       try {
-        const response = await fetch(`/api/pet-log/posts?petProfileId=${petId}`)
-        const apiPosts = await response.json()
-        
-        if (apiPosts && apiPosts.length > 0) {
-          const formattedPosts = apiPosts.map((post: any) => ({
-            ...post,
-            petName: post.pet_name,
-            petBreed: post.pet_breed,
-            petAge: post.pet_age,
-            petWeight: post.pet_weight,
-            ownerName: post.owner_name,
-            ownerId: post.user_id,
-            ownerAvatar: post.owner_avatar,
-            petAvatar: post.pet_avatar,
-            petSpecies: post.pet_species,
-            createdAt: post.created_at,
-            updatedAt: post.updated_at,
-            totalRecords: post.total_records,
-            views: post.views,
-            likes: post.likes,
-            comments: post.totalComments || post.comments?.length || 0,
-            isLiked: post.is_liked,
-            feedingRecords: (post.feedingRecords || []).map((record: any) => ({
-              ...record,
-              productName: record.product_name,
-              startDate: record.start_date,
-              endDate: record.end_date,
-              repurchaseIntent: record.repurchase_intent,
-              sideEffects: record.side_effects || [],
-              benefits: record.benefits || []
-            }))
-          }))
-          setPosts(formattedPosts)
-        } else {
-          // localStorage fallback
-          const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-          const petPosts = savedPosts.filter((p: any) => p.petProfileId === petId)
-          setPosts(petPosts)
+        const supabase = getBrowserClient()
+        const { data, error } = await supabase
+          .from('pets')
+          .select('*')
+          .eq('id', petId)
+          .single()
+
+        if (error) {
+          console.error('Failed to load pet:', error)
+          setError('반려동물 정보를 불러올 수 없습니다.')
+          return
+        }
+
+        if (data) {
+          setPet(data)
         }
       } catch (error) {
-        console.error('급여 기록 로드 중 오류:', error)
-        // localStorage fallback
-        const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-        const petPosts = savedPosts.filter((p: any) => p.petProfileId === petId)
-        setPosts(petPosts)
+        console.error('Error loading pet:', error)
+        setError('반려동물 정보를 불러오는 중 오류가 발생했습니다.')
       } finally {
-        setLoading(false)
+        setIsLoadingPet(false)
       }
     }
 
     if (petId) {
-      fetchPosts()
+      loadPet()
     }
   }, [petId])
 
-  // 필터링 및 정렬
-  const filteredAndSortedPosts = posts
-    .filter(post => {
-      if (selectedCategory === 'all') return true
-      return post.feedingRecords.some(record => record.category === selectedCategory)
-    })
-    .sort((a, b) => {
-      if (sortBy === 'recent') {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      } else {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  // 급여 후기 로드
+  useEffect(() => {
+    const loadPosts = async () => {
+      if (!pet) return
+      
+      setIsLoadingPosts(true)
+      
+      try {
+        const supabase = getBrowserClient()
+        const { data, error } = await supabase
+          .from('pet_log_posts')
+          .select('*')
+          .eq('pet_profile_id', petId)
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (!error && data) {
+          setRecentPosts(data)
+        }
+      } catch (error) {
+        console.error('Failed to load posts:', error)
+      } finally {
+        setIsLoadingPosts(false)
       }
-    })
+    }
 
-  if (loading) {
+    if (pet) {
+      loadPosts()
+    }
+  }, [pet, petId])
+
+  // 나이 계산
+  const calculateAge = (birthDate: string): string => {
+    const birth = new Date(birthDate)
+    const now = new Date()
+    const years = now.getFullYear() - birth.getFullYear()
+    const months = now.getMonth() - birth.getMonth()
+    
+    if (months < 0) {
+      return `${years - 1}세`
+    }
+    if (years > 0) {
+      return `${years}세`
+    }
+    return `${months}개월`
+  }
+
+  // 로딩 중
+  if (isLoadingPet || authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-          <p className="mt-4 text-gray-600">급여 기록을 불러오는 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
         </div>
       </div>
     )
   }
 
-  if (!pet) {
+  // 에러 발생
+  if (error || !pet) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">반려동물을 찾을 수 없습니다</h2>
-          <Link href="/pet-log/pets" className="text-blue-500 hover:text-blue-600">
-            반려동물 목록으로 돌아가기
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${
-          i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-        }`}
-      />
-    ))
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link 
-            href="/pet-log/pets"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>반려동물 목록</span>
-          </Link>
-          
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl">
-                  {pet.species === 'cat' ? '🐱' : '🐕'}
+            <span>돌아가기</span>
+          </button>
+
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <PawPrint className="w-8 h-8 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
+              {error || '반려동물 정보를 찾을 수 없습니다'}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              요청하신 반려동물 정보를 불러올 수 없습니다.
+            </p>
+            <Link
+              href="/profile"
+              className="inline-block px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              마이페이지로 돌아가기
+            </Link>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // 소유자 확인
+  const isOwner = user && pet.owner_id === user.id
+  const petAge = calculateAge(pet.birth_date)
+  const petEmoji = pet.species === 'cat' ? '🐱' : '🐶'
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back()
+              } else {
+                router.push('/profile')
+              }
+            }}
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span>돌아가기</span>
+          </button>
+        </div>
+
+        {/* Pet Profile Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              {pet.avatar_url ? (
+                <img
+                  src={pet.avatar_url}
+                  alt={pet.name}
+                  className="w-24 h-24 rounded-full object-cover border-4 border-purple-100 shadow-lg"
+                />
+              ) : (
+                <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-5xl border-4 border-purple-100 shadow-lg">
+                  {petEmoji}
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-1">{pet.name}</h1>
-                  <p className="text-gray-600">{pet.breed}</p>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                    <span>{pet.age}</span>
-                    <span>•</span>
-                    <span>{pet.weight}</span>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  {pet.name}
+                </h1>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  pet.species === 'cat' 
+                    ? 'bg-orange-100 text-orange-700' 
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {pet.species === 'cat' ? '고양이' : '강아지'}
+                </span>
+              </div>
+
+              <div className="space-y-2 text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{petAge}</span>
+                  {pet.birth_date && (
+                    <span className="text-sm text-gray-500">
+                      ({new Date(pet.birth_date).getFullYear()}년생)
+                    </span>
+                  )}
+                </div>
+                {pet.weight_kg && (
+                  <div className="flex items-center gap-2">
+                    <PawPrint className="w-4 h-4" />
+                    <span>{pet.weight_kg}kg</span>
                   </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => router.push(`/pet-log/posts/write?petId=${pet.id}`)}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>급여 기록 추가</span>
-                </button>
-                <Link
-                  href={`/pet-log/pets/${pet.id}/edit`}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                >
-                  <Edit className="h-5 w-5 text-gray-600" />
-                </Link>
+                )}
+                {pet.tags && pet.tags.length > 0 && (
+                  <div className="flex items-start gap-2 mt-3">
+                    <div className="flex flex-wrap gap-2">
+                      {pet.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Edit Button - 소유자만 */}
+            {isOwner && (
+              <Link
+                href={`/pet-log/pets/${petId}/edit`}
+                className="flex-shrink-0 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                <span>수정</span>
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* 필터 및 정렬 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">카테고리:</span>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="all">전체</option>
-                  <option value="사료">🍽️ 사료</option>
-                  <option value="간식">🦴 간식</option>
-                  <option value="영양제">💊 영양제</option>
-                  <option value="화장실">🚽 화장실</option>
-                </select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">정렬:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'recent' | 'oldest')}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="recent">최신순</option>
-                  <option value="oldest">과거순</option>
-                </select>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-white text-purple-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+        {/* Recent Posts Section */}
+        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-blue-600" />
+              {pet.name}의 급여 후기
+            </h2>
+            {isOwner && (
+              <Link
+                href={`/pet-log/posts/write?petId=${petId}`}
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
-                목록 보기
-              </button>
-              <button
-                onClick={() => setViewMode('timeline')}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'timeline'
-                    ? 'bg-white text-purple-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                타임라인
-              </button>
-            </div>
+                <Plus className="w-4 h-4" />
+                작성
+              </Link>
+            )}
           </div>
-        </div>
 
-        {/* 급여 기록 목록 */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            급여 기록 ({filteredAndSortedPosts.length}개)
-          </h2>
-
-          {filteredAndSortedPosts.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">급여 기록이 없습니다</h3>
-              <p className="text-gray-600 mb-6">첫 급여 기록을 추가해보세요!</p>
-              <button
-                onClick={() => router.push(`/pet-log/posts/write?petId=${pet.id}`)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                <Plus className="h-5 w-5" />
-                <span>급여 기록 추가</span>
-              </button>
-            </div>
-          ) : viewMode === 'list' ? (
-            <div className="grid gap-6">
-              {filteredAndSortedPosts.map((post) => (
+          {isLoadingPosts ? (
+            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+          ) : recentPosts.length > 0 ? (
+            <div className="space-y-3">
+              {recentPosts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/pet-log/posts/${post.id}`}
-                  className="block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-shadow"
+                  className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
                 >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{post.petAvatar}</span>
-                          <h3 className="text-xl font-bold text-gray-900">{post.petName}</h3>
-                        </div>
-                        <p className="text-sm text-gray-600">{post.createdAt}</p>
-                      </div>
-                      
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{post.views}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <ThumbsUp className="h-4 w-4" />
-                          <span>{post.likes}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageCircle className="h-4 w-4" />
-                          <span>{post.comments}</span>
-                        </div>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        {post.pet_name}의 급여 기록
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {post.pet_breed} • {post.total_records}개 기록
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {post.views || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart className="w-3 h-3" />
+                          {post.likes || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle className="w-3 h-3" />
+                          {post.comments_count || 0}
+                        </span>
                       </div>
                     </div>
-
-                    {/* 급여 기록들 */}
-                    <div className="space-y-3">
-                      {post.feedingRecords.map((record) => (
-                        <div
-                          key={record.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{categoryConfig[record.category].icon}</span>
-                              <div>
-                                <h4 className="font-bold text-gray-900">{record.productName}</h4>
-                                <p className="text-sm text-gray-600">{record.brand}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryConfig[record.category].color}`}>
-                                {record.category}
-                              </span>
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusConfig[record.status].color}`}>
-                                {record.status}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>{record.startDate}</span>
-                              {record.endDate && <span> ~ {record.endDate}</span>}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>{record.duration}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span>기호성:</span>
-                              {renderStars(record.palatability)}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span>만족도:</span>
-                              {renderStars(record.satisfaction)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(post.created_at).toLocaleDateString('ko-KR')}
+                    </span>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="relative">
-              {/* 타임라인 */}
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-              <div className="space-y-8 pl-16">
-                {filteredAndSortedPosts.map((post, index) => (
-                  <div key={post.id} className="relative">
-                    {/* 타임라인 점 */}
-                    <div className="absolute -left-9 top-6 w-4 h-4 bg-purple-500 rounded-full border-4 border-white shadow-lg"></div>
-                    
-                    <Link
-                      href={`/pet-log/posts/${post.id}`}
-                      className="block bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-shadow"
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Calendar className="h-5 w-5 text-purple-500" />
-                          <span className="text-lg font-bold text-gray-900">{post.createdAt}</span>
-                        </div>
-                        
-                        {/* 급여 기록들 */}
-                        <div className="space-y-3">
-                          {post.feedingRecords.map((record) => (
-                            <div
-                              key={record.id}
-                              className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-2xl">{categoryConfig[record.category].icon}</span>
-                                  <div>
-                                    <h4 className="font-bold text-gray-900">{record.productName}</h4>
-                                    <p className="text-sm text-gray-600">{record.brand}</p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${categoryConfig[record.category].color}`}>
-                                    {record.category}
-                                  </span>
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium border ${statusConfig[record.status].color}`}>
-                                    {record.status}
-                                  </span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-4 text-sm text-gray-600 mt-2 flex-wrap">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>{record.startDate}</span>
-                                  {record.endDate && <span> ~ {record.endDate}</span>}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>{record.duration}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <span>기호성:</span>
-                                  {renderStars(record.palatability)}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <span>만족도:</span>
-                                  {renderStars(record.satisfaction)}
-                                </div>
-                              </div>
-                              
-                              {record.comment && (
-                                <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-sm text-gray-700">{record.comment}</p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        
-                        {/* 포스트 통계 */}
-                        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-4 w-4" />
-                            <span>{post.views} 조회</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ThumbsUp className="h-4 w-4" />
-                            <span>{post.likes} 추천</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageCircle className="h-4 w-4" />
-                            <span>{post.comments} 댓글</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                ))}
-              </div>
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">
+                {isOwner 
+                  ? '아직 작성한 급여 후기가 없습니다' 
+                  : '등록된 급여 후기가 없습니다'}
+              </p>
+              {isOwner && (
+                <Link
+                  href={`/pet-log/posts/write?petId=${petId}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  급여 후기 작성하기
+                </Link>
+              )}
             </div>
           )}
         </div>
-      </div>
+
+        {/* Quick Actions */}
+        {isOwner && (
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Link
+              href={`/pet-log/posts/write?petId=${petId}`}
+              className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">급여 후기 작성</h3>
+                  <p className="text-sm text-gray-600">새로운 급여 기록 추가</p>
+                </div>
+              </div>
+            </Link>
+            <Link
+              href={`/pet-log/pets/${petId}/edit`}
+              className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Edit className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">프로필 수정</h3>
+                  <p className="text-sm text-gray-600">{pet.name}의 정보 업데이트</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
-
