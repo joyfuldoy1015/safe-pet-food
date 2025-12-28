@@ -19,7 +19,7 @@ import { getBrowserClient } from '@/lib/supabase-client'
 import type { Database } from '@/lib/types/database'
 
 type Pet = Database['public']['Tables']['pets']['Row']
-type PetLogPost = Database['public']['Tables']['pet_log_posts']['Row']
+type PetLogPost = any
 
 export default function PetDetailPage() {
   const params = useParams()

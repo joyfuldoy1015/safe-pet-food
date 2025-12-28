@@ -151,8 +151,8 @@ export default function ReviewLogForm({
 
       if (editData) {
         // Update
-        const { error: updateError } = await supabase
-          .from('review_logs')
+        const { error: updateError } = await (supabase
+          .from('review_logs') as any)
           .update(data)
           .eq('id', editData.id)
 
@@ -163,8 +163,8 @@ export default function ReviewLogForm({
         }
       } else {
         // Insert
-        const { error: insertError } = await supabase
-          .from('review_logs')
+        const { error: insertError } = await (supabase
+          .from('review_logs') as any)
           .insert(data)
           .select()
           .single()

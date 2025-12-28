@@ -66,20 +66,21 @@ export default function EditPetPage() {
         }
 
         // 소유자 확인
-        if (user && data.owner_id !== user.id) {
+        if (user && (data as any).owner_id !== user.id) {
           alert('이 반려동물 정보를 수정할 권한이 없습니다.')
           router.push('/profile')
           return
         }
 
-        setPet(data)
+        const petData = data as Pet
+        setPet(petData)
         setFormData({
-          name: data.name,
-          species: data.species,
-          birth_date: data.birth_date,
-          weight_kg: data.weight_kg,
-          tags: data.tags || [],
-          avatar_url: data.avatar_url
+          name: petData.name,
+          species: petData.species,
+          birth_date: petData.birth_date,
+          weight_kg: petData.weight_kg,
+          tags: petData.tags || [],
+          avatar_url: petData.avatar_url
         })
       } catch (error) {
         console.error('Error loading pet:', error)
@@ -129,8 +130,8 @@ export default function EditPetPage() {
 
     try {
       const supabase = getBrowserClient()
-      const { error } = await supabase
-        .from('pets')
+      const { error } = await (supabase
+        .from('pets') as any)
         .update({
           name: formData.name.trim(),
           species: formData.species,

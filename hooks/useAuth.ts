@@ -48,8 +48,8 @@ export function useAuth(): UseAuthReturn {
           // Profile might not exist yet, create it
           if (error.code === 'PGRST116') {
             const nickname = userEmail?.split('@')[0] || '사용자'
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
+            const { data: newProfile, error: createError } = await (supabase
+              .from('profiles') as any)
               .insert({
                 id: userId,
                 nickname

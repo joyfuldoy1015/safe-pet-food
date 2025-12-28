@@ -49,7 +49,7 @@ export default function PetAddModal({ isOpen, onClose, onSuccess }: PetAddModalP
           birth_date: formData.birthDate,
           weight_kg: formData.weightKg ? parseFloat(formData.weightKg) : null,
           tags: formData.tags.length > 0 ? formData.tags : null
-        })
+        } as any)
         .select()
         .single()
 

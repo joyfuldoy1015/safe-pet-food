@@ -122,8 +122,8 @@ export default function ProfilePage() {
     try {
       const supabase = getBrowserClient()
       
-      const { error } = await supabase
-        .from('profiles')
+      const { error } = await (supabase
+        .from('profiles') as any)
         .upsert({
           id: user.id,
           nickname: nickname.trim(),

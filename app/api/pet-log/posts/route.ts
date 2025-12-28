@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         if (!postsError && posts && posts.length > 0) {
           // 각 포스트에 대한 급여 기록 가져오기
           const postsWithRecords = await Promise.all(
-            posts.map(async (post) => {
+            posts.map(async (post: any) => {
               const { data: records } = await supabase
                 .from('pet_log_feeding_records')
                 .select('*')
