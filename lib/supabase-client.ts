@@ -24,8 +24,15 @@ export function getBrowserClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  // 🔍 DEBUG: Environment variables check
+  console.log('[Supabase Debug] URL:', supabaseUrl)
+  console.log('[Supabase Debug] KEY:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 30)}...` : 'undefined')
+  console.log('[Supabase Debug] NODE_ENV:', process.env.NODE_ENV)
+
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('[Supabase] Missing environment variables')
+    console.error('[Supabase] URL exists:', !!supabaseUrl)
+    console.error('[Supabase] KEY exists:', !!supabaseAnonKey)
     throw new Error('Missing Supabase environment variables')
   }
 
