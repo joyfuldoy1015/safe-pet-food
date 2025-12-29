@@ -33,8 +33,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: newComment, error } = await supabase
-      .from('pet_log_comments')
+    const { data: newComment, error } = await (supabase
+      .from('pet_log_comments') as any)
       .insert([{
         id: comment.id,
         post_id: postId,
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
     // 포스트의 댓글 수 업데이트
     try {
-      const { error: rpcError } = await supabase.rpc('increment_comments_count', { post_id: postId })
+      const { error: rpcError } = await (supabase as any).rpc('increment_comments_count', { post_id: postId })
       if (rpcError) {
         // RPC가 없으면 현재 값을 가져와서 +1 해서 업데이트
         const { data: post, error: fetchError } = await supabase
@@ -69,9 +69,9 @@ export async function POST(request: Request) {
           .single()
         
         if (!fetchError && post) {
-          await supabase
-            .from('pet_log_posts')
-            .update({ comments_count: (post.comments_count || 0) + 1 })
+          await (supabase
+            .from('pet_log_posts') as any)
+            .update({ comments_count: ((post as any).comments_count || 0) + 1 })
             .eq('id', postId)
         }
       }
@@ -84,9 +84,9 @@ export async function POST(request: Request) {
         .single()
       
       if (!fetchError && post) {
-        await supabase
-          .from('pet_log_posts')
-          .update({ comments_count: (post.comments_count || 0) + 1 })
+        await (supabase
+          .from('pet_log_posts') as any)
+          .update({ comments_count: ((post as any).comments_count || 0) + 1 })
           .eq('id', postId)
       }
     }
@@ -122,8 +122,8 @@ export async function PUT(request: Request) {
       )
     }
 
-    const { data: updatedComment, error } = await supabase
-      .from('pet_log_comments')
+    const { data: updatedComment, error } = await (supabase
+      .from('pet_log_comments') as any)
       .update({
         likes: updates.likes,
         is_liked: updates.isLiked,

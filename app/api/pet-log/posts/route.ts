@@ -119,8 +119,8 @@ export async function POST(request: Request) {
     }
 
     // 포스트 생성
-    const { data: newPost, error: postError } = await supabase
-      .from('pet_log_posts')
+    const { data: newPost, error: postError } = await (supabase
+      .from('pet_log_posts') as any)
       .insert([{
         id: post.id,
         user_id: post.ownerId || post.user_id || '',
@@ -172,8 +172,8 @@ export async function POST(request: Request) {
         benefits: record.benefits || []
       }))
 
-      const { error: recordsError } = await supabase
-        .from('pet_log_feeding_records')
+      const { error: recordsError } = await (supabase
+        .from('pet_log_feeding_records') as any)
         .insert(recordsToInsert)
 
       if (recordsError) {
@@ -230,8 +230,8 @@ export async function POST(request: Request) {
           }
         })
 
-        const { error: reviewLogsError } = await supabase
-          .from('review_logs')
+        const { error: reviewLogsError } = await (supabase
+          .from('review_logs') as any)
           .insert(reviewLogsToInsert)
 
         if (reviewLogsError) {

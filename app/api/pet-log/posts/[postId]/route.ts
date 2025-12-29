@@ -18,6 +18,7 @@ export async function GET(
   { params }: { params: { postId: string } }
 ) {
   try {
+    const supabase = getServerClient()
     const { postId } = params
 
     if (!isSupabaseConfigured()) {
@@ -56,7 +57,7 @@ export async function GET(
       .order('created_at', { ascending: true })
 
     return NextResponse.json({
-      ...post,
+      ...(post as any),
       feedingRecords: records || [],
       comments: comments || [],
       totalComments: comments?.length || 0
@@ -100,7 +101,7 @@ export async function PATCH(
     }
 
     // 기존 포스트 조회 및 권한 확인
-    const { data: existingPost, error: fetchError } = await supabase
+    const { data: existingPost, error: fetchError } = await serverSupabase
       .from('pet_log_posts')
       .select('user_id')
       .eq('id', postId)
@@ -114,7 +115,7 @@ export async function PATCH(
     }
 
     // 작성자 확인
-    if (existingPost.user_id !== user.id) {
+    if ((existingPost as any).user_id !== user.id) {
       return NextResponse.json(
         { error: 'Forbidden - You can only edit your own posts' },
         { status: 403 }
@@ -122,8 +123,8 @@ export async function PATCH(
     }
 
     // 포스트 업데이트
-    const { data: updatedPost, error: updateError } = await supabase
-      .from('pet_log_posts')
+    const { data: updatedPost, error: updateError } = await (serverSupabase
+      .from('pet_log_posts') as any)
       .update({
         pet_name: post.petName,
         pet_breed: post.petBreed,
@@ -148,7 +149,7 @@ export async function PATCH(
     }
 
     // 기존 급여 기록 삭제
-    await supabase
+    await serverSupabase
       .from('pet_log_feeding_records')
       .delete()
       .eq('post_id', postId)
@@ -175,8 +176,8 @@ export async function PATCH(
         benefits: record.benefits || []
       }))
 
-      const { error: recordsError } = await supabase
-        .from('pet_log_feeding_records')
+      const { error: recordsError } = await (serverSupabase
+        .from('pet_log_feeding_records') as any)
         .insert(recordsToInsert)
 
       if (recordsError) {
@@ -224,7 +225,7 @@ export async function DELETE(
     }
 
     // 기존 포스트 조회 및 권한 확인
-    const { data: existingPost, error: fetchError } = await supabase
+    const { data: existingPost, error: fetchError } = await serverSupabase
       .from('pet_log_posts')
       .select('user_id')
       .eq('id', postId)
@@ -238,7 +239,7 @@ export async function DELETE(
     }
 
     // 작성자 확인
-    if (existingPost.user_id !== user.id) {
+    if ((existingPost as any).user_id !== user.id) {
       return NextResponse.json(
         { error: 'Forbidden - You can only delete your own posts' },
         { status: 403 }
@@ -246,19 +247,19 @@ export async function DELETE(
     }
 
     // 연관된 급여 기록 삭제
-    await supabase
+    await serverSupabase
       .from('pet_log_feeding_records')
       .delete()
       .eq('post_id', postId)
 
     // 연관된 댓글 삭제
-    await supabase
+    await serverSupabase
       .from('pet_log_comments')
       .delete()
       .eq('post_id', postId)
 
     // 포스트 삭제
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await serverSupabase
       .from('pet_log_posts')
       .delete()
       .eq('id', postId)
