@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@/hooks/useAuth.new'
+import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 
 /**
