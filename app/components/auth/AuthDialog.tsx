@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Loader2, Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 interface AuthDialogProps {
   isOpen: boolean
@@ -13,7 +13,7 @@ interface AuthDialogProps {
 
 /**
  * Authentication dialog component
- * Supports email magic link login
+ * Supports email/password and OAuth login
  */
 export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogProps) {
   const [email, setEmail] = useState('')
@@ -22,7 +22,7 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [providerLoading, setProviderLoading] = useState<'google' | 'kakao' | null>(null)
-  const { signInWithPassword, signInWithProvider } = useAuth()
+  const supabase = getBrowserClient()
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,9 +35,23 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
       return
     }
 
-    const { error } = await signInWithPassword(email.trim(), password)
+    if (!supabase) {
+      setError('Supabase client not initialized')
+      setIsLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password
+    })
+
     if (error) {
-      setError(error.message || '로그인에 실패했습니다.')
+      let errorMessage = '로그인에 실패했습니다.'
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.'
+      }
+      setError(errorMessage)
       setIsLoading(false)
       return
     }
@@ -59,11 +73,25 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
   const handleProviderLogin = async (provider: 'google' | 'kakao') => {
     setError(null)
     setProviderLoading(provider)
-    const { error } = await signInWithProvider(provider)
+
+    if (!supabase) {
+      setError('Supabase client not initialized')
+      setProviderLoading(null)
+      return
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+
     if (error) {
       setError(error.message || '로그인에 실패했습니다.')
       setProviderLoading(null)
     }
+    // If no error, user will be redirected to OAuth provider
   }
 
   if (!isOpen) return null

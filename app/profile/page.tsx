@@ -20,23 +20,7 @@ export default function ProfilePage() {
   const [isLoadingPets, setIsLoadingPets] = useState(true)
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
 
-  // URL에서 auth=success 파라미터 확인 및 세션 새로고침
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('auth') === 'success') {
-      // URL에서 파라미터 제거
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete('auth')
-      window.history.replaceState({}, '', newUrl.toString())
-      
-      // 세션 새로고침을 위해 페이지 새로고침 (약간의 지연을 주어 쿠키가 설정될 시간 제공)
-      setTimeout(() => {
-        window.location.reload()
-      }, 300)
-    }
-  }, [])
-
-  // 세션 확인 - useAuth의 결과만 사용 (중복 확인 제거로 성능 개선)
+  // 세션 확인
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login?redirect=/profile')

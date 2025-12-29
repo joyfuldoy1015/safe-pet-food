@@ -1,43 +1,36 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/lib/types/database'
 
 /**
- * Server-side Supabase client for API routes and server components
- * Uses cookies for authentication with @supabase/ssr
+ * Server Supabase client (@supabase/ssr)
  * 
- * ⚠️ This client can read session from cookies set by OAuth callback
+ * ⚠️ RULES:
+ * 1. Only @supabase/ssr - NO @supabase/supabase-js
+ * 2. Use cookies() from next/headers
+ * 3. Read-only in Server Components (set/remove will fail silently)
+ * 
+ * 📝 Why @supabase/ssr?
+ * - Can read session cookies set by OAuth callback
+ * - Automatic cookie handling
+ * - Server Component compatible
  */
 export function getServerClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
   const cookieStore = cookies()
-
-  return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
+  
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll() {
+          // Server Component: read-only
+          // Cookie setting is handled by callback route
+        },
       },
-      set(name: string, value: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value, ...options })
-        } catch (error) {
-          // Server Component에서 cookie.set() 실패 시 무시
-          // 이미 설정된 쿠키를 읽는 것만 필요한 경우가 많음
-        }
-      },
-      remove(name: string, options: CookieOptions) {
-        try {
-          cookieStore.set({ name, value: '', ...options })
-        } catch (error) {
-          // 무시
-        }
-      },
-    },
-  })
+    }
+  )
 }
