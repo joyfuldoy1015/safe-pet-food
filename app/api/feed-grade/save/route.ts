@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { NextRequest, NextResponse} from 'next/server'
+import { getServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,8 +36,9 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: savedAnalysis, error } = await supabase
-      .from('feed_grade_analyses')
+    const supabase = getServerClient()
+    const { data: savedAnalysis, error } = await (supabase
+      .from('feed_grade_analyses') as any)
       .insert([{
         user_id: userId || null,
         feed_name: analysis.feedName || analysis.feed_name || '',
@@ -82,6 +83,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([], { status: 200 })
     }
 
+    const supabase = getServerClient()
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const limit = parseInt(searchParams.get('limit') || '100')

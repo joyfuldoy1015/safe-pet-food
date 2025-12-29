@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import brandsData from '../../../../data/brands.json'
 import reviewsData from '../../../../data/reviews.json'
-import { supabase } from '@/lib/supabase'
+import { getServerClient } from '@/lib/supabase-server'
 
 // Supabase 사용 여부 확인
 const isSupabaseConfigured = () => {
@@ -114,6 +114,7 @@ export async function GET(
     }
 
     try {
+      const supabase = getServerClient()
       const { data, error } = await supabase
         .from('brands')
         .select('*')
@@ -147,14 +148,14 @@ export async function GET(
             disclosure_level?: 'full' | 'partial' | 'none'
           }> | null = null
           
-          if (data.ingredients) {
+          if ((data as any).ingredients) {
             try {
               // JSONB 필드가 이미 파싱된 객체/배열인 경우
-              if (Array.isArray(data.ingredients)) {
-                ingredients = data.ingredients
-              } else if (typeof data.ingredients === 'string') {
+              if (Array.isArray((data as any).ingredients)) {
+                ingredients = (data as any).ingredients
+              } else if (typeof (data as any).ingredients === 'string') {
                 // 문자열인 경우 JSON 파싱
-                ingredients = JSON.parse(data.ingredients)
+                ingredients = JSON.parse((data as any).ingredients)
               } else {
                 ingredients = []
               }
@@ -169,11 +170,12 @@ export async function GET(
           // Get products for this brand from Supabase
           let products: any[] = []
           try {
-            console.log('[API] Fetching products for brand_id:', data.id, 'brand_name:', brandName)
+            const supabase = getServerClient()
+            console.log('[API] Fetching products for brand_id:', (data as any).id, 'brand_name:', brandName)
             const { data: productsData, error: productsError } = await supabase
               .from('products')
               .select('*')
-              .eq('brand_id', data.id)
+              .eq('brand_id', (data as any).id)
               .order('created_at', { ascending: true })
             
             console.log('[API] Products query result:', {
@@ -198,6 +200,7 @@ export async function GET(
                 // review_logs에서 해당 브랜드/제품명으로 리뷰 조회
                 let userReviews: any[] = []
                 try {
+                  const supabase = getServerClient()
                   // review_logs에서 해당 브랜드/제품명으로 리뷰 조회
                   let reviewQuery = supabase
                     .from('review_logs')
@@ -266,7 +269,7 @@ export async function GET(
                 }
               }))
             } else {
-              console.log('[API] No products found for brand:', brandName, 'brand_id:', data.id)
+              console.log('[API] No products found for brand:', brandName, 'brand_id:', (data as any).id)
             }
           } catch (productsError: any) {
             console.error('[API] Exception while fetching products:', {
@@ -296,7 +299,7 @@ export async function GET(
             brandName: brandName,
             productsCount: responseData.products.length,
             hasProducts: responseData.products.length > 0,
-            brandId: data.id
+            brandId: (data as any).id
           })
           
           return NextResponse.json(responseData)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import brandsData from '../../../data/brands.json'
-import { supabase } from '@/lib/supabase'
+import { getServerClient } from '@/lib/supabase-server'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -164,6 +164,7 @@ export async function GET(request: NextRequest) {
     // Supabase 사용 가능하면 Supabase에서 가져오기
     if (isSupabaseConfigured()) {
       try {
+        const supabase = getServerClient()
         // products 테이블과 조인하여 각 브랜드의 제품 개수도 함께 가져오기
         let query = supabase
           .from('brands')
@@ -282,8 +283,9 @@ export async function POST(request: NextRequest) {
     const data = await request.json()
     const brandData = transformJsonToSupabaseFormat(data)
 
-    const { data: newBrand, error } = await supabase
-      .from('brands')
+    const supabase = getServerClient()
+    const { data: newBrand, error } = await (supabase
+      .from('brands') as any)
       .insert([brandData])
       .select()
       .single()
@@ -330,8 +332,9 @@ export async function PUT(request: NextRequest) {
     const brandData = transformJsonToSupabaseFormat(data)
     const { id, ...updateData } = brandData
 
-    const { data: updatedBrand, error } = await supabase
-      .from('brands')
+    const supabase = getServerClient()
+    const { data: updatedBrand, error } = await (supabase
+      .from('brands') as any)
       .update(updateData)
       .eq('id', data.id)
       .select()
@@ -377,6 +380,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    const supabase = getServerClient()
     const { error } = await supabase
       .from('brands')
       .delete()

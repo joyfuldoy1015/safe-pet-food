@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getServerClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +15,7 @@ const isSupabaseConfigured = () => {
 // GET - 펫 로그 포스트 목록 조회
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getServerClient()
     const { searchParams } = new URL(request.url)
     const petProfileId = searchParams.get('petProfileId')
     const petName = searchParams.get('petName')
@@ -96,6 +97,7 @@ export async function GET(request: NextRequest) {
 // POST - 새 펫 로그 포스트 생성
 export async function POST(request: Request) {
   try {
+    const supabase = getServerClient()
     if (!isSupabaseConfigured()) {
       return NextResponse.json(
         { 
