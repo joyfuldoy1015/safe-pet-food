@@ -116,11 +116,38 @@ export function useAuth() {
     }
   }
 
+  // Refresh profile function
+  const refreshProfile = async () => {
+    if (!user) return
+
+    const supabase = getBrowserClient()
+    if (!supabase) return
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('[useAuth] Error refreshing profile:', error)
+        setProfile(null)
+      } else {
+        setProfile(data)
+      }
+    } catch (error) {
+      console.error('[useAuth] Error in refreshProfile:', error)
+      setProfile(null)
+    }
+  }
+
   return { 
     user, 
     profile, 
     loading,
     isLoading: loading, // Alias for backward compatibility
-    signOut 
+    signOut,
+    refreshProfile
   }
 }
