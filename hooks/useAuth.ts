@@ -97,5 +97,30 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  return { user, profile, loading }
+  // Sign out function
+  const signOut = async () => {
+    const supabase = getBrowserClient()
+    if (!supabase) return
+
+    try {
+      // Clear local state first
+      setUser(null)
+      setProfile(null)
+
+      // Sign out from Supabase
+      await supabase.auth.signOut()
+
+      console.log('[useAuth] Signed out successfully')
+    } catch (error) {
+      console.error('[useAuth] Sign out error:', error)
+    }
+  }
+
+  return { 
+    user, 
+    profile, 
+    loading,
+    isLoading: loading, // Alias for backward compatibility
+    signOut 
+  }
 }
