@@ -93,9 +93,8 @@ export async function GET(request: NextRequest) {
     console.warn('[Auth Callback] No code parameter provided')
   }
 
-  // 리다이렉트 URL에 세션 새로고침을 위한 플래그 추가
+  // 리다이렉트 URL (auth 파라미터 없이 깔끔하게)
   const redirectUrl = new URL(next, requestUrl.origin)
-  redirectUrl.searchParams.set('auth', 'success')
   
   console.log('[Auth Callback] Redirecting to:', redirectUrl.href)
   

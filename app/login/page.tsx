@@ -39,38 +39,6 @@ export default function LoginPage() {
     }
   }, [user, authLoading, redirectTo, router])
 
-  // URL에서 auth=success 확인하고 세션 재확인
-  useEffect(() => {
-    const checkSession = async () => {
-      if (searchParams.get('auth') === 'success') {
-        console.log('[Login Page] Auth success detected, checking session...')
-        
-        const supabase = getBrowserClient()
-        
-        // 여러 번 재시도 (OAuth 콜백 후 세션이 즉시 반영되지 않을 수 있음)
-        for (let i = 0; i < 5; i++) {
-          await new Promise(resolve => setTimeout(resolve, 500))
-          
-          const { data: { session }, error } = await supabase.auth.getSession()
-          
-          console.log(`[Login Page] Session check attempt ${i + 1}:`, {
-            hasSession: !!session,
-            userId: session?.user?.id,
-            error: error?.message
-          })
-          
-          if (session?.user) {
-            console.log('[Login Page] Session found, will redirect via useAuth')
-            // useAuth가 세션을 감지하고 자동으로 리다이렉트할 것임
-            break
-          }
-        }
-      }
-    }
-    
-    checkSession()
-  }, [searchParams])
-
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true)
     try {
@@ -206,35 +174,13 @@ export default function LoginPage() {
 
       if (data?.user) {
         console.log('Login successful:', data.user.email)
-        // 세션이 확실히 설정될 때까지 대기
-        let sessionLoaded = false
-        let attempts = 0
-        const maxAttempts = 10
         
-        while (!sessionLoaded && attempts < maxAttempts) {
-          const { data: { session } } = await supabase.auth.getSession()
-          if (session?.user) {
-            sessionLoaded = true
-            // 세션이 로드된 후 약간의 지연을 주어 useAuth가 업데이트될 시간 제공
-            await new Promise(resolve => setTimeout(resolve, 500))
-            // auth=success 파라미터를 추가하여 Header에서 세션 새로고침 트리거
-            const redirectUrl = new URL(redirectTo, window.location.origin)
-            redirectUrl.searchParams.set('auth', 'success')
-            router.push(redirectUrl.toString())
-            router.refresh() // 페이지 새로고침으로 상태 동기화
-            break
-          }
-          await new Promise(resolve => setTimeout(resolve, 200))
-          attempts++
-        }
+        // 세션이 확실히 설정될 때까지 약간 대기
+        await new Promise(resolve => setTimeout(resolve, 300))
         
-        if (!sessionLoaded) {
-          // 세션 로드 실패 시에도 리다이렉트 (세션은 쿠키에 있을 수 있음)
-          const redirectUrl = new URL(redirectTo, window.location.origin)
-          redirectUrl.searchParams.set('auth', 'success')
-          router.push(redirectUrl.toString())
-          router.refresh()
-        }
+        // 리다이렉트 (파라미터 없이 깔끔하게)
+        router.push(redirectTo)
+        router.refresh() // 페이지 새로고침으로 상태 동기화
       } else {
         alert('로그인에 실패했습니다. 다시 시도해주세요.')
         setIsEmailLoading(false)
