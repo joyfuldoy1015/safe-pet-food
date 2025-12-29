@@ -69,9 +69,10 @@ export const createBrowserClient = (): SupabaseClient<Database> => {
  * Uses global variable to survive hot reloads in development
  */
 export const getBrowserClient = (): SupabaseClient<Database> => {
-  // Only create client in browser context
+  // Server-side check - return null to prevent SSR errors
   if (typeof window === 'undefined') {
-    throw new Error('[Supabase] getBrowserClient() can only be called in browser context')
+    console.warn('[Supabase] getBrowserClient() called on server-side, returning null')
+    return null as any
   }
 
   // Use global variable to prevent multiple instances during hot reload
