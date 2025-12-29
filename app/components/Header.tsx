@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import {
   Calculator, 
@@ -57,25 +57,8 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { user, profile, signOut, isLoading } = useAuth()
   const isLoggedIn = !!user
-
-  // URL에서 auth=success 파라미터가 있으면 세션 새로고침
-  useEffect(() => {
-    if (searchParams?.get('auth') === 'success') {
-      // URL 파라미터 제거
-      const newUrl = new URL(window.location.href)
-      newUrl.searchParams.delete('auth')
-      window.history.replaceState({}, '', newUrl.toString())
-      
-      // 페이지 새로고침으로 세션 상태 동기화
-      // 약간의 지연을 주어 쿠키가 설정될 시간 제공
-      setTimeout(() => {
-        router.refresh()
-      }, 300)
-    }
-  }, [searchParams, router])
 
   const handleLogout = async () => {
     console.log('[Header] 로그아웃 버튼 클릭됨')

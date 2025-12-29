@@ -51,6 +51,39 @@ export const createBrowserClient = (): SupabaseClient<Database> => {
   // Extract project ref for unique storage key
   const projectRef = supabaseUrl.split('//')[1]?.split('.')[0]
   
+  // Custom storage adapter that syncs between cookies and localStorage
+  const customStorage = typeof window !== 'undefined' ? {
+    getItem: (key: string) => {
+      // Try localStorage first
+      const localValue = window.localStorage.getItem(key)
+      if (localValue) {
+        return localValue
+      }
+      
+      // Fallback to cookies (for OAuth callback case)
+      const cookies = document.cookie.split(';')
+      for (const cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.trim().split('=')
+        if (cookieName === key) {
+          const decoded = decodeURIComponent(cookieValue)
+          // Sync to localStorage for future reads
+          window.localStorage.setItem(key, decoded)
+          return decoded
+        }
+      }
+      
+      return null
+    },
+    setItem: (key: string, value: string) => {
+      window.localStorage.setItem(key, value)
+    },
+    removeItem: (key: string) => {
+      window.localStorage.removeItem(key)
+      // Also remove from cookies
+      document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+    }
+  } : undefined
+  
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       persistSession: true,
@@ -58,8 +91,8 @@ export const createBrowserClient = (): SupabaseClient<Database> => {
       detectSessionInUrl: true,
       // Use explicit storage key to prevent conflicts
       storageKey: `sb-${projectRef}-auth-token`,
-      // Ensure we're in browser context
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined
+      // Use custom storage that reads from both localStorage and cookies
+      storage: customStorage
     }
   })
 }
