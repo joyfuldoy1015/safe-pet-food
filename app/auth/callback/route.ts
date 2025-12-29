@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { Database } from '@/lib/types/database'
 
 /**
- * Auth callback route for Supabase
- * Handles OAuth and magic link redirects
+ * Auth callback route for Supabase OAuth (PKCE Flow)
+ * Handles OAuth redirects with ?code= parameter
+ * 
+ * ⚠️ IMPORTANT: This route ONLY works with PKCE flow (?code=)
+ * Implicit flow (#access_token) will NOT work here!
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -15,12 +18,40 @@ export async function GET(request: NextRequest) {
   console.log('[Auth Callback] Request received:', {
     code: code ? `${code.substring(0, 10)}...` : 'none',
     next,
-    url: requestUrl.href
+    url: requestUrl.href,
+    hasHashFragment: requestUrl.hash ? 'YES (WRONG!)' : 'no'
   })
 
   if (code) {
     const cookieStore = cookies()
-    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore })
+    
+    // Create Supabase client with @supabase/ssr for proper cookie handling
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            try {
+              cookieStore.set({ name, value, ...options })
+            } catch (error) {
+              // Handle cookies.set() error in Server Components
+              console.warn('[Auth Callback] Cookie set failed:', error)
+            }
+          },
+          remove(name: string, options: CookieOptions) {
+            try {
+              cookieStore.set({ name, value: '', ...options })
+            } catch (error) {
+              console.warn('[Auth Callback] Cookie remove failed:', error)
+            }
+          },
+        },
+      }
+    )
 
     console.log('[Auth Callback] Exchanging code for session...')
     
@@ -71,8 +102,8 @@ export async function GET(request: NextRequest) {
           || session.user.email?.split('@')[0] 
           || '사용자'
 
-        const { error: createError } = await supabase
-          .from('profiles')
+        const { error: createError } = await (supabase
+          .from('profiles') as any)
           .insert({
             id: session.user.id,
             nickname

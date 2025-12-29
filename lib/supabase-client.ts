@@ -89,6 +89,8 @@ export const createBrowserClient = (): SupabaseClient<Database> => {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      // ⭐ CRITICAL: Force PKCE flow to get ?code= instead of #access_token
+      flowType: 'pkce',
       // Use explicit storage key to prevent conflicts
       storageKey: `sb-${projectRef}-auth-token`,
       // Use custom storage that reads from both localStorage and cookies
