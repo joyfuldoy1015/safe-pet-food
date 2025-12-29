@@ -2,17 +2,17 @@ import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/lib/types/database'
 
 /**
- * Browser-side Supabase client using @supabase/ssr
+ * Browser Supabase client (@supabase/ssr)
  * 
- * ⚠️ IMPORTANT: Uses cookie-based storage for PKCE flow
- * This ensures code_verifier is accessible to both client and server
+ * ⚠️ RULES:
+ * 1. Only @supabase/ssr - NO @supabase/supabase-js
+ * 2. No custom storage adapter
+ * 3. Let @supabase/ssr handle everything (cookies, PKCE, session)
  * 
- * No custom storage adapter - @supabase/ssr handles everything!
- */
-
-/**
- * Get browser client instance
- * Creates a new client on each call - @supabase/ssr manages internal state
+ * 📝 Why @supabase/ssr?
+ * - Automatic cookie-based PKCE verifier storage
+ * - Seamless browser/server session sync
+ * - Built-in Next.js App Router support
  */
 export function getBrowserClient() {
   // Server-side check
@@ -26,11 +26,11 @@ export function getBrowserClient() {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('[Supabase] Missing environment variables')
-    return null as any
+    throw new Error('Missing Supabase environment variables')
   }
 
   // Validate URL format
-  if (supabaseUrl && !supabaseUrl.match(/^https:\/\/[a-z0-9-]+\.supabase\.co$/)) {
+  if (!supabaseUrl.match(/^https:\/\/[a-z0-9-]+\.supabase\.co$/)) {
     console.error('[Supabase] Invalid URL format:', supabaseUrl)
   }
 
@@ -41,4 +41,3 @@ export function getBrowserClient() {
   // - Cookie-based storage
   return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
 }
-

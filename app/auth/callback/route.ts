@@ -3,24 +3,37 @@ import { createServerClient } from '@supabase/ssr'
 import type { Database } from '@/lib/types/database'
 
 /**
- * Auth callback route for Supabase OAuth (PKCE Flow)
- * Handles OAuth redirects with ?code= parameter
+ * Minimal auth callback route for OAuth (PKCE flow)
  * 
- * ⚠️ CRITICAL: Uses @supabase/ssr with getAll/setAll pattern
- * This ensures PKCE code_verifier is read from cookies correctly!
+ * ⚠️ RULES:
+ * 1. Only @supabase/ssr
+ * 2. Simple getAll/setAll pattern
+ * 3. No complex profile creation (add later if needed)
+ * 
+ * 📝 Flow:
+ * 1. OAuth provider redirects here with ?code=xxx
+ * 2. Exchange code for session (PKCE verifier from cookies)
+ * 3. Set session cookies on response
+ * 4. Redirect to home
+ * 5. Server Components (Header) can read session from cookies
+ * 
+ * 🔑 Critical:
+ * - Must use getAll/setAll pattern for proper cookie handling
+ * - Response must be created before supabase client
+ * - Cookies are set on response object
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') || '/'
-
+  
   console.log('[Auth Callback] Request received:', {
     code: code ? `${code.substring(0, 10)}...` : 'none',
     next,
     url: requestUrl.href
   })
 
-  // Redirect early if no code
+  // Early return if no code
   if (!code) {
     console.error('[Auth Callback] No code parameter - PKCE flow required!')
     return NextResponse.redirect(
@@ -51,50 +64,21 @@ export async function GET(request: NextRequest) {
 
   console.log('[Auth Callback] Exchanging code for session...')
   
+  // Exchange code for session
   const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    console.error('[Auth Callback] Error exchanging code for session:', error)
+    console.error('[Auth Callback] Error exchanging code:', error)
     return NextResponse.redirect(
       new URL(`/login?error=${encodeURIComponent(error.message)}`, requestUrl.origin)
     )
   }
 
-  console.log('[Auth Callback] Code exchange successful:', {
+  console.log('[Auth Callback] Session created successfully:', {
     userId: data?.user?.id,
     email: data?.user?.email,
     hasSession: !!data?.session
   })
-
-  // Profile 생성 (선택적 - 에러 무시)
-  if (data?.user) {
-    try {
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', data.user.id)
-        .single()
-
-      if (profileError && profileError.code === 'PGRST116') {
-        console.log('[Auth Callback] Creating profile for user:', data.user.email)
-        
-        const nickname = data.user.user_metadata?.full_name 
-          || data.user.user_metadata?.name 
-          || data.user.email?.split('@')[0] 
-          || '사용자'
-
-        await (supabase.from('profiles') as any).insert({
-          id: data.user.id,
-          nickname
-        })
-
-        console.log('[Auth Callback] Profile created')
-      }
-    } catch (profileError) {
-      // Profile 생성 실패는 무시 (세션은 이미 생성됨)
-      console.warn('[Auth Callback] Profile creation failed (non-critical):', profileError)
-    }
-  }
 
   // Set cache headers to prevent caching
   response.headers.set('Cache-Control', 'no-store, must-revalidate')
@@ -104,4 +88,3 @@ export async function GET(request: NextRequest) {
   
   return response
 }
-
