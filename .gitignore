@@ -31,3 +31,9 @@ yarn-error.log*
 # Misc
 *.log
 .vercel
+
+# Backup files
+*.old.ts
+*.old.tsx
+*.backup.ts
+*.backup.tsx
