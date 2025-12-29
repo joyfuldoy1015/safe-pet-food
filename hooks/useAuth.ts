@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { getBrowserClient } from '@/lib/supabase-client.new'
+import { getBrowserClient } from '@/lib/supabase-client'
+import type { Database } from '@/lib/types/database'
+
+type Profile = Database['public']['Tables']['profiles']['Row'] | null
 
 /**
- * Minimal useAuth hook
+ * Auth hook with profile loading
  * 
  * ⚠️ RULES:
  * 1. Only essential features
@@ -16,15 +19,12 @@ import { getBrowserClient } from '@/lib/supabase-client.new'
  * 📝 What this does:
  * - Get initial session
  * - Listen to auth state changes
- * - Return user and loading state
- * 
- * 🚫 What this does NOT do:
- * - No custom session retry
- * - No URL parameter checking
- * - No complex profile loading (add later if needed)
+ * - Load profile when user logs in
+ * - Return user, profile, and loading state
  */
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   
   useEffect(() => {
@@ -34,10 +34,42 @@ export function useAuth() {
       return
     }
 
+    // Function to load profile
+    const loadProfile = async (userId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // Profile doesn't exist - this is OK, it will be created by callback
+            console.log('[useAuth] Profile not found, will be created on next login')
+          } else {
+            console.error('[useAuth] Error loading profile:', error)
+          }
+          setProfile(null)
+        } else {
+          setProfile(data)
+        }
+      } catch (error) {
+        console.error('[useAuth] Error in loadProfile:', error)
+        setProfile(null)
+      }
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      setLoading(false)
+      
+      if (session?.user) {
+        loadProfile(session.user.id).finally(() => setLoading(false))
+      } else {
+        setProfile(null)
+        setLoading(false)
+      }
       
       if (process.env.NODE_ENV === 'development') {
         console.log('[useAuth] Initial session:', session?.user?.email || 'none')
@@ -48,7 +80,13 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null)
-        setLoading(false)
+        
+        if (session?.user) {
+          loadProfile(session.user.id).finally(() => setLoading(false))
+        } else {
+          setProfile(null)
+          setLoading(false)
+        }
         
         if (process.env.NODE_ENV === 'development') {
           console.log('[useAuth] Auth state changed:', event, session?.user?.email || 'none')
@@ -59,5 +97,5 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  return { user, loading }
+  return { user, profile, loading }
 }

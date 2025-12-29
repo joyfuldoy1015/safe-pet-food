@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getBrowserClient } from '@/lib/supabase-client.new'
-import { useAuth } from '@/hooks/useAuth.new'
+import { getBrowserClient } from '@/lib/supabase-client'
+import { useAuth } from '@/hooks/useAuth'
 
 /**
  * Minimal login page
@@ -72,6 +72,32 @@ export default function LoginPage() {
     // If no error, user will be redirected to Google
   }
 
+  const handleKakaoLogin = async () => {
+    if (!supabase) {
+      setError('Supabase client not initialized')
+      return
+    }
+    
+    setLoading(true)
+    setError(null)
+    
+    console.log('[Login] Starting Kakao OAuth...')
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    
+    if (error) {
+      console.error('[Login] Kakao OAuth error:', error)
+      setError(`로그인 실패: ${error.message}`)
+      setLoading(false)
+    }
+    // If no error, user will be redirected to Kakao
+  }
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -125,6 +151,21 @@ export default function LoginPage() {
                   />
                 </svg>
                 <span className="text-gray-700 font-medium">Google로 로그인</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleKakaoLogin}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-yellow-400 border-2 border-yellow-500 rounded-lg hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="text-gray-800">로그인 중...</span>
+            ) : (
+              <>
+                <span className="text-2xl">💬</span>
+                <span className="text-gray-800 font-medium">카카오로 로그인</span>
               </>
             )}
           </button>

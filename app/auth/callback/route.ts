@@ -80,6 +80,34 @@ export async function GET(request: NextRequest) {
     hasSession: !!data?.session
   })
 
+  // Create profile if it doesn't exist (non-blocking)
+  if (data?.user) {
+    try {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', data.user.id)
+        .single()
+
+      if (!existingProfile) {
+        const nickname = data.user.user_metadata?.full_name 
+          || data.user.user_metadata?.name 
+          || data.user.email?.split('@')[0] 
+          || '사용자'
+
+        await (supabase.from('profiles') as any).insert({
+          id: data.user.id,
+          nickname
+        })
+
+        console.log('[Auth Callback] Profile created for:', data.user.email)
+      }
+    } catch (profileError) {
+      // Profile creation is non-critical - log but continue
+      console.warn('[Auth Callback] Profile creation failed (non-critical):', profileError)
+    }
+  }
+
   // Set cache headers to prevent caching
   response.headers.set('Cache-Control', 'no-store, must-revalidate')
   response.headers.set('Pragma', 'no-cache')
