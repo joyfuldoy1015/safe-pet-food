@@ -225,7 +225,7 @@ export default function QuestionDetailPage() {
           .from('community_questions')
           .select(`
             *,
-            profiles!community_questions_author_id_fkey(nickname, avatar_url)
+            author:profiles!author_id(nickname, avatar_url)
           `)
           .eq('id', questionId)
           .eq('admin_status', 'visible')
@@ -250,9 +250,9 @@ export default function QuestionDetailPage() {
             title: questionData.title,
             content: questionData.content,
             author: {
-              name: questionData.profiles?.nickname || '익명',
+              name: questionData.author?.nickname || '익명',
               level: 'beginner' as const,
-              avatar: questionData.profiles?.avatar_url
+              avatar: questionData.author?.avatar_url
             },
             category: questionData.category,
             categoryEmoji: questionData.category.split(' ')[0],
@@ -295,7 +295,7 @@ export default function QuestionDetailPage() {
           .from('community_answers')
           .select(`
             *,
-            profiles!community_answers_author_id_fkey(nickname, avatar_url)
+            author:profiles!author_id(nickname, avatar_url)
           `)
           .eq('question_id', questionId)
           .eq('admin_status', 'visible')
@@ -312,9 +312,9 @@ export default function QuestionDetailPage() {
           id: answer.id,
           content: answer.content,
           author: {
-            name: answer.profiles?.nickname || '익명',
+            name: answer.author?.nickname || '익명',
             level: 'beginner' as const,
-            avatar: answer.profiles?.avatar_url
+            avatar: answer.author?.avatar_url
           },
           votes: answer.votes || 0,
           isBestAnswer: answer.is_accepted || false,
@@ -430,6 +430,17 @@ export default function QuestionDetailPage() {
     e.preventDefault()
     if (!newComment.trim() || !question) return
 
+    // Validate minimum length
+    if (newComment.trim().length < 10) {
+      alert('답변은 최소 10자 이상 입력해주세요.')
+      return
+    }
+
+    if (newComment.trim().length > 5000) {
+      alert('답변은 최대 5000자까지 입력 가능합니다.')
+      return
+    }
+
     try {
       const supabase = getBrowserClient()
       if (!supabase) {
@@ -522,7 +533,7 @@ export default function QuestionDetailPage() {
           .from('community_questions')
           .select(`
             *,
-            profiles!community_questions_author_id_fkey(nickname, avatar_url)
+            author:profiles!author_id(nickname, avatar_url)
           `)
           .eq('category', question.category)
           .eq('admin_status', 'visible')
@@ -548,7 +559,7 @@ export default function QuestionDetailPage() {
               title: q.title,
               content: q.content,
               author: {
-                name: q.profiles?.nickname || '익명',
+                name: q.author?.nickname || '익명',
                 level: 'beginner' as const
               },
               category: q.category,
@@ -791,18 +802,34 @@ export default function QuestionDetailPage() {
                   답변 작성하기
                 </h3>
                 <form onSubmit={handleCommentSubmit} className="space-y-4">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="도움이 되는 답변을 작성해주세요..."
-                    rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                    required
-                  />
+                  <div>
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="도움이 되는 답변을 작성해주세요... (최소 10자 이상)"
+                      rows={6}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      required
+                    />
+                    <div className="flex justify-between items-center mt-2">
+                      <span className={`text-sm ${
+                        newComment.trim().length < 10 
+                          ? 'text-red-500' 
+                          : newComment.trim().length > 5000
+                          ? 'text-red-500'
+                          : 'text-gray-500'
+                      }`}>
+                        {newComment.trim().length} / 5000자
+                        {newComment.trim().length < 10 && newComment.trim().length > 0 && (
+                          <span className="ml-2">(최소 10자 필요)</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      disabled={!newComment.trim()}
+                      disabled={!newComment.trim() || newComment.trim().length < 10}
                       className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Send className="h-4 w-4" />

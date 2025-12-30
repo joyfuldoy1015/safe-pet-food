@@ -143,7 +143,7 @@ export default function CommunityQAForumPage() {
           .from('community_questions')
           .select(`
             *,
-            profiles!community_questions_author_id_fkey(nickname, avatar_url)
+            author:profiles!author_id(nickname, avatar_url)
           `)
           .eq('admin_status', 'visible')
           .order('created_at', { ascending: false })
@@ -168,7 +168,7 @@ export default function CommunityQAForumPage() {
               title: q.title,
               content: q.content,
               author: {
-                name: q.profiles?.nickname || '익명',
+                name: q.author?.nickname || '익명',
                 level: 'beginner' as const
               },
               category: q.category,

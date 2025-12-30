@@ -35,6 +35,27 @@ export default function AskQuestionModal({
       return
     }
 
+    // Validate lengths
+    if (title.trim().length < 5) {
+      alert('제목은 최소 5자 이상 입력해주세요.')
+      return
+    }
+
+    if (title.trim().length > 200) {
+      alert('제목은 최대 200자까지 입력 가능합니다.')
+      return
+    }
+
+    if (content.trim().length < 10) {
+      alert('내용은 최소 10자 이상 입력해주세요.')
+      return
+    }
+
+    if (content.trim().length > 5000) {
+      alert('내용은 최대 5000자까지 입력 가능합니다.')
+      return
+    }
+
     onSubmit({
       title: title.trim(),
       category,
@@ -75,10 +96,21 @@ export default function AskQuestionModal({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="질문의 제목을 입력해주세요"
+              placeholder="질문의 제목을 입력해주세요 (최소 5자 이상)"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
+            <div className="mt-1 text-right">
+              <span className={`text-xs ${
+                title.trim().length < 5 && title.trim().length > 0
+                  ? 'text-red-500'
+                  : title.trim().length > 200
+                  ? 'text-red-500'
+                  : 'text-gray-500'
+              }`}>
+                {title.trim().length} / 200자
+              </span>
+            </div>
           </div>
 
           {/* Category */}
@@ -109,11 +141,22 @@ export default function AskQuestionModal({
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="구체적인 상황과 궁금한 점을 자세히 설명해주세요"
+              placeholder="구체적인 상황과 궁금한 점을 자세히 설명해주세요 (최소 10자 이상)"
               rows={8}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
               required
             />
+            <div className="mt-1 text-right">
+              <span className={`text-xs ${
+                content.trim().length < 10 && content.trim().length > 0
+                  ? 'text-red-500'
+                  : content.trim().length > 5000
+                  ? 'text-red-500'
+                  : 'text-gray-500'
+              }`}>
+                {content.trim().length} / 5000자
+              </span>
+            </div>
           </div>
 
           {/* Image URL (Optional) */}
@@ -144,7 +187,16 @@ export default function AskQuestionModal({
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+              disabled={
+                !title.trim() || 
+                title.trim().length < 5 || 
+                title.trim().length > 200 ||
+                !category || 
+                !content.trim() || 
+                content.trim().length < 10 ||
+                content.trim().length > 5000
+              }
+              className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
               질문 등록
             </button>
