@@ -98,20 +98,19 @@ export default function PetLogPage() {
               if (log.pets && !uniquePets.find(p => p.id === log.pets.id)) {
                 uniquePets.push({
                   id: log.pets.id,
-                  ownerId: log.owner_id,
                   name: log.pets.name,
                   species: log.pets.species,
                   birthDate: log.pets.birth_date,
                   weightKg: log.pets.weight_kg,
-                  tags: log.pets.tags || [],
-                  avatarUrl: log.pets.avatar_url || undefined
+                  tags: log.pets.tags || []
                 })
               }
               if (log.profiles && !uniqueOwners.find(o => o.id === log.owner_id)) {
                 uniqueOwners.push({
                   id: log.owner_id,
                   nickname: log.profiles.nickname,
-                  avatarUrl: log.profiles.avatar_url || undefined
+                  avatarUrl: log.profiles.avatar_url || undefined,
+                  pets: [] // Will be populated later if needed
                 })
               }
             })
