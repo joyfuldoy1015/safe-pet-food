@@ -7,6 +7,7 @@ import { Question } from '@/app/components/qa-forum/QuestionCard'
 import { ReviewLog } from '@/lib/types/review-log'
 import questionsData from '@/data/questions.json'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 export type FeedItemKind = 'qa' | 'review'
 
@@ -42,6 +43,59 @@ export interface UnifiedFeedItem {
   categoryEmoji?: string
   // Links
   href: string
+}
+
+/**
+ * Fetch review_logs from Supabase
+ */
+async function fetchReviewLogs(): Promise<ReviewLog[]> {
+  try {
+    const supabase = getBrowserClient()
+    if (!supabase) return mockReviewLogs
+
+    const { data, error } = await supabase
+      .from('review_logs')
+      .select(`
+        *,
+        profiles!owner_id(nickname, avatar_url),
+        pets!pet_id(id, name, species, birth_date, weight_kg)
+      `)
+      .eq('admin_status', 'visible')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (error || !data) return mockReviewLogs
+
+    return data.map((log: any) => ({
+      id: log.id,
+      petId: log.pet_id || '',
+      ownerId: log.owner_id || '',
+      category: log.category || 'feed',
+      brand: log.brand || '',
+      product: log.product || '',
+      status: log.status || 'feeding',
+      periodStart: log.period_start || log.created_at,
+      periodEnd: log.period_end || undefined,
+      durationDays: log.duration_days || undefined,
+      rating: log.rating || undefined,
+      recommend: log.recommend || undefined,
+      continueReasons: log.continue_reasons || undefined,
+      stopReasons: log.stop_reasons || undefined,
+      excerpt: log.excerpt || '',
+      notes: log.notes || undefined,
+      likes: log.likes || 0,
+      commentsCount: log.comments_count || 0,
+      views: log.views || 0,
+      createdAt: log.created_at || new Date().toISOString(),
+      updatedAt: log.updated_at || log.created_at || new Date().toISOString(),
+      // Add owner/pet info for display
+      ownerName: log.profiles?.nickname || '익명',
+      petName: log.pets?.name || '펫'
+    }))
+  } catch (error) {
+    console.error('Failed to fetch review_logs:', error)
+    return mockReviewLogs
+  }
 }
 
 /**
@@ -114,10 +168,6 @@ function reviewToFeedItem(review: ReviewLog, ownerName: string, petName: string)
  * Get popular feed items (sorted by engagement)
  */
 export async function getPopular(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  // TODO: Replace with actual API call
-  // const response = await fetch('/api/feed/popular?limit=' + limit)
-  // return response.json()
-
   const items: UnifiedFeedItem[] = []
 
   // Add Q&A items
@@ -132,14 +182,13 @@ export async function getPopular(limit: number = 20): Promise<UnifiedFeedItem[]>
 
   items.push(...qaItems)
 
-  // Add Review items
-  const reviewItems = mockReviewLogs
+  // Add Review items from Supabase
+  const reviewLogs = await fetchReviewLogs()
+  const reviewItems = reviewLogs
     .slice(0, Math.floor(limit / 2))
-    .map((review) => {
-      const owner = mockOwners.find((o) => o.id === review.ownerId)
-      const pet = mockPets.find((p) => p.id === review.petId)
-      return reviewToFeedItem(review, owner?.nickname || '익명', pet?.name || '펫')
-    })
+    .map((review: any) => 
+      reviewToFeedItem(review, review.ownerName || '익명', review.petName || '펫')
+    )
     .sort((a, b) => {
       const scoreA = a.stats.likes * 2 + a.stats.comments + a.stats.views / 10
       const scoreB = b.stats.likes * 2 + b.stats.comments + b.stats.views / 10
@@ -160,7 +209,6 @@ export async function getPopular(limit: number = 20): Promise<UnifiedFeedItem[]>
  * Get recent feed items (sorted by createdAt desc)
  */
 export async function getRecent(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  // TODO: Replace with actual API call
   const items: UnifiedFeedItem[] = []
 
   // Add Q&A items
@@ -170,12 +218,11 @@ export async function getRecent(limit: number = 20): Promise<UnifiedFeedItem[]> 
 
   items.push(...qaItems)
 
-  // Add Review items
-  const reviewItems = mockReviewLogs.map((review) => {
-    const owner = mockOwners.find((o) => o.id === review.ownerId)
-    const pet = mockPets.find((p) => p.id === review.petId)
-    return reviewToFeedItem(review, owner?.nickname || '익명', pet?.name || '펫')
-  })
+  // Add Review items from Supabase
+  const reviewLogs = await fetchReviewLogs()
+  const reviewItems = reviewLogs.map((review: any) => 
+    reviewToFeedItem(review, review.ownerName || '익명', review.petName || '펫')
+  )
 
   items.push(...reviewItems)
 
@@ -200,13 +247,11 @@ export async function getQA(limit: number = 20): Promise<UnifiedFeedItem[]> {
  * Get Review/Log items only
  */
 export async function getReviews(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  // TODO: Replace with actual API call
-  return mockReviewLogs
-    .map((review) => {
-      const owner = mockOwners.find((o) => o.id === review.ownerId)
-      const pet = mockPets.find((p) => p.id === review.petId)
-      return reviewToFeedItem(review, owner?.nickname || '익명', pet?.name || '펫')
-    })
+  const reviewLogs = await fetchReviewLogs()
+  return reviewLogs
+    .map((review: any) => 
+      reviewToFeedItem(review, review.ownerName || '익명', review.petName || '펫')
+    )
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
 }

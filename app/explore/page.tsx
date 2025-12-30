@@ -33,7 +33,9 @@ import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import PetLogCard from '@/components/petlogs/PetLogCard'
 import FeedFilters from '@/app/components/pet-log/FeedFilters'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
+import { ReviewLog, Pet, Owner } from '@/lib/types/review-log'
 import questionsData from '@/data/questions.json'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 type SortOption = 'popular' | 'recent' | 'recommended'
 type ContentType = 'all' | 'qa' | 'reviews'
@@ -45,6 +47,10 @@ export default function ExplorePage() {
   const [contentType, setContentType] = useState<ContentType>('all')
   const [sortOption, setSortOption] = useState<SortOption>('popular')
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
+  const [reviews, setReviews] = useState<ReviewLog[]>(mockReviewLogs)
+  const [pets, setPets] = useState<Pet[]>(mockPets)
+  const [owners, setOwners] = useState<Owner[]>(mockOwners)
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true)
   
   // Review filters
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')
@@ -52,6 +58,90 @@ export default function ExplorePage() {
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'feeding' | 'paused' | 'completed'>('all')
   const [selectedRating, setSelectedRating] = useState<number>(0)
   const [selectedRecommend, setSelectedRecommend] = useState<'all' | 'recommended' | 'not-recommended'>('all')
+
+  // Load reviews from Supabase
+  useEffect(() => {
+    const loadReviews = async () => {
+      setIsLoadingReviews(true)
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          setIsLoadingReviews(false)
+          return
+        }
+
+        const { data, error } = await supabase
+          .from('review_logs')
+          .select(`
+            *,
+            profiles!owner_id(nickname, avatar_url),
+            pets!pet_id(id, name, species, birth_date, weight_kg)
+          `)
+          .eq('admin_status', 'visible')
+          .order('created_at', { ascending: false })
+          .limit(100)
+
+        if (!error && data) {
+          const transformedReviews: ReviewLog[] = data.map((log: any) => ({
+            id: log.id,
+            petId: log.pet_id || '',
+            ownerId: log.owner_id || '',
+            category: log.category || 'feed',
+            brand: log.brand || '',
+            product: log.product || '',
+            status: log.status || 'feeding',
+            periodStart: log.period_start || log.created_at,
+            periodEnd: log.period_end || undefined,
+            durationDays: log.duration_days || undefined,
+            rating: log.rating || undefined,
+            recommend: log.recommend || undefined,
+            continueReasons: log.continue_reasons || undefined,
+            stopReasons: log.stop_reasons || undefined,
+            excerpt: log.excerpt || '',
+            notes: log.notes || undefined,
+            likes: log.likes || 0,
+            commentsCount: log.comments_count || 0,
+            views: log.views || 0,
+            createdAt: log.created_at || new Date().toISOString(),
+            updatedAt: log.updated_at || log.created_at || new Date().toISOString()
+          }))
+          setReviews(transformedReviews)
+
+          // Extract pets and owners
+          const uniquePets: Pet[] = []
+          const uniqueOwners: Owner[] = []
+          data.forEach((log: any) => {
+            if (log.pets && !uniquePets.find(p => p.id === log.pets.id)) {
+              uniquePets.push({
+                id: log.pets.id,
+                name: log.pets.name,
+                species: log.pets.species,
+                birthDate: log.pets.birth_date,
+                weightKg: log.pets.weight_kg,
+                tags: log.pets.tags || []
+              })
+            }
+            if (log.profiles && !uniqueOwners.find(o => o.id === log.owner_id)) {
+              uniqueOwners.push({
+                id: log.owner_id,
+                nickname: log.profiles.nickname,
+                avatarUrl: log.profiles.avatar_url || undefined,
+                pets: []
+              })
+            }
+          })
+          if (uniquePets.length > 0) setPets(prev => [...prev, ...uniquePets])
+          if (uniqueOwners.length > 0) setOwners(prev => [...prev, ...uniqueOwners])
+        }
+      } catch (error) {
+        console.error('Failed to load reviews:', error)
+      } finally {
+        setIsLoadingReviews(false)
+      }
+    }
+
+    loadReviews()
+  }, [])
 
   // Format helpers
   const formatTimeAgo = (dateString: string): string => {
@@ -144,8 +234,8 @@ export default function ExplorePage() {
 
   // Filter and sort reviews
   const filteredReviews = useMemo(() => {
-    let reviews = mockReviewLogs.filter((review) => {
-      const pet = mockPets.find((p) => p.id === review.petId)
+    let filtered = reviews.filter((review) => {
+      const pet = pets.find((p) => p.id === review.petId)
       if (!pet) return false
 
       const matchesSpecies = selectedSpecies === 'all' || pet.species === selectedSpecies
@@ -163,19 +253,19 @@ export default function ExplorePage() {
     // Sort
     switch (sortOption) {
       case 'popular':
-        reviews.sort((a, b) => b.likes - a.likes)
+        filtered.sort((a, b) => b.likes - a.likes)
         break
       case 'recent':
-        reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         break
       case 'recommended':
-        reviews = reviews.filter((r) => r.recommend === true)
-        reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        filtered = filtered.filter((r) => r.recommend === true)
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         break
     }
 
-    return reviews
-  }, [selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
+    return filtered
+  }, [reviews, pets, selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
 
   // Combined items
   const allItems = useMemo(() => {
