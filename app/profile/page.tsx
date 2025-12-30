@@ -77,16 +77,30 @@ export default function ProfilePage() {
       setIsLoadingPosts(true)
       try {
         const supabase = getBrowserClient()
-        const { data, error } = await supabase
+        
+        // 1. Load from pet_log_posts
+        const { data: petLogPosts, error: petLogError } = await supabase
           .from('pet_log_posts')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(5)
 
-        if (!error && data) {
-          setRecentPosts(data)
-        }
+        // 2. Load from review_logs
+        const { data: reviewLogs, error: reviewLogsError } = await supabase
+          .from('review_logs')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        const allPosts = [
+          ...(petLogPosts || []).map(post => ({ ...post, source: 'pet_log_posts' })),
+          ...(reviewLogs || []).map(log => ({ ...log, source: 'review_logs' }))
+        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+
+        setRecentPosts(allPosts)
       } catch (error) {
         console.error('Failed to load recent posts:', error)
       } finally {
@@ -426,16 +440,22 @@ export default function ProfilePage() {
               {recentPosts.map((post) => (
                 <Link
                   key={post.id}
-                  href={`/pet-log/posts/${post.id}`}
+                  href={post.source === 'pet_log_posts' ? `/pet-log/posts/${post.id}` : `/owners/${user?.id}/pets/${post.pet_id}`}
                   className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 mb-1">
-                        {post.pet_name}의 급여 기록
+                        {post.source === 'pet_log_posts' 
+                          ? `${post.pet_name || '반려동물'}의 급여 기록`
+                          : `${post.brand} - ${post.product}`
+                        }
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">
-                        {post.pet_breed} • {post.total_records}개 기록
+                        {post.source === 'pet_log_posts'
+                          ? `${post.pet_breed || ''} • ${post.total_records || 0}개 기록`
+                          : post.excerpt || post.notes || '급여 후기'
+                        }
                       </p>
                       <div className="flex items-center gap-3 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
@@ -450,6 +470,11 @@ export default function ProfilePage() {
                           <MessageCircle className="w-3 h-3" />
                           {post.comments_count || 0}
                         </span>
+                        {post.source === 'review_logs' && (
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                            후기
+                          </span>
+                        )}
                       </div>
                     </div>
                     <span className="text-xs text-gray-500">
