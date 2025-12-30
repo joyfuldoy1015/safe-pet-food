@@ -28,6 +28,8 @@ export default function PetLogPage() {
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [isLogFormOpen, setIsLogFormOpen] = useState(false)
   const [isLoadingReviews, setIsLoadingReviews] = useState(true)
+  const [pets, setPets] = useState<Pet[]>(mockPets)
+  const [owners, setOwners] = useState<Owner[]>(mockOwners)
 
   // Fetch reviews from Supabase (review_logs and pet_log_posts)
   useEffect(() => {
@@ -53,8 +55,8 @@ export default function PetLogPage() {
             .from('review_logs')
             .select(`
               *,
-              profiles!review_logs_owner_id_fkey(nickname, avatar_url),
-              pets!review_logs_pet_id_fkey(id, name, species, birth_date, weight_kg)
+              profiles!owner_id(nickname, avatar_url),
+              pets!pet_id(id, name, species, birth_date, weight_kg)
             `)
             .order('created_at', { ascending: false })
             .limit(100)
@@ -88,6 +90,33 @@ export default function PetLogPage() {
               appetite_change: log.appetite_change || undefined
             }))
             allReviews.push(...transformedReviewLogs)
+            
+            // Extract unique pets and owners from reviewLogs
+            const uniquePets: Pet[] = []
+            const uniqueOwners: Owner[] = []
+            reviewLogs.forEach((log: any) => {
+              if (log.pets && !uniquePets.find(p => p.id === log.pets.id)) {
+                uniquePets.push({
+                  id: log.pets.id,
+                  ownerId: log.owner_id,
+                  name: log.pets.name,
+                  species: log.pets.species,
+                  birthDate: log.pets.birth_date,
+                  weightKg: log.pets.weight_kg,
+                  tags: log.pets.tags || [],
+                  avatarUrl: log.pets.avatar_url || undefined
+                })
+              }
+              if (log.profiles && !uniqueOwners.find(o => o.id === log.owner_id)) {
+                uniqueOwners.push({
+                  id: log.owner_id,
+                  nickname: log.profiles.nickname,
+                  avatarUrl: log.profiles.avatar_url || undefined
+                })
+              }
+            })
+            if (uniquePets.length > 0) setPets(prev => [...prev, ...uniquePets])
+            if (uniqueOwners.length > 0) setOwners(prev => [...prev, ...uniqueOwners])
           }
         } catch (error) {
           console.warn('[PetLogPage] Error fetching review_logs:', error)
@@ -230,7 +259,7 @@ export default function PetLogPage() {
   // Filter and sort reviews
   const filteredAndSortedReviews = useMemo(() => {
     let filtered = reviews.filter((review) => {
-      const pet = mockPets.find((p) => p.id === review.petId)
+      const pet = pets.find((p) => p.id === review.petId)
       if (!pet) return false
 
       const matchesSpecies = selectedSpecies === 'all' || pet.species === selectedSpecies
@@ -266,7 +295,7 @@ export default function PetLogPage() {
     }
 
     return filtered
-  }, [reviews, selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
+  }, [reviews, pets, selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
 
   // Displayed reviews (paginated)
   const displayedReviews = useMemo(() => {
@@ -290,21 +319,21 @@ export default function PetLogPage() {
     reviews.forEach((review) => {
       const key = `${review.ownerId}-${review.petId}`
       if (!cache.has(key)) {
-        const owner = mockOwners.find((o) => o.id === review.ownerId) || null
-        const pet = mockPets.find((p) => p.id === review.petId) || null
+        const owner = owners.find((o) => o.id === review.ownerId) || null
+        const pet = pets.find((p) => p.id === review.petId) || null
         cache.set(key, { owner, pet })
       }
     })
     return cache
-  }, [reviews])
+  }, [reviews, owners, pets])
 
   const getOwnerAndPet = (review: ReviewLog): { owner: Owner | null; pet: Pet | null } => {
     const key = `${review.ownerId}-${review.petId}`
     if (ownerPetCache.has(key)) {
       return ownerPetCache.get(key)!
     }
-    const owner = mockOwners.find((o) => o.id === review.ownerId) || null
-    const pet = mockPets.find((p) => p.id === review.petId) || null
+    const owner = owners.find((o) => o.id === review.ownerId) || null
+    const pet = pets.find((p) => p.id === review.petId) || null
     return { owner, pet }
   }
 
@@ -317,9 +346,9 @@ export default function PetLogPage() {
     return Object.entries(ownerActivity)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
-      .map(([ownerId]) => mockOwners.find((o) => o.id === ownerId))
+      .map(([ownerId]) => owners.find((o) => o.id === ownerId))
       .filter((o): o is Owner => o !== undefined)
-  }, [reviews])
+  }, [reviews, owners])
 
   const longestFeeding = useMemo(() => {
     return reviews
@@ -412,10 +441,10 @@ export default function PetLogPage() {
   }
 
   const selectedOwner = selectedReview
-    ? mockOwners.find((o) => o.id === selectedReview.ownerId) || null
+    ? owners.find((o) => o.id === selectedReview.ownerId) || null
     : null
   const selectedPet = selectedReview
-    ? mockPets.find((p) => p.id === selectedReview.petId) || null
+    ? pets.find((p) => p.id === selectedReview.petId) || null
     : null
 
   return (
