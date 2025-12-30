@@ -17,28 +17,28 @@ const features: Feature[] = [
     name: '사료 브랜드 투명성',
     href: '/brands',
     icon: Star,
-    description: '다양한 사료 브랜드의 안전성과 투명성을 확인하고 비교해보세요.',
+    description: '신뢰할 수 있는 브랜드 찾기',
     color: 'from-orange-500 to-pink-500'
   },
   {
     name: '제품 검색하기',
     href: '/search?tab=products',
     icon: Search,
-    description: '브랜드 구분 없이 모든 제품을 검색하고 비교해보세요.',
+    description: '제품 정보 알아보기',
     color: 'from-purple-500 to-pink-500'
   },
   {
     name: '펫 로그',
     href: '/pet-log',
     icon: BookOpen,
-    description: '우리 아이의 사료/간식 급여 이력을 기록하고 다른 집사들과 공유해보세요.',
+    description: '실제 급여 후기 살펴보기',
     color: 'from-green-500 to-teal-500'
   },
   {
     name: 'Q&A 포럼',
     href: '/community/qa-forum',
     icon: HelpCircle,
-    description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.',
+    description: '질문과 답변으로 지식 쌓기',
     color: 'from-blue-500 to-indigo-500'
   }
 ]
