@@ -6,8 +6,10 @@ import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import AskQuestionModal from '@/app/components/qa-forum/AskQuestionModal'
 import CategoryTabs from '@/app/components/qa-forum/CategoryTabs'
 import SidebarTrending from '@/app/components/qa-forum/SidebarTrending'
-// Mock data - in production, this would come from an API
-const questionsData = [
+import { getBrowserClient } from '@/lib/supabase-client'
+
+// Fallback mock data
+const mockQuestionsData = [
   {
     id: '1',
     title: '강아지가 사료를 잘 안 먹어요. 어떻게 해야 할까요?',
@@ -115,7 +117,7 @@ export default function CommunityQAForumPage() {
   const [sortOption, setSortOption] = useState<SortOption>('hot')
   const [showQuestionModal, setShowQuestionModal] = useState(false)
   const [questions, setQuestions] = useState<Question[]>(
-    questionsData.map((q) => ({
+    mockQuestionsData.map((q) => ({
       ...q,
       isUpvoted: false
     }))
@@ -123,6 +125,75 @@ export default function CommunityQAForumPage() {
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({})
   const [displayedCount, setDisplayedCount] = useState(QUESTIONS_PER_PAGE)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true)
+
+  // Load questions from Supabase
+  useEffect(() => {
+    const loadQuestions = async () => {
+      setIsLoadingQuestions(true)
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          setIsLoadingQuestions(false)
+          return
+        }
+
+        // Fetch questions with answer counts
+        const { data: questionsData, error } = await supabase
+          .from('community_questions')
+          .select(`
+            *,
+            profiles!community_questions_author_id_fkey(nickname, avatar_url)
+          `)
+          .eq('admin_status', 'visible')
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('Failed to load questions:', error)
+          setIsLoadingQuestions(false)
+          return
+        }
+
+        // Get answer counts for each question
+        const questionsWithAnswers = await Promise.all(
+          (questionsData || []).map(async (q: any) => {
+            const { count } = await supabase
+              .from('community_answers')
+              .select('*', { count: 'exact', head: true })
+              .eq('question_id', q.id)
+              .eq('admin_status', 'visible')
+
+            return {
+              id: q.id,
+              title: q.title,
+              content: q.content,
+              author: {
+                name: q.profiles?.nickname || '익명',
+                level: 'beginner' as const
+              },
+              category: q.category,
+              categoryEmoji: q.category.split(' ')[0],
+              votes: q.votes || 0,
+              answerCount: count || 0,
+              views: q.views || 0,
+              createdAt: q.created_at,
+              updatedAt: q.updated_at,
+              status: q.status as 'open' | 'answered' | 'closed',
+              isUpvoted: false
+            }
+          })
+        )
+
+        setQuestions(questionsWithAnswers)
+      } catch (error) {
+        console.error('Failed to load questions:', error)
+      } finally {
+        setIsLoadingQuestions(false)
+      }
+    }
+
+    loadQuestions()
+  }, [])
 
   // Format time ago helper
   const formatTimeAgo = (dateString: string): string => {
@@ -211,56 +282,146 @@ export default function CommunityQAForumPage() {
   }, [questions, userVotes])
 
   // Handle upvote
-  const handleUpvote = (questionId: string) => {
-    const isCurrentlyUpvoted = userVotes[questionId]
+  const handleUpvote = async (questionId: string) => {
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
 
-    setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId
-          ? { ...q, votes: isCurrentlyUpvoted ? q.votes - 1 : q.votes + 1 }
-          : q
-      )
-    )
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-    setUserVotes((prev) => {
+      const isCurrentlyUpvoted = userVotes[questionId]
+
       if (isCurrentlyUpvoted) {
-        const newVotes = { ...prev }
-        delete newVotes[questionId]
-        return newVotes
+        // Remove vote
+        await supabase
+          .from('community_votes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('target_type', 'question')
+          .eq('target_id', questionId)
+
+        // Decrement vote count
+        await supabase
+          .from('community_questions')
+          .update({ votes: supabase.rpc('decrement', { row_id: questionId }) } as any)
+          .eq('id', questionId)
+      } else {
+        // Add vote
+        await supabase
+          .from('community_votes')
+          .insert({
+            user_id: user.id,
+            target_type: 'question',
+            target_id: questionId,
+            vote_value: 1
+          } as any)
+
+        // Increment vote count
+        await supabase
+          .from('community_questions')
+          .update({ votes: supabase.rpc('increment', { row_id: questionId }) } as any)
+          .eq('id', questionId)
       }
-      return { ...prev, [questionId]: true }
-    })
+
+      // Update local state
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q.id === questionId
+            ? { ...q, votes: isCurrentlyUpvoted ? q.votes - 1 : q.votes + 1 }
+            : q
+        )
+      )
+
+      setUserVotes((prev) => {
+        if (isCurrentlyUpvoted) {
+          const newVotes = { ...prev }
+          delete newVotes[questionId]
+          return newVotes
+        }
+        return { ...prev, [questionId]: true }
+      })
+    } catch (error) {
+      console.error('Failed to update vote:', error)
+    }
   }
 
   // Handle question submit
-  const handleQuestionSubmit = (data: {
+  const handleQuestionSubmit = async (data: {
     title: string
     category: string
     content: string
     isAnonymous: boolean
     imageUrl?: string
   }) => {
-    const newQuestion: Question = {
-      id: `q-${Date.now()}`,
-      title: data.title,
-      content: data.content,
-      author: {
-        name: data.isAnonymous ? '익명' : '사용자',
-        level: 'beginner'
-      },
-      category: data.category,
-      categoryEmoji: categories.find((c) => c.value === data.category)?.emoji || '💬',
-      votes: 0,
-      answerCount: 0,
-      views: 0,
-      createdAt: new Date().toISOString(),
-      status: 'open',
-      isUpvoted: false,
-      imageUrl: data.imageUrl
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        alert('Supabase에 연결할 수 없습니다.')
+        return
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        alert('로그인이 필요합니다.')
+        return
+      }
+
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nickname')
+        .eq('id', user.id)
+        .single()
+
+      // Insert question
+      const { data: newQuestion, error } = await (supabase
+        .from('community_questions') as any)
+        .insert({
+          title: data.title,
+          content: data.content,
+          category: data.category,
+          author_id: user.id,
+          status: 'open',
+          votes: 0,
+          views: 0,
+          admin_status: 'visible'
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Failed to create question:', error)
+        alert('질문 등록에 실패했습니다.')
+        return
+      }
+
+      // Add to local state
+      const questionForDisplay: Question = {
+        id: newQuestion.id,
+        title: newQuestion.title,
+        content: newQuestion.content,
+        author: {
+          name: profile?.nickname || '사용자',
+          level: 'beginner'
+        },
+        category: data.category,
+        categoryEmoji: categories.find((c) => c.value === data.category)?.emoji || '💬',
+        votes: 0,
+        answerCount: 0,
+        views: 0,
+        createdAt: newQuestion.created_at,
+        updatedAt: newQuestion.updated_at,
+        status: 'open',
+        isUpvoted: false
+      }
+      
+      setQuestions([questionForDisplay, ...questions])
+      setShowQuestionModal(false)
+    } catch (error) {
+      console.error('Failed to submit question:', error)
+      alert('질문 등록에 실패했습니다.')
     }
-    
-    setQuestions([newQuestion, ...questions])
-    setShowQuestionModal(false)
   }
 
   return (
