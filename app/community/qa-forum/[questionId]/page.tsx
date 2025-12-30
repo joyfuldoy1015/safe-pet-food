@@ -17,8 +17,10 @@ import {
 } from 'lucide-react'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import CommentThread, { Comment } from '@/app/components/qa-forum/CommentThread'
-// Mock data - in production, this would come from an API
-const questionsData = [
+import { getBrowserClient } from '@/lib/supabase-client'
+
+// Fallback Mock data
+const mockQuestionsData = [
   {
     id: '1',
     title: '강아지가 사료를 잘 안 먹어요. 어떻게 해야 할까요?',
@@ -183,6 +185,8 @@ export default function QuestionDetailPage() {
   const [newComment, setNewComment] = useState('')
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({})
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const [isLoadingQuestion, setIsLoadingQuestion] = useState(true)
+  const [isLoadingComments, setIsLoadingComments] = useState(true)
 
   // Format time ago helper
   const formatTimeAgo = (dateString: string): string => {
@@ -199,18 +203,135 @@ export default function QuestionDetailPage() {
   }
 
   useEffect(() => {
-    // Load question data
-    const questionData = questionsData.find((q) => q.id === questionId)
-    if (questionData) {
-      setQuestion({
-        ...questionData,
-        isUpvoted: userVotes[questionId] || false
-      } as Question)
+    const loadQuestion = async () => {
+      setIsLoadingQuestion(true)
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          // Fallback to mock data
+          const questionData = mockQuestionsData.find((q) => q.id === questionId)
+          if (questionData) {
+            setQuestion({
+              ...questionData,
+              isUpvoted: userVotes[questionId] || false
+            } as Question)
+          }
+          setIsLoadingQuestion(false)
+          return
+        }
+
+        // Fetch question from Supabase
+        const { data: questionData, error } = await supabase
+          .from('community_questions')
+          .select(`
+            *,
+            profiles!community_questions_author_id_fkey(nickname, avatar_url)
+          `)
+          .eq('id', questionId)
+          .eq('admin_status', 'visible')
+          .single()
+
+        if (error) {
+          console.error('Failed to load question:', error)
+          setIsLoadingQuestion(false)
+          return
+        }
+
+        if (questionData) {
+          // Get answer count
+          const { count } = await supabase
+            .from('community_answers')
+            .select('*', { count: 'exact', head: true })
+            .eq('question_id', questionData.id)
+            .eq('admin_status', 'visible')
+
+          setQuestion({
+            id: questionData.id,
+            title: questionData.title,
+            content: questionData.content,
+            author: {
+              name: questionData.profiles?.nickname || '익명',
+              level: 'beginner' as const,
+              avatar: questionData.profiles?.avatar_url
+            },
+            category: questionData.category,
+            categoryEmoji: questionData.category.split(' ')[0],
+            votes: questionData.votes || 0,
+            answerCount: count || 0,
+            views: questionData.views || 0,
+            createdAt: questionData.created_at,
+            updatedAt: questionData.updated_at,
+            status: questionData.status as 'open' | 'answered' | 'closed',
+            isUpvoted: false
+          })
+
+          // Increment view count
+          await (supabase
+            .from('community_questions') as any)
+            .update({ views: (questionData.views || 0) + 1 })
+            .eq('id', questionId)
+        }
+      } catch (error) {
+        console.error('Failed to load question:', error)
+      } finally {
+        setIsLoadingQuestion(false)
+      }
     }
 
-    // Load comments
-    const questionComments = mockComments[questionId] || []
-    setComments(questionComments.map((c) => ({ ...c, isUpvoted: false })))
+    const loadComments = async () => {
+      setIsLoadingComments(true)
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          // Fallback to mock data
+          const questionComments = mockComments[questionId] || []
+          setComments(questionComments.map((c) => ({ ...c, isUpvoted: false })))
+          setIsLoadingComments(false)
+          return
+        }
+
+        // Fetch answers from Supabase
+        const { data: answersData, error } = await supabase
+          .from('community_answers')
+          .select(`
+            *,
+            profiles!community_answers_author_id_fkey(nickname, avatar_url)
+          `)
+          .eq('question_id', questionId)
+          .eq('admin_status', 'visible')
+          .order('is_accepted', { ascending: false })
+          .order('votes', { ascending: false })
+
+        if (error) {
+          console.error('Failed to load answers:', error)
+          setIsLoadingComments(false)
+          return
+        }
+
+        const comments: Comment[] = (answersData || []).map((answer: any) => ({
+          id: answer.id,
+          content: answer.content,
+          author: {
+            name: answer.profiles?.nickname || '익명',
+            level: 'beginner' as const,
+            avatar: answer.profiles?.avatar_url
+          },
+          votes: answer.votes || 0,
+          isBestAnswer: answer.is_accepted || false,
+          createdAt: answer.created_at,
+          isUpvoted: false
+        }))
+
+        setComments(comments)
+      } catch (error) {
+        console.error('Failed to load answers:', error)
+      } finally {
+        setIsLoadingComments(false)
+      }
+    }
+
+    loadQuestion()
+    loadComments()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionId]) // Only reload when questionId changes
 
@@ -305,39 +426,163 @@ export default function QuestionDetailPage() {
   }
 
   // Handle new comment submit
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newComment.trim() || !question) return
 
-    const newCommentObj: Comment = {
-      id: `c-${Date.now()}`,
-      content: newComment.trim(),
-      author: {
-        name: '사용자',
-        level: 'beginner'
-      },
-      votes: 0,
-      createdAt: new Date().toISOString()
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        alert('Supabase에 연결할 수 없습니다.')
+        return
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        alert('로그인이 필요합니다.')
+        return
+      }
+
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nickname, avatar_url')
+        .eq('id', user.id)
+        .single()
+
+      // Insert answer
+      const { data: newAnswer, error } = await (supabase
+        .from('community_answers') as any)
+        .insert({
+          question_id: questionId,
+          author_id: user.id,
+          content: newComment.trim(),
+          is_accepted: false,
+          votes: 0,
+          admin_status: 'visible'
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Failed to create answer:', error)
+        alert('답변 등록에 실패했습니다.')
+        return
+      }
+
+      // Add to local state
+      const newCommentObj: Comment = {
+        id: newAnswer.id,
+        content: newAnswer.content,
+        author: {
+          name: profile?.nickname || '사용자',
+          level: 'beginner',
+          avatar: profile?.avatar_url
+        },
+        votes: 0,
+        createdAt: newAnswer.created_at,
+        isUpvoted: false
+      }
+
+      setComments([...comments, newCommentObj])
+      setNewComment('')
+
+      // Update question answer count
+      setQuestion({
+        ...question,
+        answerCount: question.answerCount + 1
+      })
+    } catch (error) {
+      console.error('Failed to submit answer:', error)
+      alert('답변 등록에 실패했습니다.')
     }
-
-    setComments([...comments, newCommentObj])
-    setNewComment('')
-
-    // Update question answer count
-    setQuestion({
-      ...question,
-      answerCount: question.answerCount + 1
-    })
   }
 
-  // Get related questions (same category) - must be before early return
-  const relatedQuestions = useMemo(() => {
-    if (!question) return []
-    return questionsData
-      .filter((q) => q.id !== questionId && q.category === question.category)
-      .slice(0, 3)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId, question?.category])
+  // Related questions state
+  const [relatedQuestions, setRelatedQuestions] = useState<Question[]>([])
+
+  // Load related questions
+  useEffect(() => {
+    const loadRelatedQuestions = async () => {
+      if (!question) return
+
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          // Fallback to mock data
+          const related = mockQuestionsData
+            .filter((q) => q.id !== questionId && q.category === question.category)
+            .slice(0, 3)
+          setRelatedQuestions(related)
+          return
+        }
+
+        // Fetch related questions from Supabase
+        const { data: questionsData, error } = await supabase
+          .from('community_questions')
+          .select(`
+            *,
+            profiles!community_questions_author_id_fkey(nickname, avatar_url)
+          `)
+          .eq('category', question.category)
+          .eq('admin_status', 'visible')
+          .neq('id', questionId)
+          .order('votes', { ascending: false })
+          .limit(3)
+
+        if (error) {
+          console.error('Failed to load related questions:', error)
+          return
+        }
+
+        const questions: Question[] = await Promise.all(
+          (questionsData || []).map(async (q: any) => {
+            const { count } = await supabase
+              .from('community_answers')
+              .select('*', { count: 'exact', head: true })
+              .eq('question_id', q.id)
+              .eq('admin_status', 'visible')
+
+            return {
+              id: q.id,
+              title: q.title,
+              content: q.content,
+              author: {
+                name: q.profiles?.nickname || '익명',
+                level: 'beginner' as const
+              },
+              category: q.category,
+              categoryEmoji: q.category.split(' ')[0],
+              votes: q.votes || 0,
+              answerCount: count || 0,
+              views: q.views || 0,
+              createdAt: q.created_at,
+              updatedAt: q.updated_at,
+              status: q.status as 'open' | 'answered' | 'closed',
+              isUpvoted: false
+            }
+          })
+        )
+
+        setRelatedQuestions(questions)
+      } catch (error) {
+        console.error('Failed to load related questions:', error)
+      }
+    }
+
+    loadRelatedQuestions()
+  }, [question?.category, questionId, question])
+
+  if (isLoadingQuestion) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent mb-4"></div>
+          <p className="text-gray-600">질문을 불러오는 중...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!question) {
     return (

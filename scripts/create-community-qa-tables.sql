@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS community_questions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL CHECK (LENGTH(TRIM(title)) >= 5 AND LENGTH(title) <= 200),
   content TEXT NOT NULL CHECK (LENGTH(TRIM(content)) >= 10 AND LENGTH(content) <= 5000),
-  author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   category TEXT NOT NULL CHECK (category IN (
     '🐶 강아지',
     '🐱 고양이',
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS community_questions (
 CREATE TABLE IF NOT EXISTS community_answers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   question_id UUID NOT NULL REFERENCES community_questions(id) ON DELETE CASCADE,
-  author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   content TEXT NOT NULL CHECK (LENGTH(TRIM(content)) >= 10 AND LENGTH(content) <= 5000),
   is_accepted BOOLEAN DEFAULT FALSE,
   votes INTEGER DEFAULT 0,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS community_answers (
 -- ============================================
 CREATE TABLE IF NOT EXISTS community_votes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   target_type TEXT NOT NULL CHECK (target_type IN ('question', 'answer')),
   target_id UUID NOT NULL,
   vote_value INTEGER NOT NULL CHECK (vote_value IN (-1, 1)), -- upvote or downvote
