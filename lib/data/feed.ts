@@ -46,6 +46,63 @@ export interface UnifiedFeedItem {
 }
 
 /**
+ * Fetch community_questions from Supabase
+ */
+async function fetchCommunityQuestions(): Promise<Question[]> {
+  try {
+    const supabase = getBrowserClient()
+    if (!supabase) return questionsData as Question[]
+
+    const { data, error } = await supabase
+      .from('community_questions')
+      .select(`
+        *,
+        author:profiles!author_id(nickname, avatar_url)
+      `)
+      .eq('admin_status', 'visible')
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    if (error || !data) return questionsData as Question[]
+
+    // Get answer counts for each question
+    const questionsWithAnswers = await Promise.all(
+      data.map(async (q: any) => {
+        const { count } = await supabase
+          .from('community_answers')
+          .select('*', { count: 'exact', head: true })
+          .eq('question_id', q.id)
+          .eq('admin_status', 'visible')
+
+        return {
+          id: q.id,
+          title: q.title,
+          content: q.content,
+          author: {
+            name: q.author?.nickname || '익명',
+            level: 'beginner' as const
+          },
+          category: q.category,
+          categoryEmoji: q.category.split(' ')[0],
+          votes: q.votes || 0,
+          answerCount: count || 0,
+          views: q.views || 0,
+          createdAt: q.created_at,
+          updatedAt: q.updated_at,
+          status: q.status as 'open' | 'answered' | 'closed',
+          isUpvoted: false
+        }
+      })
+    )
+
+    return questionsWithAnswers
+  } catch (error) {
+    console.error('Failed to fetch community_questions:', error)
+    return questionsData as Question[]
+  }
+}
+
+/**
  * Fetch review_logs from Supabase
  */
 async function fetchReviewLogs(): Promise<ReviewLog[]> {
@@ -170,8 +227,9 @@ function reviewToFeedItem(review: ReviewLog, ownerName: string, petName: string)
 export async function getPopular(limit: number = 20): Promise<UnifiedFeedItem[]> {
   const items: UnifiedFeedItem[] = []
 
-  // Add Q&A items
-  const qaItems = (questionsData as Question[])
+  // Add Q&A items from Supabase
+  const questions = await fetchCommunityQuestions()
+  const qaItems = questions
     .map(questionToFeedItem)
     .sort((a, b) => {
       const scoreA = a.stats.likes * 2 + a.stats.comments + a.stats.views / 10
@@ -211,8 +269,9 @@ export async function getPopular(limit: number = 20): Promise<UnifiedFeedItem[]>
 export async function getRecent(limit: number = 20): Promise<UnifiedFeedItem[]> {
   const items: UnifiedFeedItem[] = []
 
-  // Add Q&A items
-  const qaItems = (questionsData as Question[])
+  // Add Q&A items from Supabase
+  const questions = await fetchCommunityQuestions()
+  const qaItems = questions
     .map(questionToFeedItem)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
@@ -236,8 +295,8 @@ export async function getRecent(limit: number = 20): Promise<UnifiedFeedItem[]> 
  * Get Q&A items only
  */
 export async function getQA(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  // TODO: Replace with actual API call
-  return (questionsData as Question[])
+  const questions = await fetchCommunityQuestions()
+  return questions
     .map(questionToFeedItem)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
