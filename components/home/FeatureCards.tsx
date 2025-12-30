@@ -62,15 +62,9 @@ export default function FeatureCards() {
                   <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3 group-hover:text-gray-700 transition-colors">
                     {feature.name}
                   </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed group-hover:text-gray-700 transition-colors flex-grow">
+                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed group-hover:text-gray-700 transition-colors">
                     {feature.description}
                   </p>
-                  <div className="mt-3 sm:mt-4 flex items-center text-xs sm:text-sm font-medium text-gray-500 group-hover:text-gray-700 transition-colors">
-                    <span>자세히 보기</span>
-                    <svg className="ml-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
                 </div>
               </Link>
             )
