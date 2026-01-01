@@ -51,16 +51,24 @@ export async function getRecentComments(
 /**
  * Get recent Q&A posts for given log IDs
  * Only returns visible posts (admin_status='visible')
+ * 
+ * TODO: This feature is currently disabled as Q&A system is not yet connected to review_logs
+ * The Q&A forum uses community_questions/community_answers tables which are independent
  */
 export async function getRecentQA(
   logIds: string[],
   limit: number = 10,
   offset: number = 0
 ): Promise<any[]> {
+  // Q&A 기능이 review_logs와 연결될 때까지 비활성화
+  console.log('[getRecentQA] Q&A feature not yet connected to review_logs, returning empty array')
+  return []
+  
+  /* 
+  // Original implementation - requires qa_threads and qa_posts tables
   const supabase = getSupabaseClient()
   if (!supabase || logIds.length === 0) return []
 
-  // UUID 검증: 잘못된 형식의 ID들을 필터링
   const validLogIds = logIds.filter(id => isValidUUID(id))
   
   if (validLogIds.length === 0) {
@@ -87,5 +95,6 @@ export async function getRecentQA(
   }
 
   return data || []
+  */
 }
 
