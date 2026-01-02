@@ -17,7 +17,7 @@ function isValidUUID(id: string): boolean {
 /**
  * Get owner profile by ID
  */
-export async function getOwner(ownerId: string): Promise<Profile | null> {
+export async function getOwner(ownerId: string): Promise<any | null> {
   const supabase = getSupabaseClient()
   if (!supabase) return null
 
@@ -38,7 +38,15 @@ export async function getOwner(ownerId: string): Promise<Profile | null> {
     return null
   }
 
-  return data
+  if (!data) return null
+
+  // Convert snake_case to camelCase for Owner type
+  return {
+    id: data.id,
+    nickname: data.nickname,
+    avatarUrl: data.avatar_url,
+    pets: [] // This would need separate query, defaulting to empty for now
+  }
 }
 
 /**
@@ -65,7 +73,17 @@ export async function getPet(petId: string): Promise<Pet | null> {
     return null
   }
 
-  return data
+  if (!data) return null
+
+  // Convert snake_case to camelCase for Pet type
+  return {
+    id: data.id,
+    name: data.name,
+    species: data.species,
+    birthDate: data.birth_date,
+    weightKg: data.weight_kg,
+    tags: data.tags
+  } as any
 }
 
 /**
@@ -105,7 +123,7 @@ export async function getLogsByOwnerPet(
  * Get owner with their pets
  */
 export async function getOwnerWithPets(ownerId: string): Promise<{
-  owner: Profile | null
+  owner: any | null
   pets: Pet[]
 }> {
   const supabase = getSupabaseClient()
@@ -125,7 +143,17 @@ export async function getOwnerWithPets(ownerId: string): Promise<{
     return { owner, pets: [] }
   }
 
-  return { owner, pets: data || [] }
+  // Convert snake_case to camelCase for Pet type
+  const pets = (data || []).map((pet: any) => ({
+    id: pet.id,
+    name: pet.name,
+    species: pet.species,
+    birthDate: pet.birth_date,
+    weightKg: pet.weight_kg,
+    tags: pet.tags
+  })) as any[]
+
+  return { owner, pets }
 }
 
 /**
