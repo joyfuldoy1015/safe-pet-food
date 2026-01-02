@@ -62,15 +62,7 @@ export default function CommentThread({
 
   return (
     <div className={`${depth > 0 ? 'ml-6 pl-4 border-l-2 border-gray-200' : ''}`}>
-      <div className={`bg-white rounded-lg p-4 ${comment.isBestAnswer ? 'ring-2 ring-green-500 bg-green-50' : ''}`}>
-        {/* Best Answer Badge */}
-        {comment.isBestAnswer && (
-          <div className="flex items-center space-x-2 mb-3 text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            <span className="text-xs font-medium">채택된 답변</span>
-          </div>
-        )}
-
+      <div className="bg-white rounded-lg p-4">
         {/* Author Info */}
         <div className="flex items-center space-x-2 mb-3">
           {comment.author.avatar ? (

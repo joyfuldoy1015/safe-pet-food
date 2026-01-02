@@ -299,8 +299,8 @@ export default function QuestionDetailPage() {
           `)
           .eq('question_id', questionId)
           .eq('admin_status', 'visible')
-          .order('is_accepted', { ascending: false })
           .order('votes', { ascending: false })
+          .order('created_at', { ascending: true })
 
         if (error) {
           console.error('Failed to load answers:', error)
@@ -317,7 +317,6 @@ export default function QuestionDetailPage() {
             avatar: answer.author?.avatar_url
           },
           votes: answer.votes || 0,
-          isBestAnswer: answer.is_accepted || false,
           createdAt: answer.created_at,
           isUpvoted: false
         }))
