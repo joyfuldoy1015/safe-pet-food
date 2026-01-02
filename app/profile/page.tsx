@@ -521,6 +521,9 @@ export default function ProfilePage() {
                           <MessageCircle className="w-3 h-3" />
                           {post.comments_count || 0}
                         </span>
+                        {post.updated_at && post.created_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000 && (
+                          <span className="text-gray-400">• 수정됨</span>
+                        )}
                         {post.source === 'review_logs' && (
                           <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
                             후기

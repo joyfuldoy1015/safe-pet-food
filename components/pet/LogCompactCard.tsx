@@ -185,6 +185,9 @@ export default function LogCompactCard({
             <Eye size={14} />
             {log.views}
           </span>
+          {log.updatedAt && log.createdAt && new Date(log.updatedAt).getTime() > new Date(log.createdAt).getTime() + 1000 && (
+            <span className="text-xs text-gray-400">• 수정됨</span>
+          )}
         </div>
         <button
           onClick={(e) => {
