@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit } from 'lucide-react'
+import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit, Trash2, MoreVertical } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfilePage() {
@@ -19,6 +19,8 @@ export default function ProfilePage() {
   const [recentPosts, setRecentPosts] = useState<any[]>([])
   const [isLoadingPets, setIsLoadingPets] = useState(true)
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
 
   // 세션 확인
   useEffect(() => {
@@ -160,6 +162,53 @@ export default function ProfilePage() {
       setAvatarUrl(null)
     }
     setIsEditing(false)
+  }
+
+  // 포스트 삭제 핸들러
+  const handleDeletePost = async (postId: string, source: 'pet_log_posts' | 'review_logs') => {
+    if (!confirm('정말로 이 급여 후기를 삭제하시겠습니까?\n삭제된 후기는 복구할 수 없습니다.')) {
+      return
+    }
+
+    setDeletingPostId(postId)
+    try {
+      const endpoint = source === 'pet_log_posts' 
+        ? `/api/pet-log/posts/${postId}`
+        : `/api/review-logs/${postId}`
+
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete post')
+      }
+
+      // 목록에서 제거
+      setRecentPosts(prev => prev.filter(post => post.id !== postId))
+      alert('급여 후기가 삭제되었습니다.')
+    } catch (error) {
+      console.error('Failed to delete post:', error)
+      alert('삭제에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setDeletingPostId(null)
+      setOpenMenuId(null)
+    }
+  }
+
+  // 포스트 수정 페이지로 이동
+  const handleEditPost = (postId: string, source: 'pet_log_posts' | 'review_logs') => {
+    if (source === 'pet_log_posts') {
+      router.push(`/pet-log/posts/${postId}/edit`)
+    } else {
+      // review_logs는 해당 펫 페이지로 이동
+      const post = recentPosts.find(p => p.id === postId)
+      if (post && post.pet_id) {
+        router.push(`/owners/${user?.id}/pets/${post.pet_id}`)
+      }
+    }
+    setOpenMenuId(null)
   }
 
   // 로딩 중이거나 세션 확인 중이면 로딩 화면 표시
@@ -438,13 +487,15 @@ export default function ProfilePage() {
           ) : recentPosts.length > 0 ? (
             <div className="space-y-3">
               {recentPosts.map((post) => (
-                <Link
+                <div
                   key={post.id}
-                  href={post.source === 'pet_log_posts' ? `/pet-log/posts/${post.id}` : `/owners/${user?.id}/pets/${post.pet_id}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                  className="relative p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <Link
+                      href={post.source === 'pet_log_posts' ? `/pet-log/posts/${post.id}` : `/owners/${user?.id}/pets/${post.pet_id}`}
+                      className="flex-1 min-w-0"
+                    >
                       <h3 className="font-semibold text-gray-900 mb-1">
                         {post.source === 'pet_log_posts' 
                           ? `${post.pet_name || '반려동물'}의 급여 기록`
@@ -476,12 +527,54 @@ export default function ProfilePage() {
                           </span>
                         )}
                       </div>
+                    </Link>
+                    
+                    {/* 수정/삭제 메뉴 */}
+                    <div className="relative flex-shrink-0 flex items-center gap-2">
+                      <span className="text-xs text-gray-500">
+                        {new Date(post.created_at).toLocaleDateString('ko-KR')}
+                      </span>
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
+                          disabled={deletingPostId === post.id}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                        >
+                          <MoreVertical className="w-4 h-4 text-gray-600" />
+                        </button>
+                        
+                        {openMenuId === post.id && (
+                          <>
+                            {/* Backdrop to close menu */}
+                            <div
+                              className="fixed inset-0 z-10"
+                              onClick={() => setOpenMenuId(null)}
+                            />
+                            
+                            {/* Dropdown menu */}
+                            <div className="absolute right-0 top-8 z-20 w-32 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                              <button
+                                onClick={() => handleEditPost(post.id, post.source)}
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                                수정
+                              </button>
+                              <button
+                                onClick={() => handleDeletePost(post.id, post.source)}
+                                disabled={deletingPostId === post.id}
+                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                {deletingPostId === post.id ? '삭제 중...' : '삭제'}
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(post.created_at).toLocaleDateString('ko-KR')}
-                    </span>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           ) : (
