@@ -56,6 +56,7 @@ export default function PetHistoryPage() {
   const [activeTab, setActiveTab] = useState<Category | 'all'>(validatedTab)
   const [initialTab, setInitialTab] = useState<'details' | 'comments' | 'qa'>('details')
   const [initialThreadId, setInitialThreadId] = useState<string | undefined>(undefined)
+  const [editingLog, setEditingLog] = useState<any>(null)
 
   // Load data
   useEffect(() => {
@@ -408,6 +409,73 @@ export default function PetHistoryPage() {
     )
   }
 
+  // 수정 핸들러
+  const handleEditLog = (log: ReviewLog) => {
+    // ReviewLog (camelCase) 타입을 Database ReviewLog (snake_case) 타입으로 변환
+    const convertedLog = {
+      id: log.id,
+      pet_id: log.petId,
+      owner_id: log.ownerId,
+      category: log.category,
+      brand: log.brand,
+      product: log.product,
+      product_id: '', // Not available in ReviewLog type
+      status: log.status,
+      period_start: log.periodStart,
+      period_end: log.periodEnd || null,
+      duration_days: log.durationDays || null,
+      rating: log.rating || null,
+      recommend: log.recommend ?? null,
+      continue_reasons: log.continueReasons || null,
+      stop_reasons: log.stopReasons || null,
+      excerpt: log.excerpt,
+      notes: log.notes || null,
+      likes: log.likes,
+      comments_count: log.commentsCount,
+      views: log.views,
+      admin_status: 'visible' as const, // Default value
+      stool_score: log.stool_score || null,
+      allergy_symptoms: log.allergy_symptoms || null,
+      vomiting: log.vomiting || null,
+      appetite_change: log.appetite_change || null,
+      safi_score: null, // Not available in ReviewLog type
+      safi_level: null, // Not available in ReviewLog type
+      safi_detail: null, // Not available in ReviewLog type
+      created_at: log.createdAt,
+      updated_at: log.updatedAt
+    }
+    
+    setEditingLog(convertedLog as any)
+    setIsDrawerOpen(false)
+    setIsLogFormOpen(true)
+  }
+
+  // 삭제 핸들러
+  const handleDeleteLog = async (logId: string) => {
+    if (!confirm('정말로 이 후기를 삭제하시겠습니까?\n삭제된 후기는 복구할 수 없습니다.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/review-logs/${logId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete log')
+      }
+
+      // 목록에서 제거
+      setLogs(prev => prev.filter(l => l.id !== logId))
+      setIsDrawerOpen(false)
+      alert('후기가 삭제되었습니다.')
+    } catch (error) {
+      console.error('Failed to delete log:', error)
+      alert('삭제에 실패했습니다. 다시 시도해주세요.')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
@@ -565,6 +633,8 @@ export default function PetHistoryPage() {
           setInitialThreadId(undefined)
         }}
         onStatusChange={handleStatusChange}
+        onEdit={handleEditLog}
+        onDelete={handleDeleteLog}
         formatTimeAgo={formatTimeAgo}
         formatDate={formatDate}
         calculateAge={calculateAge}
@@ -591,9 +661,15 @@ export default function PetHistoryPage() {
       {/* Log Form Dialog */}
       <LogFormDialog
         open={isLogFormOpen}
-        onOpenChange={setIsLogFormOpen}
-        title={pet ? `${pet.name} 새 로그 작성` : '새 로그 작성'}
+        onOpenChange={(open) => {
+          setIsLogFormOpen(open)
+          if (!open) {
+            setEditingLog(null)
+          }
+        }}
+        title={editingLog ? `${pet?.name} 로그 수정` : pet ? `${pet.name} 새 로그 작성` : '새 로그 작성'}
         defaultValues={pet ? { petId: pet.id } : undefined}
+        editData={editingLog}
         onSuccess={() => {
           // Refetch logs for this pet
           const supabase = getBrowserClient()
@@ -609,6 +685,7 @@ export default function PetHistoryPage() {
             // Reload mock data
             setLogs(mockReviewLogs.filter((l) => l.ownerId === ownerId && l.petId === petId))
           }
+          setEditingLog(null)
         }}
       />
     </div>

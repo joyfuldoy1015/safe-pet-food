@@ -22,6 +22,7 @@ interface LogFormDialogProps {
     petId?: string
     [key: string]: any
   }
+  editData?: ReviewLog | null
   onSuccess?: () => void
   requireAuth?: boolean
   userId?: string
@@ -37,6 +38,7 @@ export default function LogFormDialog({
   onOpenChange,
   title = '새 로그 작성',
   defaultValues,
+  editData,
   onSuccess,
   requireAuth = true,
   userId
@@ -339,7 +341,7 @@ export default function LogFormDialog({
                 <ReviewLogFormContent
                   onClose={handleClose}
                   onSuccess={handleFormSuccess}
-                  editData={null}
+                  editData={editData || null}
                   pets={pets}
                   isLoadingPets={isLoadingPets}
                 />
