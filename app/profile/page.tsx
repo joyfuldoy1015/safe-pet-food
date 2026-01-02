@@ -491,92 +491,95 @@ export default function ProfilePage() {
                   key={post.id}
                   className="relative p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <Link
-                      href={post.source === 'pet_log_posts' ? `/pet-log/posts/${post.id}` : `/owners/${user?.id}/pets/${post.pet_id}`}
-                      className="flex-1 min-w-0"
-                    >
-                      <h3 className="font-semibold text-gray-900 mb-1">
-                        {post.source === 'pet_log_posts' 
-                          ? `${post.pet_name || '반려동물'}의 급여 기록`
-                          : `${post.brand} - ${post.product}`
-                        }
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {post.source === 'pet_log_posts'
-                          ? `${post.pet_breed || ''} • ${post.total_records || 0}개 기록`
-                          : post.excerpt || post.notes || '급여 후기'
-                        }
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
-                          {post.views || 0}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-3 h-3" />
-                          {post.likes || 0}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MessageCircle className="w-3 h-3" />
-                          {post.comments_count || 0}
-                        </span>
-                        {post.updated_at && post.created_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000 && (
-                          <span className="text-gray-400">• 수정됨</span>
-                        )}
-                        {post.source === 'review_logs' && (
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
-                            후기
-                          </span>
-                        )}
-                      </div>
-                    </Link>
-                    
-                    {/* 수정/삭제 메뉴 */}
-                    <div className="relative flex-shrink-0 flex items-center gap-2">
-                      <span className="text-xs text-gray-500">
-                        {new Date(post.created_at).toLocaleDateString('ko-KR')}
-                      </span>
-                      <div className="relative">
-                        <button
-                          onClick={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
-                          disabled={deletingPostId === post.id}
-                          className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
-                        >
-                          <MoreVertical className="w-4 h-4 text-gray-600" />
-                        </button>
-                        
-                        {openMenuId === post.id && (
-                          <>
-                            {/* Backdrop to close menu */}
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setOpenMenuId(null)}
-                            />
-                            
-                            {/* Dropdown menu */}
-                            <div className="absolute right-0 top-8 z-20 w-32 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                              <button
-                                onClick={() => handleEditPost(post.id, post.source)}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
-                              >
-                                <Edit className="w-4 h-4" />
-                                수정
-                              </button>
-                              <button
-                                onClick={() => handleDeletePost(post.id, post.source)}
-                                disabled={deletingPostId === post.id}
-                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                {deletingPostId === post.id ? '삭제 중...' : '삭제'}
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
+                  {/* 최상단: 날짜와 메뉴 버튼 */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-gray-500">
+                      {new Date(post.created_at).toLocaleDateString('ko-KR')}
+                    </span>
+                    <div className="relative">
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
+                        disabled={deletingPostId === post.id}
+                        className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                      >
+                        <MoreVertical className="w-4 h-4 text-gray-600" />
+                      </button>
+                      
+                      {openMenuId === post.id && (
+                        <>
+                          {/* Backdrop to close menu */}
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={() => setOpenMenuId(null)}
+                          />
+                          
+                          {/* Dropdown menu */}
+                          <div className="absolute right-0 top-8 z-20 w-32 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                            <button
+                              onClick={() => handleEditPost(post.id, post.source)}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                              수정
+                            </button>
+                            <button
+                              onClick={() => handleDeletePost(post.id, post.source)}
+                              disabled={deletingPostId === post.id}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              {deletingPostId === post.id ? '삭제 중...' : '삭제'}
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
+
+                  {/* 타이틀 */}
+                  <Link
+                    href={post.source === 'pet_log_posts' ? `/pet-log/posts/${post.id}` : `/owners/${user?.id}/pets/${post.pet_id}`}
+                    className="block"
+                  >
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      {post.source === 'pet_log_posts' 
+                        ? `${post.pet_name || '반려동물'}의 급여 기록`
+                        : `${post.brand} - ${post.product}`
+                      }
+                    </h3>
+
+                    {/* 본문 */}
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {post.source === 'pet_log_posts'
+                        ? `${post.pet_breed || ''} • ${post.total_records || 0}개 기록`
+                        : post.excerpt || post.notes || '급여 후기'
+                      }
+                    </p>
+
+                    {/* 하단: 통계 및 뱃지 */}
+                    <div className="flex items-center flex-wrap gap-2 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {post.views || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3 h-3" />
+                        {post.likes || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="w-3 h-3" />
+                        {post.comments_count || 0}
+                      </span>
+                      {post.updated_at && post.created_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000 && (
+                        <span className="text-gray-400">• 수정됨</span>
+                      )}
+                      {post.source === 'review_logs' && (
+                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                          후기
+                        </span>
+                      )}
+                    </div>
+                  </Link>
                 </div>
               ))}
             </div>
