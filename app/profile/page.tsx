@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit, Trash2, MoreVertical } from 'lucide-react'
+import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit, Trash2, MoreVertical, Bookmark, ArrowUp } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfilePage() {
@@ -17,8 +17,10 @@ export default function ProfilePage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [pets, setPets] = useState<any[]>([])
   const [recentPosts, setRecentPosts] = useState<any[]>([])
+  const [bookmarkedQuestions, setBookmarkedQuestions] = useState<any[]>([])
   const [isLoadingPets, setIsLoadingPets] = useState(true)
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+  const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(true)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
 
@@ -112,6 +114,52 @@ export default function ProfilePage() {
 
     if (user) {
       loadRecentPosts()
+    }
+  }, [user])
+
+  // 북마크한 게시글 로드
+  useEffect(() => {
+    const loadBookmarkedQuestions = async () => {
+      if (!user) return
+      
+      setIsLoadingBookmarks(true)
+      try {
+        const supabase = getBrowserClient()
+        
+        const { data, error } = await supabase
+          .from('community_bookmarks')
+          .select(`
+            id,
+            created_at,
+            question:community_questions(
+              id,
+              title,
+              content,
+              category,
+              votes,
+              views,
+              created_at,
+              author:profiles!author_id(nickname, avatar_url)
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        if (!error && data) {
+          // Filter out bookmarks where question was deleted
+          const validBookmarks = data.filter(b => b.question)
+          setBookmarkedQuestions(validBookmarks)
+        }
+      } catch (error) {
+        console.error('Failed to load bookmarks:', error)
+      } finally {
+        setIsLoadingBookmarks(false)
+      }
+    }
+
+    if (user) {
+      loadBookmarkedQuestions()
     }
   }, [user])
 
@@ -592,6 +640,84 @@ export default function ProfilePage() {
               >
                 <Plus className="w-4 h-4" />
                 급여 후기 작성하기
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* 북마크한 게시글 섹션 */}
+        <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Bookmark className="w-5 h-5 text-yellow-600" />
+              북마크한 게시글
+            </h2>
+            <Link
+              href="/community/qa-forum"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Q&A 포럼
+            </Link>
+          </div>
+          
+          {isLoadingBookmarks ? (
+            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+          ) : bookmarkedQuestions.length > 0 ? (
+            <div className="space-y-3">
+              {bookmarkedQuestions.map((bookmark: any) => (
+                <Link
+                  key={bookmark.id}
+                  href={`/community/qa-forum/${bookmark.question.id}`}
+                  className="block p-4 border border-gray-200 rounded-lg hover:border-yellow-300 hover:shadow-md transition-all"
+                >
+                  {/* 카테고리와 날짜 */}
+                  <div className="flex items-center gap-2 mb-2 text-xs">
+                    <span className="text-gray-600 font-medium">{bookmark.question.category}</span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-400">
+                      {new Date(bookmark.created_at).toLocaleDateString('ko-KR')} 북마크
+                    </span>
+                  </div>
+                  
+                  {/* 제목 */}
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
+                    {bookmark.question.title}
+                  </h3>
+                  
+                  {/* 본문 미리보기 */}
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {bookmark.question.content}
+                  </p>
+                  
+                  {/* 통계 */}
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <ArrowUp className="w-3 h-3" />
+                      {bookmark.question.votes || 0}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      {bookmark.question.views || 0}
+                    </span>
+                    {bookmark.question.author && (
+                      <>
+                        <span className="text-gray-400">•</span>
+                        <span>{bookmark.question.author.nickname || '익명'}</span>
+                      </>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">북마크한 게시글이 없습니다</p>
+              <Link
+                href="/community/qa-forum"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+              >
+                <Bookmark className="w-4 h-4" />
+                Q&A 포럼 둘러보기
               </Link>
             </div>
           )}

@@ -187,6 +187,7 @@ export default function QuestionDetailPage() {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true)
   const [isLoadingComments, setIsLoadingComments] = useState(true)
+  const [isTogglingBookmark, setIsTogglingBookmark] = useState(false)
 
   // Format time ago helper
   const formatTimeAgo = (dateString: string): string => {
@@ -329,8 +330,34 @@ export default function QuestionDetailPage() {
       }
     }
 
+    const loadBookmarkStatus = async () => {
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) return
+
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // Check if user has bookmarked this question
+        const { data, error } = await supabase
+          .from('community_bookmarks')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('question_id', questionId)
+          .single()
+
+        if (!error && data) {
+          setIsBookmarked(true)
+        }
+      } catch (error) {
+        // 북마크가 없으면 에러 발생 (정상)
+        setIsBookmarked(false)
+      }
+    }
+
     loadQuestion()
     loadComments()
+    loadBookmarkStatus()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionId]) // Only reload when questionId changes
 
@@ -354,6 +381,69 @@ export default function QuestionDetailPage() {
       }
       return { ...prev, [questionId]: true }
     })
+  }
+
+  // Handle bookmark toggle
+  const handleToggleBookmark = async () => {
+    if (isTogglingBookmark) return
+
+    const supabase = getBrowserClient()
+    if (!supabase) {
+      alert('Supabase에 연결할 수 없습니다.')
+      return
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+
+    setIsTogglingBookmark(true)
+    try {
+      if (isBookmarked) {
+        // 북마크 삭제
+        const { error } = await supabase
+          .from('community_bookmarks')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('question_id', questionId)
+
+        if (error) {
+          console.error('Failed to remove bookmark:', error)
+          alert('북마크 해제에 실패했습니다.')
+          return
+        }
+
+        setIsBookmarked(false)
+      } else {
+        // 북마크 추가
+        const { error } = await (supabase
+          .from('community_bookmarks') as any)
+          .insert({
+            user_id: user.id,
+            question_id: questionId
+          })
+
+        if (error) {
+          console.error('Failed to add bookmark:', error)
+          // 이미 북마크된 경우 (UNIQUE constraint)
+          if (error.code === '23505') {
+            setIsBookmarked(true)
+            return
+          }
+          alert('북마크 추가에 실패했습니다.')
+          return
+        }
+
+        setIsBookmarked(true)
+      }
+    } catch (error) {
+      console.error('Failed to toggle bookmark:', error)
+      alert('북마크 처리 중 오류가 발생했습니다.')
+    } finally {
+      setIsTogglingBookmark(false)
+    }
   }
 
   // Handle comment upvote
@@ -713,12 +803,14 @@ export default function QuestionDetailPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  className={`p-2 rounded-lg transition-colors ${
+                  onClick={handleToggleBookmark}
+                  disabled={isTogglingBookmark}
+                  className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                     isBookmarked
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-400 hover:bg-gray-100'
                   }`}
+                  aria-label={isBookmarked ? '북마크 해제' : '북마크 추가'}
                 >
                   <Bookmark
                     className={`h-5 w-5 ${isBookmarked ? 'fill-current' : ''}`}
