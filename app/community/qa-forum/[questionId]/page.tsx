@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 import {
   ArrowLeft,
   ArrowUp,
@@ -179,6 +180,7 @@ const mockComments: Record<string, Comment[]> = {
 export default function QuestionDetailPage() {
   const params = useParams()
   const questionId = params.questionId as string
+  const { user, profile } = useAuth()
 
   const [question, setQuestion] = useState<Question | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -315,7 +317,8 @@ export default function QuestionDetailPage() {
           author: {
             name: answer.author?.nickname || '익명',
             level: 'beginner' as const,
-            avatar: answer.author?.avatar_url
+            avatar: answer.author?.avatar_url,
+            id: answer.author_id
           },
           votes: answer.votes || 0,
           createdAt: answer.created_at,
@@ -495,7 +498,8 @@ export default function QuestionDetailPage() {
       content,
       author: {
         name: '사용자',
-        level: 'beginner'
+        level: 'beginner',
+        id: user?.id
       },
       votes: 0,
       createdAt: new Date().toISOString()
@@ -523,6 +527,67 @@ export default function QuestionDetailPage() {
     }
 
     setComments((prev) => prev.map(addReplyToComment))
+  }
+
+  // Handle edit comment
+  const handleEditComment = (commentId: string, newContent: string) => {
+    const editComment = (comment: Comment): Comment => {
+      if (comment.id === commentId) {
+        return {
+          ...comment,
+          content: newContent
+        }
+      }
+      
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: comment.replies.map(editComment)
+        }
+      }
+      
+      return comment
+    }
+
+    setComments((prev) => prev.map(editComment))
+  }
+
+  // Handle delete comment
+  const handleDeleteComment = (commentId: string) => {
+    const deleteComment = (comment: Comment): Comment | null => {
+      if (comment.id === commentId) {
+        // 대댓글이 있으면 내용만 삭제 표시
+        if (comment.replies && comment.replies.length > 0) {
+          return {
+            ...comment,
+            content: '사용자가 댓글을 삭제했습니다.',
+            isDeleted: true
+          }
+        }
+        // 대댓글이 없으면 완전 삭제 (null 반환)
+        return null
+      }
+      
+      // 하위 답글 처리
+      if (comment.replies && comment.replies.length > 0) {
+        const updatedReplies = comment.replies
+          .map(deleteComment)
+          .filter((r): r is Comment => r !== null)
+        
+        return {
+          ...comment,
+          replies: updatedReplies
+        }
+      }
+      
+      return comment
+    }
+
+    setComments((prev) => 
+      prev
+        .map(deleteComment)
+        .filter((c): c is Comment => c !== null)
+    )
   }
 
   // Handle new comment submit
@@ -588,7 +653,8 @@ export default function QuestionDetailPage() {
         author: {
           name: profile?.nickname || '사용자',
           level: 'beginner',
-          avatar: profile?.avatar_url
+          avatar: profile?.avatar_url,
+          id: user.id
         },
         votes: 0,
         createdAt: newAnswer.created_at,
@@ -893,7 +959,10 @@ export default function QuestionDetailPage() {
                     comment={comment}
                     onUpvote={handleCommentUpvote}
                     onReply={handleReply}
+                    onEdit={handleEditComment}
+                    onDelete={handleDeleteComment}
                     formatTimeAgo={formatTimeAgo}
+                    currentUserId={user?.id}
                   />
                 ))}
               </div>
