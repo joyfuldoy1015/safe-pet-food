@@ -158,7 +158,7 @@ export default function CommentThread({
 
       {/* Nested Replies - 부모 컨테이너 밖에서 렌더링 */}
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-1.5 space-y-1.5">
+        <div className="mt-1 space-y-1">
           {comment.replies.map((reply) => (
             <CommentThread
               key={reply.id}

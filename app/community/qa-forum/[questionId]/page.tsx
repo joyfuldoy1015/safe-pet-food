@@ -886,7 +886,7 @@ export default function QuestionDetailPage() {
                 {comments.length}개의 답변
               </h2>
 
-              <div className="space-y-2.5 mb-6">
+              <div className="space-y-2 mb-6">
                 {comments.map((comment) => (
                   <CommentThread
                     key={comment.id}
