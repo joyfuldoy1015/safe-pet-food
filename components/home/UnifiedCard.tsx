@@ -65,7 +65,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
   return (
     <Link href={item.href}>
-      <article className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col min-h-[400px] group">
+      <article className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group" style={{ aspectRatio: '5 / 3.5' }}>
         {/* 카테고리 배지들 - Q&A일 때만 Q&A 배지 + 카테고리 배지 */}
         {item.kind === 'qa' ? (
           <div className="mb-3 flex items-center gap-2 flex-wrap">
@@ -142,7 +142,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
         {/* Excerpt */}
         <div className="mt-4 flex-1">
-          <p className="text-[15px] leading-7 text-gray-600 line-clamp-3">
+          <p className="text-[15px] leading-7 text-gray-600 line-clamp-2">
             {item.excerpt}
           </p>
         </div>

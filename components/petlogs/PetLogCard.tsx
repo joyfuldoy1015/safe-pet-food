@@ -130,7 +130,8 @@ export default function PetLogCard(props: PetLogCardProps) {
 
   return (
     <article
-      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full min-h-[400px] group cursor-pointer"
+      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full group cursor-pointer"
+      style={{ aspectRatio: '5 / 3.5' }}
       role="article"
       aria-label={`${props.brand} ${props.product} 후기`}
       onClick={handleCardClick}
@@ -189,7 +190,7 @@ export default function PetLogCard(props: PetLogCardProps) {
         <div className="mt-4 flex-1">
           {!isExpanded ? (
             <>
-              <p className={`text-[15px] leading-7 text-gray-600 ${shouldTruncate ? 'line-clamp-3' : ''}`}>
+              <p className={`text-[15px] leading-7 text-gray-600 ${shouldTruncate ? 'line-clamp-2' : ''}`}>
                 {reviewText}
               </p>
               {shouldTruncate && (
