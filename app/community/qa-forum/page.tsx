@@ -433,7 +433,7 @@ export default function CommunityQAForumPage() {
             Q&A 포럼 💬
           </h1>
           <p className="text-lg text-gray-600">
-            반려동물에 대한 궁금한 점을 질문하고, 경험을 나눠보세요.
+            사료 선택 고민을 다른 보호자들과 함께 나눠보세요.
           </p>
         </div>
 
