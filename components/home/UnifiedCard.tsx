@@ -92,7 +92,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
         {/* Header */}
         <header className="mb-2 flex-shrink-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="text-lg font-bold tracking-tight text-gray-900 line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
+            <h3 className="text-base font-bold tracking-tight text-gray-900 line-clamp-1 flex-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
             {item.kind === 'qa' && item.status && (
               <div className="flex-shrink-0">
                 {getStatusIcon(item.status)}
