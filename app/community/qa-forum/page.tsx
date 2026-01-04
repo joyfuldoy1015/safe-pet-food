@@ -428,11 +428,11 @@ export default function CommunityQAForumPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Q&A 포럼 💬
           </h1>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">
+          <p className="text-lg text-gray-600">
             사료 선택 고민을 다른 보호자들과 함께 나눠보세요.
           </p>
         </div>
