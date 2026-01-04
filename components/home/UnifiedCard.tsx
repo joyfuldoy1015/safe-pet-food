@@ -89,6 +89,16 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
           </div>
         )}
 
+        {/* Review-specific info - 급여 후기일 때는 제목 위에 표시 */}
+        {item.kind === 'review' && item.period && (
+          <div className="flex items-center justify-between text-xs text-gray-500 mb-2 flex-shrink-0">
+            <span>{item.period.label}</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${periodColor}`}>
+              {item.period.status === 'feeding' ? '급여 중' : item.period.status === 'completed' ? '급여 완료' : '급여 중지'}
+            </span>
+          </div>
+        )}
+
         {/* Header */}
         <header className="mb-2 flex-shrink-0">
           <div className="flex items-start justify-between gap-2 mb-1">
@@ -101,7 +111,22 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
           </div>
         </header>
 
-        {/* Author Info - Q&A일 때만 상단에 표시 */}
+        {/* 별점 + 추천 - 급여 후기일 때 제목 다음에 표시 */}
+        {item.kind === 'review' && item.rating !== undefined && item.rating !== null && (
+          <div className="mb-2 flex items-center gap-2 flex-shrink-0">
+            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+            <span className="text-base font-semibold text-gray-900">
+              {item.rating.toFixed(1)}
+            </span>
+            {item.recommend !== undefined && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium border border-yellow-300 text-yellow-700 bg-yellow-50">
+                {item.recommend ? '추천' : '비추천'}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Author Info */}
         {item.kind === 'qa' && item.author && (
           <div className="mb-2 flex items-center gap-2 text-xs text-gray-600 flex-shrink-0">
             <div className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center">
@@ -112,31 +137,10 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
           </div>
         )}
 
-        {/* Review-specific info */}
-        {item.kind === 'review' && (
-          <div className="mb-2 flex flex-wrap items-center gap-1.5 flex-shrink-0">
-            {item.period && (
-              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs border font-medium ${periodColor}`}>
-                <CalendarDays size={12} />
-                <span className="whitespace-nowrap">{item.period.label}</span>
-              </span>
-            )}
-            {item.rating !== undefined && item.rating !== null && (
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="text-base font-semibold text-gray-900">
-                  {item.rating.toFixed(1)}
-                </span>
-                {item.recommend !== undefined && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium border border-yellow-300 text-yellow-700 bg-yellow-50">
-                    {item.recommend ? '추천' : '비추천'}
-                  </span>
-                )}
-              </div>
-            )}
-            {item.meta && (
-              <span className="text-xs text-gray-500">{item.meta}</span>
-            )}
+        {/* 작성자 정보 - 급여 후기일 때 */}
+        {item.kind === 'review' && item.meta && (
+          <div className="mb-2 text-xs text-gray-600 flex-shrink-0">
+            <span className="font-semibold text-gray-900">{item.meta}</span>
           </div>
         )}
 
