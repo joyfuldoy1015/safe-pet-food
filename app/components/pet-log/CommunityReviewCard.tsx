@@ -51,7 +51,7 @@ export default function CommunityReviewCard({
     (hasMoreStopReasons ? stopReasons.length - 3 : 0)
 
   return (
-    <article className="rounded-3xl border border-gray-100 bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full">
+    <article className="rounded-3xl border border-gray-100 bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full" style={{ aspectRatio: '5 / 3.5' }}>
       <header className="mb-4">
         <h3 className="text-base sm:text-lg lg:text-xl font-semibold sm:font-bold text-gray-900 line-clamp-2 mb-3">{title}</h3>
         <div className="flex flex-wrap items-center gap-2">
@@ -88,7 +88,7 @@ export default function CommunityReviewCard({
         </div>
       </header>
 
-      <p className="text-sm text-gray-900 leading-relaxed bg-gray-50 rounded-2xl px-4 py-3 line-clamp-3 flex-shrink-0 h-[5rem] mb-3 text-[15px] flex items-start">
+      <p className="text-sm text-gray-900 leading-relaxed bg-gray-50 rounded-2xl px-4 py-3 line-clamp-2 flex-shrink-0 mb-3 text-[15px] flex items-start">
         {excerpt}
       </p>
 

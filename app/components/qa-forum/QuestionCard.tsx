@@ -61,7 +61,7 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
 
   return (
     <Link href={`/community/qa-forum/${question.id}`}>
-      <article className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col min-h-[400px] group">
+      <article className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group" style={{ aspectRatio: '5 / 3.5' }}>
         {/* 카테고리 배지들 - Q&A + 카테고리 */}
         <div className="mb-3 flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
@@ -109,7 +109,7 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
 
         {/* Excerpt */}
         <div className="mt-4 flex-1">
-          <p className="text-[15px] leading-7 text-gray-600 line-clamp-3">
+          <p className="text-[15px] leading-7 text-gray-600 line-clamp-2">
             {question.content}
           </p>
         </div>
