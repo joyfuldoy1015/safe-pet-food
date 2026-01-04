@@ -24,6 +24,7 @@ interface CommentThreadProps {
   onReply: (commentId: string, content: string) => void
   formatTimeAgo: (date: string) => string
   depth?: number
+  parentAuthor?: string // 대대댓글일 때 멘션할 부모 작성자
 }
 
 export default function CommentThread({
@@ -31,11 +32,12 @@ export default function CommentThread({
   onUpvote,
   onReply,
   formatTimeAgo,
-  depth = 0
+  depth = 0,
+  parentAuthor
 }: CommentThreadProps) {
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyContent, setReplyContent] = useState('')
-  const maxDepth = 3
+  const maxDepth = 10 // 충분히 깊은 답글 허용
 
   const getAuthorBadge = (level?: string) => {
     if (!level) return null
@@ -60,8 +62,12 @@ export default function CommentThread({
     setShowReplyForm(false)
   }
 
+  // depth 1까지만 들여쓰기 적용, 그 이상은 동일한 들여쓰기 유지
+  const shouldIndent = depth > 0
+  const indentClass = shouldIndent ? 'ml-6 pl-3 border-l-2 border-gray-200' : ''
+
   return (
-    <div className={`${depth > 0 ? 'ml-6 pl-3 border-l-2 border-gray-200' : ''}`}>
+    <div className={indentClass}>
       <div className="bg-white rounded-lg p-3">
         {/* Author Info */}
         <div className="flex items-center space-x-2 mb-2">
@@ -81,8 +87,13 @@ export default function CommentThread({
           <span className="text-xs text-gray-500">{formatTimeAgo(comment.createdAt)}</span>
         </div>
 
-        {/* Content */}
-        <p className="text-sm text-gray-700 whitespace-pre-line mb-2">{comment.content}</p>
+        {/* Content with mention for nested replies */}
+        <p className="text-sm text-gray-700 whitespace-pre-line mb-2">
+          {parentAuthor && (
+            <span className="text-blue-600 font-medium">@{parentAuthor} </span>
+          )}
+          {comment.content}
+        </p>
 
         {/* Actions */}
         <div className="flex items-center justify-between">
@@ -154,6 +165,7 @@ export default function CommentThread({
               onReply={onReply}
               formatTimeAgo={formatTimeAgo}
               depth={depth + 1}
+              parentAuthor={depth >= 1 ? comment.author.name : undefined}
             />
           ))}
         </div>
