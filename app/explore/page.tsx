@@ -36,15 +36,14 @@ import { ReviewLog, Pet, Owner } from '@/lib/types/review-log'
 import questionsData from '@/data/questions.json'
 import { getBrowserClient } from '@/lib/supabase-client'
 
-type SortOption = 'popular' | 'recent' | 'recommended'
+type SortOption = 'recent' | 'popular' | 'rating'
 type ContentType = 'all' | 'qa' | 'reviews'
-type ProductCategory = 'all' | 'feed' | 'snack' | 'supplement' | 'toilet'
 
 const ITEMS_PER_PAGE = 12
 
 export default function ExplorePage() {
   const [contentType, setContentType] = useState<ContentType>('all')
-  const [sortOption, setSortOption] = useState<SortOption>('popular')
+  const [sortOption, setSortOption] = useState<SortOption>('recent')
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [reviews, setReviews] = useState<ReviewLog[]>(mockReviewLogs)
   const [pets, setPets] = useState<Pet[]>(mockPets)
@@ -53,10 +52,7 @@ export default function ExplorePage() {
   
   // Review filters
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')
-  const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('all')
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'feeding' | 'paused' | 'completed'>('all')
-  const [selectedRating, setSelectedRating] = useState<number>(0)
-  const [selectedRecommend, setSelectedRecommend] = useState<'all' | 'recommended' | 'not-recommended'>('all')
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Load reviews from Supabase
   useEffect(() => {
@@ -209,6 +205,15 @@ export default function ExplorePage() {
       isUpvoted: false
     }))
 
+    // Search filter
+    if (searchQuery) {
+      questions = questions.filter(q => 
+        q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        q.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        q.author.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
     // Sort
     switch (sortOption) {
       case 'popular':
@@ -221,32 +226,34 @@ export default function ExplorePage() {
       case 'recent':
         questions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         break
-      case 'recommended':
-        // For Q&A, "recommended" means answered
-        questions = questions.filter((q) => q.status === 'answered')
-        questions.sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
+      case 'rating':
+        // For Q&A, rating means votes
+        questions.sort((a, b) => b.votes - a.votes)
         break
     }
 
     return questions
-  }, [sortOption])
+  }, [sortOption, searchQuery])
 
   // Filter and sort reviews
   const filteredReviews = useMemo(() => {
     let filtered = reviews.filter((review) => {
       const pet = pets.find((p) => p.id === review.petId)
+      const owner = owners.find((o) => o.id === review.ownerId)
       if (!pet) return false
 
+      // Species filter
       const matchesSpecies = selectedSpecies === 'all' || pet.species === selectedSpecies
-      const matchesCategory = selectedCategory === 'all' || review.category === selectedCategory
-      const matchesStatus = selectedStatus === 'all' || review.status === selectedStatus
-      const matchesRating = selectedRating === 0 || (review.rating && review.rating >= selectedRating)
-      const matchesRecommend =
-        selectedRecommend === 'all' ||
-        (selectedRecommend === 'recommended' && review.recommend === true) ||
-        (selectedRecommend === 'not-recommended' && review.recommend === false)
 
-      return matchesSpecies && matchesCategory && matchesStatus && matchesRating && matchesRecommend
+      // Search filter (제품명, 브랜드, 반려동물 이름, 집사 이름)
+      const matchesSearch =
+        searchQuery === '' ||
+        review.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        review.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (owner && owner.nickname.toLowerCase().includes(searchQuery.toLowerCase()))
+
+      return matchesSpecies && matchesSearch
     })
 
     // Sort
@@ -257,14 +264,13 @@ export default function ExplorePage() {
       case 'recent':
         filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         break
-      case 'recommended':
-        filtered = filtered.filter((r) => r.recommend === true)
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      case 'rating':
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0))
         break
     }
 
     return filtered
-  }, [reviews, pets, selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
+  }, [reviews, pets, owners, selectedSpecies, searchQuery, sortOption])
 
   // Combined items
   const allItems = useMemo(() => {
@@ -298,7 +304,7 @@ export default function ExplorePage() {
   // Reset displayed count when filters change
   useEffect(() => {
     setDisplayedCount(ITEMS_PER_PAGE)
-  }, [contentType, sortOption, selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend])
+  }, [contentType, sortOption, selectedSpecies, searchQuery])
 
   const handleLoadMore = () => {
     setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, allItems.length))
@@ -374,109 +380,51 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        {/* Filters and Sort */}
-        <div className="mb-6 space-y-4">
-          {/* Sort Options */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">정렬:</span>
-            <button
-              onClick={() => setSortOption('popular')}
-              className={`px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
-                sortOption === 'popular'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              인기순
-            </button>
-            <button
-              onClick={() => setSortOption('recent')}
-              className={`px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
-                sortOption === 'recent'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              최신순
-            </button>
-            <button
-              onClick={() => setSortOption('recommended')}
-              className={`px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
-                sortOption === 'recommended'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              추천순
-            </button>
-          </div>
-
-          {/* Review Filters (only show when reviews are visible) */}
-          {(contentType === 'all' || contentType === 'reviews') && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                <div>
-                  <select
-                    value={selectedSpecies}
-                    onChange={(e) => setSelectedSpecies(e.target.value as 'all' | 'dog' | 'cat')}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-                  >
-                    <option value="all">전체</option>
-                    <option value="dog">강아지</option>
-                    <option value="cat">고양이</option>
-                  </select>
-                </div>
-                <div>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value as ProductCategory)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-                  >
-                    <option value="all">전체</option>
-                    <option value="feed">사료</option>
-                    <option value="snack">간식</option>
-                    <option value="supplement">영양제</option>
-                    <option value="toilet">화장실</option>
-                  </select>
-                </div>
-                <div>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value as 'all' | 'feeding' | 'paused' | 'completed')}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-                  >
-                    <option value="all">전체</option>
-                    <option value="feeding">급여 중</option>
-                    <option value="paused">중지</option>
-                    <option value="completed">완료</option>
-                  </select>
-                </div>
-                <div>
-                  <select
-                    value={selectedRating}
-                    onChange={(e) => setSelectedRating(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-                  >
-                    <option value={0}>전체</option>
-                    <option value={5}>5점</option>
-                    <option value={4}>4점 이상</option>
-                    <option value={3}>3점 이상</option>
-                  </select>
-                </div>
-                <div>
-                  <select
-                    value={selectedRecommend}
-                    onChange={(e) => setSelectedRecommend(e.target.value as 'all' | 'recommended' | 'not-recommended')}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
-                  >
-                    <option value="all">전체</option>
-                    <option value="recommended">추천</option>
-                    <option value="not-recommended">비추천</option>
-                  </select>
-                </div>
+        {/* Filters - Search + Species + Sort */}
+        <div className="mb-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search Input */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="제품명, 브랜드, 반려동물 이름으로 검색..."
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm placeholder:text-gray-400"
+                />
               </div>
             </div>
-          )}
+
+            {/* Species Filter (only for reviews) */}
+            {(contentType === 'all' || contentType === 'reviews') && (
+              <div className="w-full sm:w-32">
+                <select
+                  value={selectedSpecies}
+                  onChange={(e) => setSelectedSpecies(e.target.value as 'all' | 'dog' | 'cat')}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm bg-white"
+                >
+                  <option value="all">전체</option>
+                  <option value="dog">강아지</option>
+                  <option value="cat">고양이</option>
+                </select>
+              </div>
+            )}
+
+            {/* Sort Filter */}
+            <div className="w-full sm:w-32">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm bg-white"
+              >
+                <option value="recent">최신순</option>
+                <option value="popular">인기순</option>
+                <option value="rating">평점순</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Content Grid */}
