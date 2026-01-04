@@ -14,7 +14,7 @@ import FeedingLeaderboard from '@/components/rank/FeedingLeaderboard'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
 
-type SortOption = 'popular' | 'recent' | 'completed'
+type SortOption = 'recent' | 'popular' | 'rating'
 
 const ITEMS_PER_PAGE = 6
 
@@ -187,11 +187,8 @@ export default function PetLogPage() {
 
   // Filters
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'feed' | 'snack' | 'supplement' | 'toilet'>('all')
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'feeding' | 'paused' | 'completed'>('all')
-  const [selectedRating, setSelectedRating] = useState<number>(0)
-  const [selectedRecommend, setSelectedRecommend] = useState<'all' | 'recommended' | 'not-recommended'>('all')
-  const [sortOption, setSortOption] = useState<SortOption>('popular')
+  const [sortOption, setSortOption] = useState<SortOption>('recent')
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Format helpers
   const formatTimeAgo = (dateString: string): string => {
@@ -259,18 +256,21 @@ export default function PetLogPage() {
   const filteredAndSortedReviews = useMemo(() => {
     let filtered = reviews.filter((review) => {
       const pet = pets.find((p) => p.id === review.petId)
+      const owner = owners.find((o) => o.id === review.ownerId)
       if (!pet) return false
 
+      // Species filter
       const matchesSpecies = selectedSpecies === 'all' || pet.species === selectedSpecies
-      const matchesCategory = selectedCategory === 'all' || review.category === selectedCategory
-      const matchesStatus = selectedStatus === 'all' || review.status === selectedStatus
-      const matchesRating = selectedRating === 0 || (review.rating && review.rating >= selectedRating)
-      const matchesRecommend =
-        selectedRecommend === 'all' ||
-        (selectedRecommend === 'recommended' && review.recommend === true) ||
-        (selectedRecommend === 'not-recommended' && review.recommend === false)
 
-      return matchesSpecies && matchesCategory && matchesStatus && matchesRating && matchesRecommend
+      // Search filter (제품명, 브랜드, 반려동물 이름)
+      const matchesSearch =
+        searchQuery === '' ||
+        review.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        review.product.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (owner && owner.nickname.toLowerCase().includes(searchQuery.toLowerCase()))
+
+      return matchesSpecies && matchesSearch
     })
 
     // Sort
@@ -284,17 +284,13 @@ export default function PetLogPage() {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
         break
-      case 'completed':
-        filtered = filtered.filter((r) => r.status === 'completed')
-        filtered.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
+      case 'rating':
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0))
         break
     }
 
     return filtered
-  }, [reviews, pets, selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
+  }, [reviews, pets, owners, selectedSpecies, sortOption, searchQuery])
 
   // Displayed reviews (paginated)
   const displayedReviews = useMemo(() => {
@@ -304,7 +300,7 @@ export default function PetLogPage() {
   // Reset displayed count when filters change
   useEffect(() => {
     setDisplayedCount(ITEMS_PER_PAGE)
-  }, [selectedSpecies, selectedCategory, selectedStatus, selectedRating, selectedRecommend, sortOption])
+  }, [selectedSpecies, sortOption, searchQuery])
 
   const handleLoadMore = () => {
     setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredAndSortedReviews.length))
@@ -472,15 +468,11 @@ export default function PetLogPage() {
         >
           <FeedFilters
             selectedSpecies={selectedSpecies}
-            selectedCategory={selectedCategory}
-            selectedStatus={selectedStatus}
-            selectedRating={selectedRating}
-            selectedRecommend={selectedRecommend}
+            sortOption={sortOption}
+            searchQuery={searchQuery}
             onSpeciesChange={setSelectedSpecies}
-            onCategoryChange={setSelectedCategory}
-            onStatusChange={setSelectedStatus}
-            onRatingChange={setSelectedRating}
-            onRecommendChange={setSelectedRecommend}
+            onSortChange={setSortOption}
+            onSearchChange={setSearchQuery}
           />
         </motion.div>
 
@@ -493,59 +485,10 @@ export default function PetLogPage() {
         >
           <FeedingLeaderboard
             initialSpecies={selectedSpecies}
-            initialCategory={selectedCategory}
+            initialCategory="all"
           />
         </motion.div>
 
-        {/* Sort Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="sticky top-0 z-30 -mx-4 sm:mx-0 px-4 sm:px-0 py-4 sm:py-4 mb-6"
-        >
-          <div className="flex items-center gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSortOption('popular')}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base ${
-                        sortOption === 'popular'
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      aria-label="인기순 정렬"
-                    >
-                      <span className="font-medium">🔥 인기</span>
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSortOption('recent')}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base ${
-                        sortOption === 'recent'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      aria-label="최신순 정렬"
-                    >
-                      <span className="font-medium">🕓 최신</span>
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSortOption('completed')}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base ${
-                        sortOption === 'completed'
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      aria-label="급여 완료순 정렬"
-                    >
-                      <span className="font-medium">✅ 급여 완료</span>
-                    </motion.button>
-          </div>
-        </motion.div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

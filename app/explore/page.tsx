@@ -31,7 +31,6 @@ import { motion } from 'framer-motion'
 import { Filter, Search } from 'lucide-react'
 import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import PetLogCard from '@/components/petlogs/PetLogCard'
-import FeedFilters from '@/app/components/pet-log/FeedFilters'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
 import { ReviewLog, Pet, Owner } from '@/lib/types/review-log'
 import questionsData from '@/data/questions.json'
@@ -414,18 +413,69 @@ export default function ExplorePage() {
 
           {/* Review Filters (only show when reviews are visible) */}
           {(contentType === 'all' || contentType === 'reviews') && (
-            <FeedFilters
-              selectedSpecies={selectedSpecies}
-              selectedCategory={selectedCategory}
-              selectedStatus={selectedStatus}
-              selectedRating={selectedRating}
-              selectedRecommend={selectedRecommend}
-              onSpeciesChange={setSelectedSpecies}
-              onCategoryChange={setSelectedCategory}
-              onStatusChange={setSelectedStatus}
-              onRatingChange={setSelectedRating}
-              onRecommendChange={setSelectedRecommend}
-            />
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div>
+                  <select
+                    value={selectedSpecies}
+                    onChange={(e) => setSelectedSpecies(e.target.value as 'all' | 'dog' | 'cat')}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                  >
+                    <option value="all">전체</option>
+                    <option value="dog">강아지</option>
+                    <option value="cat">고양이</option>
+                  </select>
+                </div>
+                <div>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value as ProductCategory)}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                  >
+                    <option value="all">전체</option>
+                    <option value="feed">사료</option>
+                    <option value="snack">간식</option>
+                    <option value="supplement">영양제</option>
+                    <option value="toilet">화장실</option>
+                  </select>
+                </div>
+                <div>
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value as 'all' | 'feeding' | 'paused' | 'completed')}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                  >
+                    <option value="all">전체</option>
+                    <option value="feeding">급여 중</option>
+                    <option value="paused">중지</option>
+                    <option value="completed">완료</option>
+                  </select>
+                </div>
+                <div>
+                  <select
+                    value={selectedRating}
+                    onChange={(e) => setSelectedRating(Number(e.target.value))}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                  >
+                    <option value={0}>전체</option>
+                    <option value={5}>5점</option>
+                    <option value={4}>4점 이상</option>
+                    <option value={3}>3점 이상</option>
+                  </select>
+                </div>
+                <div>
+                  <select
+                    value={selectedRecommend}
+                    onChange={(e) => setSelectedRecommend(e.target.value as 'all' | 'recommended' | 'not-recommended')}
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                  >
+                    <option value="all">전체</option>
+                    <option value="recommended">추천</option>
+                    <option value="not-recommended">비추천</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
