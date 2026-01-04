@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { getBrowserClient } from '@/lib/supabase-client'
 import { 
   ArrowLeft, 
   Plus, 
@@ -127,34 +128,90 @@ export default function WritePostPage() {
   const [newSideEffect, setNewSideEffect] = useState('')
   const [useNewPet, setUseNewPet] = useState(false)
 
-  // 로컬 스토리지에서 반려동물 프로필 불러오기
+  // Supabase에서 반려동물 프로필 불러오기
   useEffect(() => {
-    try {
-      const savedPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
-      setPetProfiles(savedPets)
-      
-      // URL 파라미터로 선택된 반려동물이 있으면 해당 반려동물 선택
-      if (selectedPetId) {
-        const pet = savedPets.find((p: PetProfile) => p.id === selectedPetId)
-        if (pet) {
-          setSelectedPetProfile(selectedPetId)
-          loadPetInfo(pet)
+    const loadPets = async () => {
+      if (!user) {
+        console.log('로그인된 사용자가 없습니다.')
+        setUseNewPet(true)
+        return
+      }
+
+      try {
+        const supabase = getBrowserClient()
+        const { data: petsData, error } = await supabase
+          .from('pets')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('반려동물 목록 로드 실패:', error)
+          setUseNewPet(true)
+          return
+        }
+
+        if (!petsData || petsData.length === 0) {
+          console.log('등록된 반려동물이 없습니다.')
+          setUseNewPet(true)
+          return
+        }
+
+        // Supabase 데이터를 PetProfile 형식으로 변환
+        const pets: PetProfile[] = petsData.map((pet: any) => {
+          const birthYear = pet.birth_date ? new Date(pet.birth_date).getFullYear() : new Date().getFullYear()
+          const currentYear = new Date().getFullYear()
+          const ageYears = currentYear - birthYear
+          
+          return {
+            id: pet.id,
+            name: pet.name,
+            species: pet.species || 'dog',
+            birthYear: birthYear,
+            age: `${ageYears}세`,
+            gender: pet.gender || 'male',
+            neutered: pet.neutered || false,
+            breed: pet.breed || '믹스',
+            weight: pet.weight_kg ? `${pet.weight_kg}kg` : '미등록',
+            allergies: pet.allergies || [],
+            healthConditions: pet.health_conditions || [],
+            specialNotes: pet.special_notes || '',
+            createdAt: pet.created_at,
+            updatedAt: pet.updated_at,
+            ownerId: pet.owner_id,
+            ownerName: profile?.nickname || user.email?.split('@')[0] || '사용자'
+          }
+        })
+
+        setPetProfiles(pets)
+
+        // URL 파라미터로 선택된 반려동물이 있으면 해당 반려동물 선택
+        if (selectedPetId) {
+          const pet = pets.find((p: PetProfile) => p.id === selectedPetId)
+          if (pet) {
+            setSelectedPetProfile(selectedPetId)
+            loadPetInfo(pet)
+            setUseNewPet(false)
+          } else {
+            // 선택된 펫을 찾지 못하면 첫 번째 펫 선택
+            setSelectedPetProfile(pets[0].id)
+            loadPetInfo(pets[0])
+            setUseNewPet(false)
+          }
+        } else {
+          // 기본적으로 첫 번째 반려동물 선택
+          setSelectedPetProfile(pets[0].id)
+          loadPetInfo(pets[0])
           setUseNewPet(false)
         }
-      } else if (savedPets.length > 0) {
-        // 기본적으로 첫 번째 반려동물 선택
-        setSelectedPetProfile(savedPets[0].id)
-        loadPetInfo(savedPets[0])
-        setUseNewPet(false)
-      } else {
-        // 등록된 반려동물이 없으면 새로 입력 모드
+      } catch (error) {
+        console.error('반려동물 프로필 로드 중 오류:', error)
         setUseNewPet(true)
       }
-    } catch (error) {
-      console.error('반려동물 프로필 로드 중 오류:', error)
-      setUseNewPet(true)
     }
-  }, [selectedPetId])
+
+    loadPets()
+  }, [selectedPetId, user, profile])
 
   // 선택한 반려동물 프로필에서 정보 로드
   const loadPetInfo = (pet: PetProfile) => {
