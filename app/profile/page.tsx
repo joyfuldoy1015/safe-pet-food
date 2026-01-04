@@ -23,6 +23,9 @@ export default function ProfilePage() {
   const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(true)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+  const [isShowingDeleteModal, setIsShowingDeleteModal] = useState(false)
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   // 세션 확인
   useEffect(() => {
@@ -259,6 +262,48 @@ export default function ProfilePage() {
     setOpenMenuId(null)
   }
 
+  // 회원 탈퇴
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== '회원탈퇴') {
+      alert('정확히 "회원탈퇴"를 입력해주세요.')
+      return
+    }
+
+    setIsDeletingAccount(true)
+
+    try {
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '계정 삭제에 실패했습니다.')
+      }
+
+      // 성공 시 로그아웃 및 홈으로 리다이렉트
+      alert('계정이 삭제되었습니다. 그동안 이용해 주셔서 감사합니다.')
+      
+      // 로그아웃 처리
+      const supabase = getBrowserClient()
+      await supabase.auth.signOut()
+      
+      // 홈으로 리다이렉트
+      router.push('/')
+    } catch (error: any) {
+      console.error('Delete account error:', error)
+      alert(error.message || '계정 삭제 중 오류가 발생했습니다. 다시 시도해주세요.')
+    } finally {
+      setIsDeletingAccount(false)
+      setIsShowingDeleteModal(false)
+      setDeleteConfirmText('')
+    }
+  }
+
   // 로딩 중이거나 세션 확인 중이면 로딩 화면 표시
   if (authLoading || isCheckingAuth) {
     return (
@@ -458,6 +503,22 @@ export default function ProfilePage() {
               </button>
             )}
           </div>
+
+          {/* 회원 탈퇴 버튼 - 편집 모드일 때만 표시 */}
+          {isEditing && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <button
+                onClick={() => setIsShowingDeleteModal(true)}
+                disabled={isSaving}
+                className="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50 text-sm font-medium"
+              >
+                회원 탈퇴
+              </button>
+              <p className="mt-2 text-xs text-gray-500 text-center">
+                탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 내 반려동물 섹션 */}
@@ -723,6 +784,63 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
+
+      {/* 회원 탈퇴 확인 모달 */}
+      {isShowingDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              정말 탈퇴하시겠습니까?
+            </h3>
+            
+            <div className="mb-6">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-red-800 font-semibold mb-2">⚠️ 경고</p>
+                <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+                  <li>모든 개인정보가 삭제됩니다</li>
+                  <li>작성한 모든 게시글과 댓글이 삭제됩니다</li>
+                  <li>반려동물 정보가 삭제됩니다</li>
+                  <li>북마크 및 활동 기록이 삭제됩니다</li>
+                  <li>삭제된 데이터는 복구할 수 없습니다</li>
+                </ul>
+              </div>
+
+              <p className="text-sm text-gray-700 mb-3">
+                계속하려면 아래에 <strong className="text-red-600">&quot;회원탈퇴&quot;</strong>를 정확히 입력해주세요.
+              </p>
+              
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="회원탈퇴"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                disabled={isDeletingAccount}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setIsShowingDeleteModal(false)
+                  setDeleteConfirmText('')
+                }}
+                disabled={isDeletingAccount}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount || deleteConfirmText !== '회원탈퇴'}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeletingAccount ? '탈퇴 처리 중...' : '탈퇴하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
