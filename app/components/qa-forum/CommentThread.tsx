@@ -61,10 +61,10 @@ export default function CommentThread({
   }
 
   return (
-    <div className={`${depth > 0 ? 'ml-6 pl-4 border-l-2 border-gray-200' : ''}`}>
-      <div className="bg-white rounded-lg p-4">
+    <div className={`${depth > 0 ? 'ml-6 pl-3 border-l-2 border-gray-200' : ''}`}>
+      <div className="bg-white rounded-lg p-3">
         {/* Author Info */}
-        <div className="flex items-center space-x-2 mb-3">
+        <div className="flex items-center space-x-2 mb-2">
           {comment.author.avatar ? (
             <img
               src={comment.author.avatar}
@@ -82,11 +82,11 @@ export default function CommentThread({
         </div>
 
         {/* Content */}
-        <p className="text-sm text-gray-700 whitespace-pre-line mb-3">{comment.content}</p>
+        <p className="text-sm text-gray-700 whitespace-pre-line mb-2">{comment.content}</p>
 
         {/* Actions */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => onUpvote(comment.id)}
               className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
@@ -112,7 +112,7 @@ export default function CommentThread({
 
         {/* Reply Form */}
         {showReplyForm && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="mt-3 pt-3 border-t border-gray-200">
             <textarea
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
@@ -145,7 +145,7 @@ export default function CommentThread({
 
       {/* Nested Replies */}
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-4 space-y-4">
+        <div className="mt-3 space-y-3">
           {comment.replies.map((reply) => (
             <CommentThread
               key={reply.id}

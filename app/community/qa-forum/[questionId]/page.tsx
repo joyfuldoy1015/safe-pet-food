@@ -871,11 +871,11 @@ export default function QuestionDetailPage() {
 
             {/* Comments Section */}
             <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 {comments.length}개의 답변
               </h2>
 
-              <div className="space-y-6 mb-6">
+              <div className="space-y-4 mb-6">
                 {comments.map((comment) => (
                   <CommentThread
                     key={comment.id}
@@ -888,8 +888,8 @@ export default function QuestionDetailPage() {
               </div>
 
               {/* New Comment Form */}
-              <div className="pt-6 border-t border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="pt-4 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   답변 작성하기
                 </h3>
                 <form onSubmit={handleCommentSubmit} className="space-y-4">
