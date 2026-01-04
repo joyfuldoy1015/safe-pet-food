@@ -76,6 +76,16 @@ export default function CommentThread({
     setShowReplyForm(false)
   }
 
+  const handleReplyClick = () => {
+    if (!currentUserId) {
+      alert('답글을 작성하려면 로그인이 필요합니다.')
+      const currentPath = window.location.pathname
+      window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`
+      return
+    }
+    setShowReplyForm(!showReplyForm)
+  }
+
   const handleEditSubmit = () => {
     if (!editContent.trim() || !onEdit) return
     onEdit(comment.id, editContent.trim())
@@ -209,7 +219,7 @@ export default function CommentThread({
                 </button>
                 {depth < maxDepth && (
                   <button
-                    onClick={() => setShowReplyForm(!showReplyForm)}
+                    onClick={handleReplyClick}
                     className="flex items-center space-x-1 px-2 py-1 text-gray-600 hover:bg-gray-100 rounded transition-colors"
                   >
                     <Reply className="h-4 w-4" />

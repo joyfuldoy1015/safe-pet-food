@@ -972,42 +972,57 @@ export default function QuestionDetailPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   답변 작성하기
                 </h3>
-                <form onSubmit={handleCommentSubmit} className="space-y-4">
-                  <div>
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="도움이 되는 답변을 작성해주세요... (최소 10자 이상)"
-                      rows={6}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                      required
-                    />
-                    <div className="flex justify-between items-center mt-2">
-                      <span className={`text-sm ${
-                        newComment.trim().length < 10 
-                          ? 'text-red-500' 
-                          : newComment.trim().length > 5000
-                          ? 'text-red-500'
-                          : 'text-gray-500'
-                      }`}>
-                        {newComment.trim().length} / 5000자
-                        {newComment.trim().length < 10 && newComment.trim().length > 0 && (
-                          <span className="ml-2">(최소 10자 필요)</span>
-                        )}
-                      </span>
+                {user ? (
+                  <form onSubmit={handleCommentSubmit} className="space-y-4">
+                    <div>
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="도움이 되는 답변을 작성해주세요... (최소 10자 이상)"
+                        rows={6}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        required
+                      />
+                      <div className="flex justify-between items-center mt-2">
+                        <span className={`text-sm ${
+                          newComment.trim().length < 10 
+                            ? 'text-red-500' 
+                            : newComment.trim().length > 5000
+                            ? 'text-red-500'
+                            : 'text-gray-500'
+                        }`}>
+                          {newComment.trim().length} / 5000자
+                          {newComment.trim().length < 10 && newComment.trim().length > 0 && (
+                            <span className="ml-2">(최소 10자 필요)</span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={!newComment.trim() || newComment.trim().length < 10}
+                        className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Send className="h-4 w-4" />
+                        <span>답변 등록</span>
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                    <div className="flex flex-col items-center space-y-3">
+                      <User className="h-12 w-12 text-gray-400" />
+                      <p className="text-gray-600">답변을 작성하려면 로그인이 필요합니다.</p>
+                      <Link
+                        href={`/login?redirect=${encodeURIComponent(`/community/qa-forum/${questionId}`)}`}
+                        className="px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        로그인하기
+                      </Link>
                     </div>
                   </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={!newComment.trim() || newComment.trim().length < 10}
-                      className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Send className="h-4 w-4" />
-                      <span>답변 등록</span>
-                    </button>
-                  </div>
-                </form>
+                )}
               </div>
             </div>
           </div>
