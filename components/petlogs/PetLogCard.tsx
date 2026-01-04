@@ -130,14 +130,14 @@ export default function PetLogCard(props: PetLogCardProps) {
 
   return (
     <article
-      className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full group cursor-pointer"
+      className="rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full group cursor-pointer overflow-hidden"
       style={{ aspectRatio: '5 / 3.5' }}
       role="article"
       aria-label={`${props.brand} ${props.product} 후기`}
       onClick={handleCardClick}
     >
       {/* 카테고리 배지 - 급여 후기 */}
-      <div className="mb-3">
+      <div className="mb-2 flex-shrink-0">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
           <span>📝</span>
           <span>{isUsageCategory ? "사용 후기" : "급여 후기"}</span>
@@ -160,12 +160,12 @@ export default function PetLogCard(props: PetLogCardProps) {
       </div>
 
       {/* 제품명 */}
-      <h3 className="mt-2 text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors">
+      <h3 className="mt-1 text-lg font-bold tracking-tight text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
         {props.brand} · {props.product}
       </h3>
 
       {/* 별점 + 추천 */}
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-1.5 flex items-center gap-2">
         <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" aria-hidden />
         <span className="text-base font-semibold text-gray-900">
           {props.rating.toFixed(1)}
@@ -180,17 +180,17 @@ export default function PetLogCard(props: PetLogCardProps) {
       </div>
 
       {/* 작성자 & 반려동물 정보 */}
-      <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+      <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
         <span className="font-semibold text-gray-900">{props.authorName}</span>
         <span>· {props.petName} ({props.petAgeYears}세 · {props.petWeightKg}kg)</span>
       </div>
 
       {/* 본문 (말줄임 처리) */}
       {reviewText && (
-        <div className="mt-4 flex-1">
+        <div className="mt-2 flex-1 min-h-0">
           {!isExpanded ? (
             <>
-              <p className={`text-[15px] leading-7 text-gray-600 ${shouldTruncate ? 'line-clamp-2' : ''}`}>
+              <p className={`text-sm leading-relaxed text-gray-600 ${shouldTruncate ? 'line-clamp-2' : ''}`}>
                 {reviewText}
               </p>
               {shouldTruncate && (
@@ -208,7 +208,7 @@ export default function PetLogCard(props: PetLogCardProps) {
             </>
           ) : (
             <>
-              <p className="text-[15px] leading-7 text-gray-600">
+              <p className="text-sm leading-relaxed text-gray-600">
                 {reviewText}
               </p>
               <button
@@ -227,7 +227,7 @@ export default function PetLogCard(props: PetLogCardProps) {
       )}
 
       {/* 하단 메트릭 */}
-      <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+      <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-4 text-xs text-gray-600">
           <span className="inline-flex items-center gap-1" aria-label="좋아요">
             <Heart className="h-3.5 w-3.5 text-red-500" />

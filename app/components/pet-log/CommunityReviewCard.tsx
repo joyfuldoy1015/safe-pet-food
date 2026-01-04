@@ -51,10 +51,10 @@ export default function CommunityReviewCard({
     (hasMoreStopReasons ? stopReasons.length - 3 : 0)
 
   return (
-    <article className="rounded-3xl border border-gray-100 bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full" style={{ aspectRatio: '5 / 3.5' }}>
-      <header className="mb-4">
-        <h3 className="text-base sm:text-lg lg:text-xl font-semibold sm:font-bold text-gray-900 line-clamp-2 mb-3">{title}</h3>
-        <div className="flex flex-wrap items-center gap-2">
+    <article className="rounded-3xl border border-gray-100 bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full overflow-hidden" style={{ aspectRatio: '5 / 3.5' }}>
+      <header className="mb-2 flex-shrink-0">
+        <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-2">{title}</h3>
+        <div className="flex flex-wrap items-center gap-1.5">
           <span
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm border font-medium ${statusColor}`}
           >
@@ -88,12 +88,12 @@ export default function CommunityReviewCard({
         </div>
       </header>
 
-      <p className="text-sm text-gray-900 leading-relaxed bg-gray-50 rounded-2xl px-4 py-3 line-clamp-2 flex-shrink-0 mb-3 text-[15px] flex items-start">
+      <p className="text-sm text-gray-900 leading-relaxed bg-gray-50 rounded-xl px-3 py-2 line-clamp-2 flex-shrink-0 mb-2 flex items-start">
         {excerpt}
       </p>
 
       {(displayedContinueReasons.length > 0 || displayedStopReasons.length > 0 || totalHiddenReasons > 0) && (
-      <div className="flex flex-wrap gap-2 flex-shrink-0 mb-1">
+      <div className="flex flex-wrap gap-1.5 flex-shrink-0 mb-1">
         {displayedContinueReasons.map((t) => (
           <span
             key={t}
@@ -129,9 +129,9 @@ export default function CommunityReviewCard({
       </div>
       )}
 
-      <footer className="mt-auto pt-4 flex flex-col gap-3 border-t border-gray-100">
+      <footer className="mt-auto pt-2 flex flex-col gap-2 border-t border-gray-100 flex-shrink-0">
         {/* Metrics */}
-        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
+        <div className="flex items-center justify-between text-xs text-gray-600">
           <span className="inline-flex items-center gap-1">
             <Heart size={14} className="sm:w-4 sm:h-4 flex-shrink-0" /> <span className="whitespace-nowrap">{metrics.likes.toLocaleString()}</span>
           </span>
@@ -146,14 +146,14 @@ export default function CommunityReviewCard({
         <div className="flex gap-2 w-full">
           <button
             onClick={onAsk}
-            className="flex-1 px-3 sm:px-4 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-700 text-xs sm:text-sm font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 whitespace-nowrap active:scale-[0.98]"
+            className="flex-1 px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 text-xs font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 whitespace-nowrap"
             aria-label="질문하기"
           >
             질문하기
           </button>
           <button
             onClick={onOpenDetail}
-            className="flex-1 px-3 sm:px-4 py-2.5 rounded-xl bg-[#3056F5] text-white text-xs sm:text-sm font-medium hover:bg-[#2648e6] active:bg-[#1e3ac4] transition-all duration-200 whitespace-nowrap active:scale-[0.98] shadow-sm hover:shadow-md"
+            className="flex-1 px-3 py-2 rounded-lg bg-[#3056F5] text-white text-xs font-medium hover:bg-[#2648e6] transition-all duration-200 whitespace-nowrap shadow-sm"
             aria-label="자세히 보기"
           >
             자세히 보기

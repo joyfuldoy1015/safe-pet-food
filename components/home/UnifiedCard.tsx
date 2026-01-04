@@ -65,10 +65,10 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
   return (
     <Link href={item.href}>
-      <article className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group" style={{ aspectRatio: '5 / 3.5' }}>
+      <article className="bg-white rounded-2xl border border-gray-200 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group overflow-hidden" style={{ aspectRatio: '5 / 3.5' }}>
         {/* 카테고리 배지들 - Q&A일 때만 Q&A 배지 + 카테고리 배지 */}
         {item.kind === 'qa' ? (
-          <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <div className="mb-2 flex items-center gap-2 flex-wrap flex-shrink-0">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
               <span>💬</span>
               <span>Q&A</span>
@@ -81,7 +81,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
             )}
           </div>
         ) : (
-          <div className="mb-3">
+          <div className="mb-2 flex-shrink-0">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
               <span>📝</span>
               <span>급여 후기</span>
@@ -90,9 +90,9 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
         )}
 
         {/* Header */}
-        <header className="mb-3">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h3 className="text-xl font-extrabold tracking-tight text-gray-900 line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
+        <header className="mb-2 flex-shrink-0">
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <h3 className="text-lg font-bold tracking-tight text-gray-900 line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors">{item.title}</h3>
             {item.kind === 'qa' && item.status && (
               <div className="flex-shrink-0">
                 {getStatusIcon(item.status)}
@@ -103,7 +103,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
         {/* Author Info - Q&A일 때만 상단에 표시 */}
         {item.kind === 'qa' && item.author && (
-          <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
+          <div className="mb-2 flex items-center gap-2 text-xs text-gray-600 flex-shrink-0">
             <div className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center">
               <User className="h-3 w-3 text-gray-500" />
             </div>
@@ -114,7 +114,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
         {/* Review-specific info */}
         {item.kind === 'review' && (
-          <div className="mb-3 flex flex-wrap items-center gap-2">
+          <div className="mb-2 flex flex-wrap items-center gap-1.5 flex-shrink-0">
             {item.period && (
               <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs border font-medium ${periodColor}`}>
                 <CalendarDays size={12} />
@@ -141,14 +141,14 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
         )}
 
         {/* Excerpt */}
-        <div className="mt-4 flex-1">
-          <p className="text-[15px] leading-7 text-gray-600 line-clamp-2">
+        <div className="mt-2 flex-1 min-h-0">
+          <p className="text-sm leading-relaxed text-gray-600 line-clamp-2">
             {item.excerpt}
           </p>
         </div>
 
         {/* Footer */}
-        <footer className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+        <footer className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-4 text-xs text-gray-600">
             <span className="inline-flex items-center gap-1" aria-label="좋아요">
               <Heart className="h-3.5 w-3.5 text-red-500" />

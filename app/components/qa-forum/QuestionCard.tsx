@@ -61,9 +61,9 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
 
   return (
     <Link href={`/community/qa-forum/${question.id}`}>
-      <article className="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group" style={{ aspectRatio: '5 / 3.5' }}>
+      <article className="bg-white rounded-2xl border border-gray-200 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group overflow-hidden" style={{ aspectRatio: '5 / 3.5' }}>
         {/* 카테고리 배지들 - Q&A + 카테고리 */}
-        <div className="mb-3 flex items-center gap-2 flex-wrap">
+        <div className="mb-2 flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
             <span>💬</span>
             <span>Q&A</span>
@@ -77,9 +77,9 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
         </div>
 
         {/* Header */}
-        <header className="mb-3">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h3 className="text-xl font-extrabold tracking-tight text-gray-900 line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors">
+        <header className="mb-2">
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <h3 className="text-lg font-bold tracking-tight text-gray-900 line-clamp-2 flex-1 group-hover:text-blue-600 transition-colors">
               {question.title}
             </h3>
             {question.status && (
@@ -91,7 +91,7 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
         </header>
 
         {/* Author Info - 상단으로 이동 */}
-        <div className="mb-3 flex items-center gap-2 text-sm text-gray-600">
+        <div className="mb-2 flex items-center gap-2 text-xs text-gray-600">
           {question.author.avatar ? (
             <img
               src={question.author.avatar}
@@ -108,14 +108,14 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
         </div>
 
         {/* Excerpt */}
-        <div className="mt-4 flex-1">
-          <p className="text-[15px] leading-7 text-gray-600 line-clamp-2">
+        <div className="mt-2 flex-1 min-h-0">
+          <p className="text-sm leading-relaxed text-gray-600 line-clamp-2">
             {question.content}
           </p>
         </div>
 
         {/* Footer */}
-        <footer className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+        <footer className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-4 text-xs text-gray-600">
             <span className="inline-flex items-center gap-1" aria-label="좋아요">
               <Heart className="h-3.5 w-3.5 text-red-500" />
