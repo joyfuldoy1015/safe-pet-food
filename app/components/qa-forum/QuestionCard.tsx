@@ -79,7 +79,7 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
         {/* Header */}
         <header className="mb-2">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="text-base font-bold tracking-tight text-gray-900 line-clamp-1 flex-1 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-lg font-bold tracking-tight text-gray-900 line-clamp-1 flex-1 group-hover:text-blue-600 transition-colors">
               {question.title}
             </h3>
             {question.status && (
