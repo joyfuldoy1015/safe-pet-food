@@ -449,12 +449,12 @@ export default function PetLogPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6 sm:mb-8"
+          className="text-center mb-8"
         >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
             급여 후기 커뮤니티 🐾
-            </h1>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 px-4">
+          </h1>
+          <p className="text-lg text-gray-600">
             다른 반려집사들의 급여 경험을 둘러보고 나만의 후기도 남겨보세요
           </p>
         </motion.div>
