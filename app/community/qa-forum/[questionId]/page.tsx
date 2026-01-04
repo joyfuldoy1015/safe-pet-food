@@ -488,7 +488,7 @@ export default function QuestionDetailPage() {
     })
   }
 
-  // Handle reply
+  // Handle reply - 재귀적으로 모든 댓글 트리에서 대상 찾기
   const handleReply = (commentId: string, content: string) => {
     const newReply: Comment = {
       id: `r-${Date.now()}`,
@@ -501,17 +501,28 @@ export default function QuestionDetailPage() {
       createdAt: new Date().toISOString()
     }
 
-    setComments((prev) =>
-      prev.map((c) => {
-        if (c.id === commentId) {
-          return {
-            ...c,
-            replies: [...(c.replies || []), newReply]
-          }
+    // 재귀 함수: 댓글 트리에서 대상 ID 찾기
+    const addReplyToComment = (comment: Comment): Comment => {
+      if (comment.id === commentId) {
+        // 찾았으면 답글 추가
+        return {
+          ...comment,
+          replies: [...(comment.replies || []), newReply]
         }
-        return c
-      })
-    )
+      }
+      
+      // 하위 답글들도 재귀적으로 탐색
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: comment.replies.map(addReplyToComment)
+        }
+      }
+      
+      return comment
+    }
+
+    setComments((prev) => prev.map(addReplyToComment))
   }
 
   // Handle new comment submit
