@@ -145,7 +145,7 @@ export default function CommentThread({
 
       {/* Nested Replies */}
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-3 space-y-3">
+        <div className="mt-2 space-y-2">
           {comment.replies.map((reply) => (
             <CommentThread
               key={reply.id}
