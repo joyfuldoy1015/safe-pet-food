@@ -164,7 +164,7 @@ export default function CommentThread({
               onUpvote={onUpvote}
               onReply={onReply}
               formatTimeAgo={formatTimeAgo}
-              depth={depth + 1}
+              depth={1}
               parentAuthor={depth >= 1 ? comment.author.name : undefined}
             />
           ))}
