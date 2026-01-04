@@ -65,7 +65,7 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
   return (
     <Link href={item.href}>
-      <article className="bg-white rounded-2xl border border-gray-200 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group overflow-hidden" style={{ aspectRatio: '5 / 3.5' }}>
+      <article className="bg-white rounded-2xl border border-gray-200 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 h-full flex flex-col group overflow-hidden" style={{ aspectRatio: item.kind === 'review' ? '5 / 4' : '5 / 3.5' }}>
         {/* 카테고리 배지들 - Q&A일 때만 Q&A 배지 + 카테고리 배지 */}
         {item.kind === 'qa' ? (
           <div className="mb-2 flex items-center gap-2 flex-wrap flex-shrink-0">

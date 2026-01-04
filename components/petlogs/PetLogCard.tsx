@@ -131,7 +131,7 @@ export default function PetLogCard(props: PetLogCardProps) {
   return (
     <article
       className="rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full group cursor-pointer overflow-hidden"
-      style={{ aspectRatio: '5 / 3.5' }}
+      style={{ aspectRatio: '5 / 4' }}
       role="article"
       aria-label={`${props.brand} ${props.product} 후기`}
       onClick={handleCardClick}

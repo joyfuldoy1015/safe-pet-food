@@ -51,7 +51,7 @@ export default function CommunityReviewCard({
     (hasMoreStopReasons ? stopReasons.length - 3 : 0)
 
   return (
-    <article className="rounded-3xl border border-gray-100 bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full overflow-hidden" style={{ aspectRatio: '5 / 3.5' }}>
+    <article className="rounded-3xl border border-gray-100 bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] transition-all duration-200 flex flex-col h-full overflow-hidden" style={{ aspectRatio: '5 / 4' }}>
       <header className="mb-2 flex-shrink-0">
         <h3 className="text-lg font-bold text-gray-900 line-clamp-1 mb-2">{title}</h3>
         <div className="flex flex-wrap items-center gap-1.5">

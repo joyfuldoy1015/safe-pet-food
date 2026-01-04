@@ -62,7 +62,7 @@ export default function ReviewCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className="bg-white rounded-[28px] shadow-soft border border-gray-100 cursor-pointer group"
-      style={{ aspectRatio: '5 / 3.5' }}
+      style={{ aspectRatio: '5 / 4' }}
       onClick={() => onViewDetail(review.id)}
     >
       {/* Content */}
