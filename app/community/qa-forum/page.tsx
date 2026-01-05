@@ -114,7 +114,7 @@ const QUESTIONS_PER_PAGE = 5
 export default function CommunityQAForumPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [sortOption, setSortOption] = useState<SortOption>('hot')
+  const [sortOption, setSortOption] = useState<SortOption>('recent')
   const [showQuestionModal, setShowQuestionModal] = useState(false)
   const [questions, setQuestions] = useState<Question[]>(
     mockQuestionsData.map((q) => ({
