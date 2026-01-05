@@ -176,7 +176,7 @@ export default function CommentThread({
 
           {/* Content - 삭제된 댓글 또는 일반 댓글 */}
           {comment.isDeleted ? (
-            <p className="text-sm text-gray-400 italic mb-2">사용자가 댓글을 삭제했습니다.</p>
+            <p className="text-sm text-gray-400 italic mb-2">작성자가 삭제한 댓글입니다.</p>
           ) : isEditing ? (
             <div className="mb-2">
               <textarea

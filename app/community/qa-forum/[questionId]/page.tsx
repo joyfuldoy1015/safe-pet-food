@@ -633,7 +633,7 @@ export default function QuestionDetailPage() {
         if (comment.replies && comment.replies.length > 0) {
           return {
             ...comment,
-            content: '사용자가 댓글을 삭제했습니다.',
+            content: '작성자가 삭제한 댓글입니다.',
             isDeleted: true
           }
         }
