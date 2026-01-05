@@ -287,12 +287,12 @@ export default function FeedingLeaderboard({
           </div>
         ) : (
           // Rankings list
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {displayedRankings.map((item, index) => {
               const rank = index + 1
               return (
                 <motion.div
-                  key={`${item.category}-${item.brand}-${item.product}`}
+                  key={`${item.category}-${item.brand}-${item.product}-${rank}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
