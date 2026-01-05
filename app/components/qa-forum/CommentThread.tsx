@@ -72,6 +72,13 @@ export default function CommentThread({
 
   const handleReplySubmit = () => {
     if (!replyContent.trim()) return
+    
+    // Validate minimum length (10 characters)
+    if (replyContent.trim().length < 10) {
+      alert('답글은 최소 10자 이상 입력해주세요.')
+      return
+    }
+    
     onReply(comment.id, replyContent.trim())
     setReplyContent('')
     setShowReplyForm(false)
@@ -237,28 +244,40 @@ export default function CommentThread({
               <textarea
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="답글을 작성해주세요..."
+                placeholder="답글을 작성해주세요... (최소 10자)"
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
               />
-              <div className="flex justify-end space-x-2 mt-2">
-                <button
-                  onClick={() => {
-                    setShowReplyForm(false)
-                    setReplyContent('')
-                  }}
-                  className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={handleReplySubmit}
-                  disabled={!replyContent.trim()}
-                  className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
-                >
-                  <Send className="h-3 w-3" />
-                  <span>작성</span>
-                </button>
+              <div className="flex justify-between items-center mt-2">
+                <span className={`text-xs ${
+                  replyContent.trim().length < 10 
+                    ? 'text-red-500' 
+                    : 'text-gray-500'
+                }`}>
+                  {replyContent.trim().length} / 최소 10자
+                  {replyContent.trim().length > 0 && replyContent.trim().length < 10 && (
+                    <span className="ml-2">(최소 {10 - replyContent.trim().length}자 더 필요)</span>
+                  )}
+                </span>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setShowReplyForm(false)
+                      setReplyContent('')
+                    }}
+                    className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleReplySubmit}
+                    disabled={!replyContent.trim() || replyContent.trim().length < 10}
+                    className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                  >
+                    <Send className="h-3 w-3" />
+                    <span>작성</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
