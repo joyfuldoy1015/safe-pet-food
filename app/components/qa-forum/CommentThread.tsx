@@ -18,6 +18,7 @@ export interface Comment {
   createdAt: string
   replies?: Comment[]
   isDeleted?: boolean // 삭제된 댓글 여부
+  parent_id?: string // 부모 댓글 ID (대댓글인 경우)
 }
 
 interface CommentThreadProps {

@@ -293,7 +293,7 @@ export default function QuestionDetailPage() {
           return
         }
 
-        // Fetch answers from Supabase
+        // Fetch all answers from Supabase (including nested replies)
         const { data: answersData, error } = await supabase
           .from('community_answers')
           .select(`
@@ -302,7 +302,6 @@ export default function QuestionDetailPage() {
           `)
           .eq('question_id', questionId)
           .eq('admin_status', 'visible')
-          .order('votes', { ascending: false })
           .order('created_at', { ascending: true })
 
         if (error) {
@@ -311,7 +310,8 @@ export default function QuestionDetailPage() {
           return
         }
 
-        const comments: Comment[] = (answersData || []).map((answer: any) => ({
+        // Build flat list of all answers
+        const flatComments: Comment[] = (answersData || []).map((answer: any) => ({
           id: answer.id,
           content: answer.content,
           author: {
@@ -322,10 +322,44 @@ export default function QuestionDetailPage() {
           },
           votes: answer.votes || 0,
           createdAt: answer.created_at,
-          isUpvoted: false
+          isUpvoted: false,
+          parent_id: answer.parent_id
         }))
 
-        setComments(comments)
+        // Build nested structure
+        const commentMap = new Map<string, Comment>()
+        const rootComments: Comment[] = []
+
+        // First pass: create map of all comments
+        flatComments.forEach(comment => {
+          commentMap.set(comment.id, { ...comment, replies: [] })
+        })
+
+        // Second pass: build tree structure
+        flatComments.forEach(comment => {
+          const commentWithReplies = commentMap.get(comment.id)!
+          if (comment.parent_id) {
+            // This is a reply, add to parent's replies array
+            const parent = commentMap.get(comment.parent_id)
+            if (parent) {
+              if (!parent.replies) parent.replies = []
+              parent.replies.push(commentWithReplies)
+            }
+          } else {
+            // This is a root comment
+            rootComments.push(commentWithReplies)
+          }
+        })
+
+        // Sort root comments by votes (descending) then by creation time
+        rootComments.sort((a, b) => {
+          if (b.votes !== a.votes) {
+            return b.votes - a.votes
+          }
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        })
+
+        setComments(rootComments)
       } catch (error) {
         console.error('Failed to load answers:', error)
       } finally {
@@ -491,42 +525,81 @@ export default function QuestionDetailPage() {
     })
   }
 
-  // Handle reply - 재귀적으로 모든 댓글 트리에서 대상 찾기
-  const handleReply = (commentId: string, content: string) => {
-    const newReply: Comment = {
-      id: `r-${Date.now()}`,
-      content,
-      author: {
-        name: '사용자',
-        level: 'beginner',
-        id: user?.id
-      },
-      votes: 0,
-      createdAt: new Date().toISOString()
+  // Handle reply - Supabase에 저장하고 재귀적으로 댓글 트리 업데이트
+  const handleReply = async (commentId: string, content: string) => {
+    if (!user || !profile) {
+      alert('로그인이 필요합니다.')
+      return
     }
 
-    // 재귀 함수: 댓글 트리에서 대상 ID 찾기
-    const addReplyToComment = (comment: Comment): Comment => {
-      if (comment.id === commentId) {
-        // 찾았으면 답글 추가
-        return {
-          ...comment,
-          replies: [...(comment.replies || []), newReply]
-        }
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        alert('Supabase에 연결할 수 없습니다.')
+        return
       }
-      
-      // 하위 답글들도 재귀적으로 탐색
-      if (comment.replies && comment.replies.length > 0) {
-        return {
-          ...comment,
-          replies: comment.replies.map(addReplyToComment)
-        }
-      }
-      
-      return comment
-    }
 
-    setComments((prev) => prev.map(addReplyToComment))
+      // Insert reply into database
+      const { data: newAnswer, error } = await (supabase
+        .from('community_answers') as any)
+        .insert({
+          question_id: questionId,
+          author_id: user.id,
+          content: content.trim(),
+          parent_id: commentId,
+          is_accepted: false,
+          votes: 0,
+          admin_status: 'visible'
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Failed to create reply:', error)
+        alert('답글 등록에 실패했습니다.')
+        return
+      }
+
+      // Create new reply object with profile data
+      const newReply: Comment = {
+        id: newAnswer.id,
+        content: newAnswer.content,
+        author: {
+          name: profile?.nickname || '사용자',
+          level: 'beginner',
+          avatar: profile?.avatar_url,
+          id: user.id
+        },
+        votes: 0,
+        createdAt: newAnswer.created_at
+      }
+
+      // 재귀 함수: 댓글 트리에서 대상 ID 찾기
+      const addReplyToComment = (comment: Comment): Comment => {
+        if (comment.id === commentId) {
+          // 찾았으면 답글 추가
+          return {
+            ...comment,
+            replies: [...(comment.replies || []), newReply]
+          }
+        }
+        
+        // 하위 답글들도 재귀적으로 탐색
+        if (comment.replies && comment.replies.length > 0) {
+          return {
+            ...comment,
+            replies: comment.replies.map(addReplyToComment)
+          }
+        }
+        
+        return comment
+      }
+
+      setComments((prev) => prev.map(addReplyToComment))
+    } catch (error) {
+      console.error('Failed to submit reply:', error)
+      alert('답글 등록 중 오류가 발생했습니다.')
+    }
   }
 
   // Handle edit comment
