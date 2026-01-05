@@ -603,64 +603,146 @@ export default function QuestionDetailPage() {
   }
 
   // Handle edit comment
-  const handleEditComment = (commentId: string, newContent: string) => {
-    const editComment = (comment: Comment): Comment => {
-      if (comment.id === commentId) {
-        return {
-          ...comment,
-          content: newContent
-        }
+  const handleEditComment = async (commentId: string, newContent: string) => {
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        alert('Supabase에 연결할 수 없습니다.')
+        return
       }
-      
-      if (comment.replies && comment.replies.length > 0) {
-        return {
-          ...comment,
-          replies: comment.replies.map(editComment)
-        }
+
+      // Update in database
+      const { error } = await (supabase
+        .from('community_answers') as any)
+        .update({ content: newContent })
+        .eq('id', commentId)
+
+      if (error) {
+        console.error('Failed to update comment:', error)
+        alert('댓글 수정에 실패했습니다.')
+        return
       }
-      
-      return comment
-    }
 
-    setComments((prev) => prev.map(editComment))
-  }
-
-  // Handle delete comment
-  const handleDeleteComment = (commentId: string) => {
-    const deleteComment = (comment: Comment): Comment | null => {
-      if (comment.id === commentId) {
-        // 대댓글이 있으면 내용만 삭제 표시
+      // Update local state
+      const editComment = (comment: Comment): Comment => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            content: newContent
+          }
+        }
+        
         if (comment.replies && comment.replies.length > 0) {
           return {
             ...comment,
-            content: '작성자가 삭제한 댓글입니다.',
-            isDeleted: true
+            replies: comment.replies.map(editComment)
           }
         }
-        // 대댓글이 없으면 완전 삭제 (null 반환)
+        
+        return comment
+      }
+
+      setComments((prev) => prev.map(editComment))
+    } catch (error) {
+      console.error('Failed to edit comment:', error)
+      alert('댓글 수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  // Handle delete comment
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        alert('Supabase에 연결할 수 없습니다.')
+        return
+      }
+
+      // Check if comment has replies
+      const findComment = (comments: Comment[], id: string): Comment | null => {
+        for (const comment of comments) {
+          if (comment.id === id) return comment
+          if (comment.replies) {
+            const found = findComment(comment.replies, id)
+            if (found) return found
+          }
+        }
         return null
       }
-      
-      // 하위 답글 처리
-      if (comment.replies && comment.replies.length > 0) {
-        const updatedReplies = comment.replies
-          .map(deleteComment)
-          .filter((r): r is Comment => r !== null)
-        
-        return {
-          ...comment,
-          replies: updatedReplies
+
+      const targetComment = findComment(comments, commentId)
+      if (!targetComment) return
+
+      const hasReplies = targetComment.replies && targetComment.replies.length > 0
+
+      if (hasReplies) {
+        // Soft delete: update content in database
+        const { error } = await (supabase
+          .from('community_answers') as any)
+          .update({ 
+            content: '작성자가 삭제한 댓글입니다.',
+            admin_status: 'deleted'
+          })
+          .eq('id', commentId)
+
+        if (error) {
+          console.error('Failed to soft delete comment:', error)
+          alert('댓글 삭제에 실패했습니다.')
+          return
+        }
+      } else {
+        // Hard delete: remove from database
+        const { error } = await supabase
+          .from('community_answers')
+          .delete()
+          .eq('id', commentId)
+
+        if (error) {
+          console.error('Failed to delete comment:', error)
+          alert('댓글 삭제에 실패했습니다.')
+          return
         }
       }
-      
-      return comment
-    }
 
-    setComments((prev) => 
-      prev
-        .map(deleteComment)
-        .filter((c): c is Comment => c !== null)
-    )
+      // Update local state
+      const deleteComment = (comment: Comment): Comment | null => {
+        if (comment.id === commentId) {
+          // 대댓글이 있으면 내용만 삭제 표시
+          if (comment.replies && comment.replies.length > 0) {
+            return {
+              ...comment,
+              content: '작성자가 삭제한 댓글입니다.',
+              isDeleted: true
+            }
+          }
+          // 대댓글이 없으면 완전 삭제 (null 반환)
+          return null
+        }
+        
+        // 하위 답글 처리
+        if (comment.replies && comment.replies.length > 0) {
+          const updatedReplies = comment.replies
+            .map(deleteComment)
+            .filter((r): r is Comment => r !== null)
+          
+          return {
+            ...comment,
+            replies: updatedReplies
+          }
+        }
+        
+        return comment
+      }
+
+      setComments((prev) => 
+        prev
+          .map(deleteComment)
+          .filter((c): c is Comment => c !== null)
+      )
+    } catch (error) {
+      console.error('Failed to delete comment:', error)
+      alert('댓글 삭제 중 오류가 발생했습니다.')
+    }
   }
 
   // Handle new comment submit
