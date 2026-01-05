@@ -616,6 +616,7 @@ export default function QuestionDetailPage() {
         .from('community_answers') as any)
         .update({ content: newContent })
         .eq('id', commentId)
+        .eq('author_id', user?.id) // RLS: only own comments
 
       if (error) {
         console.error('Failed to update comment:', error)
@@ -676,14 +677,14 @@ export default function QuestionDetailPage() {
       const hasReplies = targetComment.replies && targetComment.replies.length > 0
 
       if (hasReplies) {
-        // Soft delete: update content in database
+        // Soft delete: update content only (keep admin_status as 'visible')
         const { error } = await (supabase
           .from('community_answers') as any)
           .update({ 
-            content: '작성자가 삭제한 댓글입니다.',
-            admin_status: 'deleted'
+            content: '작성자가 삭제한 댓글입니다.'
           })
           .eq('id', commentId)
+          .eq('author_id', user?.id) // RLS: only own comments
 
         if (error) {
           console.error('Failed to soft delete comment:', error)
@@ -696,6 +697,7 @@ export default function QuestionDetailPage() {
           .from('community_answers')
           .delete()
           .eq('id', commentId)
+          .eq('author_id', user?.id) // RLS: only own comments
 
         if (error) {
           console.error('Failed to delete comment:', error)
