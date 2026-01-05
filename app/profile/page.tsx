@@ -193,11 +193,23 @@ export default function ProfilePage() {
           .order('created_at', { ascending: false })
           .limit(5)
 
-        if (!error && data) {
+        if (error) {
+          console.error('Failed to load my questions:', error)
+          console.error('Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          })
+          console.error('User ID:', user.id)
+          console.error('This is likely an RLS (Row Level Security) policy issue.')
+          console.error('Please run: scripts/fix-community-questions-rls.sql')
+        } else if (data) {
+          console.log('Successfully loaded', data.length, 'questions')
           setMyQuestions(data)
         }
       } catch (error) {
-        console.error('Failed to load my questions:', error)
+        console.error('Failed to load my questions (catch):', error)
       } finally {
         setIsLoadingMyQuestions(false)
       }
