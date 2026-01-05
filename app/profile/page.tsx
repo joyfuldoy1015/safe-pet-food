@@ -18,9 +18,11 @@ export default function ProfilePage() {
   const [pets, setPets] = useState<any[]>([])
   const [recentPosts, setRecentPosts] = useState<any[]>([])
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState<any[]>([])
+  const [myQuestions, setMyQuestions] = useState<any[]>([])
   const [isLoadingPets, setIsLoadingPets] = useState(true)
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
   const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(true)
+  const [isLoadingMyQuestions, setIsLoadingMyQuestions] = useState(true)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
   const [isShowingDeleteModal, setIsShowingDeleteModal] = useState(false)
@@ -166,6 +168,46 @@ export default function ProfilePage() {
     }
   }, [user])
 
+  // 내가 작성한 Q&A 로드
+  useEffect(() => {
+    const loadMyQuestions = async () => {
+      if (!user) return
+      
+      setIsLoadingMyQuestions(true)
+      try {
+        const supabase = getBrowserClient()
+        
+        const { data, error } = await supabase
+          .from('community_questions')
+          .select(`
+            id,
+            title,
+            content,
+            category,
+            votes,
+            views,
+            created_at,
+            answer_count
+          `)
+          .eq('author_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        if (!error && data) {
+          setMyQuestions(data)
+        }
+      } catch (error) {
+        console.error('Failed to load my questions:', error)
+      } finally {
+        setIsLoadingMyQuestions(false)
+      }
+    }
+
+    if (user) {
+      loadMyQuestions()
+    }
+  }, [user])
+
   const handleSave = async () => {
     if (!user) return
 
@@ -259,6 +301,44 @@ export default function ProfilePage() {
         router.push(`/owners/${user?.id}/pets/${post.pet_id}`)
       }
     }
+    setOpenMenuId(null)
+  }
+
+  // Q&A 삭제 핸들러
+  const handleDeleteQuestion = async (questionId: string) => {
+    if (!confirm('정말로 이 Q&A 게시글을 삭제하시겠습니까?\n삭제된 게시글은 복구할 수 없습니다.')) {
+      return
+    }
+
+    setDeletingPostId(questionId)
+    try {
+      const supabase = getBrowserClient()
+      
+      const { error } = await supabase
+        .from('community_questions')
+        .delete()
+        .eq('id', questionId)
+        .eq('author_id', user?.id) // 본인 게시글만 삭제 가능
+
+      if (error) {
+        throw error
+      }
+
+      // 목록에서 제거
+      setMyQuestions(prev => prev.filter(q => q.id !== questionId))
+      alert('Q&A 게시글이 삭제되었습니다.')
+    } catch (error) {
+      console.error('Failed to delete question:', error)
+      alert('삭제에 실패했습니다. 다시 시도해주세요.')
+    } finally {
+      setDeletingPostId(null)
+      setOpenMenuId(null)
+    }
+  }
+
+  // Q&A 수정 페이지로 이동
+  const handleEditQuestion = (questionId: string) => {
+    router.push(`/community/qa-forum/${questionId}`)
     setOpenMenuId(null)
   }
 
@@ -701,6 +781,127 @@ export default function ProfilePage() {
               >
                 <Plus className="w-4 h-4" />
                 급여 후기 작성하기
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* 내가 작성한 Q&A 섹션 */}
+        <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-green-600" />
+              내가 작성한 Q&A
+            </h2>
+            <Link
+              href="/community/qa-forum"
+              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              작성
+            </Link>
+          </div>
+          
+          {isLoadingMyQuestions ? (
+            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+          ) : myQuestions.length > 0 ? (
+            <div className="space-y-3">
+              {myQuestions.map((question: any) => (
+                <div
+                  key={question.id}
+                  className="relative p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:shadow-md transition-all"
+                >
+                  {/* 최상단: 날짜와 메뉴 버튼 */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-gray-600 font-medium">{question.category}</span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-gray-500">
+                        {new Date(question.created_at).toLocaleDateString('ko-KR')}
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === question.id ? null : question.id)}
+                        disabled={deletingPostId === question.id}
+                        className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                      >
+                        <MoreVertical className="w-4 h-4 text-gray-600" />
+                      </button>
+                      
+                      {openMenuId === question.id && (
+                        <>
+                          {/* Backdrop to close menu */}
+                          <div
+                            className="fixed inset-0 z-10"
+                            onClick={() => setOpenMenuId(null)}
+                          />
+                          
+                          {/* Dropdown menu */}
+                          <div className="absolute right-0 top-8 z-20 w-32 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                            <button
+                              onClick={() => handleEditQuestion(question.id)}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                              수정
+                            </button>
+                            <button
+                              onClick={() => handleDeleteQuestion(question.id)}
+                              disabled={deletingPostId === question.id}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              {deletingPostId === question.id ? '삭제 중...' : '삭제'}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 타이틀과 본문 */}
+                  <Link
+                    href={`/community/qa-forum/${question.id}`}
+                    className="block"
+                  >
+                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
+                      {question.title}
+                    </h3>
+
+                    {/* 본문 미리보기 */}
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {question.content}
+                    </p>
+
+                    {/* 하단: 통계 */}
+                    <div className="flex items-center flex-wrap gap-2 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <ArrowUp className="w-3 h-3" />
+                        {question.votes || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="w-3 h-3" />
+                        {question.answer_count || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {question.views || 0}
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">작성한 Q&A가 없습니다</p>
+              <Link
+                href="/community/qa-forum"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                질문하기
               </Link>
             </div>
           )}
