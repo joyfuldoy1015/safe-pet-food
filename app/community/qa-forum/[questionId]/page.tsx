@@ -381,13 +381,15 @@ export default function QuestionDetailPage() {
           .select('id')
           .eq('user_id', user.id)
           .eq('question_id', questionId)
-          .single()
+          .maybeSingle() // Use maybeSingle() instead of single() to avoid 406 error
 
         if (!error && data) {
           setIsBookmarked(true)
+        } else {
+          setIsBookmarked(false)
         }
       } catch (error) {
-        // 북마크가 없으면 에러 발생 (정상)
+        // Handle any unexpected errors
         setIsBookmarked(false)
       }
     }
