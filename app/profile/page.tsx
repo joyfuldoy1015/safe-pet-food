@@ -186,8 +186,7 @@ export default function ProfilePage() {
             category,
             votes,
             views,
-            created_at,
-            answer_count
+            created_at
           `)
           .eq('author_id', user.id)
           .order('created_at', { ascending: false })
@@ -891,10 +890,6 @@ export default function ProfilePage() {
                       <span className="flex items-center gap-1">
                         <ArrowUp className="w-3 h-3" />
                         {question.votes || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {question.answer_count || 0}
                       </span>
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
