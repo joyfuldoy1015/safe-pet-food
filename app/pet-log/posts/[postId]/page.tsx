@@ -315,27 +315,58 @@ export default function PetLogPostDetail() {
 
   const [post, setPost] = useState<DetailedPetLogPost | null>(mockDetailedPosts[postId as keyof typeof mockDetailedPosts] || null)
 
-  // 로컬 스토리지에서 포스트 불러오기
+  // 로컬 스토리지에서 포스트 불러오기 및 Supabase에서 댓글 불러오기
   useEffect(() => {
-    try {
-      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-      const savedPost = savedPosts.find((p: any) => p.id === postId)
-      
-      if (savedPost) {
-        // comments 필드 추가 (없을 경우 빈 배열)
-        const formattedPost = {
-          ...savedPost,
-          comments: savedPost.comments || [],
-          totalComments: savedPost.totalComments || (savedPost.comments?.length || 0)
+    const loadPost = async () => {
+      try {
+        // 1. 포스트 데이터 로드 (localStorage 또는 mock)
+        const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+        const savedPost = savedPosts.find((p: any) => p.id === postId)
+        
+        let currentPost: DetailedPetLogPost | null = null
+        
+        if (savedPost) {
+          currentPost = {
+            ...savedPost,
+            comments: savedPost.comments || [],
+            totalComments: savedPost.totalComments || (savedPost.comments?.length || 0)
+          }
+        } else if (mockDetailedPosts[postId as keyof typeof mockDetailedPosts]) {
+          currentPost = mockDetailedPosts[postId as keyof typeof mockDetailedPosts]
         }
-        setPost(formattedPost)
-      } else if (mockDetailedPosts[postId as keyof typeof mockDetailedPosts]) {
-        // mock 데이터에서 찾기
-        setPost(mockDetailedPosts[postId as keyof typeof mockDetailedPosts])
+        
+        setPost(currentPost)
+        
+        // 2. Supabase에서 댓글 데이터 로드
+        if (currentPost) {
+          try {
+            const response = await fetch(`/api/pet-log/posts/${postId}`)
+            if (response.ok) {
+              const data = await response.json()
+              if (data.comments && Array.isArray(data.comments)) {
+                setComments(data.comments)
+                // localStorage 업데이트
+                if (savedPost) {
+                  savedPost.comments = data.comments
+                  savedPost.totalComments = data.comments.length
+                  localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+                }
+              }
+            }
+          } catch (error) {
+            console.error('댓글 로드 중 오류:', error)
+            // 실패 시 localStorage의 댓글 사용
+            if (currentPost.comments) {
+              setComments(currentPost.comments)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('포스트 로드 중 오류:', error)
       }
-    } catch (error) {
-      console.error('포스트 로드 중 오류:', error)
     }
+    
+    loadPost()
   }, [postId])
 
   // post가 변경될 때 comments 초기화
@@ -361,7 +392,7 @@ export default function PetLogPostDetail() {
   } : null
 
   // 댓글 작성 함수
-  const handleSubmitComment = () => {
+  const handleSubmitComment = async () => {
     if (!isLoggedIn) {
       setShowLoginModal(true)
       return
@@ -380,40 +411,66 @@ export default function PetLogPostDetail() {
       replies: []
     }
     
-    const updatedComments = [...comments, comment]
-    setComments(updatedComments)
-    setNewComment('')
-    
-    // 로컬 스토리지에 저장
     try {
-      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-      const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+      // Supabase에 저장
+      const response = await fetch('/api/pet-log/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: postId,
+          comment: {
+            id: comment.id,
+            userId: comment.userId,
+            userName: comment.userName,
+            content: comment.content,
+            likes: comment.likes,
+            isLiked: comment.isLiked,
+            replies: []
+          }
+        })
+      })
       
-      if (postIndex !== -1) {
-        // 저장된 포스트가 있는 경우 업데이트
-        savedPosts[postIndex] = {
-          ...savedPosts[postIndex],
-          comments: updatedComments,
-          totalComments: updatedComments.length
+      if (!response.ok) {
+        throw new Error('Failed to save comment')
+      }
+      
+      // 성공 시 로컬 state 업데이트
+      const updatedComments = [...comments, comment]
+      setComments(updatedComments)
+      setNewComment('')
+      
+      // 로컬 스토리지에도 저장 (오프라인 지원)
+      try {
+        const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+        const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+        
+        if (postIndex !== -1) {
+          savedPosts[postIndex] = {
+            ...savedPosts[postIndex],
+            comments: updatedComments,
+            totalComments: updatedComments.length
+          }
+          localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+        } else if (post) {
+          const updatedPost = {
+            ...post,
+            comments: updatedComments,
+            totalComments: updatedComments.length
+          }
+          savedPosts.push(updatedPost)
+          localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
         }
-        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
-      } else if (post) {
-        // 저장된 포스트가 없는 경우 (mock 데이터) 새로 저장
-        const updatedPost = {
-          ...post,
-          comments: updatedComments,
-          totalComments: updatedComments.length
-        }
-        savedPosts.push(updatedPost)
-        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+      } catch (error) {
+        console.error('로컬 스토리지 저장 중 오류:', error)
       }
     } catch (error) {
       console.error('댓글 저장 중 오류:', error)
+      alert('댓글 저장에 실패했습니다. 다시 시도해주세요.')
     }
   }
 
   // 답글 작성 함수
-  const handleSubmitReply = (commentId: string) => {
+  const handleSubmitReply = async (commentId: string) => {
     if (!isLoggedIn) {
       setShowLoginModal(true)
       return
@@ -431,41 +488,70 @@ export default function PetLogPostDetail() {
       isLiked: false
     }
     
-    const updatedComments = comments.map(comment => 
-      comment.id === commentId 
-        ? { ...comment, replies: [...comment.replies, reply] }
-        : comment
-    )
-    
-    setComments(updatedComments)
-    setReplyContent('')
-    setReplyingTo(null)
-    
-    // 로컬 스토리지에 저장
     try {
-      const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-      const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+      // 원본 댓글 찾기
+      const originalComment = comments.find(c => c.id === commentId)
+      if (!originalComment) return
       
-      if (postIndex !== -1) {
-        // 저장된 포스트가 있는 경우 업데이트
-        savedPosts[postIndex] = {
-          ...savedPosts[postIndex],
-          comments: updatedComments,
-          totalComments: updatedComments.length
+      const updatedComment = {
+        ...originalComment,
+        replies: [...originalComment.replies, reply]
+      }
+      
+      // Supabase에 업데이트
+      const response = await fetch('/api/pet-log/comments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          commentId: commentId,
+          updates: {
+            replies: updatedComment.replies,
+            likes: updatedComment.likes,
+            isLiked: updatedComment.isLiked
+          }
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to save reply')
+      }
+      
+      // 성공 시 로컬 state 업데이트
+      const updatedComments = comments.map(comment => 
+        comment.id === commentId ? updatedComment : comment
+      )
+      
+      setComments(updatedComments)
+      setReplyContent('')
+      setReplyingTo(null)
+      
+      // 로컬 스토리지에도 저장
+      try {
+        const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
+        const postIndex = savedPosts.findIndex((p: any) => p.id === postId)
+        
+        if (postIndex !== -1) {
+          savedPosts[postIndex] = {
+            ...savedPosts[postIndex],
+            comments: updatedComments,
+            totalComments: updatedComments.length
+          }
+          localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+        } else if (post) {
+          const updatedPost = {
+            ...post,
+            comments: updatedComments,
+            totalComments: updatedComments.length
+          }
+          savedPosts.push(updatedPost)
+          localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
         }
-        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
-      } else if (post) {
-        // 저장된 포스트가 없는 경우 (mock 데이터) 새로 저장
-        const updatedPost = {
-          ...post,
-          comments: updatedComments,
-          totalComments: updatedComments.length
-        }
-        savedPosts.push(updatedPost)
-        localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
+      } catch (error) {
+        console.error('로컬 스토리지 저장 중 오류:', error)
       }
     } catch (error) {
       console.error('답글 저장 중 오류:', error)
+      alert('답글 저장에 실패했습니다. 다시 시도해주세요.')
     }
   }
 
