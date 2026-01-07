@@ -441,32 +441,10 @@ export default function LogDetailDrawer({
                 </>
               ) : activeTab === 'comments' ? (
                 <>
-                  {/* Comments Notice */}
-                  <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-200 mb-6">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-[#3056F5]" />
-                    <p className="text-base font-medium text-gray-900 mb-2">
-                      댓글 기능 안내
-                    </p>
-                    <p className="text-sm text-gray-600 mb-4">
-                      댓글은 펫 로그 상세 페이지에서 작성하실 수 있습니다.
-                    </p>
-                    <button
-                      onClick={() => {
-                        router.push('/pet-log')
-                        onClose()
-                      }}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#3056F5] text-white rounded-xl text-sm font-medium hover:bg-[#2648e6] transition-colors"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      펫 로그에서 댓글 달기
-                    </button>
-                  </div>
-
-                  {/* Existing Comments (Read-only) */}
-                  {reviewComments.length > 0 && (
-                    <div className="space-y-4">
-                      <p className="text-sm font-medium text-gray-600 mb-3">기존 댓글</p>
-                      {reviewComments
+                  {/* Comments List */}
+                  <div className="space-y-4">
+                    {reviewComments.length > 0 ? (
+                      reviewComments
                         .filter((c) => !c.parentId)
                         .map((comment) => (
                           <CommentThread
@@ -474,15 +452,56 @@ export default function LogDetailDrawer({
                             comment={comment}
                             allComments={reviewComments}
                             formatTimeAgo={formatTimeAgo}
-                            onReply={() => {
-                              // Read-only: redirect to pet-log
-                              router.push('/pet-log')
-                              onClose()
+                            onReply={(content, parentId) => {
+                              if (!user && onAuthRequired) {
+                                onAuthRequired()
+                                return
+                              }
+                              onCommentSubmit(log.id, content, parentId)
                             }}
                           />
-                        ))}
-                    </div>
-                  )}
+                        ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-base text-gray-500">아직 댓글이 없습니다.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Comment Form */}
+                  <form onSubmit={handleCommentSubmit} className="mt-6 pt-6 border-t border-gray-200">
+                    {user ? (
+                      <>
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="댓글을 작성해주세요..."
+                      rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
+                    />
+                      <div className="flex justify-end mt-3">
+                        <button
+                          type="submit"
+                          disabled={!newComment.trim()}
+                          className="px-4 py-2 bg-[#3056F5] text-white rounded-xl text-base font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          댓글 작성
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 text-base text-gray-600">
+                        <button
+                          type="button"
+                          onClick={() => onAuthRequired?.()}
+                          className="w-full px-4 py-3 border border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-[#3056F5] hover:text-[#3056F5] transition-colors"
+                        >
+                          로그인이 필요합니다. 클릭하여 로그인하세요.
+                        </button>
+                      </div>
+                    )}
+                  </form>
                 </>
               ) : activeTab === 'qa' ? (
                 <>
