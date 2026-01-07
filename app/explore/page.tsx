@@ -313,13 +313,13 @@ export default function ExplorePage() {
   const hasMore = displayedCount < allItems.length
 
   const getOwnerAndPet = (review: typeof mockReviewLogs[0]) => {
-    const owner = mockOwners.find((o) => o.id === review.ownerId) || null
-    const pet = mockPets.find((p) => p.id === review.petId) || null
+    const owner = owners.find((o) => o.id === review.ownerId) || null
+    const pet = pets.find((p) => p.id === review.petId) || null
     return { owner, pet }
   }
 
   const handleViewDetail = (reviewId: string) => {
-    const review = mockReviewLogs.find((r) => r.id === reviewId)
+    const review = reviews.find((r) => r.id === reviewId)
     if (review) {
       window.location.href = `/owners/${review.ownerId}/pets/${review.petId}`
     }
@@ -327,7 +327,7 @@ export default function ExplorePage() {
 
   const handleQuestionClick = (reviewId: string) => {
     // Navigate to detail page with Q&A focus
-    const review = mockReviewLogs.find((r) => r.id === reviewId)
+    const review = reviews.find((r) => r.id === reviewId)
     if (review) {
       window.location.href = `/owners/${review.ownerId}/pets/${review.petId}?tab=qa`
     }
@@ -491,6 +491,7 @@ export default function ExplorePage() {
                         likes={review.likes}
                         comments={review.commentsCount}
                         views={review.views}
+                        onAsk={() => handleQuestionClick(review.id)}
                         onDetail={() => handleViewDetail(review.id)}
                         avatarUrl={owner.avatarUrl}
                       />
