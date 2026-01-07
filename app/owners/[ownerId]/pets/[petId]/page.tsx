@@ -26,7 +26,7 @@ export default function PetHistoryPage() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
 
   const ownerId = params.ownerId as string
   const petId = params.petId as string
@@ -337,6 +337,8 @@ export default function PetHistoryPage() {
       id: `comment-${Date.now()}`,
       logId,
       authorId: user?.id || 'anonymous',
+      authorName: profile?.nickname || '사용자',
+      avatarUrl: profile?.avatar_url,
       content,
       createdAt: new Date().toISOString(),
       parentId,

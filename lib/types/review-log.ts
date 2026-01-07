@@ -53,6 +53,8 @@ export interface Comment {
   id: string
   logId: string
   authorId: string
+  authorName?: string  // 작성자 닉네임
+  avatarUrl?: string   // 작성자 프로필 이미지
   content: string
   createdAt: string
   parentId?: string

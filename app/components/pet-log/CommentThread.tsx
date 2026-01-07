@@ -52,9 +52,20 @@ export default function CommentThread({
         )}
 
         <div className="flex items-start justify-between mb-2">
-          <div>
-            <span className="font-medium text-gray-900">사용자 {comment.authorId}</span>
-            <span className="ml-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2">
+            {comment.avatarUrl ? (
+              <img
+                src={comment.avatarUrl}
+                alt={comment.authorName || '사용자'}
+                className="w-6 h-6 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-xs text-gray-500">👤</span>
+              </div>
+            )}
+            <span className="font-medium text-gray-900">{comment.authorName || '사용자'}</span>
+            <span className="text-xs text-gray-500">
               {formatTimeAgo(comment.createdAt)}
             </span>
           </div>
