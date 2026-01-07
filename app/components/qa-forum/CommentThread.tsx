@@ -255,9 +255,6 @@ export default function CommentThread({
                     : 'text-gray-500'
                 }`}>
                   {replyContent.trim().length} / 최소 10자
-                  {replyContent.trim().length > 0 && replyContent.trim().length < 10 && (
-                    <span className="ml-2">(최소 {10 - replyContent.trim().length}자 더 필요)</span>
-                  )}
                 </span>
                 <div className="flex space-x-2">
                   <button
