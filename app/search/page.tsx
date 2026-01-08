@@ -69,9 +69,12 @@ export default function SearchPage() {
         setBrands(Array.isArray(brandsData) ? brandsData : [])
       }
 
-      // 제품 데이터 가져오기 (브랜드별로 가져와서 합치기)
-      // 실제로는 전체 제품 API가 필요하지만, 현재는 mock 데이터 사용
-      setProducts([])
+      // 제품 데이터 가져오기
+      const productsRes = await fetch('/api/products')
+      if (productsRes.ok) {
+        const productsData = await productsRes.json()
+        setProducts(Array.isArray(productsData) ? productsData : [])
+      }
     } catch (error) {
       console.error('Failed to fetch data:', error)
     } finally {
