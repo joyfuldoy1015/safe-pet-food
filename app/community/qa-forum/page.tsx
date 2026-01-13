@@ -35,7 +35,7 @@ const mockQuestionsData = [
     answerCount: 2,
     views: 156,
     createdAt: '2024-01-19T15:45:00Z',
-    status: 'open'
+    status: 'answered'
   },
   {
     id: '3',
@@ -62,7 +62,7 @@ const mockQuestionsData = [
     answerCount: 4,
     views: 189,
     createdAt: '2024-01-17T13:20:00Z',
-    status: 'open'
+    status: 'answered'
   },
   {
     id: '5',
@@ -491,15 +491,16 @@ export default function CommunityQAForumPage() {
           </div>
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Tabs - 주제 둘러보기 */}
         <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">주제 둘러보기</h3>
           <CategoryTabs
-            categories={categories}
+            categories={categories.filter(c => c.value !== 'all')}
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
-                  </div>
-                  
+        </div>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Questions Feed */}

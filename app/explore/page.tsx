@@ -26,9 +26,9 @@
 
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Filter, Search } from 'lucide-react'
+import { Search, ChevronDown } from 'lucide-react'
 import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import PetLogCard from '@/components/petlogs/PetLogCard'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
@@ -40,6 +40,75 @@ type SortOption = 'recent' | 'popular' | 'rating'
 type ContentType = 'all' | 'qa' | 'reviews'
 
 const ITEMS_PER_PAGE = 12
+
+const speciesOptions = [
+  { value: 'all', label: '전체' },
+  { value: 'dog', label: '강아지' },
+  { value: 'cat', label: '고양이' }
+] as const
+
+const sortOptions = [
+  { value: 'recent', label: '최신순' },
+  { value: 'popular', label: '인기순' },
+  { value: 'rating', label: '평점순' }
+] as const
+
+interface CustomDropdownProps {
+  value: string
+  options: readonly { value: string; label: string }[]
+  onChange: (value: string) => void
+  className?: string
+}
+
+function CustomDropdown({ value, options, onChange, className = '' }: CustomDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const selectedOption = options.find(opt => opt.value === value)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={dropdownRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-sm flex items-center justify-between focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5]"
+      >
+        <span>{selectedOption?.label}</span>
+        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                onChange(option.value)
+                setIsOpen(false)
+              }}
+              className={`w-full px-3 py-2.5 text-left text-sm hover:bg-gray-50 transition-colors ${
+                value === option.value ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function ExplorePage() {
   const [contentType, setContentType] = useState<ContentType>('all')
@@ -399,31 +468,21 @@ export default function ExplorePage() {
 
             {/* Species Filter (only for reviews) */}
             {(contentType === 'all' || contentType === 'reviews') && (
-              <div className="w-full sm:w-32">
-                <select
-                  value={selectedSpecies}
-                  onChange={(e) => setSelectedSpecies(e.target.value as 'all' | 'dog' | 'cat')}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm bg-white"
-                >
-                  <option value="all">전체</option>
-                  <option value="dog">강아지</option>
-                  <option value="cat">고양이</option>
-                </select>
-              </div>
+              <CustomDropdown
+                value={selectedSpecies}
+                options={speciesOptions}
+                onChange={(value) => setSelectedSpecies(value as 'all' | 'dog' | 'cat')}
+                className="w-full sm:w-32"
+              />
             )}
 
             {/* Sort Filter */}
-            <div className="w-full sm:w-32">
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value as SortOption)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm bg-white"
-              >
-                <option value="recent">최신순</option>
-                <option value="popular">인기순</option>
-                <option value="rating">평점순</option>
-              </select>
-            </div>
+            <CustomDropdown
+              value={sortOption}
+              options={sortOptions}
+              onChange={(value) => setSortOption(value as SortOption)}
+              className="w-full sm:w-32"
+            />
           </div>
         </div>
 

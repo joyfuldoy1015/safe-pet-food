@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { getBrowserClient } from '@/lib/supabase-client'
 import {
   LayoutDashboard,
   Users,
@@ -17,7 +18,8 @@ import {
   Download,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Package
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -25,16 +27,17 @@ interface AdminLayoutProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: '대시보드', href: '/admin' },
-  { icon: Users, label: '사용자', href: '/admin/users' },
-  { icon: Heart, label: '반려동물', href: '/admin/pets' },
-  { icon: FileText, label: '로그', href: '/admin/logs' },
-  { icon: MessageSquare, label: '댓글', href: '/admin/comments' },
-  { icon: HelpCircle, label: 'Q&A', href: '/admin/qa' },
-  { icon: Trophy, label: '랭킹', href: '/admin/rankings' },
-  { icon: Search, label: '탐색 QA', href: '/admin/explore' },
-  { icon: Settings, label: '설정', href: '/admin/settings' },
-  { icon: Download, label: '내보내기', href: '/admin/exports' }
+  { icon: LayoutDashboard, label: '대시보드', href: '/admin', badgeKey: null },
+  { icon: Users, label: '사용자', href: '/admin/users', badgeKey: null },
+  { icon: Heart, label: '반려동물', href: '/admin/pets', badgeKey: null },
+  { icon: FileText, label: '로그', href: '/admin/logs', badgeKey: null },
+  { icon: MessageSquare, label: '댓글', href: '/admin/comments', badgeKey: null },
+  { icon: HelpCircle, label: 'Q&A', href: '/admin/qa', badgeKey: null },
+  { icon: Package, label: '제품 요청', href: '/admin/product-requests', badgeKey: 'productRequests' },
+  { icon: Trophy, label: '랭킹', href: '/admin/rankings', badgeKey: null },
+  { icon: Search, label: '탐색 QA', href: '/admin/explore', badgeKey: null },
+  { icon: Settings, label: '설정', href: '/admin/settings', badgeKey: null },
+  { icon: Download, label: '내보내기', href: '/admin/exports', badgeKey: null }
 ]
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -43,11 +46,40 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { signOut } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [pendingProductRequests, setPendingProductRequests] = useState(0)
 
   // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // 대기 중인 제품 요청 수 가져오기
+  useEffect(() => {
+    const fetchPendingRequests = async () => {
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) return
+
+        const { count, error } = await supabase
+          .from('product_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+
+        if (!error && count !== null) {
+          setPendingProductRequests(count)
+        }
+      } catch (error) {
+        console.error('대기 중인 요청 수 조회 오류:', error)
+      }
+    }
+
+    if (mounted) {
+      fetchPendingRequests()
+      // 30초마다 업데이트
+      const interval = setInterval(fetchPendingRequests, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [mounted])
 
   // Ensure pathname is available before using it
   const currentPathname = mounted ? pathname : null
@@ -107,19 +139,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 const Icon = item.icon
                 const isActive = mounted && (currentPathname === item.href || (item.href !== '/admin' && currentPathname?.startsWith(item.href)))
                 
+                // 배지 카운트 가져오기
+                let badgeCount = 0
+                if (item.badgeKey === 'productRequests') {
+                  badgeCount = pendingProductRequests
+                }
+                
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
                         isActive
                           ? 'bg-blue-50 text-blue-700 font-medium'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5" />
+                        <span>{item.label}</span>
+                      </div>
+                      {badgeCount > 0 && (
+                        <span className="px-2 py-0.5 text-xs font-medium bg-red-500 text-white rounded-full min-w-[20px] text-center">
+                          {badgeCount > 99 ? '99+' : badgeCount}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 )

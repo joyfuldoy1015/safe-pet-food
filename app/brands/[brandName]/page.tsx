@@ -28,14 +28,12 @@ import {
   ThumbsUp,
   ThumbsDown,
   Flag,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
   BarChart3
 } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
 import SafiEvaluationDialog from '@/components/safi/SafiEvaluationDialog'
-import BrandDetailTabs from '@/components/brand/BrandDetailTabs'
 import ProductsListSection from '@/components/brand/ProductsListSection'
 
 interface BrandQuestion {
@@ -195,8 +193,6 @@ export default function BrandDetailPage() {
   const params = useParams()
   const brandName = decodeURIComponent(params.brandName as string)
   const [brand, setBrand] = useState<Brand | null>(null)
-  const [mainTab, setMainTab] = useState<'products' | 'qa'>('products')
-  const [showQAForm, setShowQAForm] = useState(false)
   const [showReportForm, setShowReportForm] = useState(false)
   const [showEvaluationSuccess, setShowEvaluationSuccess] = useState(false)
   const [voteData, setVoteData] = useState<{
@@ -213,8 +209,6 @@ export default function BrandDetailPage() {
     recommendationRate: number
     recentEvaluations: any[]
   } | null>(null)
-  const [newQuestion, setNewQuestion] = useState('')
-  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false)
   const [expandedProducts, setExpandedProducts] = useState<Record<string, Record<string, boolean>>>({})
   const [defaultVote, setDefaultVote] = useState<'yes' | 'no'>('yes')
   const [safiScore, setSafiScore] = useState<SafiResult | null>(null)
@@ -302,17 +296,30 @@ export default function BrandDetailPage() {
                 recommend_no: 0,
                 total_votes: 0
               },
-              qa_section: apiData.qa_section || [],
+              qa_section: [],  // Q&A는 별도 API에서 가져옴
               products: apiProducts || []
             }
-            
+
             console.log('[Brand Page] Brand data created:', {
               brandId: brandData.id,
               brandName: brandData.name,
               productsCount: brandData.products.length
             })
-            
+
             setBrand(brandData)
+
+            // Q&A 데이터 별도 로드
+            try {
+              const qaResponse = await fetch(`/api/brands/${encodeURIComponent(brandName)}/questions`)
+              if (qaResponse.ok) {
+                const qaData = await qaResponse.json()
+                if (Array.isArray(qaData)) {
+                  setBrand(prev => prev ? { ...prev, qa_section: qaData } : null)
+                }
+              }
+            } catch (qaError) {
+              console.error('Q&A 로드 오류:', qaError)
+            }
           } else {
             console.error('브랜드 데이터를 찾을 수 없습니다:', apiData.error)
             setBrand(null)
@@ -437,39 +444,6 @@ export default function BrandDetailPage() {
       alert('투표 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
       setIsVoting(false)
-    }
-  }
-
-  const handleSubmitQuestion = async () => {
-    if (!newQuestion.trim() || isSubmittingQuestion) return
-
-    setIsSubmittingQuestion(true)
-    try {
-      const newQ: BrandQuestion = {
-        id: `q-${Date.now()}`,
-        user_name: '익명사용자',
-        question: newQuestion.trim(),
-        date: new Date().toISOString().split('T')[0],
-        likes: 0,
-        is_answered: false
-      }
-
-      if (brand) {
-        const updatedBrand = {
-          ...brand,
-          qa_section: [newQ, ...brand.qa_section]
-        }
-        setBrand(updatedBrand)
-      }
-
-      setNewQuestion('')
-      setShowQAForm(false)
-      alert('질문이 등록되었습니다. 브랜드 담당자가 확인 후 답변드릴 예정입니다.')
-    } catch (error) {
-      console.error('질문 등록 오류:', error)
-      alert('질문 등록에 실패했습니다. 다시 시도해주세요.')
-    } finally {
-      setIsSubmittingQuestion(false)
     }
   }
 
@@ -941,188 +915,11 @@ export default function BrandDetailPage() {
 
         {/* ==================== 🔒 보존 영역 끝 ==================== */}
 
-        {/* ==================== 탭 네비게이션 ==================== */}
+        {/* ==================== 제품 목록 ==================== */}
         <div className="mt-8">
-          <BrandDetailTabs
-            activeTab={mainTab}
-            onTabChange={(tab) => setMainTab(tab as 'products' | 'qa')}
-            productsCount={brand.products.length}
-            qaCount={brand.qa_section.length}
-          />
-        </div>
-
-        {/* ==================== 탭 콘텐츠 ==================== */}
-        <div className="mt-6">
-          {/* 제품 목록 탭 (요약형 리스트) */}
-          {mainTab === 'products' && (
-            <ProductsListSection products={brand.products} />
-          )}
-
-          {/* 관련 Q&A 탭 */}
-          {mainTab === 'qa' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">💬 브랜드 질문하기</h2>
-                <button 
-                  onClick={() => setShowQAForm(true)}
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full sm:w-auto"
-                >
-                  <HelpCircle className="h-4 w-4" />
-                  <span>질문 등록</span>
-                </button>
-              </div>
-
-              {/* 질문 목록 */}
-              <div className="space-y-6">
-                {brand.qa_section.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>아직 등록된 질문이 없습니다.</p>
-                    <p className="text-sm">첫 번째 질문을 남겨보세요!</p>
-                  </div>
-                ) : (
-                  brand.qa_section.map((qa) => (
-                    <div key={qa.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-2">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium">{qa.user_name}</span>
-                            <span className="text-xs text-gray-500">{qa.date}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
-                              <Heart className="h-4 w-4" />
-                              <span className="text-sm">{qa.likes}</span>
-                            </button>
-                            {qa.is_answered && (
-                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                                답변완료
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-gray-800 bg-gray-50 p-3 rounded-lg">{qa.question}</p>
-                      </div>
-
-                      {qa.answer && (
-                        <div className="ml-6 pl-4 border-l-2 border-blue-200">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                              <Building className="h-3 w-3 text-blue-600" />
-                            </div>
-                            <span className="text-sm font-medium text-blue-700">{qa.answer.answerer}</span>
-                            <span className="text-xs text-gray-500">{qa.answer.date}</span>
-                          </div>
-                          <p className="text-gray-700 bg-blue-50 p-3 rounded-lg">{qa.answer.content}</p>
-                        </div>
-                      )}
-
-                      {!qa.is_answered && (
-                        <div className="ml-6 pl-4 border-l-2 border-gray-200">
-                          <div className="flex items-center space-x-2 text-gray-500">
-                            <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-                              <Building className="h-3 w-3 text-gray-400" />
-                            </div>
-                            <span className="text-sm">브랜드 담당자 답변 대기 중...</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* 액션 버튼들 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-6 border-t">
-                <Link 
-                  href={`/brands/${brandName}/evaluate`}
-                  className="flex items-center justify-center space-x-2 p-4 border-2 border-green-200 rounded-lg hover:border-green-300 hover:bg-green-50"
-                >
-                  <Star className="h-5 w-5 text-green-600" />
-                  <span className="font-medium text-green-600">이 브랜드 평가하기</span>
-                </Link>
-                
-                <button 
-                  onClick={() => setShowReportForm(true)}
-                  className="flex items-center justify-center space-x-2 p-4 border-2 border-red-200 rounded-lg hover:border-red-300 hover:bg-red-50"
-                >
-                  <Flag className="h-5 w-5 text-red-600" />
-                  <span className="font-medium text-red-600">문제 신고하기</span>
-                </button>
-
-                <div className="flex items-center justify-center space-x-2">
-                  <button 
-                    onClick={() => handleVote('yes')}
-                    disabled={isVoting}
-                    className={`flex items-center space-x-1 px-4 py-2 rounded-lg ${
-                      voteData?.user_vote === 'yes' || (!voteData?.user_vote && defaultVote === 'yes')
-                        ? 'bg-green-600 text-white' 
-                        : 'bg-green-500 text-white hover:bg-green-600'
-                    } ${isVoting ? 'opacity-50' : ''}`}
-                  >
-                    <ThumbsUp className="h-3 w-3" />
-                    <span className="text-sm">추천</span>
-                  </button>
-                  <button 
-                    onClick={() => handleVote('no')}
-                    disabled={isVoting}
-                    className={`flex items-center space-x-1 px-4 py-2 rounded-lg ${
-                      voteData?.user_vote === 'no' 
-                        ? 'bg-red-600 text-white' 
-                        : 'bg-gray-300 text-gray-600 hover:bg-red-500 hover:text-white'
-                    } ${isVoting ? 'opacity-50' : ''}`}
-                  >
-                    <ThumbsDown className="h-3 w-3" />
-                    <span className="text-sm">비추천</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <ProductsListSection products={brand.products} />
         </div>
       </div>
-
-      {/* Q&A 모달 */}
-      {showQAForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold mb-4">브랜드에 질문하기</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              브랜드 담당자가 직접 답변해드립니다. 궁금한 점을 자세히 적어주세요.
-            </p>
-            <textarea 
-              value={newQuestion}
-              onChange={(e) => setNewQuestion(e.target.value)}
-              className="w-full p-3 border rounded-lg mb-4 resize-none" 
-              rows={4} 
-              placeholder="예: 알레르기가 있는 강아지도 안전하게 먹을 수 있나요?"
-              maxLength={500}
-            />
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs text-gray-500">{newQuestion.length}/500자</span>
-            </div>
-            <div className="flex space-x-3">
-              <button 
-                onClick={() => {
-                  setShowQAForm(false)
-                  setNewQuestion('')
-                }}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                취소
-              </button>
-              <button 
-                onClick={handleSubmitQuestion}
-                disabled={!newQuestion.trim() || isSubmittingQuestion}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
-              >
-                {isSubmittingQuestion ? '등록 중...' : '질문 등록'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 신고 모달 */}
       {showReportForm && (

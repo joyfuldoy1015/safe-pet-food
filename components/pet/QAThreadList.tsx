@@ -32,7 +32,7 @@ export default function QAThreadList({
   const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set())
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
-  const [newQuestionContent, setNewQuestionContent] = useState('')
+  const [answerContents, setAnswerContents] = useState<Record<string, string>>({})
 
   const toggleThread = (threadId: string) => {
     setExpandedThreads((prev) => {
@@ -71,10 +71,11 @@ export default function QAThreadList({
     setReplyingTo(null)
   }
 
-  const handleNewQuestion = (threadId: string) => {
-    if (!newQuestionContent.trim()) return
-    onPostSubmit(threadId, newQuestionContent.trim(), 'question')
-    setNewQuestionContent('')
+  const handleAnswerSubmit = (threadId: string, questionId: string) => {
+    const content = answerContents[threadId]
+    if (!content?.trim()) return
+    onPostSubmit(threadId, content.trim(), 'answer', questionId)
+    setAnswerContents((prev) => ({ ...prev, [threadId]: '' }))
   }
 
   return (
@@ -290,8 +291,8 @@ export default function QAThreadList({
                     {currentUserId && (
                       <div className="pt-3 border-t border-gray-200">
                         <textarea
-                          value={newQuestionContent}
-                          onChange={(e) => setNewQuestionContent(e.target.value)}
+                          value={answerContents[thread.id] || ''}
+                          onChange={(e) => setAnswerContents((prev) => ({ ...prev, [thread.id]: e.target.value }))}
                           placeholder="답변을 작성하세요..."
                           rows={3}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
@@ -301,7 +302,7 @@ export default function QAThreadList({
                             onClick={() => {
                               const question = getQuestionPost(thread.id)
                               if (question) {
-                                handleReplySubmit(thread.id, 'answer', question.id)
+                                handleAnswerSubmit(thread.id, question.id)
                               }
                             }}
                             className="px-4 py-2 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors"

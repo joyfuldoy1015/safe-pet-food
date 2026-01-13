@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Star, Shield } from 'lucide-react'
+import { Shield } from 'lucide-react'
 
 interface ProductSearchResultProps {
   product: {
@@ -13,23 +13,23 @@ interface ProductSearchResultProps {
     grade?: string
     grade_text?: string
     certifications?: string[]
-    consumer_ratings?: {
-      palatability?: number
-      overall_satisfaction?: number
-    }
   }
 }
 
-const getGradeColor = (grade?: string) => {
+const getGradeStyle = (grade?: string) => {
   switch (grade) {
-    case 'A': return 'bg-green-100 text-green-800 border-green-300'
-    case 'B': return 'bg-blue-100 text-blue-800 border-blue-300'
-    case 'C': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
-    default: return 'bg-gray-100 text-gray-800 border-gray-300'
+    case 'A': return { bg: 'bg-green-500', text: 'text-white', label: 'A등급' }
+    case 'B': return { bg: 'bg-blue-500', text: 'text-white', label: 'B등급' }
+    case 'C': return { bg: 'bg-yellow-500', text: 'text-white', label: 'C등급' }
+    case 'D': return { bg: 'bg-orange-500', text: 'text-white', label: 'D등급' }
+    case 'F': return { bg: 'bg-red-500', text: 'text-white', label: 'F등급' }
+    default: return { bg: 'bg-gray-400', text: 'text-white', label: '미평가' }
   }
 }
 
 export default function ProductSearchResult({ product }: ProductSearchResultProps) {
+  const gradeStyle = getGradeStyle(product.grade)
+  
   return (
     <Link
       href={`/products/${product.id}`}
@@ -70,22 +70,9 @@ export default function ProductSearchResult({ product }: ProductSearchResultProp
           )}
         </div>
 
-        {/* 등급 & 평점 */}
-        <div className="flex flex-col items-end gap-2">
-          {product.grade && (
-            <div className={`px-3 py-1 rounded-lg border font-bold text-sm ${getGradeColor(product.grade)}`}>
-              {product.grade}
-            </div>
-          )}
-
-          {product.consumer_ratings?.overall_satisfaction && (
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="text-sm font-medium text-gray-700">
-                {product.consumer_ratings.overall_satisfaction.toFixed(1)}
-              </span>
-            </div>
-          )}
+        {/* 등급 배지 */}
+        <div className={`flex-shrink-0 px-3 py-1.5 rounded-lg font-bold text-sm ${gradeStyle.bg} ${gradeStyle.text}`}>
+          {gradeStyle.label}
         </div>
       </div>
     </Link>

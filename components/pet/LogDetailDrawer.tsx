@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2, ExternalLink } from 'lucide-react'
+import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2, ExternalLink, Plus, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPost, QAPostWithAuthor } from '@/lib/types/review-log'
 import CommentThread from '@/app/components/pet-log/CommentThread'
@@ -26,7 +26,7 @@ interface LogDetailDrawerProps {
   onAuthRequired?: () => void
   qaThreads?: QAThread[]
   qaPosts?: QAPostWithAuthor[]
-  onQAThreadCreate?: (logId: string, title: string) => void
+  onQAThreadCreate?: (logId: string, title: string, content: string) => void
   onQAPostSubmit?: (threadId: string, content: string, kind: 'question' | 'answer' | 'comment', parentId?: string) => void
   onAcceptAnswer?: (postId: string) => void
   onUpvote?: (postId: string) => void
@@ -68,6 +68,21 @@ export default function LogDetailDrawer({
   const [activeTab, setActiveTab] = useState<'details' | 'comments' | 'qa'>(initialTab)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['reason', 'changes']))
   const [newComment, setNewComment] = useState('')
+  
+  // Q&A 질문 작성 관련 state
+  const [showQAForm, setShowQAForm] = useState(false)
+  const [qaTitle, setQATitle] = useState('')
+  const [qaContent, setQAContent] = useState('')
+
+  // 제품 등록 요청 관련 state
+  const [showProductRequestForm, setShowProductRequestForm] = useState(false)
+  const [productRequestDescription, setProductRequestDescription] = useState('')
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false)
+  const [requestSubmitted, setRequestSubmitted] = useState(false)
+  
+  // 제품 존재 여부 확인
+  const [productExists, setProductExists] = useState<boolean | null>(null)
+  const [isCheckingProduct, setIsCheckingProduct] = useState(false)
 
   // Update active tab when initialTab changes
   useEffect(() => {
@@ -75,6 +90,85 @@ export default function LogDetailDrawer({
       setActiveTab(initialTab)
     }
   }, [isOpen, initialTab])
+
+  // Reset product request form when drawer closes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowProductRequestForm(false)
+      setProductRequestDescription('')
+      setRequestSubmitted(false)
+      setProductExists(null)
+    }
+  }, [isOpen])
+
+  // 제품 존재 여부 확인
+  useEffect(() => {
+    const checkProductExists = async () => {
+      if (!isOpen || !log?.brand) return
+      
+      setIsCheckingProduct(true)
+      try {
+        const response = await fetch(`/api/brands/${encodeURIComponent(log.brand)}`)
+        if (response.ok) {
+          const data = await response.json()
+          // 브랜드가 존재하고 제품 목록이 있는지 확인
+          const hasProducts = data.products && Array.isArray(data.products) && data.products.length > 0
+          setProductExists(hasProducts)
+        } else {
+          // 브랜드가 없으면 제품도 없음
+          setProductExists(false)
+        }
+      } catch (error) {
+        console.error('제품 확인 오류:', error)
+        setProductExists(false)
+      } finally {
+        setIsCheckingProduct(false)
+      }
+    }
+
+    checkProductExists()
+  }, [isOpen, log?.brand])
+
+  // 제품 등록 요청 제출
+  const handleProductRequestSubmit = async () => {
+    if (!user) {
+      if (onAuthRequired) {
+        onAuthRequired()
+      }
+      return
+    }
+
+    if (!log) return
+
+    setIsSubmittingRequest(true)
+    try {
+      const response = await fetch('/api/product-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_name: log.brand,
+          product_name: log.product,
+          category: log.category || 'feed',
+          description: productRequestDescription || undefined
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        setRequestSubmitted(true)
+        setShowProductRequestForm(false)
+        alert(result.message || '제품 등록 요청이 접수되었습니다.')
+      } else {
+        alert(result.error || '요청 처리 중 오류가 발생했습니다.')
+      }
+    } catch (error) {
+      console.error('제품 등록 요청 오류:', error)
+      alert('요청 처리 중 오류가 발생했습니다.')
+    } finally {
+      setIsSubmittingRequest(false)
+    }
+  }
 
   if (!log || !pet || !owner) return null
 
@@ -230,24 +324,102 @@ export default function LogDetailDrawer({
             )}
 
             {/* Product Detail Link */}
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-              <button
-                onClick={() => {
-                  console.log('[LogDetailDrawer] Brand link clicked:', {
-                    logBrand: log.brand,
-                    logProduct: log.product
-                  })
-                  // Next.js router는 자동으로 URL을 인코딩하므로 수동 인코딩 불필요
-                  const targetUrl = `/brands/${log.brand}`
-                  console.log('[LogDetailDrawer] Navigating to:', targetUrl)
-                  router.push(targetUrl)
-                  onClose()
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
-              >
-                <span>제품에 대해 자세히 알아보기</span>
-                <ExternalLink className="h-4 w-4" />
-              </button>
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 space-y-3">
+              {/* 제품 확인 중 로딩 */}
+              {isCheckingProduct ? (
+                <div className="flex items-center justify-center gap-2 py-3 text-gray-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">제품 정보 확인 중...</span>
+                </div>
+              ) : productExists === false ? (
+                /* 제품이 등록되어 있지 않은 경우 */
+                <>
+                  <div className="text-center py-3 px-4 bg-gray-50 rounded-xl">
+                    <p className="text-sm text-gray-600 mb-1">📦 아직 제품 목록에 등록되어 있지 않아요</p>
+                    <p className="text-xs text-gray-500">제품 정보를 요청해주시면 운영자가 검토 후 등록해드립니다.</p>
+                  </div>
+                  
+                  {/* 제품 등록 요청 */}
+                  {requestSubmitted ? (
+                    <div className="text-center py-2 px-4 bg-green-50 text-green-700 rounded-xl text-sm">
+                      ✅ 제품 등록 요청이 접수되었습니다. 운영자 검토 후 등록됩니다.
+                    </div>
+                  ) : showProductRequestForm ? (
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                      <div className="text-sm font-medium text-gray-900">
+                        제품 등록 요청
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        <span className="font-medium">{log.brand}</span> - {log.product}
+                      </div>
+                      <textarea
+                        value={productRequestDescription}
+                        onChange={(e) => setProductRequestDescription(e.target.value)}
+                        placeholder="추가 정보가 있다면 입력해주세요 (선택사항)"
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setShowProductRequestForm(false)}
+                          className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+                        >
+                          취소
+                        </button>
+                        <button
+                          onClick={handleProductRequestSubmit}
+                          disabled={isSubmittingRequest}
+                          className="flex-1 px-3 py-2 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                        >
+                          {isSubmittingRequest ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              요청 중...
+                            </>
+                          ) : (
+                            '요청하기'
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (!user) {
+                          alert('로그인이 필요합니다.')
+                          if (onAuthRequired) {
+                            onAuthRequired()
+                          }
+                          return
+                        }
+                        setShowProductRequestForm(true)
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>제품 등록 요청하기</span>
+                    </button>
+                  )}
+                </>
+              ) : (
+                /* 제품이 등록되어 있는 경우 */
+                <button
+                  onClick={() => {
+                    console.log('[LogDetailDrawer] Brand link clicked:', {
+                      logBrand: log.brand,
+                      logProduct: log.product
+                    })
+                    const targetUrl = `/brands/${log.brand}`
+                    console.log('[LogDetailDrawer] Navigating to:', targetUrl)
+                    router.push(targetUrl)
+                    onClose()
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
+                >
+                  <span>제품에 대해 자세히 알아보기</span>
+                  <ExternalLink className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             {/* Period */}
@@ -509,18 +681,60 @@ export default function LogDetailDrawer({
                   {qaThreads.length > 0 || onQAThreadCreate ? (
                     <div className="space-y-4">
                       {onQAThreadCreate && user && (
-                        <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                          <button
-                            onClick={() => {
-                              const title = prompt('질문 제목을 입력하세요:')
-                              if (title && log) {
-                                onQAThreadCreate(log.id, title)
-                              }
-                            }}
-                            className="w-full px-4 py-2 bg-[#3056F5] text-white rounded-lg text-base font-medium hover:bg-[#2648e6] transition-colors"
-                          >
-                            + 새 질문하기
-                          </button>
+                        <div className="mb-4">
+                          {showQAForm ? (
+                            <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 space-y-3">
+                              <div className="text-sm font-medium text-gray-900">새 질문 작성</div>
+                              <input
+                                type="text"
+                                value={qaTitle}
+                                onChange={(e) => setQATitle(e.target.value)}
+                                placeholder="질문 제목을 입력하세요"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5]"
+                              />
+                              <textarea
+                                value={qaContent}
+                                onChange={(e) => setQAContent(e.target.value)}
+                                placeholder="질문 내용을 자세히 입력하세요"
+                                rows={4}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setShowQAForm(false)
+                                    setQATitle('')
+                                    setQAContent('')
+                                  }}
+                                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+                                >
+                                  취소
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (qaTitle.trim() && qaContent.trim() && log) {
+                                      onQAThreadCreate(log.id, qaTitle.trim(), qaContent.trim())
+                                      setShowQAForm(false)
+                                      setQATitle('')
+                                      setQAContent('')
+                                    } else {
+                                      alert('제목과 내용을 모두 입력해주세요.')
+                                    }
+                                  }}
+                                  className="flex-1 px-4 py-2 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors"
+                                >
+                                  질문 등록
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setShowQAForm(true)}
+                              className="w-full px-4 py-3 bg-[#3056F5] text-white rounded-xl text-base font-medium hover:bg-[#2648e6] transition-colors"
+                            >
+                              + 새 질문하기
+                            </button>
+                          )}
                         </div>
                       )}
                       <QAThreadList

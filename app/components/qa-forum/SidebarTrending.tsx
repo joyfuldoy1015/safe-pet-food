@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { TrendingUp, ArrowUp, MessageCircle, Sparkles } from 'lucide-react'
+import { TrendingUp, ArrowUp, MessageCircle } from 'lucide-react'
 import { Question } from './QuestionCard'
 
 interface SidebarTrendingProps {
@@ -16,20 +16,6 @@ export default function SidebarTrending({
 }: SidebarTrendingProps) {
   return (
     <div className="space-y-6">
-      {/* Featured Topic */}
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
-        <div className="flex items-center space-x-2 mb-3">
-          <Sparkles className="h-5 w-5 text-purple-600" />
-          <h3 className="font-bold text-gray-900">Featured Topic</h3>
-        </div>
-        <p className="text-sm text-gray-700 mb-4">
-          이번 주 가장 인기 있는 주제를 확인해보세요!
-        </p>
-        <button className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm font-medium">
-          주제 둘러보기
-        </button>
-      </div>
-
       {/* Trending Questions */}
       <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
         <div className="flex items-center space-x-2 mb-4">

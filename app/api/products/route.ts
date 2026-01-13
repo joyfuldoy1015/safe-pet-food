@@ -61,25 +61,27 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 데이터 변환 (snake_case → camelCase)
+    // 데이터 변환 (컴포넌트 호환 형식)
     const products = (data || []).map((product: any) => ({
       id: product.id,
-      brandId: product.brand_id,
-      brandName: product.brands?.name || '',
-      brandCountry: product.brands?.country || '',
+      brand_id: product.brand_id,
+      brand_name: product.brands?.name || '',
+      brand_country: product.brands?.country || '',
       name: product.name,
       image: product.image,
       description: product.description,
+      grade: product.grade || null,
+      grade_text: product.grade_text || null,
       certifications: product.certifications || [],
       ingredients: product.ingredients || [],
-      guaranteedAnalysis: product.guaranteed_analysis,
+      guaranteed_analysis: product.guaranteed_analysis,
       pros: product.pros || [],
       cons: product.cons || [],
-      consumerRatings: product.consumer_ratings,
-      communityFeedback: product.community_feedback,
-      consumerReviews: product.consumer_reviews || [],
-      createdAt: product.created_at,
-      updatedAt: product.updated_at
+      consumer_ratings: product.consumer_ratings,
+      community_feedback: product.community_feedback,
+      consumer_reviews: product.consumer_reviews || [],
+      created_at: product.created_at,
+      updated_at: product.updated_at
     }))
 
     return NextResponse.json(products)

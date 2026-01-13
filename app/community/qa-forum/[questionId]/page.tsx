@@ -14,7 +14,10 @@ import {
   Flag,
   Send,
   Eye,
-  Bookmark
+  Bookmark,
+  Edit,
+  X,
+  Save
 } from 'lucide-react'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import CommentThread, { Comment } from '@/app/components/qa-forum/CommentThread'
@@ -47,7 +50,7 @@ const mockQuestionsData = [
     answerCount: 2,
     views: 156,
     createdAt: '2024-01-19T15:45:00Z',
-    status: 'open'
+    status: 'answered'
   },
   {
     id: '3',
@@ -74,7 +77,7 @@ const mockQuestionsData = [
     answerCount: 4,
     views: 189,
     createdAt: '2024-01-17T13:20:00Z',
-    status: 'open'
+    status: 'answered'
   },
   {
     id: '5',
@@ -190,6 +193,13 @@ export default function QuestionDetailPage() {
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true)
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [isTogglingBookmark, setIsTogglingBookmark] = useState(false)
+  
+  // 질문 수정 관련 상태
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editContent, setEditContent] = useState('')
+  const [editCategory, setEditCategory] = useState('')
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   // Format time ago helper
   const formatTimeAgo = (dateString: string): string => {
@@ -255,7 +265,8 @@ export default function QuestionDetailPage() {
             author: {
               name: questionData.author?.nickname || '익명',
               level: 'beginner' as const,
-              avatar: questionData.author?.avatar_url
+              avatar: questionData.author?.avatar_url,
+              id: questionData.author_id
             },
             category: questionData.category,
             categoryEmoji: questionData.category.split(' ')[0],
@@ -265,7 +276,8 @@ export default function QuestionDetailPage() {
             createdAt: questionData.created_at,
             updatedAt: questionData.updated_at,
             status: questionData.status as 'open' | 'answered' | 'closed',
-            isUpvoted: false
+            isUpvoted: false,
+            author_id: questionData.author_id
           })
 
           // Increment view count
@@ -749,6 +761,85 @@ export default function QuestionDetailPage() {
     }
   }
 
+  // 질문 수정 카테고리 목록
+  const questionCategories = [
+    { value: '🐶 강아지', label: '강아지', emoji: '🐶' },
+    { value: '🐱 고양이', label: '고양이', emoji: '🐱' },
+    { value: '🍖 사료 & 영양', label: '사료 & 영양', emoji: '🍖' },
+    { value: '❤️ 건강', label: '건강', emoji: '❤️' },
+    { value: '🎓 훈련 & 행동', label: '훈련 & 행동', emoji: '🎓' },
+    { value: '💬 자유토론', label: '자유토론', emoji: '💬' }
+  ]
+
+  // 질문 수정 모드 시작
+  const handleStartEditQuestion = () => {
+    if (!question) return
+    setEditTitle(question.title)
+    setEditContent(question.content)
+    setEditCategory(question.category)
+    setIsEditingQuestion(true)
+  }
+
+  // 질문 수정 취소
+  const handleCancelEditQuestion = () => {
+    setIsEditingQuestion(false)
+    setEditTitle('')
+    setEditContent('')
+    setEditCategory('')
+  }
+
+  // 질문 수정 저장
+  const handleSaveEditQuestion = async () => {
+    if (!question || !editTitle.trim() || !editContent.trim()) {
+      alert('제목과 내용을 입력해주세요.')
+      return
+    }
+
+    setIsSavingEdit(true)
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        alert('Supabase에 연결할 수 없습니다.')
+        return
+      }
+
+      const { error } = await (supabase
+        .from('community_questions') as any)
+        .update({
+          title: editTitle.trim(),
+          content: editContent.trim(),
+          category: editCategory,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', questionId)
+        .eq('author_id', user?.id)
+
+      if (error) {
+        console.error('Failed to update question:', error)
+        alert('질문 수정에 실패했습니다.')
+        return
+      }
+
+      // 로컬 상태 업데이트
+      setQuestion({
+        ...question,
+        title: editTitle.trim(),
+        content: editContent.trim(),
+        category: editCategory,
+        categoryEmoji: editCategory.split(' ')[0],
+        updatedAt: new Date().toISOString()
+      })
+
+      setIsEditingQuestion(false)
+      alert('질문이 수정되었습니다.')
+    } catch (error) {
+      console.error('Failed to save question edit:', error)
+      alert('질문 수정 중 오류가 발생했습니다.')
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }
+
   // Handle new comment submit
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -823,10 +914,19 @@ export default function QuestionDetailPage() {
       setComments([...comments, newCommentObj])
       setNewComment('')
 
-      // Update question answer count
+      // Update question status to 'answered' if it was 'open'
+      if (question.status === 'open') {
+        await (supabase
+          .from('community_questions') as any)
+          .update({ status: 'answered' })
+          .eq('id', questionId)
+      }
+
+      // Update question answer count and status
       setQuestion({
         ...question,
-        answerCount: question.answerCount + 1
+        answerCount: question.answerCount + 1,
+        status: 'answered'
       })
     } catch (error) {
       console.error('Failed to submit answer:', error)
@@ -982,9 +1082,31 @@ export default function QuestionDetailPage() {
               </div>
 
               {/* Title */}
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                {question.title}
-              </h1>
+              {isEditingQuestion ? (
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full text-2xl font-bold text-gray-900 mb-4 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="질문 제목"
+                />
+              ) : (
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {question.title}
+                  </h1>
+                  {/* 수정 버튼 - 본인 글일 경우에만 표시 */}
+                  {user && question.author_id === user.id && (
+                    <button
+                      onClick={handleStartEditQuestion}
+                      className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="질문 수정"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Author and Meta */}
               <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
@@ -1055,18 +1177,68 @@ export default function QuestionDetailPage() {
               </div>
 
               {/* Content */}
-              <div className="prose max-w-none mb-6">
-                <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                  {question.content}
-                </p>
-                {question.imageUrl && (
-                  <img
-                    src={question.imageUrl}
-                    alt="Question image"
-                    className="mt-4 rounded-lg max-w-full"
-                  />
-                )}
-              </div>
+              {isEditingQuestion ? (
+                <div className="space-y-4 mb-6">
+                  {/* 카테고리 선택 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      {questionCategories.map((cat) => (
+                        <option key={cat.value} value={cat.value}>
+                          {cat.emoji} {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* 내용 입력 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      rows={8}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      placeholder="질문 내용을 입력하세요"
+                    />
+                  </div>
+                  {/* 저장/취소 버튼 */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={handleCancelEditQuestion}
+                      disabled={isSavingEdit}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      취소
+                    </button>
+                    <button
+                      onClick={handleSaveEditQuestion}
+                      disabled={isSavingEdit || !editTitle.trim() || !editContent.trim()}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSavingEdit ? '저장 중...' : '저장'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="prose max-w-none mb-6">
+                  <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                    {question.content}
+                  </p>
+                  {question.imageUrl && (
+                    <img
+                      src={question.imageUrl}
+                      alt="Question image"
+                      className="mt-4 rounded-lg max-w-full"
+                    />
+                  )}
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-gray-200">

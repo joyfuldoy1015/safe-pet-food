@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Shield, MapPin, Factory, Award, ThumbsUp, ThumbsDown, ArrowLeft } from 'lucide-react'
+import { Shield, MapPin, Factory, Award, ThumbsUp, ThumbsDown } from 'lucide-react'
+import BackButton from '@/components/common/BackButton'
 import { 
   getProductById, 
   getBrandById, 
@@ -80,15 +81,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Back Button Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center space-x-4">
-            <Link 
-              href={brand ? `/brands/${brand.name}` : '/brands'} 
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </Link>
+            <BackButton fallbackHref="/search?tab=products" />
             <div className="flex items-center space-x-3">
               {brand && (
                 <>
@@ -112,31 +108,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-8">
           {/* Product Info */}
           <div>
-              {/* Brand Link */}
-              {brand && (
-                <Link 
-                  href={`/brands/${brand.name}`}
-                  className="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 mb-3 transition-colors"
-                >
-                  <span className="mr-2">{brand.image || '🏢'}</span>
-                  <span className="font-medium">{brand.name}</span>
-                </Link>
-              )}
-
-              {/* Product Name & Grade */}
-              <div className="flex items-start gap-4 mb-4">
-                <h1 className="text-[29px] sm:text-[35px] font-bold text-gray-900 flex-1 leading-tight">
-                  {product.name}
-                </h1>
-                {product.grade && (
-                  <div className={`px-4 py-2 rounded-xl border-2 font-bold text-lg ${getGradeColor(product.grade)}`}>
-                    {product.grade} {product.grade_text}
-                  </div>
-                )}
-              </div>
+              {/* Product Name */}
+              <h1 className="text-[29px] sm:text-[35px] font-bold text-gray-900 leading-tight mb-4">
+                {product.name}
+              </h1>
 
               {/* Description */}
-              <p className="text-[17px] text-gray-600 mb-6 leading-relaxed">
+              <p className="text-[17px] text-gray-600 mb-4 leading-relaxed">
                 {product.description || '반려동물을 위한 프리미엄 사료입니다.'}
               </p>
 
@@ -169,7 +147,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
               {/* Certifications */}
               {product.certifications && product.certifications.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-6">
                   {product.certifications.slice(0, 3).map((cert, idx) => (
                     <div key={idx} className="flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
                       <Award className="h-3 w-3" />
@@ -177,6 +155,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {/* 구분선 + 등급 배지 */}
+              {product.grade && (
+                <>
+                  <div className="border-t border-gray-200 my-6"></div>
+                  <div className="flex justify-center">
+                    <div className={`w-2/3 py-3 rounded-full font-bold text-lg text-center ${getGradeColor(product.grade)}`}>
+                      {product.grade} {product.grade_text}
+                    </div>
+                  </div>
+                </>
               )}
           </div>
         </div>
@@ -446,21 +436,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <GradeCredibility credibility={gradeCredibility} />
         </section>
 
-        {/* Q&A Section */}
-        <section id="qa" className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Q&A</h2>
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-gray-400" />
-              </div>
-              <p className="text-gray-600 mb-4">아직 질문이 없습니다.</p>
-              <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                첫 질문 남기기
-              </button>
-            </div>
-          </div>
-        </section>
 
         {/* Related Products Section */}
         {otherProducts.length > 0 && (

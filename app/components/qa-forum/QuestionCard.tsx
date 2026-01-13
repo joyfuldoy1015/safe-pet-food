@@ -12,6 +12,7 @@ export interface Question {
     name: string
     avatar?: string
     level?: 'beginner' | 'experienced' | 'expert'
+    id?: string
   }
   category: string
   categoryEmoji: string
@@ -23,6 +24,7 @@ export interface Question {
   status: 'open' | 'answered' | 'closed'
   isUpvoted?: boolean
   imageUrl?: string
+  author_id?: string
 }
 
 interface QuestionCardProps {

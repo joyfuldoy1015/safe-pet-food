@@ -20,13 +20,13 @@ export default function CategoryTabs({
   onSelectCategory
 }: CategoryTabsProps) {
   return (
-    <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex flex-wrap gap-2">
       <button
         onClick={() => onSelectCategory('all')}
-        className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 ${
+        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
           selectedCategory === 'all'
-            ? 'bg-blue-500 text-white shadow-md'
-            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+            ? 'bg-blue-500 text-white shadow-sm'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
         전체
@@ -35,14 +35,14 @@ export default function CategoryTabs({
         <button
           key={category.value}
           onClick={() => onSelectCategory(category.value)}
-          className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 flex items-center space-x-2 text-sm ${
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
             selectedCategory === category.value
-              ? 'bg-blue-500 text-white shadow-md'
-              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-blue-500 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          <span className="text-base">{category.emoji}</span>
-          <span className="text-[15px] font-medium">{category.label}</span>
+          <span>{category.emoji}</span>
+          <span>{category.label}</span>
         </button>
       ))}
     </div>

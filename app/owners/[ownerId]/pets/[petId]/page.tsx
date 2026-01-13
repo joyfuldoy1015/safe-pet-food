@@ -106,6 +106,91 @@ export default function PetHistoryPage() {
           setOwner(ownerData as unknown as Owner)
           setPet(petData as unknown as Pet)
           setLogs(logsData as unknown as ReviewLog[])
+          
+          // Supabase에서 댓글 로드
+          if (logsData && logsData.length > 0) {
+            const logIds = logsData.map((l: any) => l.id)
+            const { data: commentsData, error: commentsError } = await supabase
+              .from('comments')
+              .select(`
+                id,
+                log_id,
+                author_id,
+                content,
+                parent_id,
+                likes,
+                created_at,
+                profiles:author_id(nickname, avatar_url)
+              `)
+              .in('log_id', logIds)
+              .order('created_at', { ascending: true })
+
+            if (!commentsError && commentsData) {
+              const transformedComments: Comment[] = commentsData.map((c: any) => ({
+                id: c.id,
+                logId: c.log_id,
+                authorId: c.author_id,
+                authorName: c.profiles?.nickname || '사용자',
+                avatarUrl: c.profiles?.avatar_url,
+                content: c.content,
+                createdAt: c.created_at,
+                parentId: c.parent_id,
+                isBestAnswer: false,
+                isHelpful: false
+              }))
+              setComments(transformedComments)
+            }
+            
+            // Supabase에서 Q&A 로드
+            const { data: threadsData, error: threadsError } = await supabase
+              .from('pet_log_qa_threads')
+              .select('*')
+              .in('log_id', logIds)
+              .order('created_at', { ascending: true })
+            
+            if (!threadsError && threadsData && threadsData.length > 0) {
+              const transformedThreads: QAThread[] = threadsData.map((t: any) => ({
+                id: t.id,
+                logId: t.log_id,
+                title: t.title,
+                authorId: t.author_id,
+                createdAt: t.created_at
+              }))
+              setQAThreads(transformedThreads)
+              
+              // Thread에 속한 Posts 로드
+              const threadIds = threadsData.map((t: any) => t.id)
+              const { data: postsData, error: postsError } = await supabase
+                .from('pet_log_qa_posts')
+                .select(`
+                  *,
+                  profiles:author_id(nickname, avatar_url)
+                `)
+                .in('thread_id', threadIds)
+                .order('created_at', { ascending: true })
+              
+              if (!postsError && postsData) {
+                const transformedPosts: QAPostWithAuthor[] = postsData.map((p: any) => ({
+                  id: p.id,
+                  threadId: p.thread_id,
+                  authorId: p.author_id,
+                  content: p.content,
+                  kind: p.kind,
+                  parentId: p.parent_id,
+                  isAccepted: p.is_accepted || false,
+                  upvotes: p.upvotes || 0,
+                  createdAt: p.created_at,
+                  author: {
+                    id: p.author_id,
+                    nickname: p.profiles?.nickname || '사용자',
+                    avatarUrl: p.profiles?.avatar_url
+                  }
+                }))
+                setQAPosts(transformedPosts)
+              }
+            }
+          }
+          
           setIsLoading(false)
         } else {
           // Fallback to mock
@@ -332,42 +417,145 @@ export default function PetHistoryPage() {
     }
   }
 
-  const handleCommentSubmit = (logId: string, content: string, parentId?: string) => {
-    const newComment: Comment = {
-      id: `comment-${Date.now()}`,
-      logId,
-      authorId: user?.id || 'anonymous',
-      authorName: profile?.nickname || '사용자',
-      avatarUrl: profile?.avatar_url,
-      content,
-      createdAt: new Date().toISOString(),
-      parentId,
-      isBestAnswer: false,
-      isHelpful: false
+  const handleCommentSubmit = async (logId: string, content: string, parentId?: string) => {
+    if (!user) {
+      alert('로그인이 필요합니다.')
+      return
     }
-    setComments((prev) => [...prev, newComment])
 
-    setLogs((prev) =>
-      prev.map((log) =>
-        log.id === logId ? { ...log, commentsCount: log.commentsCount + 1 } : log
+    try {
+      const supabase = getBrowserClient()
+      
+      // Supabase에 댓글 저장
+      const { data, error } = await (supabase
+        .from('comments') as any)
+        .insert({
+          log_id: logId,
+          author_id: user.id,
+          content,
+          parent_id: parentId || null
+        })
+        .select(`
+          id,
+          log_id,
+          author_id,
+          content,
+          parent_id,
+          likes,
+          created_at,
+          profiles:author_id(nickname, avatar_url)
+        `)
+        .single()
+
+      if (error) {
+        console.error('댓글 저장 오류:', error)
+        alert('댓글 저장에 실패했습니다.')
+        return
+      }
+
+      // 로컬 상태에 추가
+      const newComment: Comment = {
+        id: data.id,
+        logId: data.log_id,
+        authorId: data.author_id,
+        authorName: data.profiles?.nickname || profile?.nickname || '사용자',
+        avatarUrl: data.profiles?.avatar_url || profile?.avatar_url,
+        content: data.content,
+        createdAt: data.created_at,
+        parentId: data.parent_id,
+        isBestAnswer: false,
+        isHelpful: false
+      }
+      setComments((prev) => [...prev, newComment])
+
+      // 댓글 수 업데이트
+      setLogs((prev) =>
+        prev.map((log) =>
+          log.id === logId ? { ...log, commentsCount: log.commentsCount + 1 } : log
+        )
       )
-    )
+
+      // review_logs 테이블의 comments_count도 업데이트
+      await (supabase
+        .from('review_logs') as any)
+        .update({ comments_count: logs.find(l => l.id === logId)?.commentsCount || 0 + 1 })
+        .eq('id', logId)
+
+    } catch (error) {
+      console.error('댓글 저장 오류:', error)
+      alert('댓글 저장 중 오류가 발생했습니다.')
+    }
   }
 
-  const handleQAThreadCreate = (logId: string, title: string) => {
+  const handleQAThreadCreate = async (logId: string, title: string, content: string) => {
     if (!user) return
     
-    const newThread: QAThread = {
-      id: `thread-${Date.now()}`,
-      logId,
-      title,
-      authorId: user.id,
-      createdAt: new Date().toISOString()
+    try {
+      const supabase = getBrowserClient()
+      
+      // Thread 생성 (Supabase)
+      const { data: threadData, error: threadError } = await (supabase
+        .from('pet_log_qa_threads') as any)
+        .insert({
+          log_id: logId,
+          title,
+          author_id: user.id
+        })
+        .select()
+        .single()
+      
+      if (threadError) {
+        console.error('Thread 저장 오류:', threadError)
+        alert('질문 등록 중 오류가 발생했습니다.')
+        return
+      }
+      
+      // Question Post 생성 (Supabase)
+      const { data: postData, error: postError } = await (supabase
+        .from('pet_log_qa_posts') as any)
+        .insert({
+          thread_id: threadData.id,
+          author_id: user.id,
+          content: content,
+          kind: 'question'
+        })
+        .select()
+        .single()
+      
+      if (postError) {
+        console.error('Post 저장 오류:', postError)
+        return
+      }
+      
+      // 로컬 상태 업데이트
+      const newThread: QAThread = {
+        id: threadData.id,
+        logId: threadData.log_id,
+        title: threadData.title,
+        authorId: threadData.author_id,
+        createdAt: threadData.created_at
+      }
+      setQAThreads((prev) => [...prev, newThread])
+      
+      const newQuestionPost: QAPostWithAuthor = {
+        id: postData.id,
+        threadId: postData.thread_id,
+        authorId: postData.author_id,
+        content: postData.content,
+        kind: postData.kind,
+        createdAt: postData.created_at,
+        upvotes: postData.upvotes || 0,
+        isAccepted: postData.is_accepted || false
+      }
+      setQAPosts((prev) => [...prev, newQuestionPost])
+      
+    } catch (error) {
+      console.error('Q&A 저장 오류:', error)
+      alert('질문 등록 중 오류가 발생했습니다.')
     }
-    setQAThreads((prev) => [...prev, newThread])
   }
 
-  const handleQAPostSubmit = (
+  const handleQAPostSubmit = async (
     threadId: string,
     content: string,
     kind: 'question' | 'answer' | 'comment',
@@ -375,23 +563,49 @@ export default function PetHistoryPage() {
   ) => {
     if (!user) return
     
-    const newPost: QAPostWithAuthor = {
-      id: `post-${Date.now()}`,
-      threadId,
-      authorId: user.id,
-      kind,
-      content,
-      parentId,
-      isAccepted: false,
-      upvotes: 0,
-      createdAt: new Date().toISOString(),
-      author: {
-        id: user.id,
-        nickname: user.email?.split('@')[0] || '사용자',
-        avatarUrl: undefined
+    try {
+      const supabase = getBrowserClient()
+      
+      const { data: postData, error: postError } = await (supabase
+        .from('pet_log_qa_posts') as any)
+        .insert({
+          thread_id: threadId,
+          author_id: user.id,
+          content,
+          kind,
+          parent_id: parentId || null
+        })
+        .select()
+        .single()
+      
+      if (postError) {
+        console.error('Post 저장 오류:', postError)
+        alert('답변 등록 중 오류가 발생했습니다.')
+        return
       }
+      
+      const newPost: QAPostWithAuthor = {
+        id: postData.id,
+        threadId: postData.thread_id,
+        authorId: postData.author_id,
+        kind: postData.kind,
+        content: postData.content,
+        parentId: postData.parent_id,
+        isAccepted: postData.is_accepted || false,
+        upvotes: postData.upvotes || 0,
+        createdAt: postData.created_at,
+        author: {
+          id: user.id,
+          nickname: user.email?.split('@')[0] || '사용자',
+          avatarUrl: undefined
+        }
+      }
+      setQAPosts((prev) => [...prev, newPost])
+      
+    } catch (error) {
+      console.error('Q&A Post 저장 오류:', error)
+      alert('답변 등록 중 오류가 발생했습니다.')
     }
-    setQAPosts((prev) => [...prev, newPost])
   }
 
   const handleAcceptAnswer = (postId: string) => {

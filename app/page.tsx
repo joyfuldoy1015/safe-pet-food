@@ -38,27 +38,50 @@ import FeedTabs, { FeedTab } from '@/components/home/FeedTabs'
 import UnifiedCard from '@/components/home/UnifiedCard'
 import PetLogCard from '@/components/petlogs/PetLogCard'
 import { getPopular, getRecent, getQA, getReviews, type UnifiedFeedItem } from '@/lib/data/feed'
-import { Question } from '@/app/components/qa-forum/QuestionCard'
-import questionsData from '@/data/questions.json'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
 
 const PREVIEW_ITEMS_PER_TAB = 6
+
+interface TrendingQuestion {
+  id: string
+  title: string
+  category: string
+  votes: number
+  views: number
+  answerCount: number
+  author: {
+    name: string
+    level: string
+  }
+  createdAt: string
+  trendingScore: number
+}
 
 export default function Home() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<FeedTab>('popular')
   const [feedItems, setFeedItems] = useState<UnifiedFeedItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [trendingQuestions, setTrendingQuestions] = useState<TrendingQuestion[]>([])
+  const [isTrendingLoading, setIsTrendingLoading] = useState(true)
   
-  // Get trending questions (top 5 by votes)
-  const trendingQuestions = useMemo(() => {
-    return (questionsData as Question[])
-      .sort((a, b) => b.votes - a.votes)
-      .slice(0, 5)
-      .map((q) => ({
-        ...q,
-        isUpvoted: false
-      }))
+  // Fetch trending questions from API
+  useEffect(() => {
+    const fetchTrending = async () => {
+      setIsTrendingLoading(true)
+      try {
+        const response = await fetch('/api/trending-questions')
+        if (response.ok) {
+          const data = await response.json()
+          setTrendingQuestions(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch trending questions:', error)
+      } finally {
+        setIsTrendingLoading(false)
+      }
+    }
+    fetchTrending()
   }, [])
 
   // Load feed items based on active tab
@@ -319,7 +342,11 @@ export default function Home() {
             <h3 className="font-bold text-gray-900">트렌딩 질문</h3>
           </div>
           <div className="space-y-4">
-            {trendingQuestions.length > 0 ? (
+            {isTrendingLoading ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
+              </div>
+            ) : trendingQuestions.length > 0 ? (
               trendingQuestions.map((question, index) => (
                 <Link
                   key={question.id}

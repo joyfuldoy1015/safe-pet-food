@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ThumbsUp, ThumbsDown, Shield, Info, Star } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, Info, Star } from 'lucide-react'
 
 interface ProductListItemProps {
   product: {
@@ -157,66 +157,98 @@ export default function ProductListItem({ product }: ProductListItemProps) {
           )}
         </div>
 
-        {/* 오른쪽: 소비자 평가 & 인증 */}
-        <div className="flex-shrink-0 sm:w-40 flex flex-row sm:flex-col justify-between sm:justify-start gap-3">
-          {/* 4. 소비자 평가 요약 (기호성/소화력) */}
-          {product.consumer_ratings && (
-            <div className="flex-1 sm:flex-none">
-              <div className="text-xs text-gray-600 mb-1">소비자 평가</div>
-              <div className="space-y-1">
-                {product.consumer_ratings.palatability !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-600">기호성</span>
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`h-3 w-3 ${
-                            star <= (product.consumer_ratings?.palatability || 0)
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
+        {/* 오른쪽: 소비자 평가 (별표 5개 항목) */}
+        {product.consumer_ratings && (
+          <div className="w-full sm:w-auto sm:flex-shrink-0">
+            <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-4 gap-y-1">
+              {product.consumer_ratings.palatability !== undefined && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-600 w-12">기호성</span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-3 w-3 ${
+                          star <= (product.consumer_ratings?.palatability || 0)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
                   </div>
-                )}
-                {product.consumer_ratings.digestibility !== undefined && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-600">소화력</span>
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className={`h-3 w-3 ${
-                            star <= (product.consumer_ratings?.digestibility || 0)
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
+                </div>
+              )}
+              {product.consumer_ratings.digestibility !== undefined && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-600 w-12">소화율</span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-3 w-3 ${
+                          star <= (product.consumer_ratings?.digestibility || 0)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+              {product.consumer_ratings.coat_quality !== undefined && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-600 w-12">털상태</span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-3 w-3 ${
+                          star <= (product.consumer_ratings?.coat_quality || 0)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {product.consumer_ratings.stool_quality !== undefined && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-600 w-12">변상태</span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-3 w-3 ${
+                          star <= (product.consumer_ratings?.stool_quality || 0)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {product.consumer_ratings.overall_satisfaction !== undefined && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-600 w-12">만족도</span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-3 w-3 ${
+                          star <= (product.consumer_ratings?.overall_satisfaction || 0)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-
-          {/* 5. 대표 인증 (최대 2개) */}
-          {product.certifications && product.certifications.length > 0 && (
-            <div className="flex-1 sm:flex-none">
-              <div className="text-xs text-gray-600 mb-1">인증</div>
-              <div className="space-y-1">
-                {product.certifications.slice(0, 2).map((cert, idx) => (
-                  <div key={idx} className="flex items-center gap-1">
-                    <Shield className="h-3 w-3 text-green-500" />
-                    <span className="text-xs text-gray-700">{cert}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 설명 (선택) */}

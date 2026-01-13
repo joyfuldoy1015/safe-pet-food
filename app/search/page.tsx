@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
-import { Search, Filter, ArrowLeft } from 'lucide-react'
+import { Search, Filter, ArrowLeft, ChevronDown } from 'lucide-react'
 import SearchTabs from '@/components/search/SearchTabs'
 import ProductSearchResult from '@/components/search/ProductSearchResult'
 
@@ -34,7 +34,7 @@ interface Product {
 }
 
 export default function SearchPage() {
-  const [activeTab, setActiveTab] = useState<'brands' | 'products'>('brands')
+  const [activeTab, setActiveTab] = useState<'brands' | 'products'>('products')
   const [searchTerm, setSearchTerm] = useState('')
   const [brands, setBrands] = useState<Brand[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -42,7 +42,20 @@ export default function SearchPage() {
   
   // 🆕 필터 상태
   const [gradeFilter, setGradeFilter] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<string>('rating')
+  const [sortBy, setSortBy] = useState<string>('grade')
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
+  const sortDropdownRef = useRef<HTMLDivElement>(null)
+
+  // 드롭다운 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setSortDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -111,10 +124,14 @@ export default function SearchPage() {
     }
     
     // 정렬
+    const gradeOrder = ['A', 'B', 'C', 'D', 'F', null, undefined]
     result = [...result].sort((a, b) => {
       switch (sortBy) {
-        case 'rating':
-          return (b.consumer_ratings?.overall_satisfaction || 0) - (a.consumer_ratings?.overall_satisfaction || 0)
+        case 'grade':
+          // 등급 높은순 (A > B > C > D > F > 미평가)
+          const aIdx = gradeOrder.indexOf(a.grade as any)
+          const bIdx = gradeOrder.indexOf(b.grade as any)
+          return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx)
         case 'name':
           return a.name.localeCompare(b.name)
         default:
@@ -264,17 +281,34 @@ export default function SearchPage() {
                       </div>
                     </div>
                     
-                    {/* 정렬 */}
-                    <div className="flex items-center gap-2 ml-auto">
+                    {/* 정렬 - 커스텀 드롭다운 */}
+                    <div className="flex items-center gap-2 ml-auto relative" ref={sortDropdownRef}>
                       <span className="text-sm font-medium text-gray-700">정렬:</span>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      <button
+                        onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                        className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[100px] justify-between"
                       >
-                        <option value="rating">평점 높은순</option>
-                        <option value="name">이름순</option>
-                      </select>
+                        <span>{sortBy === 'grade' ? '등급 높은순' : '이름순'}</span>
+                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {/* 드롭다운 메뉴 */}
+                      {sortDropdownOpen && (
+                        <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
+                          <button
+                            onClick={() => { setSortBy('grade'); setSortDropdownOpen(false) }}
+                            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${sortBy === 'grade' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'}`}
+                          >
+                            등급 높은순
+                          </button>
+                          <button
+                            onClick={() => { setSortBy('name'); setSortDropdownOpen(false) }}
+                            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${sortBy === 'name' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'}`}
+                          >
+                            이름순
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
