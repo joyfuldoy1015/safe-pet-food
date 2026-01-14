@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, Reply, Send, CheckCircle, User, ArrowUp } from 'lucide-react'
+import { Heart, Reply, Send, CheckCircle, User, ArrowUp, MoreHorizontal, Edit2, Trash2 } from 'lucide-react'
 import { Comment } from '@/lib/types/review-log'
 
 interface CommentThreadProps {
@@ -10,6 +10,9 @@ interface CommentThreadProps {
   allComments: Comment[]
   formatTimeAgo: (date: string) => string
   onReply: (content: string, parentId: string) => void
+  onEdit?: (commentId: string, newContent: string) => void
+  onDelete?: (commentId: string) => void
+  currentUserId?: string
   depth?: number
   parentAuthor?: string // 대댓글에서 @멘션할 부모 작성자
 }
@@ -19,12 +22,20 @@ export default function CommentThread({
   allComments,
   formatTimeAgo,
   onReply,
+  onEdit,
+  onDelete,
+  currentUserId,
   depth = 0,
   parentAuthor
 }: CommentThreadProps) {
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [liked, setLiked] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editContent, setEditContent] = useState(comment.content)
+
+  const isOwner = currentUserId && comment.authorId === currentUserId
 
   const replies = allComments.filter((c) => c.parentId === comment.id)
   const maxDepth = 10
@@ -39,6 +50,39 @@ export default function CommentThread({
     onReply(replyContent.trim(), comment.id)
     setReplyContent('')
     setShowReplyForm(false)
+  }
+
+  // 삭제된 댓글인 경우 다른 UI 표시
+  if (comment.isDeleted) {
+    return (
+      <>
+        <div className={indentClass}>
+          <div className="bg-gray-100 rounded-xl p-3 border border-gray-200">
+            <p className="text-sm text-gray-400 italic">작성자가 삭제한 댓글입니다.</p>
+          </div>
+        </div>
+
+        {/* 대댓글은 계속 표시 */}
+        {replies.length > 0 && (
+          <div className="mt-1 space-y-1">
+            {replies.map((reply) => (
+              <CommentThread
+                key={reply.id}
+                comment={reply}
+                allComments={allComments}
+                formatTimeAgo={formatTimeAgo}
+                onReply={onReply}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                currentUserId={currentUserId}
+                depth={1}
+                parentAuthor={comment.authorName}
+              />
+            ))}
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
@@ -80,15 +124,89 @@ export default function CommentThread({
                 {formatTimeAgo(comment.createdAt)}
               </span>
             </div>
+            {/* 본인 댓글 수정/삭제 메뉴 */}
+            {isOwner && !comment.isDeleted && (onEdit || onDelete) && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                >
+                  <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                </button>
+                {showMenu && (
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[80px]">
+                    {onEdit && (
+                      <button
+                        onClick={() => {
+                          setIsEditing(true)
+                          setShowMenu(false)
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        수정
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        onClick={() => {
+                          if (confirm('댓글을 삭제하시겠습니까?')) {
+                            onDelete(comment.id)
+                          }
+                          setShowMenu(false)
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        삭제
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Content with @mention */}
-          <p className="text-sm text-gray-700 mb-3 whitespace-pre-line leading-relaxed">
-            {parentAuthor && (
-              <span className="text-blue-600 font-medium">@{parentAuthor} </span>
-            )}
-            {comment.content}
-          </p>
+          {/* Content with @mention - 수정 모드 or 일반 모드 */}
+          {isEditing ? (
+            <div className="mb-3">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none text-sm"
+                rows={3}
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <button
+                  onClick={() => {
+                    setIsEditing(false)
+                    setEditContent(comment.content)
+                  }}
+                  className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => {
+                    if (editContent.trim() && onEdit) {
+                      onEdit(comment.id, editContent.trim())
+                      setIsEditing(false)
+                    }
+                  }}
+                  className="px-3 py-1.5 text-sm bg-[#3056F5] text-white rounded-lg hover:bg-[#2545D4]"
+                >
+                  저장
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-700 mb-3 whitespace-pre-line leading-relaxed">
+              {parentAuthor && (
+                <span className="text-blue-600 font-medium">@{parentAuthor} </span>
+              )}
+              {comment.content}
+            </p>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-3">
@@ -166,6 +284,9 @@ export default function CommentThread({
               allComments={allComments}
               formatTimeAgo={formatTimeAgo}
               onReply={onReply}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              currentUserId={currentUserId}
               depth={1}
               parentAuthor={depth >= 1 ? comment.authorName : undefined}
             />

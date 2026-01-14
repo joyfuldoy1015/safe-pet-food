@@ -27,7 +27,7 @@ interface FeedActivityPanelProps {
   formatTimeAgo: (date: string) => string
 }
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 5
 
 /**
  * Feed Activity Panel - shows recent comments and Q&A for visible logs

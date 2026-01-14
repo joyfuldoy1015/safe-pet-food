@@ -60,6 +60,7 @@ export interface Comment {
   parentId?: string
   isBestAnswer?: boolean
   isHelpful?: boolean
+  isDeleted?: boolean  // soft delete 여부
 }
 
 // Q&A Thread Types
@@ -81,6 +82,7 @@ export interface QAPost {
   isAccepted: boolean
   upvotes: number
   createdAt: string
+  isDeleted?: boolean  // soft delete 여부
 }
 
 export interface QAPostWithAuthor extends QAPost {

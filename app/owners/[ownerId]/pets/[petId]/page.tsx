@@ -120,6 +120,7 @@ export default function PetHistoryPage() {
                 parent_id,
                 likes,
                 created_at,
+                is_deleted,
                 profiles:author_id(nickname, avatar_url)
               `)
               .in('log_id', logIds)
@@ -132,6 +133,7 @@ export default function PetHistoryPage() {
                 authorId: c.author_id,
                 authorName: c.profiles?.nickname || '사용자',
                 avatarUrl: c.profiles?.avatar_url,
+                isDeleted: c.is_deleted || false,
                 content: c.content,
                 createdAt: c.created_at,
                 parentId: c.parent_id,
@@ -180,6 +182,7 @@ export default function PetHistoryPage() {
                   isAccepted: p.is_accepted || false,
                   upvotes: p.upvotes || 0,
                   createdAt: p.created_at,
+                  isDeleted: p.is_deleted || false,
                   author: {
                     id: p.author_id,
                     nickname: p.profiles?.nickname || '사용자',
@@ -487,6 +490,84 @@ export default function PetHistoryPage() {
     }
   }
 
+  const handleCommentEdit = async (commentId: string, newContent: string) => {
+    if (!user) return
+
+    try {
+      const supabase = getBrowserClient()
+
+      const { error } = await (supabase
+        .from('comments') as any)
+        .update({ content: newContent })
+        .eq('id', commentId)
+        .eq('author_id', user.id)
+
+      if (error) {
+        console.error('댓글 수정 오류:', error)
+        alert('댓글 수정 중 오류가 발생했습니다.')
+        return
+      }
+
+      // 로컬 상태 업데이트
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, content: newContent } : c))
+      )
+    } catch (error) {
+      console.error('댓글 수정 오류:', error)
+      alert('댓글 수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleCommentDelete = async (commentId: string) => {
+    if (!user) return
+
+    try {
+      const supabase = getBrowserClient()
+
+      // 대댓글이 있는지 확인
+      const hasReplies = comments.some((c) => c.parentId === commentId)
+
+      if (hasReplies) {
+        // 대댓글이 있으면 soft delete (is_deleted = true로 업데이트)
+        const { error } = await (supabase
+          .from('comments') as any)
+          .update({ is_deleted: true })
+          .eq('id', commentId)
+          .eq('author_id', user.id)
+
+        if (error) {
+          console.error('댓글 삭제 오류:', error)
+          alert('댓글 삭제 중 오류가 발생했습니다.')
+          return
+        }
+
+        // 로컬 상태 업데이트 (isDeleted 플래그만 변경)
+        setComments((prev) =>
+          prev.map((c) => (c.id === commentId ? { ...c, isDeleted: true } : c))
+        )
+      } else {
+        // 대댓글이 없으면 hard delete
+        const { error } = await (supabase
+          .from('comments') as any)
+          .delete()
+          .eq('id', commentId)
+          .eq('author_id', user.id)
+
+        if (error) {
+          console.error('댓글 삭제 오류:', error)
+          alert('댓글 삭제 중 오류가 발생했습니다.')
+          return
+        }
+
+        // 로컬 상태 업데이트 (해당 댓글 제거)
+        setComments((prev) => prev.filter((c) => c.id !== commentId))
+      }
+    } catch (error) {
+      console.error('댓글 삭제 오류:', error)
+      alert('댓글 삭제 중 오류가 발생했습니다.')
+    }
+  }
+
   const handleQAThreadCreate = async (logId: string, title: string, content: string) => {
     if (!user) return
     
@@ -605,6 +686,139 @@ export default function PetHistoryPage() {
     } catch (error) {
       console.error('Q&A Post 저장 오류:', error)
       alert('답변 등록 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleQAPostEdit = async (postId: string, newContent: string) => {
+    if (!user) return
+
+    try {
+      const supabase = getBrowserClient()
+
+      const { error } = await (supabase
+        .from('pet_log_qa_posts') as any)
+        .update({ content: newContent })
+        .eq('id', postId)
+        .eq('author_id', user.id)
+
+      if (error) {
+        console.error('Q&A 수정 오류:', error)
+        alert('수정 중 오류가 발생했습니다.')
+        return
+      }
+
+      // 로컬 상태 업데이트
+      setQAPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, content: newContent } : p))
+      )
+    } catch (error) {
+      console.error('Q&A 수정 오류:', error)
+      alert('수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleQAPostDelete = async (postId: string) => {
+    if (!user) return
+
+    try {
+      const supabase = getBrowserClient()
+
+      // 해당 포스트에 달린 댓글이 있는지 확인
+      const hasReplies = qaPosts.some((p) => p.parentId === postId)
+
+      if (hasReplies) {
+        // 댓글이 있으면 soft delete
+        const { error } = await (supabase
+          .from('pet_log_qa_posts') as any)
+          .update({ is_deleted: true })
+          .eq('id', postId)
+          .eq('author_id', user.id)
+
+        if (error) {
+          console.error('Q&A 삭제 오류:', error)
+          alert('삭제 중 오류가 발생했습니다.')
+          return
+        }
+
+        // 로컬 상태 업데이트 (isDeleted 플래그만 변경)
+        setQAPosts((prev) =>
+          prev.map((p) => (p.id === postId ? { ...p, isDeleted: true } : p))
+        )
+      } else {
+        // 댓글이 없으면 hard delete
+        const { error } = await (supabase
+          .from('pet_log_qa_posts') as any)
+          .delete()
+          .eq('id', postId)
+          .eq('author_id', user.id)
+
+        if (error) {
+          console.error('Q&A 삭제 오류:', error)
+          alert('삭제 중 오류가 발생했습니다.')
+          return
+        }
+
+        // 로컬 상태 업데이트
+        setQAPosts((prev) => prev.filter((p) => p.id !== postId))
+      }
+    } catch (error) {
+      console.error('Q&A 삭제 오류:', error)
+      alert('삭제 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleQAThreadDelete = async (threadId: string) => {
+    if (!user) return
+
+    try {
+      const supabase = getBrowserClient()
+
+      // 해당 Thread에 답변이 있는지 확인 (질문 제외)
+      const threadPosts = qaPosts.filter((p) => p.threadId === threadId)
+      const hasAnswers = threadPosts.some((p) => p.kind === 'answer')
+
+      if (hasAnswers) {
+        // 답변이 있으면 질문만 soft delete (질문 포스트의 is_deleted를 true로)
+        const questionPost = threadPosts.find((p) => p.kind === 'question')
+        if (questionPost) {
+          const { error } = await (supabase
+            .from('pet_log_qa_posts') as any)
+            .update({ is_deleted: true })
+            .eq('id', questionPost.id)
+            .eq('author_id', user.id)
+
+          if (error) {
+            console.error('Q&A Thread 삭제 오류:', error)
+            alert('삭제 중 오류가 발생했습니다.')
+            return
+          }
+
+          // 로컬 상태 업데이트 (질문의 isDeleted 플래그만 변경)
+          setQAPosts((prev) =>
+            prev.map((p) => (p.id === questionPost.id ? { ...p, isDeleted: true } : p))
+          )
+        }
+      } else {
+        // 답변이 없으면 Thread 전체 hard delete
+        const { error } = await (supabase
+          .from('pet_log_qa_threads') as any)
+          .delete()
+          .eq('id', threadId)
+          .eq('author_id', user.id)
+
+        if (error) {
+          console.error('Q&A Thread 삭제 오류:', error)
+          alert('삭제 중 오류가 발생했습니다.')
+          return
+        }
+
+        // 로컬 상태 업데이트
+        setQAThreads((prev) => prev.filter((t) => t.id !== threadId))
+        setQAPosts((prev) => prev.filter((p) => p.threadId !== threadId))
+      }
+    } catch (error) {
+      console.error('Q&A Thread 삭제 오류:', error)
+      alert('삭제 중 오류가 발생했습니다.')
     }
   }
 
@@ -859,11 +1073,16 @@ export default function PetHistoryPage() {
         calculateAge={calculateAge}
         comments={comments}
         onCommentSubmit={handleCommentSubmit}
+        onCommentEdit={handleCommentEdit}
+        onCommentDelete={handleCommentDelete}
         onAuthRequired={() => setIsAuthDialogOpen(true)}
         qaThreads={qaThreads}
         qaPosts={qaPosts}
         onQAThreadCreate={handleQAThreadCreate}
         onQAPostSubmit={handleQAPostSubmit}
+        onQAPostEdit={handleQAPostEdit}
+        onQAPostDelete={handleQAPostDelete}
+        onQAThreadDelete={handleQAThreadDelete}
         onAcceptAnswer={handleAcceptAnswer}
         onUpvote={handleUpvote}
         getAuthorInfo={getOwnerInfo}

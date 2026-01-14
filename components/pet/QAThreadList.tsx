@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, ChevronDown, ChevronUp, CheckCircle, ThumbsUp } from 'lucide-react'
+import { MessageSquare, ChevronDown, ChevronUp, CheckCircle, ThumbsUp, MoreHorizontal, Edit2, Trash2 } from 'lucide-react'
 import type { QAThread, QAPost, QAPostWithAuthor } from '@/lib/types/review-log'
 
 interface QAThreadListProps {
@@ -10,6 +10,9 @@ interface QAThreadListProps {
   posts: QAPostWithAuthor[]
   currentUserId?: string
   onPostSubmit: (threadId: string, content: string, kind: 'question' | 'answer' | 'comment', parentId?: string) => void
+  onPostEdit?: (postId: string, newContent: string) => void
+  onPostDelete?: (postId: string) => void
+  onThreadDelete?: (threadId: string) => void
   onAcceptAnswer?: (postId: string) => void
   onUpvote?: (postId: string) => void
   formatTimeAgo: (date: string) => string
@@ -24,6 +27,9 @@ export default function QAThreadList({
   posts,
   currentUserId,
   onPostSubmit,
+  onPostEdit,
+  onPostDelete,
+  onThreadDelete,
   onAcceptAnswer,
   onUpvote,
   formatTimeAgo,
@@ -33,6 +39,9 @@ export default function QAThreadList({
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
   const [answerContents, setAnswerContents] = useState<Record<string, string>>({})
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState('')
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   const toggleThread = (threadId: string) => {
     setExpandedThreads((prev) => {
@@ -142,27 +151,119 @@ export default function QAThreadList({
                     <div className="pb-3 border-b border-gray-200">
                       <div className="flex items-start gap-3">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                              질문
-                            </span>
-                            <span className="text-xs text-gray-600">
-                              {questionAuthor?.nickname || '익명'}
-                            </span>
-                            <span className="text-xs text-gray-400">
-                              {formatTimeAgo(question.createdAt)}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-900 whitespace-pre-line">{question.content}</p>
-                          <div className="flex items-center gap-3 mt-2">
-                            <button
-                              onClick={() => onUpvote?.(question.id)}
-                              className="flex items-center gap-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
-                            >
-                              <ThumbsUp size={14} />
-                              {question.upvotes}
-                            </button>
-                          </div>
+                          {question.isDeleted ? (
+                            // 삭제된 질문 표시
+                            <div className="bg-gray-100 rounded-lg p-3 border border-gray-200">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-gray-400 bg-gray-200 px-2 py-1 rounded">
+                                  질문
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-400 italic">작성자가 삭제한 질문입니다.</p>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                    질문
+                                  </span>
+                                  <span className="text-xs text-gray-600">
+                                    {questionAuthor?.nickname || '익명'}
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    {formatTimeAgo(question.createdAt)}
+                                  </span>
+                                </div>
+                                {/* 본인 질문 수정/삭제 메뉴 */}
+                                {currentUserId === question.authorId && (onPostEdit || onThreadDelete) && (
+                                  <div className="relative">
+                                    <button
+                                      onClick={() => setOpenMenuId(openMenuId === question.id ? null : question.id)}
+                                      className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                                    >
+                                      <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                                    </button>
+                                    {openMenuId === question.id && (
+                                      <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[80px]">
+                                        {onPostEdit && (
+                                          <button
+                                            onClick={() => {
+                                              setEditingPostId(question.id)
+                                              setEditContent(question.content)
+                                              setOpenMenuId(null)
+                                            }}
+                                            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                          >
+                                            <Edit2 className="h-3 w-3" />
+                                            수정
+                                          </button>
+                                        )}
+                                        {onThreadDelete && (
+                                          <button
+                                            onClick={() => {
+                                              if (confirm('질문을 삭제하시겠습니까? 답변이 없는 경우 완전히 삭제됩니다.')) {
+                                                onThreadDelete(thread.id)
+                                              }
+                                              setOpenMenuId(null)
+                                            }}
+                                            className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                            삭제
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              {/* 질문 내용 - 수정 모드 or 일반 모드 */}
+                              {editingPostId === question.id ? (
+                                <div className="mb-2">
+                                  <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] text-sm resize-none"
+                                    rows={3}
+                                  />
+                                  <div className="flex justify-end gap-2 mt-2">
+                                    <button
+                                      onClick={() => {
+                                        setEditingPostId(null)
+                                        setEditContent('')
+                                      }}
+                                      className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    >
+                                      취소
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        if (editContent.trim() && onPostEdit) {
+                                          onPostEdit(question.id, editContent.trim())
+                                          setEditingPostId(null)
+                                        }
+                                      }}
+                                      className="px-3 py-1.5 text-sm bg-[#3056F5] text-white rounded-lg hover:bg-[#2545D4]"
+                                    >
+                                      저장
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-900 whitespace-pre-line">{question.content}</p>
+                              )}
+                              <div className="flex items-center gap-3 mt-2">
+                                <button
+                                  onClick={() => onUpvote?.(question.id)}
+                                  className="flex items-center gap-1 text-xs text-gray-600 hover:text-blue-600 transition-colors"
+                                >
+                                  <ThumbsUp size={14} />
+                                  {question.upvotes}
+                                </button>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -179,30 +280,115 @@ export default function QAThreadList({
                             <div
                               key={answer.id}
                               className={`p-3 rounded-lg border ${
-                                answer.isAccepted
-                                  ? 'bg-emerald-50 border-emerald-200'
-                                  : 'bg-gray-50 border-gray-200'
+                                answer.isDeleted
+                                  ? 'bg-gray-100 border-gray-200'
+                                  : answer.isAccepted
+                                    ? 'bg-emerald-50 border-emerald-200'
+                                    : 'bg-gray-50 border-gray-200'
                               }`}
                             >
-                              <div className="flex items-start gap-2 mb-2">
-                                {answer.isAccepted && (
-                                  <CheckCircle className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                                )}
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-xs font-medium text-gray-700">
-                                      {answerAuthor?.nickname || '익명'}
-                                    </span>
+                              {answer.isDeleted ? (
+                                // 삭제된 답변 표시
+                                <p className="text-sm text-gray-400 italic">작성자가 삭제한 답변입니다.</p>
+                              ) : (
+                                <>
+                                  <div className="flex items-start gap-2 mb-2">
                                     {answer.isAccepted && (
-                                      <span className="text-xs text-emerald-600 font-medium bg-emerald-100 px-2 py-0.5 rounded">
-                                        채택됨
-                                      </span>
+                                      <CheckCircle className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                                     )}
-                                    <span className="text-xs text-gray-400">
-                                      {formatTimeAgo(answer.createdAt)}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-900 whitespace-pre-line">{answer.content}</p>
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs font-medium text-gray-700">
+                                            {answerAuthor?.nickname || '익명'}
+                                          </span>
+                                          {answer.isAccepted && (
+                                            <span className="text-xs text-emerald-600 font-medium bg-emerald-100 px-2 py-0.5 rounded">
+                                              채택됨
+                                            </span>
+                                          )}
+                                          <span className="text-xs text-gray-400">
+                                            {formatTimeAgo(answer.createdAt)}
+                                          </span>
+                                        </div>
+                                        {/* 본인 답변 수정/삭제 메뉴 */}
+                                        {currentUserId === answer.authorId && (onPostEdit || onPostDelete) && (
+                                          <div className="relative">
+                                            <button
+                                              onClick={() => setOpenMenuId(openMenuId === answer.id ? null : answer.id)}
+                                              className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                                            >
+                                              <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                                            </button>
+                                            {openMenuId === answer.id && (
+                                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[80px]">
+                                                {onPostEdit && (
+                                                  <button
+                                                    onClick={() => {
+                                                      setEditingPostId(answer.id)
+                                                      setEditContent(answer.content)
+                                                      setOpenMenuId(null)
+                                                    }}
+                                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                  >
+                                                    <Edit2 className="h-3 w-3" />
+                                                    수정
+                                                  </button>
+                                                )}
+                                                {onPostDelete && (
+                                                  <button
+                                                    onClick={() => {
+                                                      if (confirm('답변을 삭제하시겠습니까?')) {
+                                                        onPostDelete(answer.id)
+                                                      }
+                                                      setOpenMenuId(null)
+                                                    }}
+                                                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                                  >
+                                                    <Trash2 className="h-3 w-3" />
+                                                    삭제
+                                                  </button>
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                      {/* 답변 내용 - 수정 모드 or 일반 모드 */}
+                                      {editingPostId === answer.id ? (
+                                        <div className="mb-2">
+                                          <textarea
+                                            value={editContent}
+                                            onChange={(e) => setEditContent(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3056F5] text-sm resize-none"
+                                            rows={3}
+                                          />
+                                          <div className="flex justify-end gap-2 mt-2">
+                                            <button
+                                              onClick={() => {
+                                                setEditingPostId(null)
+                                                setEditContent('')
+                                              }}
+                                              className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                                            >
+                                              취소
+                                            </button>
+                                            <button
+                                              onClick={() => {
+                                                if (editContent.trim() && onPostEdit) {
+                                                  onPostEdit(answer.id, editContent.trim())
+                                                  setEditingPostId(null)
+                                                }
+                                              }}
+                                              className="px-3 py-1.5 text-sm bg-[#3056F5] text-white rounded-lg hover:bg-[#2545D4]"
+                                            >
+                                              저장
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <p className="text-sm text-gray-900 whitespace-pre-line">{answer.content}</p>
+                                      )}
                                   <div className="flex items-center gap-3 mt-2">
                                     <button
                                       onClick={() => onUpvote?.(answer.id)}
@@ -250,37 +436,39 @@ export default function QAThreadList({
                                     </div>
                                   )}
 
-                                  {/* Reply Form */}
-                                  {replyingTo === answer.id && (
-                                    <div className="mt-3">
-                                      <textarea
-                                        value={replyContent}
-                                        onChange={(e) => setReplyContent(e.target.value)}
-                                        placeholder="댓글을 작성하세요..."
-                                        rows={2}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
-                                      />
-                                      <div className="flex gap-2 mt-2">
-                                        <button
-                                          onClick={() => handleReplySubmit(thread.id, 'comment', answer.id)}
-                                          className="px-3 py-1.5 bg-[#3056F5] text-white rounded-lg text-xs font-medium hover:bg-[#2648e6] transition-colors"
-                                        >
-                                          댓글 작성
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            setReplyingTo(null)
-                                            setReplyContent('')
-                                          }}
-                                          className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
-                                        >
-                                          취소
-                                        </button>
-                                      </div>
+                                      {/* Reply Form */}
+                                      {replyingTo === answer.id && (
+                                        <div className="mt-3">
+                                          <textarea
+                                            value={replyContent}
+                                            onChange={(e) => setReplyContent(e.target.value)}
+                                            placeholder="댓글을 작성하세요..."
+                                            rows={2}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
+                                          />
+                                          <div className="flex justify-end gap-2 mt-2">
+                                            <button
+                                              onClick={() => {
+                                                setReplyingTo(null)
+                                                setReplyContent('')
+                                              }}
+                                              className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+                                            >
+                                              취소
+                                            </button>
+                                            <button
+                                              onClick={() => handleReplySubmit(thread.id, 'comment', answer.id)}
+                                              className="px-3 py-1.5 bg-[#3056F5] text-white rounded-lg text-xs font-medium hover:bg-[#2648e6] transition-colors"
+                                            >
+                                              댓글 작성
+                                            </button>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
-                                  )}
-                                </div>
-                              </div>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )
                         })}

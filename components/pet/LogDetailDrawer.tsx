@@ -23,11 +23,16 @@ interface LogDetailDrawerProps {
   calculateAge: (birthDate: string) => string
   comments: Comment[]
   onCommentSubmit: (logId: string, content: string, parentId?: string) => void
+  onCommentEdit?: (commentId: string, newContent: string) => void
+  onCommentDelete?: (commentId: string) => void
   onAuthRequired?: () => void
   qaThreads?: QAThread[]
   qaPosts?: QAPostWithAuthor[]
   onQAThreadCreate?: (logId: string, title: string, content: string) => void
   onQAPostSubmit?: (threadId: string, content: string, kind: 'question' | 'answer' | 'comment', parentId?: string) => void
+  onQAPostEdit?: (postId: string, newContent: string) => void
+  onQAPostDelete?: (postId: string) => void
+  onQAThreadDelete?: (threadId: string) => void
   onAcceptAnswer?: (postId: string) => void
   onUpvote?: (postId: string) => void
   getAuthorInfo?: (authorId: string) => { nickname: string; avatarUrl?: string } | null
@@ -52,11 +57,16 @@ export default function LogDetailDrawer({
   calculateAge,
   comments,
   onCommentSubmit,
+  onCommentEdit,
+  onCommentDelete,
   onAuthRequired,
   qaThreads = [],
   qaPosts = [],
   onQAThreadCreate,
   onQAPostSubmit,
+  onQAPostEdit,
+  onQAPostDelete,
+  onQAThreadDelete,
   onAcceptAnswer,
   onUpvote,
   getAuthorInfo,
@@ -631,6 +641,9 @@ export default function LogDetailDrawer({
                               }
                               onCommentSubmit(log.id, content, parentId)
                             }}
+                            onEdit={onCommentEdit}
+                            onDelete={onCommentDelete}
+                            currentUserId={user?.id}
                           />
                         ))
                     ) : (
@@ -742,6 +755,9 @@ export default function LogDetailDrawer({
                         posts={qaPosts}
                         currentUserId={user?.id}
                         onPostSubmit={onQAPostSubmit || (() => {})}
+                        onPostEdit={onQAPostEdit}
+                        onPostDelete={onQAPostDelete}
+                        onThreadDelete={onQAThreadDelete}
                         onAcceptAnswer={onAcceptAnswer}
                         onUpvote={onUpvote}
                         formatTimeAgo={formatTimeAgo}
