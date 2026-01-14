@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import {
   ArrowLeft,
@@ -182,6 +182,7 @@ const mockComments: Record<string, Comment[]> = {
 
 export default function QuestionDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const questionId = params.questionId as string
   const { user, profile } = useAuth()
 
@@ -416,6 +417,14 @@ export default function QuestionDetailPage() {
   const handleQuestionUpvote = () => {
     if (!question) return
 
+    // 로그인 체크
+    if (!user) {
+      if (confirm('로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?')) {
+        router.push(`/login?redirect=/community/qa-forum/${questionId}`)
+      }
+      return
+    }
+
     const isCurrentlyUpvoted = userVotes[questionId]
 
     setQuestion({
@@ -499,6 +508,14 @@ export default function QuestionDetailPage() {
 
   // Handle comment upvote
   const handleCommentUpvote = (commentId: string) => {
+    // 로그인 체크
+    if (!user) {
+      if (confirm('로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?')) {
+        router.push(`/login?redirect=/community/qa-forum/${questionId}`)
+      }
+      return
+    }
+
     const isCurrentlyUpvoted = userVotes[commentId]
 
     setComments((prev) =>
