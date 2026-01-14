@@ -1092,7 +1092,7 @@ export default function QuestionDetailPage() {
                 />
               ) : (
                 <div className="flex items-start justify-between gap-3 mb-4">
-                  <h1 className="text-2xl font-bold text-gray-900">
+                  <h1 className="text-[1.4rem] font-bold text-gray-900">
                     {question.title}
                   </h1>
                   {/* 수정 버튼 - 본인 글일 경우에만 표시 */}

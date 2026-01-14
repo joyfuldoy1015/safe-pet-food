@@ -148,21 +148,45 @@ export default function NewPetPage() {
   }
 
   const handleAllergyToggle = (allergy: string) => {
-    setFormData(prev => ({
-      ...prev,
-      allergies: prev.allergies.includes(allergy)
-        ? prev.allergies.filter(a => a !== allergy)
-        : [...prev.allergies, allergy]
-    }))
+    setFormData(prev => {
+      if (allergy === '없음') {
+        // '없음' 클릭 시: 이미 있으면 제거, 없으면 다른 모든 항목 제거하고 '없음'만 추가
+        return {
+          ...prev,
+          allergies: prev.allergies.includes('없음') ? [] : ['없음']
+        }
+      } else {
+        // 다른 항목 클릭 시: '없음' 제거하고 해당 항목 토글
+        const withoutNone = prev.allergies.filter(a => a !== '없음')
+        return {
+          ...prev,
+          allergies: withoutNone.includes(allergy)
+            ? withoutNone.filter(a => a !== allergy)
+            : [...withoutNone, allergy]
+        }
+      }
+    })
   }
 
   const handleHealthConditionToggle = (condition: string) => {
-    setFormData(prev => ({
-      ...prev,
-      healthConditions: prev.healthConditions.includes(condition)
-        ? prev.healthConditions.filter(c => c !== condition)
-        : [...prev.healthConditions, condition]
-    }))
+    setFormData(prev => {
+      if (condition === '없음') {
+        // '없음' 클릭 시: 이미 있으면 제거, 없으면 다른 모든 항목 제거하고 '없음'만 추가
+        return {
+          ...prev,
+          healthConditions: prev.healthConditions.includes('없음') ? [] : ['없음']
+        }
+      } else {
+        // 다른 항목 클릭 시: '없음' 제거하고 해당 항목 토글
+        const withoutNone = prev.healthConditions.filter(c => c !== '없음')
+        return {
+          ...prev,
+          healthConditions: withoutNone.includes(condition)
+            ? withoutNone.filter(c => c !== condition)
+            : [...withoutNone, condition]
+        }
+      }
+    })
   }
 
   return (
@@ -356,6 +380,16 @@ export default function NewPetPage() {
                       <span className="text-sm text-gray-700">{allergy}</span>
                     </label>
                   ))}
+                  {/* 없음 체크박스 - 맨 마지막 */}
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.allergies.includes('없음')}
+                      onChange={() => handleAllergyToggle('없음')}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700 font-medium">없음</span>
+                  </label>
                 </div>
               </div>
 
@@ -373,6 +407,16 @@ export default function NewPetPage() {
                       <span className="text-sm text-gray-700">{condition}</span>
                     </label>
                   ))}
+                  {/* 없음 체크박스 - 맨 마지막 */}
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.healthConditions.includes('없음')}
+                      onChange={() => handleHealthConditionToggle('없음')}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700 font-medium">없음</span>
+                  </label>
                 </div>
               </div>
 
