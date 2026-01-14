@@ -50,22 +50,13 @@ export async function getRecentComments(
 
 /**
  * Get recent Q&A posts for given log IDs
- * Only returns visible posts (admin_status='visible')
- * 
- * TODO: This feature is currently disabled as Q&A system is not yet connected to review_logs
- * The Q&A forum uses community_questions/community_answers tables which are independent
+ * Uses pet_log_qa_threads and pet_log_qa_posts tables
  */
 export async function getRecentQA(
   logIds: string[],
   limit: number = 10,
   offset: number = 0
 ): Promise<any[]> {
-  // Q&A 기능이 review_logs와 연결될 때까지 비활성화
-  console.log('[getRecentQA] Q&A feature not yet connected to review_logs, returning empty array')
-  return []
-  
-  /* 
-  // Original implementation - requires qa_threads and qa_posts tables
   const supabase = getSupabaseClient()
   if (!supabase || logIds.length === 0) return []
 
@@ -76,25 +67,65 @@ export async function getRecentQA(
     return []
   }
 
-  const { data, error } = await supabase
-    .from('qa_posts')
-    .select(`
-      *,
-      qa_threads!qa_posts_thread_id_fkey(id, title, log_id),
-      profiles!qa_posts_author_id_fkey(nickname),
-      review_logs!qa_threads_log_id_fkey(id, brand, product)
-    `)
-    .in('qa_threads.log_id', validLogIds)
-    .eq('admin_status', 'visible')
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
+  try {
+    // 먼저 해당 logIds에 속한 thread들 조회
+    const { data: threads, error: threadsError } = await supabase
+      .from('pet_log_qa_threads')
+      .select('id, log_id, title')
+      .in('log_id', validLogIds)
 
-  if (error) {
+    if (threadsError || !threads || threads.length === 0) {
+      console.log('[getRecentQA] No threads found for logIds')
+      return []
+    }
+
+    const threadIds = threads.map(t => t.id)
+
+    // 해당 thread들의 posts 조회
+    const { data: posts, error: postsError } = await supabase
+      .from('pet_log_qa_posts')
+      .select(`
+        id,
+        thread_id,
+        author_id,
+        content,
+        kind,
+        created_at,
+        profiles:author_id(nickname)
+      `)
+      .in('thread_id', threadIds)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (postsError) {
+      console.error('[getRecentQA] Error fetching posts:', postsError)
+      return []
+    }
+
+    // review_logs에서 brand, product 정보 가져오기
+    const { data: logsData } = await supabase
+      .from('review_logs')
+      .select('id, brand, product')
+      .in('id', validLogIds)
+
+    const logsMap = new Map(logsData?.map(l => [l.id, l]) || [])
+    const threadsMap = new Map(threads.map(t => [t.id, t]))
+
+    // 데이터 병합
+    const result = posts?.map(post => {
+      const thread = threadsMap.get(post.thread_id)
+      const log = thread ? logsMap.get(thread.log_id) : null
+      return {
+        ...post,
+        qa_threads: thread ? { id: thread.id, title: thread.title, log_id: thread.log_id } : null,
+        review_logs: log ? { id: log.id, brand: log.brand, product: log.product } : null
+      }
+    }) || []
+
+    return result
+  } catch (error) {
     console.error('[getRecentQA] Error:', error)
     return []
   }
-
-  return data || []
-  */
 }
 

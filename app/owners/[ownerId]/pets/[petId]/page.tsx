@@ -714,16 +714,19 @@ export default function PetHistoryPage() {
     )
   }
 
+  // 소유자 여부 확인: 로그인한 사용자가 이 펫의 소유자인 경우에만 로그 추가 가능
+  const isOwner = user?.id === owner?.id
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with Add Button */}
+        {/* Header with Add Button - 소유자만 표시 */}
         <PetProfileHeader
           pet={pet}
           owner={owner}
           logs={logs}
           calculateAge={calculateAge}
-          onAddLog={() => setIsLogFormOpen(true)}
+          onAddLog={isOwner ? () => setIsLogFormOpen(true) : undefined}
         />
 
         {/* Tabs */}

@@ -24,7 +24,6 @@ export default function PetProfileHeader({
   onAddLog
 }: PetProfileHeaderProps) {
   // Calculate KPIs
-  const currentFeeding = logs.filter((l) => l.status === 'feeding').length
   const recentUpdate = logs.length > 0
     ? logs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
     : null
@@ -90,23 +89,19 @@ export default function PetProfileHeader({
       </div>
 
       {/* KPI Chips */}
-      <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
-        <div className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-200">
-          <div className="text-xs text-emerald-600 font-medium mb-1">현재 급여</div>
-          <div className="text-lg font-bold text-emerald-700">{currentFeeding}개</div>
-        </div>
-        <div className="px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
+      <div className="flex gap-3 pt-4 border-t border-gray-100">
+        <div className="flex-1 px-4 py-3 bg-blue-50 rounded-xl border border-blue-200 text-center">
           <div className="text-xs text-blue-600 font-medium mb-1">최근 변경일</div>
-          <div className="text-sm font-bold text-blue-700">
+          <div className="text-lg font-bold text-blue-700">
             {recentUpdate
               ? new Date(recentUpdate.updatedAt).toLocaleDateString('ko-KR', {
-                  month: '2-digit',
-                  day: '2-digit'
+                  month: 'numeric',
+                  day: 'numeric'
                 })
               : '-'}
           </div>
         </div>
-        <div className="px-4 py-2 bg-purple-50 rounded-xl border border-purple-200">
+        <div className="flex-1 px-4 py-3 bg-purple-50 rounded-xl border border-purple-200 text-center">
           <div className="text-xs text-purple-600 font-medium mb-1">누적 브랜드</div>
           <div className="text-lg font-bold text-purple-700">{uniqueBrands}개</div>
         </div>
