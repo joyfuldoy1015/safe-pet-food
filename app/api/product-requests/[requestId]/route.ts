@@ -19,14 +19,15 @@ export async function PATCH(
       )
     }
 
-    // 관리자 권한 확인
-    const { data: profile } = await supabase
-      .from('profiles')
+    // 관리자 권한 확인 (roles 테이블 사용)
+    const { data: roleData } = await supabase
+      .from('roles')
       .select('role')
-      .eq('id', user.id)
-      .single()
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle()
 
-    if (profile?.role !== 'admin') {
+    if (!roleData) {
       return NextResponse.json(
         { error: '관리자 권한이 필요합니다.' },
         { status: 403 }
@@ -70,11 +71,11 @@ export async function PATCH(
     if (status === 'approved') {
       // 브랜드 찾기 또는 생성
       let brandId = null
-      const { data: existingBrand } = await supabase
-        .from('brands')
+      const { data: existingBrand } = await (supabase
+        .from('brands') as any)
         .select('id')
         .ilike('name', requestData.brand_name)
-        .single()
+        .maybeSingle()
 
       if (existingBrand) {
         brandId = existingBrand.id
@@ -193,13 +194,15 @@ export async function GET(
     }
 
     // 본인 요청이거나 관리자인지 확인
-    const { data: profile } = await supabase
-      .from('profiles')
+    const { data: roleData } = await supabase
+      .from('roles')
       .select('role')
-      .eq('id', user.id)
-      .single()
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle()
 
-    if (data.requester_id !== user.id && profile?.role !== 'admin') {
+    const isAdmin = !!roleData
+    if (data.requester_id !== user.id && !isAdmin) {
       return NextResponse.json(
         { error: '접근 권한이 없습니다.' },
         { status: 403 }

@@ -26,18 +26,20 @@ export async function POST(request: NextRequest) {
     }
 
     // 사용자 프로필에서 닉네임 가져오기
-    const { data: profile } = await supabase
-      .from('profiles')
+    const { data: profile } = await (supabase
+      .from('profiles') as any)
       .select('nickname')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
+
+    const requesterName = profile?.nickname || '익명'
 
     // 제품 등록 요청 생성
     const { data, error } = await (supabase
       .from('product_requests') as any)
       .insert({
         requester_id: user.id,
-        requester_name: profile?.nickname || '익명',
+        requester_name: requesterName,
         brand_name,
         product_name,
         category: category || 'feed',
@@ -83,12 +85,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 관리자 권한 확인
-    const { data: profile } = await supabase
-      .from('profiles')
+    // 관리자 권한 확인 (roles 테이블 사용)
+    const { data: roleData } = await supabase
+      .from('roles')
       .select('role')
-      .eq('id', user.id)
-      .single()
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    const isAdmin = !!roleData
 
     const searchParams = request.nextUrl.searchParams
     const status = searchParams.get('status') // pending, approved, rejected, all
@@ -99,7 +104,7 @@ export async function GET(request: NextRequest) {
     if (myRequests) {
       // 일반 사용자: 자신의 요청만 조회
       query = query.eq('requester_id', user.id)
-    } else if (profile?.role !== 'admin') {
+    } else if (!isAdmin) {
       // 관리자가 아니면 자신의 요청만
       query = query.eq('requester_id', user.id)
     }
