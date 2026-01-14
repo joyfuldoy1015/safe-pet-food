@@ -108,13 +108,13 @@ export async function getRecentQA(
       .select('id, brand, product')
       .in('id', validLogIds)
 
-    const logsMap = new Map(logsData?.map(l => [l.id, l]) || [])
-    const threadsMap = new Map(threads.map(t => [t.id, t]))
+    const logsMap = new Map(logsData?.map((l: any) => [l.id, l]) || [])
+    const threadsMap = new Map(threads.map((t: any) => [t.id, t]))
 
     // 데이터 병합
-    const result = posts?.map(post => {
-      const thread = threadsMap.get(post.thread_id)
-      const log = thread ? logsMap.get(thread.log_id) : null
+    const result = posts?.map((post: any) => {
+      const thread: any = threadsMap.get(post.thread_id)
+      const log: any = thread ? logsMap.get(thread.log_id) : null
       return {
         ...post,
         qa_threads: thread ? { id: thread.id, title: thread.title, log_id: thread.log_id } : null,
