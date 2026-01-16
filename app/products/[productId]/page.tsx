@@ -3,7 +3,6 @@ import { Shield, MapPin, Factory, Award, ThumbsUp, ThumbsDown } from 'lucide-rea
 import BackButton from '@/components/common/BackButton'
 import { 
   getProductById, 
-  getBrandById, 
   getProductsByBrandId,
   getProductReviews,
   aggregateProductRatings,
@@ -49,7 +48,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
     )
   }
 
-  const brand = await getBrandById(product.brand_id)
+  // 브랜드 정보는 제품과 함께 가져온 데이터 사용
+  const brand = (product as any).brand || null
   const relatedProducts = await getProductsByBrandId(product.brand_id, 6)
   const otherProducts = relatedProducts.filter(p => p.id !== product.id).slice(0, 5)
 
@@ -86,18 +86,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <div className="flex items-center space-x-4">
             <BackButton fallbackHref="/search?tab=products" />
             <div className="flex items-center space-x-3">
-              {brand && (
-                <>
-                  <div className="text-3xl">{brand.image || '🏢'}</div>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{product.name}</h1>
-                    <p className="text-sm text-gray-600">{brand.name}</p>
-                  </div>
-                </>
-              )}
-              {!brand && (
+              <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{product.name}</h1>
-              )}
+                {brand && <p className="text-sm text-gray-600">{brand.name}</p>}
+              </div>
             </div>
           </div>
         </div>
@@ -109,12 +101,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
           {/* Product Info */}
           <div>
               {/* Product Name */}
-              <h1 className="text-[29px] sm:text-[35px] font-bold text-gray-900 leading-tight mb-4">
+              <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 leading-tight mb-4">
                 {product.name}
               </h1>
 
               {/* Description */}
-              <p className="text-[17px] text-gray-600 mb-4 leading-relaxed">
+              <p className="text-[16.5px] text-gray-600 mb-4 leading-relaxed whitespace-pre-line">
                 {product.description || '반려동물을 위한 프리미엄 사료입니다.'}
               </p>
 
@@ -174,7 +166,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Summary Section */}
         <section id="summary" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">핵심 요약</h2>
+            <h2 className="text-[23px] font-bold text-gray-900 mb-6">핵심 요약</h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 추천 이유 */}
@@ -223,7 +215,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Origin Section */}
         <section id="origin" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">원산지 & 제조</h2>
+            <h2 className="text-[23px] font-bold text-gray-900 mb-6">원산지 & 제조</h2>
             
             {product.origin_info ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -272,7 +264,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Ingredients Section */}
         <section id="ingredients" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">원료 리스트</h2>
+            <h2 className="text-[23px] font-bold text-gray-900 mb-6">원료 리스트</h2>
             
             {product.ingredients && product.ingredients.length > 0 ? (
               <div className="space-y-3">
@@ -315,7 +307,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Guaranteed Analysis Section */}
         <section id="analysis" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">등록성분량</h2>
+            <h2 className="text-[23px] font-bold text-gray-900 mb-6">등록성분량</h2>
             
             {product.guaranteed_analysis ? (
               <div className="overflow-x-auto">
@@ -356,7 +348,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <section id="ratings" className="mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">소비자 평가</h2>
+                <h2 className="text-[23px] font-bold text-gray-900">소비자 평가</h2>
                 {feedingReviews.length > 0 && (
                   <span className="text-sm text-green-600 font-medium">
                     💚 실시간 급여 후기 기반
@@ -441,7 +433,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {otherProducts.length > 0 && (
           <section className="mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-[23px] font-bold text-gray-900 mb-6">
                 이 브랜드의 다른 제품
               </h2>
               

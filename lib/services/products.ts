@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { getServerClient } from '@/lib/supabase-server'
 import { Product, BrandBasic } from '@/types/product'
 
 // Supabase 사용 여부 확인
@@ -9,6 +9,9 @@ const isSupabaseConfigured = () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
   )
 }
+
+// 서버용 Supabase 클라이언트 가져오기
+const getSupabase = () => getServerClient()
 
 // ============================================
 // 급여 후기 리뷰 타입
@@ -68,6 +71,7 @@ export async function getProductReviews(productId: string): Promise<FeedingRevie
   }
 
   try {
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('review_logs')
       .select(`
@@ -156,17 +160,26 @@ export function formatReviewsForDisplay(reviews: FeedingReview[]) {
 // ============================================
 
 /**
- * 제품 ID로 제품 상세 정보 조회
+ * 제품 ID로 제품 상세 정보 조회 (브랜드 정보 포함)
  */
-export async function getProductById(productId: string): Promise<Product | null> {
+export async function getProductById(productId: string): Promise<(Product & { brand?: BrandBasic }) | null> {
   if (!isSupabaseConfigured()) {
     return getMockProduct(productId)
   }
 
   try {
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select(`
+        *,
+        brands:brand_id (
+          id,
+          name,
+          manufacturer,
+          country
+        )
+      `)
       .eq('id', productId)
       .single()
 
@@ -175,7 +188,12 @@ export async function getProductById(productId: string): Promise<Product | null>
       return getMockProduct(productId)
     }
 
-    return data as Product
+    // 브랜드 정보를 별도 필드로 추출
+    const { brands, ...productData } = data as any
+    return {
+      ...productData,
+      brand: brands || null
+    } as Product & { brand?: BrandBasic }
   } catch (error) {
     console.error('[getProductById] Error:', error)
     return getMockProduct(productId)
@@ -187,25 +205,26 @@ export async function getProductById(productId: string): Promise<Product | null>
  */
 export async function getBrandById(brandId: string): Promise<BrandBasic | null> {
   if (!isSupabaseConfigured()) {
-    return getMockBrand(brandId)
+    return null
   }
 
   try {
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('brands')
-      .select('id, name, manufacturer, country, image')
+      .select('id, name, manufacturer, country')
       .eq('id', brandId)
       .single()
 
     if (error || !data) {
-      console.warn('[getBrandById] Supabase error, falling back to mock:', error)
-      return getMockBrand(brandId)
+      console.warn('[getBrandById] Supabase error:', error)
+      return null
     }
 
     return data as BrandBasic
   } catch (error) {
     console.error('[getBrandById] Error:', error)
-    return getMockBrand(brandId)
+    return null
   }
 }
 
@@ -214,10 +233,11 @@ export async function getBrandById(brandId: string): Promise<BrandBasic | null> 
  */
 export async function getProductsByBrandId(brandId: string, limit: number = 6): Promise<Product[]> {
   if (!isSupabaseConfigured()) {
-    return getMockProductsByBrand(brandId, limit)
+    return []
   }
 
   try {
+    const supabase = getSupabase()
     const { data, error } = await supabase
       .from('products')
       .select('id, brand_id, name, description, grade, grade_text, image, certifications')
@@ -225,14 +245,14 @@ export async function getProductsByBrandId(brandId: string, limit: number = 6): 
       .limit(limit)
 
     if (error || !data) {
-      console.warn('[getProductsByBrandId] Supabase error, falling back to mock:', error)
-      return getMockProductsByBrand(brandId, limit)
+      console.warn('[getProductsByBrandId] Supabase error:', error)
+      return []
     }
 
     return data as Product[]
   } catch (error) {
     console.error('[getProductsByBrandId] Error:', error)
-    return getMockProductsByBrand(brandId, limit)
+    return []
   }
 }
 
