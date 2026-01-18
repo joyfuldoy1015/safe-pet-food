@@ -67,30 +67,65 @@ export interface CommunityFeedback {
  */
 export async function getProductReviews(productId: string): Promise<FeedingReview[]> {
   if (!isSupabaseConfigured()) {
-    return getMockReviews(productId)
+    return []
   }
 
   try {
     const supabase = getSupabase()
+    
+    // 제품 정보 가져오기
+    const { data: productData } = await supabase
+      .from('products')
+      .select('name, brand_id')
+      .eq('id', productId)
+      .single()
+    
+    if (!productData) {
+      console.warn('[getProductReviews] Product not found:', productId)
+      return []
+    }
+    
+    // 브랜드명 가져오기
+    const { data: brandData } = await supabase
+      .from('brands')
+      .select('name')
+      .eq('id', productData.brand_id)
+      .single()
+    
+    if (!brandData) {
+      console.warn('[getProductReviews] Brand not found for product:', productId)
+      return []
+    }
+    
+    // 브랜드명과 제품명으로 리뷰 매칭
+    // 제품명에서 앞부분 키워드로 매칭 (정확도 향상)
+    const productKeyword = productData.name.split(' ').slice(0, 3).join(' ')
+    
     const { data, error } = await supabase
       .from('review_logs')
       .select(`
         *,
-        pet:pets(name, species, breed),
-        user:profiles(name)
+        pet:pets(name, species),
+        user:profiles(nickname)
       `)
-      .eq('product_id', productId)
+      .eq('brand', brandData.name)
+      .ilike('product', `%${productKeyword}%`)
       .order('created_at', { ascending: false })
-
+    
     if (error) {
-      console.warn('[getProductReviews] Supabase error, falling back to mock:', error)
-      return getMockReviews(productId)
+      console.warn('[getProductReviews] Supabase error:', error)
+      return []
     }
 
-    return (data || []) as FeedingReview[]
+    // 데이터 변환
+    return (data || []).map((r: any) => ({
+      ...r,
+      user: r.user ? { name: r.user.nickname } : null,
+      pet: r.pet ? { ...r.pet, breed: null } : null
+    })) as FeedingReview[]
   } catch (error) {
     console.error('[getProductReviews] Error:', error)
-    return getMockReviews(productId)
+    return []
   }
 }
 
@@ -144,6 +179,14 @@ export function aggregateCommunityFeedback(reviews: FeedingReview[]): CommunityF
  * 리뷰를 소비자 리뷰 형식으로 변환
  */
 export function formatReviewsForDisplay(reviews: FeedingReview[]) {
+  const speciesKorean = (species: string) => {
+    switch (species) {
+      case 'dog': return '강아지'
+      case 'cat': return '고양이'
+      default: return species
+    }
+  }
+  
   return reviews.map(r => ({
     id: r.id,
     user_name: r.user?.name || '익명',
@@ -151,7 +194,7 @@ export function formatReviewsForDisplay(reviews: FeedingReview[]) {
     comment: r.excerpt,
     date: new Date(r.created_at).toISOString().split('T')[0],
     helpful_count: r.helpful_count || 0,
-    pet_info: r.pet ? `${r.pet.species} · ${r.pet.breed || '품종 미상'}` : null
+    pet_info: r.pet ? speciesKorean(r.pet.species) : null
   }))
 }
 

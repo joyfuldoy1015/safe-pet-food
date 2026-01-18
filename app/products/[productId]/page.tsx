@@ -101,7 +101,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           {/* Product Info */}
           <div>
               {/* Product Name */}
-              <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 leading-tight mb-4">
+              <h1 className="text-[26.5px] sm:text-[32.5px] font-bold text-gray-900 leading-tight mb-4">
                 {product.name}
               </h1>
 
@@ -116,7 +116,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   {/* 추천 */}
                   <div className="flex items-center gap-2">
                     <ThumbsUp className="h-5 w-5 text-green-600" />
-                    <span className="text-[22px] font-bold text-green-600">
+                    <span className="text-[20.5px] font-bold text-green-600">
                       {community_feedback.recommend_yes.toLocaleString()}
                     </span>
                   </div>
@@ -124,7 +124,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   {/* 비추천 */}
                   <div className="flex items-center gap-2">
                     <ThumbsDown className="h-5 w-5 text-red-600" />
-                    <span className="text-[22px] font-bold text-red-600">
+                    <span className="text-[20.5px] font-bold text-red-600">
                       {community_feedback.recommend_no.toLocaleString()}
                     </span>
                   </div>
@@ -132,7 +132,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   {/* 추천률 */}
                   <div className="flex items-center gap-2 ml-auto">
                     <div className="text-[13px] text-gray-600">추천률</div>
-                    <div className="text-[22px] font-bold text-blue-600">{recommendRate}%</div>
+                    <div className="text-[20.5px] font-bold text-blue-600">{recommendRate}%</div>
                   </div>
                 </div>
               )}
@@ -166,7 +166,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Summary Section */}
         <section id="summary" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-[23px] font-bold text-gray-900 mb-6">핵심 요약</h2>
+            <h2 className="text-[21.5px] font-bold text-gray-900 mb-5">핵심 요약</h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 추천 이유 */}
@@ -215,7 +215,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Origin Section */}
         <section id="origin" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-[23px] font-bold text-gray-900 mb-6">원산지 & 제조</h2>
+            <h2 className="text-[21.5px] font-bold text-gray-900 mb-5">원산지 & 제조</h2>
             
             {product.origin_info ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -264,7 +264,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Ingredients Section */}
         <section id="ingredients" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-[23px] font-bold text-gray-900 mb-6">원료 리스트</h2>
+            <h2 className="text-[21.5px] font-bold text-gray-900 mb-5">원료 리스트</h2>
             
             {product.ingredients && product.ingredients.length > 0 ? (
               <div className="space-y-3">
@@ -307,7 +307,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Guaranteed Analysis Section */}
         <section id="analysis" className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-            <h2 className="text-[23px] font-bold text-gray-900 mb-6">등록성분량</h2>
+            <h2 className="text-[21.5px] font-bold text-gray-900 mb-5">등록성분량</h2>
             
             {product.guaranteed_analysis ? (
               <div className="overflow-x-auto">
@@ -348,7 +348,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <section id="ratings" className="mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[23px] font-bold text-gray-900">소비자 평가</h2>
+                <h2 className="text-[21.5px] font-bold text-gray-900">소비자 평가</h2>
                 {feedingReviews.length > 0 && (
                   <span className="text-sm text-green-600 font-medium">
                     💚 실시간 급여 후기 기반
@@ -433,7 +433,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {otherProducts.length > 0 && (
           <section className="mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-              <h2 className="text-[23px] font-bold text-gray-900 mb-6">
+              <h2 className="text-[21.5px] font-bold text-gray-900 mb-5">
                 이 브랜드의 다른 제품
               </h2>
               

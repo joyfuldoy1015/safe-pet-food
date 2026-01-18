@@ -747,26 +747,26 @@ export default function BrandDetailPage() {
 
         {/* SAFI 안전성 점수 섹션 */}
         {safiScore && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-50 rounded-lg">
-                  <Shield className="h-6 w-6 text-blue-600" />
+                  <Shield className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">🛡️ SAFI 안전성 점수</h2>
-                  <p className="text-sm text-gray-600">Safety & Fit Index - 제품 안전성 종합 평가</p>
+                  <h2 className="text-lg font-semibold text-gray-900">🛡️ SAFI 안전성 점수</h2>
+                  <p className="text-xs text-gray-600">Safety & Fit Index - 제품 안전성 종합 평가</p>
                 </div>
               </div>
             </div>
 
             {/* 전체 점수 */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">종합 안전성 점수</p>
                   <div className="flex items-baseline space-x-2">
-                    <span className="text-4xl font-bold text-gray-900">{safiScore.overallScore.toFixed(1)}</span>
+                    <span className="text-[35px] font-bold text-gray-900">{safiScore.overallScore.toFixed(1)}</span>
                     <span className="text-lg text-gray-500">/ 100</span>
                   </div>
                 </div>
@@ -797,14 +797,14 @@ export default function BrandDetailPage() {
             </div>
 
             {/* 세부 지수 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
               {/* A. Side Effect Index */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-gray-600">A. 부작용 지수</span>
                   <span className="text-xs text-gray-500">35%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.A.toFixed(1)}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">{safiScore.detail.A.toFixed(1)}</div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div 
                     className="bg-blue-500 h-1.5 rounded-full"
@@ -815,12 +815,12 @@ export default function BrandDetailPage() {
               </div>
 
               {/* B. Stool Condition Index */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-gray-600">B. 변 상태 지수</span>
                   <span className="text-xs text-gray-500">25%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.B.toFixed(1)}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">{safiScore.detail.B.toFixed(1)}</div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div 
                     className="bg-green-500 h-1.5 rounded-full"
@@ -831,12 +831,12 @@ export default function BrandDetailPage() {
               </div>
 
               {/* C. Appetite Index */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-gray-600">C. 식욕 지수</span>
                   <span className="text-xs text-gray-500">10%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.C.toFixed(1)}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">{safiScore.detail.C.toFixed(1)}</div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div 
                     className="bg-yellow-500 h-1.5 rounded-full"
@@ -847,12 +847,12 @@ export default function BrandDetailPage() {
               </div>
 
               {/* D. Ingredient Safety Index */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-gray-600">D. 원재료 안전 지수</span>
                   <span className="text-xs text-gray-500">20%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.D.toFixed(1)}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">{safiScore.detail.D.toFixed(1)}</div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div 
                     className="bg-purple-500 h-1.5 rounded-full"
@@ -863,12 +863,12 @@ export default function BrandDetailPage() {
               </div>
 
               {/* E. Brand Trust Index */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium text-gray-600">E. 브랜드 신뢰 지수</span>
                   <span className="text-xs text-gray-500">10%</span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{safiScore.detail.E.toFixed(1)}</div>
+                <div className="text-xl font-bold text-gray-900 mb-1">{safiScore.detail.E.toFixed(1)}</div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div 
                     className="bg-indigo-500 h-1.5 rounded-full"
@@ -880,7 +880,7 @@ export default function BrandDetailPage() {
             </div>
 
             {/* 평가 기준 안내 */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-start space-x-2 text-sm text-gray-600">
                 <BarChart3 className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                 <div>
