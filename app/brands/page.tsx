@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
-import { Star, Shield, AlertTriangle, CheckCircle, Users, ArrowLeft, Search, Filter, BarChart3, MessageSquare } from 'lucide-react'
+import { Star, Shield, AlertTriangle, CheckCircle, Users, ArrowLeft, Search, Filter, BarChart3, MessageSquare, ChevronDown } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
 import { mockReviewLogs } from '@/lib/mock/review-log'
 
@@ -32,6 +32,19 @@ export default function BrandsPage() {
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<'rating' | 'name' | 'transparency'>('rating')
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
+  const sortDropdownRef = useRef<HTMLDivElement>(null)
+
+  // 드롭다운 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setSortDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     fetchBrands()
@@ -222,34 +235,50 @@ export default function BrandsPage() {
                   </div>
                 </div>
 
-                {/* Sort Options */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                {/* Sort Options - 커스텀 드롭다운 */}
+                <div className="relative" ref={sortDropdownRef}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     정렬 기준
                   </label>
-                  <div className="space-y-2">
-                    {[
-                      { value: 'rating', label: '평점 높은 순' },
-                      { value: 'transparency', label: '투명성 높은 순' },
-                      { value: 'name', label: '이름 순' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setSortBy(option.value as 'rating' | 'name' | 'transparency')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-colors ${
-                          sortBy === option.value
-                            ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
+                  <button
+                    onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm hover:bg-gray-50 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                  >
+                    <span className="font-medium text-gray-900">
+                      {sortBy === 'rating' ? '평점 높은 순' : sortBy === 'transparency' ? '투명성 높은 순' : '이름 순'}
+                    </span>
+                    <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {/* 드롭다운 메뉴 */}
+                  {sortDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                      {[
+                        { value: 'rating', label: '평점 높은 순' },
+                        { value: 'transparency', label: '투명성 높은 순' },
+                        { value: 'name', label: '이름 순' }
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSortBy(option.value as 'rating' | 'name' | 'transparency')
+                            setSortDropdownOpen(false)
+                          }}
+                          className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors ${
+                            sortBy === option.value 
+                              ? 'bg-yellow-50 text-yellow-700 font-medium' 
+                              : 'text-gray-700'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Stats */}
-                <div className="pt-6 border-t border-gray-200">
+                <div className="pt-6 mt-4 border-t border-gray-200">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">{brands.length}</div>
                     <div className="text-sm text-gray-600">등록된 브랜드</div>
