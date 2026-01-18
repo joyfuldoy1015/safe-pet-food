@@ -78,7 +78,7 @@ export async function getProductReviews(productId: string): Promise<FeedingRevie
       .from('products')
       .select('name, brand_id')
       .eq('id', productId)
-      .single()
+      .single() as { data: { name: string; brand_id: string } | null }
     
     if (!productData) {
       console.warn('[getProductReviews] Product not found:', productId)
@@ -90,7 +90,7 @@ export async function getProductReviews(productId: string): Promise<FeedingRevie
       .from('brands')
       .select('name')
       .eq('id', productData.brand_id)
-      .single()
+      .single() as { data: { name: string } | null }
     
     if (!brandData) {
       console.warn('[getProductReviews] Brand not found for product:', productId)
