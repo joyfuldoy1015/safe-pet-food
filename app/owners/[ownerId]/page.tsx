@@ -153,7 +153,7 @@ export default function OwnerProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-100 via-blue-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
       <div className="px-4 py-3 flex items-center gap-3">
         <button
