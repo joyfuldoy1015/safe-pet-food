@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CheckCircle, User, TrendingUp, Plus } from 'lucide-react'
+import { CheckCircle, User, TrendingUp, Plus, ChevronDown, Search } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
 import { mockReviewLogs, mockOwners, mockPets, mockComments } from '@/lib/mock/review-log'
 import PetLogCard from '@/components/petlogs/PetLogCard'
-import FeedFilters from '@/app/components/pet-log/FeedFilters'
+// FeedFilters removed - using inline filters
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
 import LogFormDialog from '@/components/log/LogFormDialog'
 import FeedingLeaderboard from '@/components/rank/FeedingLeaderboard'
@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
 
 type SortOption = 'recent' | 'popular' | 'rating'
+type CategoryFilter = 'all' | 'feed' | 'supplement' | 'toilet' | 'health'
 
 const ITEMS_PER_PAGE = 6
 
@@ -195,6 +196,20 @@ export default function PetLogPage() {
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')
   const [sortOption, setSortOption] = useState<SortOption>('recent')
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
+  const sortDropdownRef = useRef<HTMLDivElement>(null)
+  
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setSortDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Format helpers
   const formatTimeAgo = (dateString: string): string => {
@@ -268,6 +283,21 @@ export default function PetLogPage() {
       // Species filter
       const matchesSpecies = selectedSpecies === 'all' || pet.species === selectedSpecies
 
+      // Category filter
+      let matchesCategory = true
+      if (categoryFilter !== 'all') {
+        if (categoryFilter === 'feed') {
+          matchesCategory = review.category === 'feed' || review.category === 'snack'
+        } else if (categoryFilter === 'supplement') {
+          matchesCategory = review.category === 'supplement'
+        } else if (categoryFilter === 'toilet') {
+          matchesCategory = review.category === 'toilet'
+        } else if (categoryFilter === 'health') {
+          // 건강체크 카테고리 (추후 추가 가능)
+          matchesCategory = false
+        }
+      }
+
       // Search filter (제품명, 브랜드, 반려동물 이름)
       const matchesSearch =
         searchQuery === '' ||
@@ -276,7 +306,7 @@ export default function PetLogPage() {
         pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (owner && owner.nickname.toLowerCase().includes(searchQuery.toLowerCase()))
 
-      return matchesSpecies && matchesSearch
+      return matchesSpecies && matchesCategory && matchesSearch
     })
 
     // Sort
@@ -296,7 +326,7 @@ export default function PetLogPage() {
     }
 
     return filtered
-  }, [reviews, pets, owners, selectedSpecies, sortOption, searchQuery])
+  }, [reviews, pets, owners, selectedSpecies, sortOption, searchQuery, categoryFilter])
 
   // Displayed reviews (paginated)
   const displayedReviews = useMemo(() => {
@@ -306,7 +336,7 @@ export default function PetLogPage() {
   // Reset displayed count when filters change
   useEffect(() => {
     setDisplayedCount(ITEMS_PER_PAGE)
-  }, [selectedSpecies, sortOption, searchQuery])
+  }, [selectedSpecies, sortOption, searchQuery, categoryFilter])
 
   const handleLoadMore = () => {
     setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredAndSortedReviews.length))
@@ -451,64 +481,132 @@ export default function PetLogPage() {
   // 클라이언트 마운트 전에는 로딩 UI 표시 (하이드레이션 에러 방지)
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              급여 후기 커뮤니티 🐾
-            </h1>
-            <p className="text-lg text-gray-600">
-              다른 반려집사들의 급여 경험을 둘러보고 나만의 후기도 남겨보세요
-            </p>
+      <div className="min-h-screen bg-gray-50">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="mb-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">로그 타임라인</h1>
           </div>
           <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-blue-500"></div>
           </div>
         </main>
       </div>
     )
   }
 
+  // 정렬 옵션 라벨
+  const getSortLabel = () => {
+    switch (sortOption) {
+      case 'recent': return '최신순'
+      case 'popular': return '인기순'
+      case 'rating': return '평점순'
+      default: return '맞춤 추천 순'
+    }
+  }
+
+  // 카테고리 탭 데이터
+  const categoryTabs = [
+    { id: 'all' as CategoryFilter, label: '전체 로그' },
+    { id: 'feed' as CategoryFilter, label: '사료/간식' },
+    { id: 'supplement' as CategoryFilter, label: '영양제' },
+    { id: 'toilet' as CategoryFilter, label: '용품' },
+    { id: 'health' as CategoryFilter, label: '건강체크' },
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Header: 로그 타임라인 + 정렬 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="flex items-center justify-between mb-6"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            급여 후기 커뮤니티 🐾
-          </h1>
-          <p className="text-lg text-gray-600">
-            다른 반려집사들의 급여 경험을 둘러보고 나만의 후기도 남겨보세요
-          </p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">로그 타임라인</h1>
+          
+          {/* 정렬 드롭다운 */}
+          <div className="relative" ref={sortDropdownRef}>
+            <button
+              onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+              className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-700"
+            >
+              {getSortLabel()}
+              <ChevronDown className={`h-4 w-4 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {sortDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+                {[
+                  { value: 'recent' as SortOption, label: '최신순' },
+                  { value: 'popular' as SortOption, label: '인기순' },
+                  { value: 'rating' as SortOption, label: '평점순' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setSortOption(option.value)
+                      setSortDropdownOpen(false)
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 ${
+                      sortOption === option.value ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </motion.div>
 
-        {/* Filters */}
+        {/* 카테고리 탭 */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="mb-6 overflow-x-auto scrollbar-hide"
+        >
+          <div className="flex gap-2 min-w-max pb-2">
+            {categoryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setCategoryFilter(tab.id)}
+                className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  categoryFilter === tab.id
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* 검색 바 (선택적) */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <FeedFilters
-            selectedSpecies={selectedSpecies}
-            sortOption={sortOption}
-            searchQuery={searchQuery}
-            onSpeciesChange={setSelectedSpecies}
-            onSortChange={setSortOption}
-            onSearchChange={setSearchQuery}
-          />
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="제품명, 브랜드로 검색..."
+              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </motion.div>
 
-        {/* Feeding Leaderboard */}
+        {/* Feeding Leaderboard (데스크톱에서만) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="mb-6"
+          className="mb-6 hidden lg:block"
         >
           <FeedingLeaderboard
             initialSpecies={selectedSpecies}
@@ -516,63 +614,56 @@ export default function PetLogPage() {
           />
         </motion.div>
 
-
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Reviews Feed */}
           <div className="lg:col-span-2">
             {displayedReviews.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="space-y-4">
                   {displayedReviews.map((review, index) => {
-                  const { owner, pet } = getOwnerAndPet(review)
-                  if (!owner || !pet) return null
+                    const { owner, pet } = getOwnerAndPet(review)
+                    if (!owner || !pet) return null
 
-                  // Map status to PetLogCard format
-                  const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
-                    'feeding': 'in_progress',
-                    'paused': 'stopped',
-                    'completed': 'completed'
-                  }
+                    // Map status to PetLogCard format
+                    const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
+                      'feeding': 'in_progress',
+                      'paused': 'stopped',
+                      'completed': 'completed'
+                    }
 
-                  const petAge = calculateAge(pet.birthDate)
-                  const petAgeNumber = extractAgeNumber(petAge)
-
-                  return (
-                    <motion.div
-                      key={review.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <PetLogCard
-                        since={formatDateForCard(review.periodStart)}
-                        until={
-                          (review.status === 'completed' || review.status === 'paused') && review.periodEnd
-                            ? formatDateForCard(review.periodEnd)
-                            : undefined
-                        }
-                        status={statusMap[review.status] || 'in_progress'}
-                        brand={review.brand}
-                        product={review.product}
-                        category={review.category}
-                        rating={review.rating || 0}
-                        recommended={review.recommend}
-                        authorName={owner.nickname}
-                        petName={pet.name}
-                        petAgeYears={petAgeNumber}
-                        petWeightKg={pet.weightKg || 0}
-                        review={review.excerpt || ''}
-                        likes={review.likes}
-                        comments={review.commentsCount}
-                        views={review.views}
-                        onAsk={() => handleQuestionClick(review.id)}
-                        onDetail={() => handleViewDetail(review.id)}
-                        avatarUrl={owner.avatarUrl}
-                      />
-                    </motion.div>
-                  )
-                })}
+                    return (
+                      <motion.div
+                        key={review.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: Math.min(index * 0.03, 0.3) }}
+                      >
+                        <PetLogCard
+                          since={formatDateForCard(review.periodStart)}
+                          until={
+                            (review.status === 'completed' || review.status === 'paused') && review.periodEnd
+                              ? formatDateForCard(review.periodEnd)
+                              : undefined
+                          }
+                          status={statusMap[review.status] || 'in_progress'}
+                          brand={review.brand}
+                          product={review.product}
+                          category={review.category}
+                          recommended={review.recommend}
+                          authorName={owner.nickname}
+                          petName={pet.name}
+                          review={review.excerpt || ''}
+                          likes={review.likes}
+                          comments={review.commentsCount}
+                          createdAt={formatDateForCard(review.createdAt)}
+                          onAsk={() => handleQuestionClick(review.id)}
+                          onDetail={() => handleViewDetail(review.id)}
+                          avatarUrl={owner.avatarUrl}
+                        />
+                      </motion.div>
+                    )
+                  })}
                 </div>
 
                 {/* Load More Button or Completion Message */}
@@ -584,7 +675,7 @@ export default function PetLogPage() {
                   >
                     <button
                       onClick={handleLoadMore}
-                      className="px-6 py-3 bg-white border-2 border-[#3056F5] text-[#3056F5] rounded-xl font-medium hover:bg-[#3056F5] hover:text-white transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
+                      className="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 active:scale-[0.98] shadow-sm"
                       aria-label="더 많은 후기 보기"
                     >
                       더 보기
@@ -596,7 +687,7 @@ export default function PetLogPage() {
                     animate={{ opacity: 1 }}
                     className="mt-8 flex justify-center"
                   >
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400">
                       모든 후기를 불러왔습니다.
                     </p>
                   </motion.div>
@@ -606,52 +697,56 @@ export default function PetLogPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-20 bg-white rounded-3xl shadow-soft border border-gray-100"
+                className="text-center py-20 bg-white rounded-2xl border border-gray-100"
               >
                 <p className="text-lg font-medium text-gray-900 mb-2">
                   후기가 없습니다
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-500">
                   필터를 조정해보세요
                 </p>
               </motion.div>
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4 sm:space-y-6 hidden lg:block">
+          {/* Sidebar (데스크톱) */}
+          <div className="lg:col-span-1 space-y-4 hidden lg:block">
             {/* 최근 활발한 집사 */}
             {activeOwners.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-3xl shadow-soft border border-gray-100 p-6"
+                className="bg-white rounded-2xl border border-gray-100 p-5"
               >
                 <div className="flex items-center gap-2 mb-4">
                   <User className="h-5 w-5 text-blue-500" />
-                  <h3 className="font-bold text-gray-900">최근 활발한 집사</h3>
-            </div>
+                  <h3 className="font-semibold text-gray-900">활발한 집사</h3>
+                </div>
                 <div className="space-y-2">
-                  {activeOwners.map((owner, index) => (
+                  {activeOwners.map((owner) => (
                     <div
                       key={owner.id}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-sm">
-                        {owner.avatarUrl || '👤'}
-                            </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-gray-900">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-sm font-medium text-gray-600">
+                        {owner.avatarUrl ? (
+                          <span>{owner.avatarUrl}</span>
+                        ) : (
+                          owner.nickname.charAt(0)
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">
                           {owner.nickname}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-400">
                           {reviews.filter((r) => r.ownerId === owner.id).length}개 후기
                         </div>
-                        </div>
+                      </div>
                     </div>
                   ))}
-                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -661,20 +756,20 @@ export default function PetLogPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white rounded-3xl shadow-soft border border-gray-100 p-6"
+                className="bg-white rounded-2xl border border-gray-100 p-5"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="h-5 w-5 text-orange-500" />
-                  <h3 className="font-bold text-gray-900">가장 오래 급여 중인 제품</h3>
-            </div>
-                <div className="p-3 bg-orange-50 rounded-xl">
-                  <div className="font-semibold text-gray-900 text-sm mb-1">
-                    {longestFeeding.brand} · {longestFeeding.product}
-            </div>
-                  <div className="text-xs text-gray-600">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  <h3 className="font-semibold text-gray-900">장기 급여 제품</h3>
+                </div>
+                <div className="p-3 bg-green-50 rounded-xl">
+                  <div className="font-medium text-gray-900 text-sm mb-1">
+                    {longestFeeding.product}
+                  </div>
+                  <div className="text-xs text-gray-500">
                     {longestFeeding.durationDays}일째 급여 중
-        </div>
-              </div>
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -684,22 +779,22 @@ export default function PetLogPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white rounded-3xl shadow-soft border border-gray-100 p-6"
+                className="bg-white rounded-2xl border border-gray-100 p-5"
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <CheckCircle className="h-5 w-5 text-red-500" />
-                  <h3 className="font-bold text-gray-900">최근 중지 사유</h3>
+                  <CheckCircle className="h-5 w-5 text-red-400" />
+                  <h3 className="font-semibold text-gray-900">중지 사유</h3>
                 </div>
                 <div className="space-y-2">
                   {recentStopReasons.map((reason, index) => (
                     <div
                       key={index}
-                      className="px-2 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-medium"
+                      className="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs"
                     >
                       {reason}
-              </div>
+                    </div>
                   ))}
-            </div>
+                </div>
               </motion.div>
             )}
           </div>
