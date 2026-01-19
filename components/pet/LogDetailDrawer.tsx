@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2, ExternalLink, Plus, Loader2 } from 'lucide-react'
+import { X, Star, Heart, MessageCircle, Eye, Calendar, ChevronDown, ChevronUp, Edit, Trash2, ExternalLink, Plus, Loader2, ArrowLeft, Share2, CheckCircle } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPost, QAPostWithAuthor } from '@/lib/types/review-log'
 import CommentThread from '@/app/components/pet-log/CommentThread'
@@ -241,209 +242,216 @@ export default function LogDetailDrawer({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-full h-full md:w-[600px] md:h-auto bg-white shadow-strong z-50 overflow-y-auto"
+            className="fixed right-0 top-0 bottom-0 w-full h-full md:w-[600px] md:h-auto bg-gray-50 shadow-strong z-50 overflow-y-auto"
           >
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="min-w-0">
-                  <h2 className="text-xl sm:text-3xl font-bold text-gray-900 truncate">
-                    {log.brand}
-                  </h2>
-                  <p className="text-sm sm:text-base text-gray-600 truncate">{log.product}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {/* Rating in Header */}
-                {log.rating && (
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }, (_, i) => (
-                        <Star
-                          key={i}
-                          size={14}
-                          className={i < Math.round(log.rating!) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">{log.rating.toFixed(1)}</span>
-                    {log.recommend !== undefined && (
-                      <span className="text-sm text-gray-600">
-                        {log.recommend ? '👍' : '👎'}
-                      </span>
-                    )}
-                  </div>
-                )}
-                {isOwner && (
-                  <>
-                    {onEdit && (
-                      <button
-                        onClick={() => onEdit(log)}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                        aria-label="수정"
-                      >
-                        <Edit className="h-5 w-5 text-gray-500" />
-                      </button>
-                    )}
-                    {onDelete && (
-                      <button
-                        onClick={() => {
-                          if (confirm('정말 삭제하시겠습니까?')) {
-                            onDelete(log.id)
-                          }
-                        }}
-                        className="p-2 hover:bg-red-50 rounded-full transition-colors"
-                        aria-label="삭제"
-                      >
-                        <Trash2 className="h-5 w-5 text-red-500" />
-                      </button>
-                    )}
-                  </>
+            {/* Header - 로그 상세보기 */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between z-10">
+              <button
+                onClick={onClose}
+                className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-700" />
+              </button>
+              <h2 className="text-base font-semibold text-gray-900">로그 상세보기</h2>
+              <div className="flex items-center gap-1">
+                {isOwner && onEdit && (
+                  <button
+                    onClick={() => onEdit(log)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    aria-label="수정"
+                  >
+                    <Edit className="h-4 w-4 text-gray-500" />
+                  </button>
                 )}
                 <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: `${log.product} 후기`,
+                        text: log.excerpt,
+                        url: window.location.href
+                      })
+                    }
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <X className="h-5 w-5 text-gray-500" />
+                  <Share2 className="h-5 w-5 text-gray-700" />
                 </button>
               </div>
             </div>
 
-            {/* Status */}
-            {isOwner && onStatusChange && (
-              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                  <span className="text-sm sm:text-base font-medium text-gray-700">상태:</span>
-                  <div className="flex gap-2 flex-wrap">
-                    {(['feeding', 'paused', 'completed'] as const).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => handleStatusChange(s)}
-                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-sm sm:text-base font-medium transition-colors ${
-                          log.status === s
-                            ? statusConfig[s].color
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {statusConfig[s].label}
-                      </button>
-                    ))}
+            {/* 프로필 영역 */}
+            <div className="bg-white px-4 py-4">
+              <button
+                onClick={() => router.push(`/owners/${owner.id}/pets/${pet.id}`)}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              >
+                {/* 아바타 */}
+                <div className="relative flex-shrink-0">
+                  {owner.avatarUrl ? (
+                    <Image
+                      src={owner.avatarUrl}
+                      alt={owner.nickname}
+                      width={48}
+                      height={48}
+                      className="rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <span className="text-gray-500 font-medium">
+                        {owner.nickname.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold text-gray-900">{owner.nickname}</span>
+                    <ChevronDown className="h-4 w-4 text-gray-400 rotate-[-90deg]" />
                   </div>
+                  <p className="text-sm text-gray-500">
+                    {pet.name} · {pet.species === 'dog' ? '강아지' : pet.species === 'cat' ? '고양이' : pet.species}
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            {/* 제품 정보 카드 */}
+            <div className="mx-4 my-4 bg-white rounded-2xl border border-gray-100 p-4 relative">
+              {/* 사용 기간 배지 */}
+              <div className="absolute top-4 right-4">
+                <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                  log.status === 'feeding' ? 'bg-green-50 text-green-600' :
+                  log.status === 'completed' ? 'bg-gray-100 text-gray-600' :
+                  'bg-red-50 text-red-600'
+                }`}>
+                  {log.status === 'feeding' 
+                    ? `${log.durationDays || Math.ceil((new Date().getTime() - new Date(log.periodStart).getTime()) / (1000 * 60 * 60 * 24))}일째 사용 중`
+                    : log.status === 'completed' ? '사용 완료' : '사용 중지'
+                  }
+                </span>
+              </div>
+
+              {/* 카테고리 레이블 */}
+              <p className="text-xs font-medium text-violet-500 uppercase tracking-wider mb-2">
+                {log.category === 'feed' ? 'FEED LOG' :
+                 log.category === 'snack' ? 'SNACK LOG' :
+                 log.category === 'supplement' ? 'SUPPLEMENT LOG' :
+                 log.category === 'toilet' ? 'TOILET LOG' : 'PET LOG'}
+              </p>
+
+              {/* 제품명 */}
+              <h3 className="text-lg font-bold text-gray-900 mb-2 pr-24">
+                {log.product}
+              </h3>
+
+              {/* 기능 태그 (임시 - 실제 데이터에서 가져와야 함) */}
+              {log.excerpt && (
+                <div className="mb-3">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
+                    <CheckCircle className="h-3 w-3" />
+                    {log.category === 'supplement' ? '건강 개선' : 
+                     log.category === 'feed' ? '영양 공급' :
+                     log.category === 'snack' ? '기호성 좋음' : '사용 중'}
+                  </span>
+                </div>
+              )}
+
+              {/* 기록 시작일 */}
+              <p className="text-sm text-gray-500">
+                기록 시작: {formatDate(log.periodStart)}
+              </p>
+            </div>
+
+            {/* AI 스마트 분석 (선택적) */}
+            {log.excerpt && (
+              <div className="mx-4 mb-4 bg-violet-50 rounded-2xl p-4 border border-violet-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">✨</span>
+                  <span className="text-sm font-semibold text-violet-700">AI 스마트 분석</span>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {log.product}은(는) {pet.species === 'dog' ? '반려견' : '반려묘'}에게 {
+                    log.category === 'supplement' ? '건강 개선과 영양 보충에 효과적인 제품입니다.' :
+                    log.category === 'feed' ? '균형 잡힌 영양소를 제공하는 사료입니다.' :
+                    log.category === 'snack' ? '기호성이 좋은 간식입니다.' :
+                    '유용한 용품입니다.'
+                  }
+                </p>
+              </div>
+            )}
+
+            {/* 후기 내용 */}
+            {log.excerpt && (
+              <div className="mx-4 mb-4 bg-white rounded-2xl border border-gray-100 p-4">
+                <p className="text-sm text-gray-700 leading-relaxed italic">
+                  &ldquo;{log.excerpt}&rdquo;
+                </p>
+              </div>
+            )}
+
+            {/* 상태 변경 (소유자만) */}
+            {isOwner && onStatusChange && (
+              <div className="mx-4 mb-4 bg-white rounded-2xl border border-gray-100 p-4">
+                <p className="text-xs font-medium text-gray-500 mb-2">상태 변경</p>
+                <div className="flex gap-2">
+                  {(['feeding', 'paused', 'completed'] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleStatusChange(s)}
+                      className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        log.status === s
+                          ? statusConfig[s].color
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {statusConfig[s].label}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Product Detail Link */}
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 space-y-3">
-              {/* 제품 확인 중 로딩 */}
+            {/* 제품 상세 링크 */}
+            <div className="mx-4 mb-4">
               {isCheckingProduct ? (
                 <div className="flex items-center justify-center gap-2 py-3 text-gray-500">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm">제품 정보 확인 중...</span>
                 </div>
               ) : productExists === false ? (
-                /* 제품이 등록되어 있지 않은 경우 */
-                <>
+                <div className="space-y-3">
                   <div className="text-center py-3 px-4 bg-gray-50 rounded-xl">
-                    <p className="text-sm text-gray-600 mb-1">📦 아직 제품 목록에 등록되어 있지 않아요</p>
-                    <p className="text-xs text-gray-500">제품 정보를 요청해주시면 운영자가 검토 후 등록해드립니다.</p>
+                    <p className="text-sm text-gray-600">📦 아직 제품 목록에 등록되어 있지 않아요</p>
                   </div>
-                  
-                  {/* 제품 등록 요청 */}
-                  {requestSubmitted ? (
-                    <div className="text-center py-2 px-4 bg-green-50 text-green-700 rounded-xl text-sm">
-                      ✅ 제품 등록 요청이 접수되었습니다. 운영자 검토 후 등록됩니다.
-                    </div>
-                  ) : showProductRequestForm ? (
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
-                      <div className="text-sm font-medium text-gray-900">
-                        제품 등록 요청
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        <span className="font-medium">{log.brand}</span> - {log.product}
-                      </div>
-                      <textarea
-                        value={productRequestDescription}
-                        onChange={(e) => setProductRequestDescription(e.target.value)}
-                        placeholder="추가 정보가 있다면 입력해주세요 (선택사항)"
-                        rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setShowProductRequestForm(false)}
-                          className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
-                        >
-                          취소
-                        </button>
-                        <button
-                          onClick={handleProductRequestSubmit}
-                          disabled={isSubmittingRequest}
-                          className="flex-1 px-3 py-2 bg-[#3056F5] text-white rounded-lg text-sm font-medium hover:bg-[#2648e6] transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
-                        >
-                          {isSubmittingRequest ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              요청 중...
-                            </>
-                          ) : (
-                            '요청하기'
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
+                  {!requestSubmitted && !showProductRequestForm && (
                     <button
                       onClick={() => {
                         if (!user) {
-                          alert('로그인이 필요합니다.')
-                          if (onAuthRequired) {
-                            onAuthRequired()
-                          }
+                          if (onAuthRequired) onAuthRequired()
                           return
                         }
                         setShowProductRequestForm(true)
                       }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-violet-500 text-white rounded-xl text-sm font-medium hover:bg-violet-600 transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                       <span>제품 등록 요청하기</span>
                     </button>
                   )}
-                </>
+                </div>
               ) : (
-                /* 제품이 등록되어 있는 경우 */
                 <button
                   onClick={() => {
-                    console.log('[LogDetailDrawer] Brand link clicked:', {
-                      logBrand: log.brand,
-                      logProduct: log.product
-                    })
-                    const targetUrl = `/brands/${log.brand}`
-                    console.log('[LogDetailDrawer] Navigating to:', targetUrl)
-                    router.push(targetUrl)
+                    router.push(`/brands/${log.brand}`)
                     onClose()
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#3056F5] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#2648e6] transition-colors shadow-sm hover:shadow-md"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-violet-500 text-white rounded-xl text-sm font-medium hover:bg-violet-600 transition-colors"
                 >
                   <span>제품에 대해 자세히 알아보기</span>
                   <ExternalLink className="h-4 w-4" />
                 </button>
               )}
-            </div>
-
-            {/* Period */}
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
-                <span className="text-sm sm:text-base font-bold text-gray-900">급여 기간</span>
-              </div>
-              <p className="text-sm sm:text-base text-gray-700">
-                {formatDate(log.periodStart)}
-                {log.periodEnd && ` ~ ${formatDate(log.periodEnd)}`}
-                {!log.periodEnd && ' ~ 현재'}
-                {log.durationDays && ` (총 ${log.durationDays}일)`}
-              </p>
             </div>
 
             {/* Tabs */}
