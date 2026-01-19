@@ -34,13 +34,10 @@ import { motion } from 'framer-motion'
 import { ArrowRight, ChevronRight, TrendingUp, ArrowUp, MessageCircle } from 'lucide-react'
 import Hero from '@/components/home/Hero'
 import FeatureCards from '@/components/home/FeatureCards'
-import FeedTabs, { FeedTab } from '@/components/home/FeedTabs'
 import UnifiedCard from '@/components/home/UnifiedCard'
 import PetLogCard from '@/components/petlogs/PetLogCard'
-import { getPopular, getRecent, getQA, getReviews, type UnifiedFeedItem } from '@/lib/data/feed'
+import { getQA, type UnifiedFeedItem } from '@/lib/data/feed'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
-
-const PREVIEW_ITEMS_PER_TAB = 6
 
 interface TrendingQuestion {
   id: string
@@ -59,9 +56,8 @@ interface TrendingQuestion {
 
 export default function Home() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<FeedTab>('popular')
-  const [feedItems, setFeedItems] = useState<UnifiedFeedItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [qaItems, setQAItems] = useState<UnifiedFeedItem[]>([])
+  const [isQALoading, setIsQALoading] = useState(true)
   const [trendingQuestions, setTrendingQuestions] = useState<TrendingQuestion[]>([])
   const [isTrendingLoading, setIsTrendingLoading] = useState(true)
   
@@ -84,39 +80,23 @@ export default function Home() {
     fetchTrending()
   }, [])
 
-  // Load feed items based on active tab
+  // Load Q&A
   useEffect(() => {
-    const loadFeed = async () => {
-      setIsLoading(true)
+    const loadQA = async () => {
+      setIsQALoading(true)
       try {
-        let items: UnifiedFeedItem[] = []
-        
-        switch (activeTab) {
-          case 'popular':
-            items = await getPopular(PREVIEW_ITEMS_PER_TAB)
-            break
-          case 'recent':
-            items = await getRecent(PREVIEW_ITEMS_PER_TAB)
-            break
-          case 'qa':
-            items = await getQA(PREVIEW_ITEMS_PER_TAB)
-            break
-          case 'reviews':
-            items = await getReviews(PREVIEW_ITEMS_PER_TAB)
-            break
-        }
-        
-        setFeedItems(items)
+        const items = await getQA(3)
+        setQAItems(items)
       } catch (error) {
-        console.error('Failed to load feed:', error)
-        setFeedItems([])
+        console.error('Failed to load Q&A:', error)
+        setQAItems([])
       } finally {
-        setIsLoading(false)
+        setIsQALoading(false)
       }
     }
 
-    loadFeed()
-  }, [activeTab])
+    loadQA()
+  }, [])
 
   const formatTimeAgo = (dateString: string): string => {
     const date = new Date(dateString)
@@ -170,18 +150,12 @@ export default function Home() {
 
   // Handle review detail navigation
   const handleViewDetail = (reviewId: string) => {
-    const review = mockReviewLogs.find((r) => r.id === reviewId)
-    if (review) {
-      router.push(`/owners/${review.ownerId}/pets/${review.petId}`)
-    }
+    router.push(`/pet-log/${reviewId}`)
   }
 
   // Handle question click
   const handleQuestionClick = (reviewId: string) => {
-    const review = mockReviewLogs.find((r) => r.id === reviewId)
-    if (review) {
-      router.push(`/owners/${review.ownerId}/pets/${review.petId}?tab=qa`)
-    }
+    router.push(`/pet-log/${reviewId}?tab=qa`)
   }
 
   return (
@@ -192,144 +166,125 @@ export default function Home() {
       {/* Feature Cards Section */}
       <FeatureCards />
 
-      {/* UGC Feed Preview Section (Bottom 70-80%) */}
+      {/* 급여/사용 기록 섹션 */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">커뮤니티 피드</h2>
-          <p className="text-lg text-gray-600">
-            다른 집사들의 질문과 급여 후기를 확인해보세요
-          </p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">급여/사용 기록 📝</h2>
+            <p className="text-sm text-gray-600">
+              다른 집사들의 급여 및 사용 후기를 확인해보세요
+            </p>
+          </div>
+          <Link
+            href="/pet-log"
+            className="flex items-center gap-1 text-sm text-violet-600 font-medium hover:text-violet-700"
+          >
+            더보기
+            <ChevronRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        {/* Feed Tabs */}
-        <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {mockReviewLogs.slice(0, 3).map((review, index) => {
+            const owner = mockOwners.find((o) => o.id === review.ownerId)
+            const pet = mockPets.find((p) => p.id === review.petId)
+            if (!owner || !pet) return null
 
-        {/* Feed Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+            const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
+              'feeding': 'in_progress',
+              'paused': 'stopped',
+              'completed': 'completed'
+            }
+
+            const petAge = calculateAge(pet.birthDate)
+            const petAgeNumber = extractAgeNumber(petAge)
+
+            return (
+              <motion.div
+                key={review.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <PetLogCard
+                  since={formatDateForCard(review.periodStart)}
+                  until={
+                    (review.status === 'completed' || review.status === 'paused') && review.periodEnd
+                      ? formatDateForCard(review.periodEnd)
+                      : undefined
+                  }
+                  status={statusMap[review.status] || 'in_progress'}
+                  brand={review.brand}
+                  product={review.product}
+                  category={review.category}
+                  rating={review.rating || 0}
+                  recommended={review.recommend}
+                  authorName={owner.nickname}
+                  petName={pet.name}
+                  petAgeYears={petAgeNumber}
+                  petWeightKg={pet.weightKg || 0}
+                  review={review.excerpt || ''}
+                  likes={review.likes}
+                  comments={review.commentsCount}
+                  views={review.views}
+                  onAsk={() => handleQuestionClick(review.id)}
+                  onDetail={() => handleViewDetail(review.id)}
+                  avatarUrl={owner.avatarUrl}
+                />
+              </motion.div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Q&A 섹션 */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">Q&A 💬</h2>
+            <p className="text-sm text-gray-600">
+              궁금한 점을 질문하고 답변을 받아보세요
+            </p>
+          </div>
+          <Link
+            href="/community/qa-forum"
+            className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-700"
+          >
+            더보기
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {isQALoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] h-64 animate-pulse"
+                className="bg-white rounded-2xl border border-gray-100 p-4 h-36 animate-pulse"
               >
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                <div className="h-20 bg-gray-200 rounded mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
+                <div className="h-10 bg-gray-200 rounded mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
               </div>
             ))}
           </div>
-        ) : feedItems.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {feedItems.map((item, index) => {
-                // For review items, use PetLogCard
-                if (item.kind === 'review') {
-                  const review = mockReviewLogs.find((r) => r.id === item.id)
-                  if (!review) {
-                    // Fallback to UnifiedCard if review not found
-                    return (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
-                      </motion.div>
-                    )
-                  }
-
-                  const owner = mockOwners.find((o) => o.id === review.ownerId)
-                  const pet = mockPets.find((p) => p.id === review.petId)
-                  if (!owner || !pet) {
-                    return (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
-                      </motion.div>
-                    )
-                  }
-
-                  // Map status to PetLogCard format
-                  const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
-                    'feeding': 'in_progress',
-                    'paused': 'stopped',
-                    'completed': 'completed'
-                  }
-
-                  const petAge = calculateAge(pet.birthDate)
-                  const petAgeNumber = extractAgeNumber(petAge)
-
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <PetLogCard
-                        since={formatDateForCard(review.periodStart)}
-                        until={
-                          (review.status === 'completed' || review.status === 'paused') && review.periodEnd
-                            ? formatDateForCard(review.periodEnd)
-                            : undefined
-                        }
-                        status={statusMap[review.status] || 'in_progress'}
-                        brand={review.brand}
-                        product={review.product}
-                        category={review.category}
-                        rating={review.rating || 0}
-                        recommended={review.recommend}
-                        authorName={owner.nickname}
-                        petName={pet.name}
-                        petAgeYears={petAgeNumber}
-                        petWeightKg={pet.weightKg || 0}
-                        review={review.excerpt || ''}
-                        likes={review.likes}
-                        comments={review.commentsCount}
-                        views={review.views}
-                        onAsk={() => handleQuestionClick(review.id)}
-                        onDetail={() => handleViewDetail(review.id)}
-                        avatarUrl={owner.avatarUrl}
-                      />
-                    </motion.div>
-                  )
-                }
-
-                // For Q&A items, use UnifiedCard
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
-                  </motion.div>
-                )
-              })}
-            </div>
-
-            {/* See All Button */}
-            <div className="flex justify-center">
-              <Link
-                href="/explore"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#3056F5] text-white rounded-xl font-medium hover:bg-[#2648e6] transition-all duration-200 shadow-md hover:shadow-lg"
+        ) : qaItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {qaItems.slice(0, 3).map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
-                전체 보기
-                <ChevronRight className="h-5 w-5" />
-              </Link>
-            </div>
-          </>
+                <UnifiedCard item={item} formatTimeAgo={formatTimeAgo} />
+              </motion.div>
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-3xl shadow-soft border border-gray-100">
-            <p className="text-lg font-medium text-gray-900 mb-2">콘텐츠가 없습니다</p>
-            <p className="text-sm text-gray-600">곧 새로운 콘텐츠가 추가될 예정입니다</p>
+          <div className="text-center py-12 bg-gray-50 rounded-2xl">
+            <p className="text-sm text-gray-500">아직 등록된 Q&A가 없습니다</p>
           </div>
         )}
       </section>

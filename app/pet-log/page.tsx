@@ -513,13 +513,28 @@ export default function PetLogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header: 로그 타임라인 + 정렬 */}
+        {/* 히어로 섹션 */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            로그 타임라인 📝
+          </h1>
+          <p className="text-lg text-gray-600">
+            급여/사용 후기를 통해 다른 집사들에게 도움을 줄 수 있어요
+          </p>
+        </motion.div>
+
+        {/* Header: 필터 + 정렬 */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-6"
+          transition={{ delay: 0.05 }}
+          className="flex items-center justify-between mb-4"
         >
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">로그 타임라인</h1>
+          <span className="text-sm text-gray-500">총 {filteredAndSortedReviews.length}개의 로그</span>
           
           {/* 정렬 드롭다운 */}
           <div className="relative" ref={sortDropdownRef}>

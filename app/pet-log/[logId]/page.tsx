@@ -403,11 +403,12 @@ export default function LogDetailPage() {
 
         {/* 기능 태그 */}
         <div className="mb-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-violet-50 text-violet-600">
             <CheckCircle className="h-3 w-3" />
             {log.category === 'supplement' ? '건강 개선' : 
              log.category === 'feed' ? '영양 공급' :
-             log.category === 'snack' ? '기호성 좋음' : '사용 중'}
+             log.category === 'snack' ? '기호성 좋음' : 
+             log.category === 'toilet' ? '위생 관리' : '반려 케어'}
           </span>
         </div>
 
@@ -417,40 +418,32 @@ export default function LogDetailPage() {
         </p>
       </motion.div>
 
-      {/* AI 스마트 분석 */}
+      {/* 후기 내용 */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="mx-4 mb-4 bg-violet-50 rounded-2xl p-4 border border-violet-100"
+        className="mx-4 mb-4 bg-white rounded-2xl border border-gray-100 p-5"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg">✨</span>
-          <span className="text-sm font-semibold text-violet-700">AI 스마트 분석</span>
-        </div>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          {log.product}은(는) {pet.species === 'dog' ? '반려견' : '반려묘'}에게 {
-            log.category === 'supplement' ? '건강 개선과 영양 보충에 효과적인 제품입니다. 다만, 원료에 대한 알레르기 반응을 미리 확인해야 하며, 비루관 폐쇄 등 구조적 문제로 인한 눈물은 영양제만으로 해결되지 않을 수 있으니 전문가 상담을 병행하시길 권장합니다.' :
-            log.category === 'feed' ? '균형 잡힌 영양소를 제공하는 사료입니다. 급여량을 적절히 조절하고, 전환 시 기존 사료와 혼합하여 서서히 변경하는 것이 좋습니다.' :
-            log.category === 'snack' ? '기호성이 좋은 간식입니다. 하루 권장량을 지켜 급여하고, 주식 대신 간식으로만 활용하는 것이 좋습니다.' :
-            '유용한 용품입니다. 반려동물의 반응을 살펴보며 사용하시기 바랍니다.'
-          }
-        </p>
-      </motion.div>
-
-      {/* 후기 내용 */}
-      {log.excerpt && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="mx-4 mb-4 bg-white rounded-2xl border border-gray-100 p-4"
-        >
-          <p className="text-sm text-gray-700 leading-relaxed italic">
-            &ldquo;{log.excerpt}&rdquo;
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">사용 후기</h3>
+        {log.excerpt ? (
+          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+            {log.excerpt}
           </p>
-        </motion.div>
-      )}
+        ) : (
+          <p className="text-sm text-gray-400 italic">
+            아직 작성된 후기가 없습니다.
+          </p>
+        )}
+        {log.notes && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <h4 className="text-xs font-medium text-gray-500 mb-2">추가 메모</h4>
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+              {log.notes}
+            </p>
+          </div>
+        )}
+      </motion.div>
 
       {/* 구분선 */}
       <div className="border-t border-gray-200 my-4" />
