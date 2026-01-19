@@ -126,10 +126,10 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
           {question.title}
         </h3>
 
-        {/* 질문 내용 (이탤릭, 따옴표) */}
+        {/* 질문 내용 */}
         {question.content && (
-          <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 italic flex-1">
-            &ldquo;{question.content.substring(0, 100)}{question.content.length > 100 ? '...' : ''}&rdquo;
+          <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 flex-1">
+            {question.content.substring(0, 100)}{question.content.length > 100 ? '...' : ''}
           </p>
         )}
 
