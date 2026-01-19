@@ -157,6 +157,66 @@ export async function getOwnerWithPets(ownerId: string): Promise<{
 }
 
 /**
+ * Get all pets by owner ID
+ */
+export async function getPetsByOwner(ownerId: string): Promise<any[]> {
+  const supabase = getSupabaseClient()
+  if (!supabase) return []
+
+  if (!isValidUUID(ownerId)) {
+    console.log('[getPetsByOwner] Invalid UUID format, skipping Supabase query:', ownerId)
+    return []
+  }
+
+  const { data, error } = await supabase
+    .from('pets')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('[getPetsByOwner] Error:', error)
+    return []
+  }
+
+  return (data || []).map((pet: any) => ({
+    id: pet.id,
+    name: pet.name,
+    species: pet.species,
+    birthDate: pet.birth_date,
+    weightKg: pet.weight_kg,
+    tags: pet.tags
+  }))
+}
+
+/**
+ * Get all review logs by owner ID
+ */
+export async function getLogsByOwner(ownerId: string): Promise<ClientReviewLog[]> {
+  const supabase = getSupabaseClient()
+  if (!supabase) return []
+
+  if (!isValidUUID(ownerId)) {
+    console.log('[getLogsByOwner] Invalid UUID format, skipping Supabase query:', ownerId)
+    return []
+  }
+
+  const { data, error } = await supabase
+    .from('review_logs')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .eq('admin_status', 'visible')
+    .order('updated_at', { ascending: false })
+
+  if (error) {
+    console.error('[getLogsByOwner] Error:', error)
+    return []
+  }
+
+  return (data || []).map(transformReviewLogRow)
+}
+
+/**
  * Get Q&A threads for a review log
  * Only returns visible threads (admin_status='visible')
  */
