@@ -36,10 +36,10 @@ export default function Hero({ onCTAClick }: HeroProps) {
             <ArrowRight className="h-5 w-5" />
           </Link>
           <Link
-            href="/explore"
+            href="/pet-log"
             className="inline-flex items-center justify-center gap-2 bg-white border-2 border-[#3056F5] text-[#3056F5] font-bold py-4 px-8 rounded-xl transition-all duration-200 hover:bg-[#3056F5] hover:text-white shadow-md"
           >
-            커뮤니티 둘러보기
+            급여 기록 둘러보기
           </Link>
         </div>
       </div>

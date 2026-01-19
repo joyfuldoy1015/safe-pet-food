@@ -47,8 +47,7 @@ const categories = {
     color: 'from-purple-500 to-indigo-500',
     items: [
       { name: '펫 로그', href: '/pet-log', icon: BookOpen, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
-      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' },
-      { name: '탐색하기', href: '/explore', icon: Search, description: 'Q&A와 급여 후기를 둘러보고 경험을 공유해보세요.' }
+      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
     ]
   }
 }
