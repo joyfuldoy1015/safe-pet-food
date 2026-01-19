@@ -350,40 +350,45 @@ export default function FeedActivityPanel({
                       threadId: item.threadId
                     })
                   }}
-                  className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 bg-white hover:border-[#3056F5] hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[#3056F5] focus:ring-offset-2"
+                  className="w-full text-left p-4 rounded-xl border border-gray-200 bg-white hover:border-[#3056F5] hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[#3056F5] focus:ring-offset-2"
                   aria-label="이 활동 열기"
                 >
-                  {/* Row layout - 게시판 스타일 */}
-                  <div className="flex items-center gap-3">
-                    {/* Badge */}
-                    <span
-                      className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}
-                    >
-                      {badge.label}
-                    </span>
-
-                    {/* Author + Time */}
-                    <div className="flex-shrink-0 text-xs text-gray-500 min-w-[100px]">
-                      <span className="font-medium text-gray-700">{item.authorName}</span>
-                      <span className="mx-1">·</span>
-                      <span>{formatTimeAgo(item.createdAt)}</span>
-                    </div>
-
-                    {/* Content + Brand/Product */}
-                    <div className="flex-1 min-w-0 flex items-center gap-2">
-                      <span className="text-sm text-gray-900 truncate">{item.content}</span>
-                      {item.brand && item.product && (
-                        <span className="flex-shrink-0 text-xs text-gray-400">
-                          {item.brand} · {item.product}
+                  <div className="flex items-start gap-4">
+                    {/* Left: Badge + Author + Time */}
+                    <div className="flex-shrink-0 min-w-[140px]">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.color}`}
+                        >
+                          {badge.label}
                         </span>
-                      )}
-                      {item.threadTitle && (
-                        <span className="flex-shrink-0 text-xs text-purple-600 truncate max-w-[150px]">→ {item.threadTitle}</span>
-                      )}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        <span className="font-medium text-gray-900">{item.authorName}</span>
+                        <span className="mx-1">·</span>
+                        <span>{formatTimeAgo(item.createdAt)}</span>
+                      </div>
                     </div>
 
-                    {/* Arrow */}
-                    <ChevronRight className="flex-shrink-0 h-5 w-5 text-gray-400" />
+                    {/* Middle: Content + Brand/Product */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900 line-clamp-2 mb-2">{item.content}</p>
+                      <div className="text-xs text-gray-500">
+                        {item.brand && item.product && (
+                          <span>
+                            {item.brand} · {item.product}
+                          </span>
+                        )}
+                        {item.threadTitle && (
+                          <span className="ml-2 text-purple-600">→ {item.threadTitle}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: Button */}
+                    <div className="flex-shrink-0">
+                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                    </div>
                   </div>
                 </motion.button>
               )
