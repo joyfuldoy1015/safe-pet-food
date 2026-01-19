@@ -21,6 +21,7 @@ const ITEMS_PER_PAGE = 6
 export default function PetLogPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const [mounted, setMounted] = useState(false)
   const [reviews, setReviews] = useState<ReviewLog[]>(mockReviewLogs)
   const [comments, setComments] = useState<Comment[]>(mockComments)
   const [selectedReview, setSelectedReview] = useState<ReviewLog | null>(null)
@@ -30,6 +31,11 @@ export default function PetLogPage() {
   const [isLoadingReviews, setIsLoadingReviews] = useState(true)
   const [pets, setPets] = useState<Pet[]>(mockPets)
   const [owners, setOwners] = useState<Owner[]>(mockOwners)
+
+  // 클라이언트 사이드 마운트 확인 (하이드레이션 에러 방지)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Fetch reviews from Supabase (review_logs and pet_log_posts)
   useEffect(() => {
@@ -441,6 +447,27 @@ export default function PetLogPage() {
   const selectedPet = selectedReview
     ? pets.find((p) => p.id === selectedReview.petId) || null
     : null
+
+  // 클라이언트 마운트 전에는 로딩 UI 표시 (하이드레이션 에러 방지)
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              급여 후기 커뮤니티 🐾
+            </h1>
+            <p className="text-lg text-gray-600">
+              다른 반려집사들의 급여 경험을 둘러보고 나만의 후기도 남겨보세요
+            </p>
+          </div>
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
