@@ -156,10 +156,10 @@ export default function PetLogCard(props: PetLogCardProps) {
         </div>
       )}
 
-      {/* 후기 내용 (이탤릭, 따옴표) */}
+      {/* 후기 내용 */}
       {props.review && (
-        <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3 italic">
-          &ldquo;{props.review}&rdquo;
+        <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3">
+          {props.review}
         </p>
       )}
 

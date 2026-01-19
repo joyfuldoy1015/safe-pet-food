@@ -238,7 +238,7 @@ export default function OwnerProfilePage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-900">나의 기록 보관함</h2>
           <button
-            onClick={() => router.push(`/owners/${ownerId}/pets/${pets[0]?.id || ''}`)}
+            onClick={() => router.push('/pet-log')}
             className="text-sm text-blue-600 hover:text-blue-700"
           >
             전체보기
@@ -276,9 +276,7 @@ export default function OwnerProfilePage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
                   onClick={() => {
-                    if (pet) {
-                      router.push(`/owners/${ownerId}/pets/${pet.id}`)
-                    }
+                    router.push(`/pet-log/${log.id}`)
                   }}
                   className="w-full bg-white rounded-2xl p-4 border border-gray-100 hover:border-violet-200 transition-colors text-left flex items-center gap-4"
                 >

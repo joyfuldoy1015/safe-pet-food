@@ -115,10 +115,10 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
           {item.title}
         </h3>
 
-        {/* 질문 내용 (이탤릭, 따옴표) */}
+        {/* 질문 내용 */}
         {item.excerpt && (
-          <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 italic flex-1">
-            &ldquo;{item.excerpt}&rdquo;
+          <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 flex-1">
+            {item.excerpt}
           </p>
         )}
 

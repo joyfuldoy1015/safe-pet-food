@@ -420,10 +420,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-b from-violet-100 via-blue-50 to-white">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <button
             onClick={() => {
               if (window.history.length > 1) {
@@ -432,33 +432,27 @@ export default function ProfilePage() {
                 router.push('/')
               }
             }}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>돌아가기</span>
+            <span className="text-sm">돌아가기</span>
           </button>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <User className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">마이 페이지</h1>
-          </div>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8">
+        <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8 mb-6">
           {/* Avatar Section */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative flex-shrink-0">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt={nickname}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                  className="w-20 h-20 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center border-4 border-white shadow-lg">
-                  <User className="w-12 h-12 text-white" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                  <User className="w-10 h-10 text-gray-500" />
                 </div>
               )}
               {isEditing && (
@@ -499,15 +493,20 @@ export default function ProfilePage() {
                   />
                   <label
                     htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors cursor-pointer"
+                    className="absolute bottom-0 right-0 w-7 h-7 bg-violet-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-violet-600 transition-colors cursor-pointer"
                   >
-                    <Camera className="w-4 h-4" />
+                    <Camera className="w-3.5 h-3.5" />
                   </label>
                 </>
               )}
             </div>
             {!isEditing && (
-              <h2 className="mt-4 text-xl font-semibold text-gray-900">{nickname}</h2>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {nickname} <span className="text-violet-500">집사님</span>
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">{user.email}</p>
+              </div>
             )}
           </div>
 
@@ -613,15 +612,12 @@ export default function ProfilePage() {
         </div>
 
         {/* 내 반려동물 섹션 */}
-        <div className="mt-8 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <PawPrint className="w-5 h-5 text-purple-600" />
-              내 반려동물
-            </h2>
+            <h2 className="text-lg font-bold text-gray-900">내 반려동물</h2>
             <Link
               href="/pet-log/pets/new"
-              className="flex items-center gap-1 text-sm text-purple-600 hover:text-purple-700 font-medium"
+              className="flex items-center gap-1 text-sm text-violet-600 hover:text-violet-700 font-medium"
             >
               <Plus className="w-4 h-4" />
               추가
@@ -629,35 +625,34 @@ export default function ProfilePage() {
           </div>
           
           {isLoadingPets ? (
-            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+            <p className="text-gray-500 text-center py-6">로딩 중...</p>
           ) : pets.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {pets.map((pet) => (
                 <Link
                   key={pet.id}
                   href={`/pet-log/pets/${pet.id}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow-md transition-all"
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100 hover:border-violet-200 hover:bg-violet-50 transition-colors flex-shrink-0"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
-                      {pet.species === 'cat' ? '🐱' : '🐶'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{pet.name}</h3>
-                      <p className="text-sm text-gray-600 truncate">
-                        {pet.birth_date && `${new Date().getFullYear() - new Date(pet.birth_date).getFullYear()}세`}
-                      </p>
-                    </div>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center overflow-hidden">
+                    <span className="text-xl">{pet.species === 'cat' ? '🐱' : '🐶'}</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900">{pet.name}</p>
+                    <p className="text-xs text-violet-500">
+                      {pet.birth_date && `${new Date().getFullYear() - new Date(pet.birth_date).getFullYear()}세`}
+                      {pet.species === 'cat' ? ' 고양이' : ' 강아지'}
+                    </p>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">등록된 반려동물이 없습니다</p>
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-3 text-sm">등록된 반려동물이 없습니다</p>
               <Link
                 href="/pet-log/pets/new"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500 text-white rounded-xl text-sm hover:bg-violet-600 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 반려동물 등록하기
@@ -667,15 +662,12 @@ export default function ProfilePage() {
         </div>
 
         {/* 최근 급여 후기 섹션 */}
-        <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-blue-600" />
-              내 급여 후기
-            </h2>
+            <h2 className="text-lg font-bold text-gray-900">내 급여/사용 기록</h2>
             <Link
               href="/pet-log/posts/write"
-              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="flex items-center gap-1 text-sm text-violet-600 hover:text-violet-700 font-medium"
             >
               <Plus className="w-4 h-4" />
               작성
@@ -683,41 +675,75 @@ export default function ProfilePage() {
           </div>
           
           {isLoadingPosts ? (
-            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+            <p className="text-gray-500 text-center py-6">로딩 중...</p>
           ) : recentPosts.length > 0 ? (
             <div className="space-y-3">
               {recentPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="relative p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                  className="relative bg-white rounded-2xl p-4 border border-gray-100 hover:border-violet-200 transition-all"
                 >
-                  {/* 최상단: 날짜와 메뉴 버튼 */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-gray-500">
-                      {new Date(post.created_at).toLocaleDateString('ko-KR')}
-                    </span>
-                    <div className="relative">
+                  <div className="flex items-center gap-4">
+                    {/* 아이콘 */}
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">
+                        {post.category === 'feed' ? '🍖' :
+                         post.category === 'snack' ? '🦴' :
+                         post.category === 'supplement' ? '💊' :
+                         post.category === 'toilet' ? '🧻' : '📝'}
+                      </span>
+                    </div>
+
+                    {/* 정보 */}
+                    <Link href={`/pet-log/${post.id}`} className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-semibold text-gray-900 truncate">
+                          {post.source === 'pet_log_posts' 
+                            ? `${post.pet_name || '반려동물'}의 급여 기록`
+                            : post.product || '급여 후기'
+                          }
+                        </h3>
+                        <span className={`flex-shrink-0 ml-2 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          post.status === 'feeding' ? 'bg-green-100 text-green-600' :
+                          post.status === 'completed' ? 'bg-gray-100 text-gray-600' :
+                          'bg-violet-100 text-violet-600'
+                        }`}>
+                          {post.status === 'feeding' ? '급여 중' :
+                           post.status === 'completed' ? '급여 완료' : '기록'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-2 line-clamp-1">
+                        {post.brand && `${post.brand} · `}{new Date(post.created_at).toLocaleDateString('ko-KR')}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-3.5 w-3.5 text-red-400" />
+                          {post.likes || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MessageCircle className="h-3.5 w-3.5 text-blue-400" />
+                          {post.comments_count || 0}
+                        </span>
+                      </div>
+                    </Link>
+
+                    {/* 메뉴 버튼 */}
+                    <div className="relative flex-shrink-0">
                       <button
                         onClick={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
                         disabled={deletingPostId === post.id}
-                        className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
                       >
-                        <MoreVertical className="w-4 h-4 text-gray-600" />
+                        <MoreVertical className="w-4 h-4 text-gray-400" />
                       </button>
                       
                       {openMenuId === post.id && (
                         <>
-                          {/* Backdrop to close menu */}
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setOpenMenuId(null)}
-                          />
-                          
-                          {/* Dropdown menu */}
-                          <div className="absolute right-0 top-8 z-20 w-32 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                          <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                          <div className="absolute right-0 top-10 z-20 w-28 bg-white border border-gray-200 rounded-xl shadow-lg py-1">
                             <button
                               onClick={() => handleEditPost(post.id, post.source)}
-                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                             >
                               <Edit className="w-4 h-4" />
                               수정
@@ -728,67 +754,22 @@ export default function ProfilePage() {
                               className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
                             >
                               <Trash2 className="w-4 h-4" />
-                              {deletingPostId === post.id ? '삭제 중...' : '삭제'}
+                              삭제
                             </button>
                           </div>
                         </>
                       )}
                     </div>
                   </div>
-
-                  {/* 타이틀 */}
-                  <Link
-                    href={post.source === 'pet_log_posts' ? `/pet-log/posts/${post.id}` : `/owners/${user?.id}/pets/${post.pet_id}`}
-                    className="block"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-2">
-                      {post.source === 'pet_log_posts' 
-                        ? `${post.pet_name || '반려동물'}의 급여 기록`
-                        : `${post.brand} - ${post.product}`
-                      }
-                    </h3>
-
-                    {/* 본문 */}
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {post.source === 'pet_log_posts'
-                        ? `${post.pet_breed || ''} • ${post.total_records || 0}개 기록`
-                        : post.excerpt || post.notes || '급여 후기'
-                      }
-                    </p>
-
-                    {/* 하단: 통계 및 뱃지 */}
-                    <div className="flex items-center flex-wrap gap-2 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {post.views || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" />
-                        {post.likes || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {post.comments_count || 0}
-                      </span>
-                      {post.updated_at && post.created_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000 && (
-                        <span className="text-gray-400">• 수정됨</span>
-                      )}
-                      {post.source === 'review_logs' && (
-                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
-                          후기
-                        </span>
-                      )}
-                    </div>
-                  </Link>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">작성한 급여 후기가 없습니다</p>
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-3 text-sm">작성한 급여 후기가 없습니다</p>
               <Link
                 href="/pet-log/posts/write"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500 text-white rounded-xl text-sm hover:bg-violet-600 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 급여 후기 작성하기
@@ -798,12 +779,9 @@ export default function ProfilePage() {
         </div>
 
         {/* 내가 작성한 Q&A 섹션 */}
-        <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-green-600" />
-              내가 작성한 Q&A
-            </h2>
+            <h2 className="text-lg font-bold text-gray-900">내가 작성한 Q&A</h2>
             <Link
               href="/community/qa-forum"
               className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -814,45 +792,62 @@ export default function ProfilePage() {
           </div>
           
           {isLoadingMyQuestions ? (
-            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+            <p className="text-gray-500 text-center py-6">로딩 중...</p>
           ) : myQuestions.length > 0 ? (
             <div className="space-y-3">
               {myQuestions.map((question: any) => (
                 <div
                   key={question.id}
-                  className="relative p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:shadow-md transition-all"
+                  className="relative bg-white rounded-2xl p-4 border border-gray-100 hover:border-blue-200 transition-all"
                 >
-                  {/* 최상단: 날짜와 메뉴 버튼 */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-gray-600 font-medium">{question.category}</span>
-                      <span className="text-gray-400">•</span>
-                      <span className="text-gray-500">
-                        {new Date(question.created_at).toLocaleDateString('ko-KR')}
-                      </span>
+                  <div className="flex items-center gap-4">
+                    {/* Q 아이콘 */}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-blue-600 text-sm font-bold">Q</span>
                     </div>
-                    <div className="relative">
+
+                    {/* 정보 */}
+                    <Link href={`/community/qa-forum/${question.id}`} className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                          {question.category?.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF\u2764\uFE0F\u200D\s]+/, '').trim() || 'Q&A'}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(question.created_at).toLocaleDateString('ko-KR')}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">
+                        {question.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Heart className="h-3.5 w-3.5 text-red-400" />
+                          {question.votes || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-3.5 w-3.5 text-gray-400" />
+                          {question.views || 0}
+                        </span>
+                      </div>
+                    </Link>
+
+                    {/* 메뉴 버튼 */}
+                    <div className="relative flex-shrink-0">
                       <button
                         onClick={() => setOpenMenuId(openMenuId === question.id ? null : question.id)}
                         disabled={deletingPostId === question.id}
-                        className="p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
                       >
-                        <MoreVertical className="w-4 h-4 text-gray-600" />
+                        <MoreVertical className="w-4 h-4 text-gray-400" />
                       </button>
                       
                       {openMenuId === question.id && (
                         <>
-                          {/* Backdrop to close menu */}
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setOpenMenuId(null)}
-                          />
-                          
-                          {/* Dropdown menu */}
-                          <div className="absolute right-0 top-8 z-20 w-32 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                          <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                          <div className="absolute right-0 top-10 z-20 w-28 bg-white border border-gray-200 rounded-xl shadow-lg py-1">
                             <button
                               onClick={() => handleEditQuestion(question.id)}
-                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2"
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                             >
                               <Edit className="w-4 h-4" />
                               수정
@@ -863,49 +858,22 @@ export default function ProfilePage() {
                               className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
                             >
                               <Trash2 className="w-4 h-4" />
-                              {deletingPostId === question.id ? '삭제 중...' : '삭제'}
+                              삭제
                             </button>
                           </div>
                         </>
                       )}
                     </div>
                   </div>
-
-                  {/* 타이틀과 본문 */}
-                  <Link
-                    href={`/community/qa-forum/${question.id}`}
-                    className="block"
-                  >
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
-                      {question.title}
-                    </h3>
-
-                    {/* 본문 미리보기 */}
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {question.content}
-                    </p>
-
-                    {/* 하단: 통계 */}
-                    <div className="flex items-center flex-wrap gap-2 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <ArrowUp className="w-3 h-3" />
-                        {question.votes || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {question.views || 0}
-                      </span>
-                    </div>
-                  </Link>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">작성한 Q&A가 없습니다</p>
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-3 text-sm">작성한 Q&A가 없습니다</p>
               <Link
                 href="/community/qa-forum"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-sm hover:bg-blue-600 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 질문하기
@@ -915,12 +883,9 @@ export default function ProfilePage() {
         </div>
 
         {/* 북마크한 게시글 섹션 */}
-        <div className="mt-6 bg-white rounded-xl shadow-md border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Bookmark className="w-5 h-5 text-yellow-600" />
-              북마크한 게시글
-            </h2>
+            <h2 className="text-lg font-bold text-gray-900">북마크</h2>
             <Link
               href="/community/qa-forum"
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -930,60 +895,55 @@ export default function ProfilePage() {
           </div>
           
           {isLoadingBookmarks ? (
-            <p className="text-gray-500 text-center py-8">로딩 중...</p>
+            <p className="text-gray-500 text-center py-6">로딩 중...</p>
           ) : bookmarkedQuestions.length > 0 ? (
             <div className="space-y-3">
               {bookmarkedQuestions.map((bookmark: any) => (
                 <Link
                   key={bookmark.id}
                   href={`/community/qa-forum/${bookmark.question.id}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:border-yellow-300 hover:shadow-md transition-all"
+                  className="flex items-center gap-4 bg-white rounded-2xl p-4 border border-gray-100 hover:border-yellow-200 transition-all"
                 >
-                  {/* 카테고리와 날짜 */}
-                  <div className="flex items-center gap-2 mb-2 text-xs">
-                    <span className="text-gray-600 font-medium">{bookmark.question.category}</span>
-                    <span className="text-gray-400">•</span>
-                    <span className="text-gray-400">
-                      {new Date(bookmark.created_at).toLocaleDateString('ko-KR')} 북마크
-                    </span>
+                  {/* 북마크 아이콘 */}
+                  <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                    <Bookmark className="h-4 w-4 text-yellow-500" />
                   </div>
-                  
-                  {/* 제목 */}
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1">
-                    {bookmark.question.title}
-                  </h3>
-                  
-                  {/* 본문 미리보기 */}
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {bookmark.question.content}
-                  </p>
-                  
-                  {/* 통계 */}
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <ArrowUp className="w-3 h-3" />
-                      {bookmark.question.votes || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {bookmark.question.views || 0}
-                    </span>
-                    {bookmark.question.author && (
-                      <>
-                        <span className="text-gray-400">•</span>
-                        <span>{bookmark.question.author.nickname || '익명'}</span>
-                      </>
-                    )}
+
+                  {/* 정보 */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                        {bookmark.question.category?.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF\u2764\uFE0F\u200D\s]+/, '').trim() || 'Q&A'}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">
+                      {bookmark.question.title}
+                    </h3>
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Heart className="h-3.5 w-3.5 text-red-400" />
+                        {bookmark.question.votes || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5 text-gray-400" />
+                        {bookmark.question.views || 0}
+                      </span>
+                      {bookmark.question.author && (
+                        <span className="text-gray-400">
+                          {bookmark.question.author.nickname || '익명'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">북마크한 게시글이 없습니다</p>
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-3 text-sm">북마크한 게시글이 없습니다</p>
               <Link
                 href="/community/qa-forum"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-xl text-sm hover:bg-yellow-600 transition-colors"
               >
                 <Bookmark className="w-4 h-4" />
                 Q&A 포럼 둘러보기
