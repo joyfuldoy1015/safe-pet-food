@@ -174,7 +174,7 @@ export default function OwnerProfilePage() {
         <div className="flex items-center gap-4">
           {/* 아바타 */}
           <div className="relative flex-shrink-0">
-            {owner.avatarUrl ? (
+            {owner.avatarUrl && (owner.avatarUrl.startsWith('http') || owner.avatarUrl.startsWith('/')) ? (
               <Image
                 src={owner.avatarUrl}
                 alt={owner.nickname}

@@ -97,7 +97,7 @@ export default function PetLogCard(props: PetLogCardProps) {
         <div className="flex items-center gap-3">
           {/* 아바타 */}
           <div className="relative flex-shrink-0">
-            {props.avatarUrl ? (
+            {props.avatarUrl && (props.avatarUrl.startsWith('http') || props.avatarUrl.startsWith('/')) ? (
               <Image
                 src={props.avatarUrl}
                 alt={props.authorName}

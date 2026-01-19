@@ -396,13 +396,10 @@ export default function PetLogPage() {
       .slice(0, 5)
   }, [reviews])
 
-  // Handle review detail - navigate to pet history page
+  // Handle review detail - navigate to log detail page
   const handleViewDetail = (reviewId: string) => {
-    const review = reviews.find((r) => r.id === reviewId)
-    if (review) {
-      // Navigate to pet-centric history page
-      router.push(`/owners/${review.ownerId}/pets/${review.petId}`)
-    }
+    // Navigate to single log detail page
+    router.push(`/pet-log/${reviewId}`)
   }
 
 
