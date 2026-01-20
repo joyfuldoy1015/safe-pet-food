@@ -1060,98 +1060,56 @@ export default function QuestionDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link
           href="/community/qa-forum"
-          className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
-          <span>목록으로 돌아가기</span>
+          <span className="text-sm">목록으로 돌아가기</span>
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-4">
             {/* Question Card */}
-            <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-              {/* Category and Status */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{question.categoryEmoji}</span>
-                  <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
-                    {question.category.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF\u2764\uFE0F\u200D\s]+/, '').trim()}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {question.status === 'answered' && (
-                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                      답변 완료
-                    </span>
-                  )}
-                  {question.status === 'open' && (
-                    <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
-                      답변 대기
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Title */}
-              {isEditingQuestion ? (
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full text-2xl font-bold text-gray-900 mb-4 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="질문 제목"
-                />
-              ) : (
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <h1 className="text-[1.4rem] font-bold text-gray-900">
-                    {question.title}
-                  </h1>
-                  {/* 수정 버튼 - 본인 글일 경우에만 표시 */}
-                  {user && question.author_id === user.id && (
-                    <button
-                      onClick={handleStartEditQuestion}
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="질문 수정"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Author and Meta */}
-              <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200">
-                <div className="flex items-center space-x-3">
-                  {question.author.avatar ? (
-                    <img
-                      src={question.author.avatar}
-                      alt={question.author.name}
-                      className="h-10 w-10 rounded-full"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="h-5 w-5 text-gray-500" />
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+              {/* 상단: 프로필 + 상태 배지 */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {/* 아바타 with Q badge */}
+                  <div className="relative flex-shrink-0">
+                    {question.author.avatar ? (
+                      <img
+                        src={question.author.avatar}
+                        alt={question.author.name}
+                        className="w-11 h-11 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <User className="h-5 w-5 text-gray-500" />
+                      </div>
+                    )}
+                    <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center border-2 border-white">
+                      <span className="text-white text-[9px] font-bold">Q</span>
                     </div>
-                  )}
+                  </div>
+                  {/* 작성자 정보 */}
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-900 text-sm">
                         {question.author.name}
                       </span>
                       {question.author.level && (
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
+                          className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                             question.author.level === 'expert'
-                              ? 'bg-purple-100 text-purple-800'
+                              ? 'bg-purple-100 text-purple-700'
                               : question.author.level === 'experienced'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-green-100 text-green-800'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-green-100 text-green-700'
                           }`}
                         >
                           {question.author.level === 'expert'
@@ -1162,36 +1120,56 @@ export default function QuestionDetailPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center space-x-2 text-xs text-gray-500 mt-1">
-                      <Clock className="h-3 w-3" />
-                      <span>{formatTimeAgo(question.createdAt)}</span>
-                      {question.views !== undefined && (
-                        <>
-                          <span>•</span>
-                          <div className="flex items-center space-x-1">
-                            <Eye className="h-3 w-3" />
-                            <span>{question.views}회 조회</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    <span className="text-xs text-gray-400">{formatTimeAgo(question.createdAt)}</span>
                   </div>
                 </div>
-                <button
-                  onClick={handleToggleBookmark}
-                  disabled={isTogglingBookmark}
-                  className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    isBookmarked
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-400 hover:bg-gray-100'
-                  }`}
-                  aria-label={isBookmarked ? '북마크 해제' : '북마크 추가'}
-                >
-                  <Bookmark
-                    className={`h-5 w-5 ${isBookmarked ? 'fill-current' : ''}`}
-                  />
-                </button>
+                {/* 상태 배지 */}
+                <div className="flex items-center gap-2">
+                  {question.status === 'answered' ? (
+                    <span className="px-3 py-1 text-xs font-medium bg-green-50 text-green-600 rounded-full">
+                      답변 완료
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 text-xs font-medium bg-orange-50 text-orange-600 rounded-full">
+                      답변 대기
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* 카테고리 태그 */}
+              <div className="mb-3">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  {question.category.replace(/^[\uD83C-\uDBFF\uDC00-\uDFFF\u2764\uFE0F\u200D\s]+/, '').trim()}
+                </span>
+              </div>
+
+              {/* Title */}
+              {isEditingQuestion ? (
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full text-xl font-bold text-gray-900 mb-4 px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="질문 제목"
+                />
+              ) : (
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">
+                    {question.title}
+                  </h1>
+                  {/* 수정 버튼 - 본인 글일 경우에만 표시 */}
+                  {user && question.author_id === user.id && (
+                    <button
+                      onClick={handleStartEditQuestion}
+                      className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"
+                      title="질문 수정"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Content */}
               {isEditingQuestion ? (
@@ -1202,7 +1180,7 @@ export default function QuestionDetailPage() {
                     <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       {questionCategories.map((cat) => (
                         <option key={cat.value} value={cat.value}>
@@ -1218,7 +1196,7 @@ export default function QuestionDetailPage() {
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
                       rows={8}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder="질문 내용을 입력하세요"
                     />
                   </div>
@@ -1227,7 +1205,7 @@ export default function QuestionDetailPage() {
                     <button
                       onClick={handleCancelEditQuestion}
                       disabled={isSavingEdit}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       <X className="h-4 w-4" />
                       취소
@@ -1235,7 +1213,7 @@ export default function QuestionDetailPage() {
                     <button
                       onClick={handleSaveEditQuestion}
                       disabled={isSavingEdit || !editTitle.trim() || !editContent.trim()}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       <Save className="h-4 w-4" />
                       {isSavingEdit ? '저장 중...' : '저장'}
@@ -1243,64 +1221,85 @@ export default function QuestionDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div className="prose max-w-none mb-6">
-                  <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                <div className="mb-6">
+                  <p className="text-gray-600 text-sm sm:text-base whitespace-pre-line leading-relaxed">
                     {question.content}
                   </p>
                   {question.imageUrl && (
                     <img
                       src={question.imageUrl}
                       alt="Question image"
-                      className="mt-4 rounded-lg max-w-full"
+                      className="mt-4 rounded-xl max-w-full"
                     />
                   )}
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-gray-200">
-                {/* Upvote Button */}
-                <button
-                  onClick={handleQuestionUpvote}
-                  className={`flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg transition-colors ${
-                    question.isUpvoted
-                      ? 'text-red-600 bg-red-50 hover:bg-red-100'
-                      : 'text-gray-600 bg-gray-50 hover:bg-gray-100 hover:text-red-600'
-                  }`}
-                >
-                  <ArrowUp
-                    className={`h-5 w-5 ${question.isUpvoted ? 'fill-current' : ''}`}
-                  />
-                  <span className="font-medium">Upvote</span>
-                  <span className="text-lg font-semibold">
-                    {question.votes}
-                  </span>
-                </button>
-                
-                {/* Answer Count & Report */}
-                <div className="flex items-center justify-between sm:justify-end gap-3 text-gray-600">
-                  <div className="flex items-center space-x-2 px-4 py-2.5 bg-gray-50 rounded-lg">
-                    <MessageCircle className="h-5 w-5" />
-                    <span className="font-medium">{question.answerCount}개 답변</span>
+              {/* Actions - 하단 통계 및 액션 */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                {/* 좌측: 좋아요, 답변, 조회수 */}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={handleQuestionUpvote}
+                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-500 transition-colors"
+                  >
+                    <span className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                      question.isUpvoted ? 'bg-red-50' : 'bg-gray-50'
+                    }`}>
+                      <ArrowUp className={`h-4 w-4 ${question.isUpvoted ? 'text-red-500' : 'text-gray-400'}`} />
+                    </span>
+                    <span className="font-medium text-gray-600">{question.votes}</span>
+                  </button>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center">
+                      <MessageCircle className="h-4 w-4 text-blue-400" />
+                    </span>
+                    <span className="font-medium text-gray-600">{question.answerCount}</span>
                   </div>
+                  {question.views !== undefined && (
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <span className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center">
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      </span>
+                      <span className="font-medium text-gray-600">{question.views}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* 우측: 북마크, 신고 */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleToggleBookmark}
+                    disabled={isTogglingBookmark}
+                    className={`p-2 rounded-xl transition-colors disabled:opacity-50 ${
+                      isBookmarked
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-400 hover:bg-gray-100'
+                    }`}
+                    aria-label={isBookmarked ? '북마크 해제' : '북마크 추가'}
+                  >
+                    <Bookmark className={`h-5 w-5 ${isBookmarked ? 'fill-current' : ''}`} />
+                  </button>
                   <button 
-                    className="flex items-center justify-center px-4 py-2.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 text-gray-400 hover:bg-gray-100 rounded-xl transition-colors"
                     aria-label="신고하기"
                   >
                     <Flag className="h-5 w-5" />
-                    <span className="ml-2 font-medium sm:hidden">신고</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Comments Section */}
-            <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+              <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center">
+                  <MessageCircle className="h-4 w-4 text-blue-500" />
+                </span>
                 {comments.length}개의 답변
               </h2>
 
-              <div className="space-y-2 mb-6">
+              <div className="space-y-3 mb-6">
                 {comments.map((comment) => (
                   <CommentThread
                     key={comment.id}
@@ -1316,8 +1315,8 @@ export default function QuestionDetailPage() {
               </div>
 
               {/* New Comment Form */}
-              <div className="pt-4 border-t border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
                   답변 작성하기
                 </h3>
                 {user ? (
@@ -1327,17 +1326,17 @@ export default function QuestionDetailPage() {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="도움이 되는 답변을 작성해주세요... (최소 10자 이상)"
-                        rows={6}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        rows={5}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
                         required
                       />
                       <div className="flex justify-between items-center mt-2">
-                        <span className={`text-sm ${
+                        <span className={`text-xs ${
                           newComment.trim().length < 10 
                             ? 'text-red-500' 
                             : newComment.trim().length > 5000
                             ? 'text-red-500'
-                            : 'text-gray-500'
+                            : 'text-gray-400'
                         }`}>
                           {newComment.trim().length} / 5000자
                           {newComment.trim().length < 10 && newComment.trim().length > 0 && (
@@ -1350,7 +1349,7 @@ export default function QuestionDetailPage() {
                       <button
                         type="submit"
                         disabled={!newComment.trim() || newComment.trim().length < 10}
-                        className="flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         <Send className="h-4 w-4" />
                         <span>답변 등록</span>
@@ -1358,13 +1357,15 @@ export default function QuestionDetailPage() {
                     </div>
                   </form>
                 ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-6 text-center">
                     <div className="flex flex-col items-center space-y-3">
-                      <User className="h-12 w-12 text-gray-400" />
-                      <p className="text-gray-600">답변을 작성하려면 로그인이 필요합니다.</p>
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <User className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm text-gray-500">답변을 작성하려면 로그인이 필요합니다.</p>
                       <Link
                         href={`/login?redirect=${encodeURIComponent(`/community/qa-forum/${questionId}`)}`}
-                        className="px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
                       >
                         로그인하기
                       </Link>
@@ -1373,30 +1374,27 @@ export default function QuestionDetailPage() {
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
             {/* Related Questions */}
             {relatedQuestions.length > 0 && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-900 mb-4">관련 질문</h3>
-                <div className="space-y-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+                <h3 className="text-base font-bold text-gray-900 mb-4">관련 질문</h3>
+                <div className="space-y-3">
                   {relatedQuestions.map((q) => (
                     <Link
                       key={q.id}
                       href={`/community/qa-forum/${q.id}`}
-                      className="block p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                      className="block p-3 rounded-xl hover:bg-gray-50 transition-colors group border border-gray-100"
                     >
-                      <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
                         {q.title}
                       </h4>
-                      <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
-                        <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                        <div className="flex items-center gap-1">
                           <ArrowUp className="h-3 w-3" />
                           <span>{q.votes}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center gap-1">
                           <MessageCircle className="h-3 w-3" />
                           <span>{q.answerCount || 0}</span>
                         </div>
