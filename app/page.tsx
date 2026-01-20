@@ -31,7 +31,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowRight, ChevronRight, TrendingUp, ArrowUp, MessageCircle } from 'lucide-react'
+import { ArrowRight, ChevronRight } from 'lucide-react'
 import Hero from '@/components/home/Hero'
 import FeatureCards from '@/components/home/FeatureCards'
 import UnifiedCard from '@/components/home/UnifiedCard'
@@ -39,46 +39,10 @@ import PetLogCard from '@/components/petlogs/PetLogCard'
 import { getQA, type UnifiedFeedItem } from '@/lib/data/feed'
 import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
 
-interface TrendingQuestion {
-  id: string
-  title: string
-  category: string
-  votes: number
-  views: number
-  answerCount: number
-  author: {
-    name: string
-    level: string
-  }
-  createdAt: string
-  trendingScore: number
-}
-
 export default function Home() {
   const router = useRouter()
   const [qaItems, setQAItems] = useState<UnifiedFeedItem[]>([])
   const [isQALoading, setIsQALoading] = useState(true)
-  const [trendingQuestions, setTrendingQuestions] = useState<TrendingQuestion[]>([])
-  const [isTrendingLoading, setIsTrendingLoading] = useState(true)
-  
-  // Fetch trending questions from API
-  useEffect(() => {
-    const fetchTrending = async () => {
-      setIsTrendingLoading(true)
-      try {
-        const response = await fetch('/api/trending-questions')
-        if (response.ok) {
-          const data = await response.json()
-          setTrendingQuestions(data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch trending questions:', error)
-      } finally {
-        setIsTrendingLoading(false)
-      }
-    }
-    fetchTrending()
-  }, [])
 
   // Load Q&A
   useEffect(() => {
@@ -287,56 +251,6 @@ export default function Home() {
             <p className="text-sm text-gray-500">아직 등록된 Q&A가 없습니다</p>
           </div>
         )}
-      </section>
-
-      {/* Trending Questions Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6">
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <TrendingUp className="h-5 w-5 text-orange-500" />
-            <h3 className="font-bold text-gray-900">트렌딩 질문</h3>
-          </div>
-          <div className="space-y-4">
-            {isTrendingLoading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
-              </div>
-            ) : trendingQuestions.length > 0 ? (
-              trendingQuestions.map((question, index) => (
-                <Link
-                  key={question.id}
-                  href={`/community/qa-forum/${question.id}`}
-                  className="block p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center">
-                      <span className="text-xs font-bold text-orange-600">{index + 1}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                        {question.title}
-                      </h4>
-                      <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <ArrowUp className="h-3 w-3" />
-                          <span>{question.votes}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <MessageCircle className="h-3 w-3" />
-                          <span>{question.answerCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">
-                트렌딩 질문이 없습니다
-              </p>
-            )}
-          </div>
-        </div>
       </section>
 
       {/* Newsletter Section */}

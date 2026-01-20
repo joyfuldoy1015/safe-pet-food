@@ -5,7 +5,6 @@ import { Search, Plus, Flame, Clock, HelpCircle, ChevronDown, Loader2 } from 'lu
 import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import AskQuestionModal from '@/app/components/qa-forum/AskQuestionModal'
 import CategoryTabs from '@/app/components/qa-forum/CategoryTabs'
-import SidebarTrending from '@/app/components/qa-forum/SidebarTrending'
 import { getBrowserClient } from '@/lib/supabase-client'
 
 // Fallback mock data
@@ -270,17 +269,6 @@ export default function CommunityQAForumPage() {
     setIsLoadingMore(false)
   }
 
-  // Get trending questions (top 5 by votes)
-  const trendingQuestions = useMemo(() => {
-    return [...questions]
-      .sort((a, b) => b.votes - a.votes)
-      .slice(0, 5)
-      .map((q) => ({
-        ...q,
-        isUpvoted: userVotes[q.id] || false
-      }))
-  }, [questions, userVotes])
-
   // Handle upvote
   const handleUpvote = async (questionId: string) => {
     try {
@@ -501,10 +489,10 @@ export default function CommunityQAForumPage() {
           />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div>
           {/* Questions Feed */}
-          <div className="lg:col-span-2">
+          <div>
             {displayedQuestions.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -564,13 +552,6 @@ export default function CommunityQAForumPage() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <SidebarTrending
-              trendingQuestions={trendingQuestions}
-              formatTimeAgo={formatTimeAgo}
-            />
-          </div>
                 </div>
                 
         {/* Floating Ask Question Button */}
