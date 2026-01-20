@@ -145,106 +145,99 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </Link>
-            <h1 className="text-2xl font-bold text-gray-900">브랜드 & 제품 검색</h1>
-          </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+            <ArrowLeft className="h-4 w-4 text-gray-500" />
+          </Link>
+          <h1 className="text-lg font-bold text-gray-900">제품 검색</h1>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {/* 검색 입력 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="브랜드명 또는 제품명을 검색하세요..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              <span>필터</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 탭 네비게이션 */}
-        <div className="bg-white rounded-t-xl shadow-sm border border-gray-200 border-b-0">
-          <div className="px-6">
-            <SearchTabs
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              brandCount={filteredBrands.length}
-              productCount={filteredAndSortedProducts.length}
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="브랜드명 또는 제품명을 검색하세요..."
+              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent shadow-sm"
             />
           </div>
         </div>
 
+        {/* 탭 네비게이션 */}
+        <div className="mb-4">
+          <SearchTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            brandCount={filteredBrands.length}
+            productCount={filteredAndSortedProducts.length}
+          />
+        </div>
+
         {/* 검색 결과 */}
-        <div className="bg-white rounded-b-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">데이터를 불러오는 중...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500 mx-auto mb-4"></div>
+              <p className="text-sm text-gray-500">데이터를 불러오는 중...</p>
             </div>
           ) : (
             <>
               {/* 브랜드 탭 */}
               {activeTab === 'brands' && (
-                <div className="space-y-4">
+                <div>
                   {filteredBrands.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p className="text-lg font-medium mb-2">검색 결과가 없습니다</p>
-                      <p className="text-sm">다른 검색어를 입력해보세요.</p>
+                    <div className="text-center py-12">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Search className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 mb-1">검색 결과가 없습니다</p>
+                      <p className="text-xs text-gray-500">다른 검색어를 입력해보세요.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {filteredBrands.map((brand) => (
                         <Link
                           key={brand.id}
                           href={`/brands/${brand.name}`}
-                          className="block bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-300 transition-all"
+                          className="block bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all group"
                         >
-                          <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
-                              <h3 className="text-xl font-bold text-gray-900 mb-1">
+                              <h3 className="text-sm font-bold text-gray-900 mb-0.5 group-hover:text-violet-600 transition-colors">
                                 {brand.name}
                               </h3>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-xs text-gray-500">
                                 {brand.manufacturer}
                               </p>
                             </div>
                             {brand.transparency_score && (
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-blue-600">
+                              <div className="text-center p-2 bg-violet-50 rounded-xl">
+                                <div className="text-lg font-bold text-violet-600">
                                   {brand.transparency_score}
                                 </div>
-                                <div className="text-xs text-gray-600">투명성</div>
+                                <div className="text-[10px] text-violet-500">투명성</div>
                               </div>
                             )}
                           </div>
 
                           {brand.description && (
-                            <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                            <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                               {brand.description}
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-400">
                               {brand.country} • {brand.established_year}년
                             </span>
                             {brand.products_count !== undefined && (
-                              <span className="text-blue-600 font-medium">
+                              <span className="text-violet-600 font-medium">
                                 제품 {brand.products_count}개
                               </span>
                             )}
@@ -258,21 +251,21 @@ export default function SearchPage() {
 
               {/* 제품 탭 */}
               {activeTab === 'products' && (
-                <div className="space-y-4">
-                  {/* 🆕 필터 & 정렬 */}
-                  <div className="flex flex-wrap gap-4 pb-4 border-b border-gray-200">
+                <div>
+                  {/* 필터 & 정렬 */}
+                  <div className="flex flex-wrap items-center gap-3 pb-4 mb-4 border-b border-gray-100">
                     {/* 등급 필터 */}
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">등급:</span>
-                      <div className="flex gap-2">
+                      <span className="text-xs font-medium text-gray-500">등급:</span>
+                      <div className="flex gap-1">
                         {['all', 'A', 'B', 'C', 'D', 'F'].map((grade) => (
                           <button
                             key={grade}
                             onClick={() => setGradeFilter(grade)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                               gradeFilter === grade
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-violet-500 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                           >
                             {grade === 'all' ? '전체' : grade}
@@ -283,27 +276,27 @@ export default function SearchPage() {
                     
                     {/* 정렬 - 커스텀 드롭다운 */}
                     <div className="flex items-center gap-2 ml-auto relative" ref={sortDropdownRef}>
-                      <span className="text-sm font-medium text-gray-700">정렬:</span>
+                      <span className="text-xs font-medium text-gray-500">정렬:</span>
                       <button
                         onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                        className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[100px] justify-between"
+                        className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-xl text-xs bg-white hover:bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent min-w-[90px] justify-between"
                       >
-                        <span>{sortBy === 'grade' ? '등급 높은순' : '이름순'}</span>
-                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+                        <span className="text-gray-700">{sortBy === 'grade' ? '등급 높은순' : '이름순'}</span>
+                        <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
                       </button>
                       
                       {/* 드롭다운 메뉴 */}
                       {sortDropdownOpen && (
-                        <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px] overflow-hidden">
+                        <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 min-w-[110px] overflow-hidden">
                           <button
                             onClick={() => { setSortBy('grade'); setSortDropdownOpen(false) }}
-                            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${sortBy === 'grade' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'}`}
+                            className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-50 ${sortBy === 'grade' ? 'bg-violet-50 text-violet-600 font-medium' : 'text-gray-600'}`}
                           >
                             등급 높은순
                           </button>
                           <button
                             onClick={() => { setSortBy('name'); setSortDropdownOpen(false) }}
-                            className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${sortBy === 'name' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'}`}
+                            className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-50 ${sortBy === 'name' ? 'bg-violet-50 text-violet-600 font-medium' : 'text-gray-600'}`}
                           >
                             이름순
                           </button>
@@ -313,11 +306,14 @@ export default function SearchPage() {
                   </div>
                   
                   {filteredAndSortedProducts.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p className="text-lg font-medium mb-2">
+                    <div className="text-center py-12">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Search className="h-6 w-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 mb-1">
                         {products.length === 0 ? '등록된 제품이 없습니다' : '검색 결과가 없습니다'}
                       </p>
-                      <p className="text-sm">
+                      <p className="text-xs text-gray-500">
                         {products.length === 0 
                           ? '제품 데이터가 추가되면 여기에 표시됩니다.' 
                           : '다른 검색어나 필터를 시도해보세요.'}
@@ -325,12 +321,14 @@ export default function SearchPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="text-sm text-gray-600 mb-4">
-                        총 {filteredAndSortedProducts.length}개 제품
+                      <div className="text-xs text-gray-500 mb-3">
+                        총 <span className="font-semibold text-gray-700">{filteredAndSortedProducts.length}</span>개 제품
                       </div>
-                      {filteredAndSortedProducts.map((product) => (
-                        <ProductSearchResult key={product.id} product={product} />
-                      ))}
+                      <div className="space-y-2">
+                        {filteredAndSortedProducts.map((product) => (
+                          <ProductSearchResult key={product.id} product={product} />
+                        ))}
+                      </div>
                     </>
                   )}
                 </div>
