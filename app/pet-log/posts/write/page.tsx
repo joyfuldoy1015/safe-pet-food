@@ -563,52 +563,50 @@ export default function WritePostPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-start space-x-4 mb-6">
-            <Link href="/pet-log" className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-1">
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">커뮤니티 포스트 작성</h1>
-              <p className="text-gray-600 mb-4">우리 아이의 급여 경험을 다른 집사들과 공유해보세요</p>
-              
-              {/* 단계 표시 - 행으로 정렬 */}
-              <div className="flex items-center justify-start space-x-2">
-                {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      step === currentStep 
-                        ? 'bg-purple-600 text-white' 
-                        : step < currentStep 
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-600'
-                    }`}>
-                      {step < currentStep ? <CheckCircle className="h-4 w-4" /> : step}
-                    </div>
-                    {step < 3 && (
-                      <div className={`w-8 h-0.5 mx-2 ${
-                        step < currentStep ? 'bg-green-500' : 'bg-gray-200'
-                      }`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <Link href="/pet-log" className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+            <ArrowLeft className="h-4 w-4 text-gray-500" />
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold text-gray-900">급여 후기 작성</h1>
+            <p className="text-xs text-gray-500">우리 아이의 급여 경험을 공유해보세요</p>
           </div>
+        </div>
+        
+        {/* 단계 표시 */}
+        <div className="flex items-center justify-center gap-2 py-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+          {[1, 2, 3].map((step) => (
+            <div key={step} className="flex items-center">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+                step === currentStep 
+                  ? 'bg-violet-500 text-white' 
+                  : step < currentStep 
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-400'
+              }`}>
+                {step < currentStep ? <CheckCircle className="h-3.5 w-3.5" /> : step}
+              </div>
+              {step < 3 && (
+                <div className={`w-8 h-0.5 mx-1.5 ${
+                  step < currentStep ? 'bg-green-500' : 'bg-gray-200'
+                }`} />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {/* 단계 1: 반려동물 정보 */}
         {currentStep === 1 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">반려동물 정보</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold text-gray-900">반려동물 정보</h2>
               {petProfiles.length > 0 && (
                 <Link
                   href="/pet-log/pets/new"
-                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-xs text-violet-600 hover:text-violet-700 font-medium"
                 >
                   + 새 반려동물 등록
                 </Link>
@@ -617,14 +615,14 @@ export default function WritePostPage() {
             
             {/* 등록된 반려동물 선택 */}
             {petProfiles.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-5">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   등록된 반려동물 선택
                 </label>
                 <select
                   value={useNewPet ? 'new' : selectedPetProfile}
                   onChange={(e) => handlePetSelect(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                 >
                   {petProfiles.map(pet => (
                     <option key={pet.id} value={pet.id}>
@@ -637,16 +635,16 @@ export default function WritePostPage() {
             )}
             
             {/* 반려동물 정보 입력 폼 */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${petProfiles.length > 0 && !useNewPet ? 'opacity-60' : ''}`}>
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${petProfiles.length > 0 && !useNewPet ? 'opacity-60' : ''}`}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   반려동물 이름 *
                 </label>
                 <input
                   type="text"
                   value={petInfo.petName}
                   onChange={(e) => setPetInfo({...petInfo, petName: e.target.value})}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  className={`w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
                     !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
                   }`}
                   placeholder="예: 뽀미"
@@ -655,14 +653,14 @@ export default function WritePostPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   품종 *
                 </label>
                 <input
                   type="text"
                   value={petInfo.petBreed}
                   onChange={(e) => setPetInfo({...petInfo, petBreed: e.target.value})}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  className={`w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
                     !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
                   }`}
                   placeholder="예: 골든 리트리버"
@@ -671,14 +669,14 @@ export default function WritePostPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   나이 *
                 </label>
                 <input
                   type="text"
                   value={petInfo.petAge}
                   onChange={(e) => setPetInfo({...petInfo, petAge: e.target.value})}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  className={`w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
                     !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
                   }`}
                   placeholder="예: 3세"
@@ -687,14 +685,14 @@ export default function WritePostPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   체중 *
                 </label>
                 <input
                   type="text"
                   value={petInfo.petWeight}
                   onChange={(e) => setPetInfo({...petInfo, petWeight: e.target.value})}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                  className={`w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
                     !useNewPet && petProfiles.length > 0 ? 'bg-gray-50 cursor-not-allowed' : ''
                   }`}
                   placeholder="예: 28kg"
@@ -703,14 +701,14 @@ export default function WritePostPage() {
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   집사 이름 *
                 </label>
                 <input
                   type="text"
                   value={petInfo.ownerName}
                   onChange={(e) => setPetInfo({...petInfo, ownerName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                   placeholder="예: 김집사"
                   disabled={!useNewPet && petProfiles.length > 0}
                 />
@@ -718,9 +716,9 @@ export default function WritePostPage() {
             </div>
             
             {petProfiles.length === 0 && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-700">
-                  💡 <strong>팁:</strong> 반려동물을 먼저 등록하면 다음 급여 기록 작성 시 자동으로 정보가 입력됩니다.{' '}
+              <div className="mt-5 p-3 bg-violet-50 rounded-xl">
+                <p className="text-xs text-violet-700">
+                  💡 반려동물을 먼저 등록하면 다음 급여 기록 작성 시 자동으로 정보가 입력됩니다.{' '}
                   <Link href="/pet-log/pets/new" className="underline font-medium">
                     새 반려동물 등록하기
                   </Link>
@@ -728,14 +726,14 @@ export default function WritePostPage() {
               </div>
             )}
             
-            <div className="flex justify-end mt-8">
+            <div className="flex justify-end mt-6">
               <button
                 onClick={nextStep}
                 disabled={!canProceedToStep2}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   canProceedToStep2
-                    ? 'bg-purple-600 text-white hover:bg-purple-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-violet-500 text-white hover:bg-violet-600'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
                 다음 단계
@@ -746,11 +744,11 @@ export default function WritePostPage() {
 
         {/* 단계 2: 급여 기록 */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* 기존 급여 기록들 */}
             {feedingRecords.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">등록된 급여 기록 ({feedingRecords.length}개)</h2>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4">등록된 급여 기록 ({feedingRecords.length}개)</h2>
                 
                 <div className="space-y-4">
                   {feedingRecords.map((record) => (
@@ -799,13 +797,13 @@ export default function WritePostPage() {
             )}
 
             {/* 급여 기록 추가 폼 */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">급여 기록 추가</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-sm font-semibold text-gray-900">급여 기록 추가</h2>
                 {!showRecordForm && (
                   <button
                     onClick={() => setShowRecordForm(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-violet-500 text-white text-sm rounded-xl hover:bg-violet-600 transition-colors"
                   >
                     <Plus className="h-4 w-4" />
                     <span>기록 추가</span>
@@ -825,7 +823,7 @@ export default function WritePostPage() {
                         type="text"
                         value={currentRecord.productName}
                         onChange={(e) => setCurrentRecord({...currentRecord, productName: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         placeholder="예: 힐스 어덜트 라지 브리드"
                       />
                     </div>
@@ -838,7 +836,7 @@ export default function WritePostPage() {
                         type="text"
                         value={currentRecord.brand}
                         onChange={(e) => setCurrentRecord({...currentRecord, brand: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         placeholder="예: 힐스"
                       />
                     </div>
@@ -850,7 +848,7 @@ export default function WritePostPage() {
                       <select
                         value={currentRecord.category}
                         onChange={(e) => setCurrentRecord({...currentRecord, category: e.target.value as ProductCategory})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       >
                         <option value="사료">🍽️ 사료</option>
                         <option value="간식">🦴 간식</option>
@@ -866,7 +864,7 @@ export default function WritePostPage() {
                       <select
                         value={currentRecord.status}
                         onChange={(e) => setCurrentRecord({...currentRecord, status: e.target.value as FeedingStatus})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       >
                         <option value="급여중">🟢 급여중</option>
                         <option value="급여완료">⚫ 급여완료</option>
@@ -882,7 +880,7 @@ export default function WritePostPage() {
                         type="date"
                         value={currentRecord.startDate}
                         onChange={(e) => setCurrentRecord({...currentRecord, startDate: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         required
                       />
                     </div>
@@ -895,7 +893,7 @@ export default function WritePostPage() {
                         type="date"
                         value={currentRecord.endDate || ''}
                         onChange={(e) => setCurrentRecord({...currentRecord, endDate: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         min={currentRecord.startDate || undefined} // 시작일 이후만 선택 가능
                         max={new Date().toISOString().split('T')[0]} // 오늘 이후 날짜 선택 불가
                         disabled={!currentRecord.startDate} // 시작일이 없으면 비활성화
@@ -934,7 +932,7 @@ export default function WritePostPage() {
                         type="text"
                         value={currentRecord.price}
                         onChange={(e) => setCurrentRecord({...currentRecord, price: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         placeholder="예: 50,000원"
                       />
                     </div>
@@ -947,7 +945,7 @@ export default function WritePostPage() {
                         type="text"
                         value={currentRecord.purchaseLocation}
                         onChange={(e) => setCurrentRecord({...currentRecord, purchaseLocation: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         placeholder="예: 동물병원, 온라인몰"
                       />
                     </div>
@@ -1014,7 +1012,7 @@ export default function WritePostPage() {
                         type="text"
                         value={newBenefit}
                         onChange={(e) => setNewBenefit(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         placeholder="예: 털 윤기 개선, 소화 잘됨"
                         onKeyPress={(e) => e.key === 'Enter' && addBenefit()}
                       />
@@ -1054,7 +1052,7 @@ export default function WritePostPage() {
                         type="text"
                         value={newSideEffect}
                         onChange={(e) => setNewSideEffect(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         placeholder="예: 가격이 비쌈, 알레르기 반응"
                         onKeyPress={(e) => e.key === 'Enter' && addSideEffect()}
                       />
@@ -1093,7 +1091,7 @@ export default function WritePostPage() {
                       value={currentRecord.comment}
                       onChange={(e) => setCurrentRecord({...currentRecord, comment: e.target.value})}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="이 제품에 대한 자세한 경험과 느낀 점을 공유해주세요..."
                     />
                   </div>
@@ -1110,7 +1108,7 @@ export default function WritePostPage() {
                       disabled={!currentRecord.productName || !currentRecord.brand}
                       className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                         currentRecord.productName && currentRecord.brand
-                          ? 'bg-purple-600 text-white hover:bg-purple-700'
+                          ? 'bg-violet-500 text-white hover:bg-violet-600'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                     >
@@ -1136,7 +1134,7 @@ export default function WritePostPage() {
                 disabled={!canProceedToStep3}
                 className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                   canProceedToStep3
-                    ? 'bg-purple-600 text-white hover:bg-purple-700'
+                    ? 'bg-violet-500 text-white hover:bg-violet-600'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
@@ -1148,26 +1146,26 @@ export default function WritePostPage() {
 
         {/* 단계 3: 미리보기 */}
         {currentStep === 3 && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">포스트 미리보기</h2>
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <h2 className="text-sm font-semibold text-gray-900 mb-5">포스트 미리보기</h2>
               
               {/* 반려동물 정보 */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🐕</span>
+              <div className="bg-gray-50 rounded-xl p-4 mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
+                    <span className="text-xl">🐕</span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{petInfo.petName}</h3>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    <h3 className="text-base font-bold text-gray-900">{petInfo.petName}</h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
                       <span>{petInfo.petBreed}</span>
                       <span>•</span>
                       <span>{petInfo.petAge}</span>
                       <span>•</span>
                       <span>{petInfo.petWeight}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">집사: {petInfo.ownerName}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">집사: {petInfo.ownerName}</p>
                   </div>
                 </div>
               </div>
@@ -1277,7 +1275,7 @@ export default function WritePostPage() {
             <div className="flex items-center justify-between">
               <button
                 onClick={prevStep}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 text-gray-700 text-sm rounded-xl hover:bg-gray-200 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>이전 단계</span>
@@ -1285,7 +1283,7 @@ export default function WritePostPage() {
               
               <button
                 onClick={submitPost}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
+                className="px-5 py-2.5 bg-green-500 text-white text-sm rounded-xl hover:bg-green-600 font-medium transition-colors"
               >
                 포스트 게시하기
               </button>
