@@ -43,37 +43,6 @@ export default function HealthAnalyzerComingSoon() {
             보호자가 이해하기 쉽게 설명해드리는 기능을 준비하고 있어요.
           </p>
 
-          {/* Features Preview */}
-          <div className="bg-gray-50 rounded-2xl p-6 mb-8 max-w-md mx-auto">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">예정된 기능</h3>
-            <ul className="text-left text-sm text-gray-600 space-y-3">
-              <li className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-600 text-xs">✓</span>
-                </span>
-                혈액검사, 소변검사 결과 PDF 업로드
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-600 text-xs">✓</span>
-                </span>
-                AI 기반 검사 수치 분석 및 해석
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-600 text-xs">✓</span>
-                </span>
-                보호자 맞춤 관리 권장사항 제공
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-600 text-xs">✓</span>
-                </span>
-                수의사에게 물어볼 질문 자동 생성
-              </li>
-            </ul>
-          </div>
-
           {/* CTA */}
           <div className="space-y-4">
             <Link
