@@ -100,19 +100,29 @@ export function useAuth() {
   // Sign out function
   const signOut = async () => {
     const supabase = getBrowserClient()
-    if (!supabase) return
+    if (!supabase) {
+      console.log('[useAuth] Supabase client not available')
+      return
+    }
 
     try {
+      console.log('[useAuth] Starting sign out...')
+      
       // Clear local state first
       setUser(null)
       setProfile(null)
 
-      // Sign out from Supabase
-      await supabase.auth.signOut()
-
-      console.log('[useAuth] Signed out successfully')
+      // Sign out from Supabase with global scope to clear all sessions
+      const { error } = await supabase.auth.signOut({ scope: 'global' })
+      
+      if (error) {
+        console.error('[useAuth] Sign out error:', error)
+        // 에러가 있어도 로컬 상태는 이미 정리됨
+      } else {
+        console.log('[useAuth] Signed out successfully')
+      }
     } catch (error) {
-      console.error('[useAuth] Sign out error:', error)
+      console.error('[useAuth] Sign out exception:', error)
     }
   }
 

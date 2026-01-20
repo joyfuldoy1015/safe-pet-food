@@ -229,14 +229,20 @@ export default function Header() {
                     {profile?.nickname || user?.email || '사용자'}
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.preventDefault()
                       e.stopPropagation()
                       console.log('[Header] 모바일 로그아웃 버튼 클릭 이벤트 발생')
-                      setMobileMenuOpen(false)
-                      handleLogout()
+                      // 먼저 로그아웃 처리 후 메뉴 닫기
+                      await handleLogout()
                     }}
-                    className="flex items-center gap-2 text-black hover:text-gray-700 font-medium py-2 text-left px-4 hover:bg-yellow-300 rounded-lg"
+                    onTouchEnd={async (e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      console.log('[Header] 모바일 로그아웃 버튼 터치 이벤트 발생')
+                      await handleLogout()
+                    }}
+                    className="flex items-center gap-2 text-black hover:text-gray-700 font-medium py-3 text-left px-4 hover:bg-yellow-300 rounded-lg active:bg-yellow-500"
                     type="button"
                   >
                     <LogOut className="h-4 w-4" />
