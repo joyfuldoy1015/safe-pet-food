@@ -97,14 +97,8 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Sign out function
+  // Sign out function - uses server-side API for reliable cookie clearing
   const signOut = async () => {
-    const supabase = getBrowserClient()
-    if (!supabase) {
-      console.log('[useAuth] Supabase client not available')
-      return
-    }
-
     try {
       console.log('[useAuth] Starting sign out...')
       
@@ -112,15 +106,25 @@ export function useAuth() {
       setUser(null)
       setProfile(null)
 
-      // Sign out from Supabase with global scope to clear all sessions
-      const { error } = await supabase.auth.signOut({ scope: 'global' })
+      // Call server-side logout API to properly clear cookies
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
       
-      if (error) {
-        console.error('[useAuth] Sign out error:', error)
-        // 에러가 있어도 로컬 상태는 이미 정리됨
+      if (!response.ok) {
+        console.error('[useAuth] Logout API error:', response.status)
       } else {
-        console.log('[useAuth] Signed out successfully')
+        console.log('[useAuth] Logout API successful')
       }
+
+      // Also sign out from client-side Supabase
+      const supabase = getBrowserClient()
+      if (supabase) {
+        await supabase.auth.signOut({ scope: 'global' })
+      }
+
+      console.log('[useAuth] Signed out successfully')
     } catch (error) {
       console.error('[useAuth] Sign out exception:', error)
     }
