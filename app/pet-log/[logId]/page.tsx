@@ -973,23 +973,146 @@ export default function LogDetailPage() {
                     </>
                   )}
                   {/* 답변 표시 */}
-                  {answers.length > 0 && (
+                  {answers.filter(a => !a.parentId || a.parentId === question.id).length > 0 && (
                     <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                      {answers.map(answer => (
-                        <div key={answer.id} className="bg-white rounded-lg p-3 border border-green-100">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="text-xs text-green-600 font-medium">
-                              {answer.author?.nickname || '익명'}님의 답변
-                            </p>
-                            <span className="text-xs text-gray-400">{formatTimeAgo(answer.createdAt)}</span>
+                      {answers.filter(a => !a.parentId || a.parentId === question.id).map(answer => {
+                        // 이 답변에 대한 대댓글들
+                        const answerReplies = qaPosts.filter(p => p.parentId === answer.id)
+                        
+                        return (
+                          <div key={answer.id} className="bg-white rounded-lg p-3 border border-green-100">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-xs text-green-600 font-medium">
+                                  {answer.author?.nickname || '익명'}님의 답변
+                                </p>
+                                <span className="text-xs text-gray-400">{formatTimeAgo(answer.createdAt)}</span>
+                              </div>
+                              {user && user.id === answer.authorId && (
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setMenuOpenId(menuOpenId === `answer-${answer.id}` ? null : `answer-${answer.id}`)}
+                                    className="p-1 hover:bg-gray-100 rounded-full"
+                                  >
+                                    <MoreVertical className="h-3.5 w-3.5 text-gray-400" />
+                                  </button>
+                                  {menuOpenId === `answer-${answer.id}` && (
+                                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden min-w-[100px]">
+                                      <button
+                                        onClick={() => {
+                                          setEditingQAPostId(answer.id)
+                                          setEditContent(answer.content)
+                                          setMenuOpenId(null)
+                                        }}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 w-full whitespace-nowrap"
+                                      >
+                                        <Edit2 className="h-4 w-4 flex-shrink-0" /> 수정
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteQAPost(answer.id, answer.threadId)}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full whitespace-nowrap"
+                                      >
+                                        <Trash2 className="h-4 w-4 flex-shrink-0" /> 삭제
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            
+                            {editingQAPostId === answer.id ? (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editContent}
+                                  onChange={(e) => setEditContent(e.target.value)}
+                                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                  rows={2}
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    onClick={() => { setEditingQAPostId(null); setEditContent(''); }}
+                                    className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                                  >
+                                    취소
+                                  </button>
+                                  <button
+                                    onClick={() => handleEditQAPost(answer.id)}
+                                    className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
+                                  >
+                                    저장
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-sm text-gray-700">{answer.content}</p>
+                                
+                                {/* 답변에 답글 달기 버튼 */}
+                                {user && (
+                                  <button
+                                    onClick={() => {
+                                      setReplyingToQAId(replyingToQAId === answer.id ? null : answer.id)
+                                      setReplyContent('')
+                                    }}
+                                    className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                  >
+                                    {replyingToQAId === answer.id ? '취소' : '답글 달기'}
+                                  </button>
+                                )}
+                              </>
+                            )}
+
+                            {/* 답변에 대한 답글 입력 */}
+                            {replyingToQAId === answer.id && (
+                              <div className="mt-2 pl-3 border-l-2 border-blue-200">
+                                <textarea
+                                  value={replyContent}
+                                  onChange={(e) => setReplyContent(e.target.value)}
+                                  placeholder="답글을 입력하세요..."
+                                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                  rows={2}
+                                />
+                                <div className="flex justify-end gap-2 mt-2">
+                                  <button
+                                    onClick={() => { setReplyingToQAId(null); setReplyContent(''); }}
+                                    className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                                  >
+                                    취소
+                                  </button>
+                                  <button
+                                    onClick={() => handleReplyToQA(answer.threadId, answer.id)}
+                                    disabled={!replyContent.trim()}
+                                    className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                                  >
+                                    답글 등록
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 답변에 대한 대댓글 표시 */}
+                            {answerReplies.length > 0 && (
+                              <div className="mt-2 pl-3 border-l-2 border-gray-200 space-y-2">
+                                {answerReplies.map(reply => (
+                                  <div key={reply.id} className="bg-gray-50 rounded-lg p-2.5">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-xs font-medium text-blue-600">
+                                        {reply.author?.nickname || '익명'}
+                                      </span>
+                                      <span className="text-xs text-gray-400">{formatTimeAgo(reply.createdAt)}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-600">{reply.content}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <p className="text-sm text-gray-700">{answer.content}</p>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
 
-                  {/* 답변하기 버튼 */}
+                  {/* 문의에 답변하기 버튼 */}
                   {user && (
                     <div className="mt-3">
                       {replyingToQAId === question.id ? (
