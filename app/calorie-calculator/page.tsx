@@ -124,33 +124,31 @@ export default function CalorieCalculator() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Title Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            사료 칼로리 & 급여량 계산기 ⚡
-          </h1>
-          <p className="text-lg text-gray-600">
-            우리 아이의 체중과 활동량에 맞는 적정 칼로리와 급여량을 계산해보세요
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <Link href="/" className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+            <ArrowLeft className="h-4 w-4 text-gray-500" />
+          </Link>
+          <h1 className="text-lg font-bold text-gray-900">칼로리 & 급여량 계산기</h1>
         </div>
 
         {!showResult ? (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calculator className="h-8 w-8 text-blue-600" />
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Calculator className="h-6 w-6 text-violet-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">반려동물 정보 입력</h2>
-              <p className="text-gray-600">반려동물의 정보를 입력하여 적정 칼로리를 계산해보세요</p>
+              <h2 className="text-base font-bold text-gray-900 mb-1">반려동물 정보 입력</h2>
+              <p className="text-xs text-gray-500">반려동물의 정보를 입력하여 적정 칼로리를 계산해보세요</p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* 반려동물 종류 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">반려동물 종류</label>
-                <div className="grid grid-cols-2 gap-4">
+                <label className="block text-xs font-medium text-gray-600 mb-2">반려동물 종류</label>
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     { value: 'dog', label: '강아지', icon: '🐕' },
                     { value: 'cat', label: '고양이', icon: '🐱' }
@@ -158,14 +156,14 @@ export default function CalorieCalculator() {
                     <button
                       key={option.value}
                       onClick={() => setPetInfo(prev => ({ ...prev, type: option.value as 'dog' | 'cat' }))}
-                      className={`p-4 rounded-xl border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all ${
                         petInfo.type === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 text-violet-700'
+                          : 'border-gray-100 hover:border-gray-200'
                       }`}
                     >
-                      <div className="text-2xl mb-2">{option.icon}</div>
-                      <div className="font-medium">{option.label}</div>
+                      <div className="text-xl mb-1">{option.icon}</div>
+                      <div className="text-sm font-medium">{option.label}</div>
                     </button>
                   ))}
                 </div>
@@ -173,8 +171,8 @@ export default function CalorieCalculator() {
 
               {/* 나이 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">나이</label>
-                <div className="grid grid-cols-3 gap-4">
+                <label className="block text-xs font-medium text-gray-600 mb-2">나이</label>
+                <div className="grid grid-cols-3 gap-3">
                   {[
                     { value: 'puppy', label: petInfo.type === 'dog' ? '강아지' : '새끼고양이', desc: '1세 미만' },
                     { value: 'adult', label: '성체', desc: '1-7세' },
@@ -183,14 +181,14 @@ export default function CalorieCalculator() {
                     <button
                       key={option.value}
                       onClick={() => setPetInfo(prev => ({ ...prev, age: option.value as any }))}
-                      className={`p-4 rounded-xl border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all ${
                         petInfo.age === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 text-violet-700'
+                          : 'border-gray-100 hover:border-gray-200'
                       }`}
                     >
-                      <div className="font-medium">{option.label}</div>
-                      <div className="text-sm text-gray-500">{option.desc}</div>
+                      <div className="text-sm font-medium">{option.label}</div>
+                      <div className="text-[10px] text-gray-500">{option.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -198,12 +196,12 @@ export default function CalorieCalculator() {
 
               {/* 체중 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">체중 (kg)</label>
+                <label className="block text-xs font-medium text-gray-600 mb-2">체중 (kg)</label>
                 <input
                   type="number"
                   value={petInfo.weight || ''}
                   onChange={(e) => setPetInfo(prev => ({ ...prev, weight: parseFloat(e.target.value) || 0 }))}
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                   placeholder="체중을 입력하세요"
                   min="0"
                   step="0.1"
@@ -212,25 +210,25 @@ export default function CalorieCalculator() {
 
               {/* 활동량 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">활동량</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <label className="block text-xs font-medium text-gray-600 mb-2">활동량</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {[
-                    { value: 'low', label: '낮음', desc: '실내생활, 운동 적음' },
-                    { value: 'normal', label: '보통', desc: '일반적인 활동량' },
-                    { value: 'high', label: '높음', desc: '활발한 운동, 많은 활동' },
-                    { value: 'weight_loss', label: '체중감량', desc: '체중 감량 목표' }
+                    { value: 'low', label: '낮음', desc: '실내생활' },
+                    { value: 'normal', label: '보통', desc: '일반 활동' },
+                    { value: 'high', label: '높음', desc: '활발한 운동' },
+                    { value: 'weight_loss', label: '감량', desc: '체중 감량' }
                   ].map((option) => (
                     <button
                       key={option.value}
                       onClick={() => setPetInfo(prev => ({ ...prev, activityLevel: option.value as any }))}
-                      className={`p-4 rounded-xl border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all ${
                         petInfo.activityLevel === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 text-violet-700'
+                          : 'border-gray-100 hover:border-gray-200'
                       }`}
                     >
-                      <div className="font-medium">{option.label}</div>
-                      <div className="text-sm text-gray-500">{option.desc}</div>
+                      <div className="text-sm font-medium">{option.label}</div>
+                      <div className="text-[10px] text-gray-500">{option.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -238,8 +236,8 @@ export default function CalorieCalculator() {
 
               {/* 중성화 여부 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">중성화 여부</label>
-                <div className="grid grid-cols-2 gap-4">
+                <label className="block text-xs font-medium text-gray-600 mb-2">중성화 여부</label>
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     { value: true, label: '중성화함' },
                     { value: false, label: '중성화 안함' }
@@ -247,13 +245,13 @@ export default function CalorieCalculator() {
                     <button
                       key={option.value.toString()}
                       onClick={() => setPetInfo(prev => ({ ...prev, isNeutered: option.value }))}
-                      className={`p-4 rounded-xl border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all ${
                         petInfo.isNeutered === option.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-violet-500 bg-violet-50 text-violet-700'
+                          : 'border-gray-100 hover:border-gray-200'
                       }`}
                     >
-                      <div className="font-medium">{option.label}</div>
+                      <div className="text-sm font-medium">{option.label}</div>
                     </button>
                   ))}
                 </div>
@@ -261,33 +259,30 @@ export default function CalorieCalculator() {
 
               {/* 사료 1kg당 칼로리 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-xs font-medium text-gray-600 mb-2">
                   사료 1kg당 칼로리 (kcal/kg)
-                  <span className="ml-2 text-xs text-gray-500">사료 포장지의 영양성분표를 확인하세요</span>
                 </label>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <input
                     type="number"
                     value={petInfo.feedCaloriePerKg || ''}
                     onChange={(e) => setPetInfo(prev => ({ ...prev, feedCaloriePerKg: parseFloat(e.target.value) || 0 }))}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="예: 350 (일반적인 건사료 기준)"
+                    className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                    placeholder="예: 3500 (일반적인 건사료 기준)"
                     min="0"
                     step="1"
                   />
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="bg-violet-50 rounded-xl p-3">
                     <div className="flex items-start gap-2">
-                      <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-blue-700">
-                        <p className="font-semibold mb-1">참고 사항:</p>
-                        <ul className="space-y-1.5 text-xs">
-                          <li>• 일반 건사료(Dry food): 3,300~4,500 kcal/kg</li>
-                          <li className="text-xs opacity-90 ml-3">→ 수분이 적어 칼로리 밀도가 높습니다.</li>
-                          <li>• 습사료(Wet food): 800~1,200 kcal/kg</li>
-                          <li className="text-xs opacity-90 ml-3">→ 수분이 70~80%로 많아 칼로리 밀도가 낮습니다.</li>
+                      <Info className="h-4 w-4 text-violet-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-violet-700">
+                        <p className="font-medium mb-1">참고 사항:</p>
+                        <ul className="space-y-1 text-[10px] text-violet-600">
+                          <li>• 건사료: 3,300~4,500 kcal/kg</li>
+                          <li>• 습사료: 800~1,200 kcal/kg</li>
                         </ul>
-                        <p className="mt-2 text-xs font-medium">
-                          💡 사료 포장지의 &quot;대사 에너지(ME, kcal/kg)&quot; 또는 &quot;사료 1kg당 칼로리&quot; 값을 직접 확인하여 입력하세요.
+                        <p className="mt-1.5 text-[10px]">
+                          사료 포장지의 &quot;대사 에너지(ME)&quot; 값을 확인하세요.
                         </p>
                       </div>
                     </div>
@@ -300,56 +295,53 @@ export default function CalorieCalculator() {
                   calculateCalories()
                 }}
                 disabled={petInfo.weight <= 0 || petInfo.feedCaloriePerKg <= 0}
-                className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-violet-500 text-white py-3 rounded-xl text-sm font-semibold hover:bg-violet-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 칼로리 계산하기
               </button>
             </div>
           </div>
         ) : (
-          <div id="calculation-result" className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="h-8 w-8 text-green-600" />
+          <div id="calculation-result" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Heart className="h-6 w-6 text-green-500" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">계산 결과</h2>
-              <p className="text-gray-600">반려동물의 하루 권장 칼로리입니다</p>
+              <h2 className="text-lg font-bold text-gray-900 mb-1">계산 결과</h2>
+              <p className="text-xs text-gray-500">반려동물의 하루 권장 칼로리입니다</p>
             </div>
 
             {result && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-blue-50 p-6 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-violet-50 p-4 rounded-xl text-center">
+                    <div className="text-xl font-bold text-violet-600 mb-1">
                       {result.baseCalories}
                     </div>
-                    <div className="text-sm text-gray-600">기초 대사량 (kcal)</div>
+                    <div className="text-[10px] text-gray-500">기초 대사량 (kcal)</div>
                   </div>
-                  <div className="bg-green-50 p-6 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-2">
+                  <div className="bg-green-50 p-4 rounded-xl text-center">
+                    <div className="text-xl font-bold text-green-600 mb-1">
                       {result.adjustedCalories}
                     </div>
-                    <div className="text-sm text-gray-600">하루 권장 칼로리 (kcal)</div>
+                    <div className="text-[10px] text-gray-500">하루 권장 (kcal)</div>
                   </div>
-                  <div className="bg-orange-50 p-6 rounded-xl text-center">
-                    <div className="text-3xl font-bold text-orange-600 mb-2">
+                  <div className="bg-orange-50 p-4 rounded-xl text-center">
+                    <div className="text-xl font-bold text-orange-600 mb-1">
                       {result.dailyFeedingAmount.toFixed(1)}g
                     </div>
-                    <div className="text-sm text-gray-600">일일 사료량</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      ({petInfo.feedCaloriePerKg} kcal/kg 기준)
-                    </div>
+                    <div className="text-[10px] text-gray-500">일일 사료량</div>
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-                  <div className="flex items-start space-x-3">
-                    <Info className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="bg-amber-50 rounded-xl p-4">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-semibold text-yellow-800 mb-3">급여 권장사항</h3>
-                      <ul className="space-y-2">
+                      <h3 className="text-xs font-semibold text-amber-800 mb-2">급여 권장사항</h3>
+                      <ul className="space-y-1">
                         {result.recommendations.map((rec, index) => (
-                          <li key={index} className="text-yellow-700 text-sm">
+                          <li key={index} className="text-amber-700 text-[11px]">
                             • {rec}
                           </li>
                         ))}
@@ -358,16 +350,16 @@ export default function CalorieCalculator() {
                   </div>
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex gap-3">
                   <button
                     onClick={resetCalculator}
-                    className="flex-1 bg-gray-600 text-white py-3 rounded-xl font-semibold hover:bg-gray-700 transition-colors"
+                    className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
                   >
                     다시 계산하기
                   </button>
                   <Link
                     href="/brands"
-                    className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-center"
+                    className="flex-1 bg-violet-500 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-violet-600 transition-colors text-center"
                   >
                     브랜드 평가 보기
                   </Link>
@@ -379,4 +371,4 @@ export default function CalorieCalculator() {
       </main>
     </div>
   )
-} 
+}
