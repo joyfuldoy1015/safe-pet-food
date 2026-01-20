@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight, MoreVertical, Edit2, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { getBrowserClient } from '@/lib/supabase-client'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPostWithAuthor } from '@/lib/types/review-log'
@@ -30,6 +30,12 @@ export default function LogDetailPage() {
   const [activeTab, setActiveTab] = useState<'comments' | 'qa'>('comments')
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editingQAPostId, setEditingQAPostId] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState('')
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const commentsSectionRef = useRef<HTMLDivElement>(null)
+  const qaSectionRef = useRef<HTMLDivElement>(null)
 
   // 데이터 로드
   useEffect(() => {
@@ -228,14 +234,17 @@ export default function LogDetailPage() {
     }
   }
 
-  // 댓글 제출
-  const handleCommentSubmit = async () => {
+  // 댓글/문의 제출
+  const handleSubmit = async () => {
     if (!newComment.trim() || !user || !log) return
 
     setIsSubmitting(true)
     try {
       const supabase = getBrowserClient()
-      if (supabase) {
+      if (!supabase) return
+
+      if (activeTab === 'comments') {
+        // 댓글 등록
         const { data, error } = await supabase
           .from('comments')
           .insert({
@@ -260,12 +269,187 @@ export default function LogDetailPage() {
           }])
           setNewComment('')
         }
+      } else {
+        // 문의 등록 - 새 스레드 생성 후 질문 포스트 추가
+        const { data: threadData, error: threadError } = await supabase
+          .from('pet_log_qa_threads')
+          .insert({
+            log_id: log.id,
+            title: newComment.trim().slice(0, 50),
+            author_id: user.id
+          })
+          .select()
+          .single()
+
+        if (!threadError && threadData) {
+          // 질문 포스트 추가
+          const { data: postData, error: postError } = await supabase
+            .from('pet_log_qa_posts')
+            .insert({
+              thread_id: threadData.id,
+              author_id: user.id,
+              content: newComment.trim(),
+              kind: 'question'
+            })
+            .select(`
+              *,
+              profiles:author_id(nickname, avatar_url)
+            `)
+            .single()
+
+          if (!postError && postData) {
+            setQAThreads([...qaThreads, {
+              id: threadData.id,
+              logId: threadData.log_id,
+              title: threadData.title,
+              authorId: threadData.author_id,
+              createdAt: threadData.created_at
+            }])
+            setQAPosts([...qaPosts, {
+              id: postData.id,
+              threadId: postData.thread_id,
+              authorId: postData.author_id,
+              content: postData.content,
+              kind: postData.kind,
+              parentId: postData.parent_id,
+              isAccepted: postData.is_accepted,
+              upvotes: postData.upvotes || 0,
+              createdAt: postData.created_at,
+              author: {
+                id: postData.author_id,
+                nickname: postData.profiles?.nickname || '익명',
+                avatarUrl: postData.profiles?.avatar_url
+              }
+            }])
+            setNewComment('')
+          }
+        }
       }
     } catch (error) {
-      console.error('댓글 등록 오류:', error)
+      console.error('등록 오류:', error)
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // 댓글 수정
+  const handleEditComment = async (commentId: string) => {
+    if (!editContent.trim() || !user) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { error } = await supabase
+        .from('comments')
+        .update({ content: editContent.trim() })
+        .eq('id', commentId)
+        .eq('author_id', user.id)
+
+      if (!error) {
+        setComments(comments.map(c => 
+          c.id === commentId ? { ...c, content: editContent.trim() } : c
+        ))
+        setEditingCommentId(null)
+        setEditContent('')
+      }
+    } catch (error) {
+      console.error('댓글 수정 오류:', error)
+    }
+  }
+
+  // 댓글 삭제
+  const handleDeleteComment = async (commentId: string) => {
+    if (!user || !confirm('댓글을 삭제하시겠습니까?')) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('author_id', user.id)
+
+      if (!error) {
+        setComments(comments.filter(c => c.id !== commentId))
+      }
+    } catch (error) {
+      console.error('댓글 삭제 오류:', error)
+    }
+    setMenuOpenId(null)
+  }
+
+  // 문의 수정
+  const handleEditQAPost = async (postId: string) => {
+    if (!editContent.trim() || !user) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { error } = await supabase
+        .from('pet_log_qa_posts')
+        .update({ content: editContent.trim() })
+        .eq('id', postId)
+        .eq('author_id', user.id)
+
+      if (!error) {
+        setQAPosts(qaPosts.map(p => 
+          p.id === postId ? { ...p, content: editContent.trim() } : p
+        ))
+        setEditingQAPostId(null)
+        setEditContent('')
+      }
+    } catch (error) {
+      console.error('문의 수정 오류:', error)
+    }
+  }
+
+  // 문의 삭제
+  const handleDeleteQAPost = async (postId: string, threadId: string) => {
+    if (!user || !confirm('문의를 삭제하시겠습니까?')) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      // 포스트 삭제
+      const { error: postError } = await supabase
+        .from('pet_log_qa_posts')
+        .delete()
+        .eq('id', postId)
+        .eq('author_id', user.id)
+
+      if (!postError) {
+        // 해당 스레드의 다른 포스트가 없으면 스레드도 삭제
+        const remainingPosts = qaPosts.filter(p => p.threadId === threadId && p.id !== postId)
+        if (remainingPosts.length === 0) {
+          await supabase
+            .from('pet_log_qa_threads')
+            .delete()
+            .eq('id', threadId)
+          setQAThreads(qaThreads.filter(t => t.id !== threadId))
+        }
+        setQAPosts(qaPosts.filter(p => p.id !== postId))
+      }
+    } catch (error) {
+      console.error('문의 삭제 오류:', error)
+    }
+    setMenuOpenId(null)
+  }
+
+  // 탭 변경 시 해당 섹션으로 스크롤
+  const handleTabChange = (tab: 'comments' | 'qa') => {
+    setActiveTab(tab)
+    setTimeout(() => {
+      if (tab === 'comments' && commentsSectionRef.current) {
+        commentsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      } else if (tab === 'qa' && qaSectionRef.current) {
+        qaSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
   }
 
   // 공유 기능
@@ -448,16 +632,99 @@ export default function LogDetailPage() {
       {/* 구분선 */}
       <div className="border-t border-gray-200 my-4" />
 
-      {/* 집사 문답 섹션 */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="px-4 mb-4"
-      >
-        <div className="flex items-center justify-between mb-4">
+      {/* 댓글 섹션 */}
+      <div ref={commentsSectionRef} className="px-4 mb-4">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">
+          댓글 <span className="text-violet-500">{comments.length}</span>
+        </h3>
+        {comments.length > 0 ? (
+          <div className="space-y-3">
+            {comments.map((comment) => (
+              <div key={comment.id} className="bg-white rounded-xl p-3 border border-gray-100 relative">
+                {editingCommentId === comment.id ? (
+                  // 수정 모드
+                  <div className="space-y-2">
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      rows={2}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => { setEditingCommentId(null); setEditContent(''); }}
+                        className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={() => handleEditComment(comment.id)}
+                        className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
+                      >
+                        저장
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // 일반 모드
+                  <>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
+                        <span className="text-xs text-gray-400">{formatTimeAgo(comment.createdAt)}</span>
+                      </div>
+                      {user && user.id === comment.authorId && (
+                        <div className="relative">
+                          <button
+                            onClick={() => setMenuOpenId(menuOpenId === comment.id ? null : comment.id)}
+                            className="p-1 hover:bg-gray-100 rounded-full"
+                          >
+                            <MoreVertical className="h-4 w-4 text-gray-400" />
+                          </button>
+                          {menuOpenId === comment.id && (
+                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                              <button
+                                onClick={() => {
+                                  setEditingCommentId(comment.id)
+                                  setEditContent(comment.content)
+                                  setMenuOpenId(null)
+                                }}
+                                className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 w-full"
+                              >
+                                <Edit2 className="h-3 w-3" /> 수정
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 w-full"
+                              >
+                                <Trash2 className="h-3 w-3" /> 삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-700">{comment.content}</p>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-gray-50 rounded-2xl">
+            <p className="text-sm text-gray-500">아직 댓글이 없습니다</p>
+          </div>
+        )}
+      </div>
+
+      {/* 구분선 */}
+      <div className="border-t border-gray-200 mb-4" />
+
+      {/* 문의 섹션 */}
+      <div ref={qaSectionRef} className="px-4 pb-40">
+        <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold text-gray-900">
-            집사 문답 <span className="text-violet-500">{qaThreads.length}</span>
+            문의 <span className="text-violet-500">{qaThreads.length}</span>
           </h3>
           {totalHelpful > 0 && (
             <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-full text-sm text-red-500">
@@ -467,17 +734,77 @@ export default function LogDetailPage() {
           )}
         </div>
 
-        {/* Q&A 목록 */}
         {qaPosts.filter(p => p.kind === 'question').length > 0 ? (
           <div className="space-y-3">
             {qaPosts.filter(p => p.kind === 'question').map((question) => {
               const answers = qaPosts.filter(p => p.kind === 'answer' && p.threadId === question.threadId)
               return (
-                <div key={question.id} className="bg-gray-50 rounded-2xl p-4">
-                  <p className="text-xs text-violet-600 font-medium mb-1">
-                    {question.author?.nickname || '익명'}님의 문의
-                  </p>
-                  <p className="text-sm text-gray-800">{question.content}</p>
+                <div key={question.id} className="bg-gray-50 rounded-2xl p-4 relative">
+                  {editingQAPostId === question.id ? (
+                    // 수정 모드
+                    <div className="space-y-2">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        rows={3}
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => { setEditingQAPostId(null); setEditContent(''); }}
+                          className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                        >
+                          취소
+                        </button>
+                        <button
+                          onClick={() => handleEditQAPost(question.id)}
+                          className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
+                        >
+                          저장
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs text-violet-600 font-medium">
+                          {question.author?.nickname || '익명'}님의 문의
+                        </p>
+                        {user && user.id === question.authorId && (
+                          <div className="relative">
+                            <button
+                              onClick={() => setMenuOpenId(menuOpenId === `qa-${question.id}` ? null : `qa-${question.id}`)}
+                              className="p-1 hover:bg-gray-200 rounded-full"
+                            >
+                              <MoreVertical className="h-4 w-4 text-gray-400" />
+                            </button>
+                            {menuOpenId === `qa-${question.id}` && (
+                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                                <button
+                                  onClick={() => {
+                                    setEditingQAPostId(question.id)
+                                    setEditContent(question.content)
+                                    setMenuOpenId(null)
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 w-full"
+                                >
+                                  <Edit2 className="h-3 w-3" /> 수정
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteQAPost(question.id, question.threadId)}
+                                  className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 w-full"
+                                >
+                                  <Trash2 className="h-3 w-3" /> 삭제
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-800">{question.content}</p>
+                      <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(question.createdAt)}</p>
+                    </>
+                  )}
                   {answers.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
                       <p className="text-xs text-green-600 font-medium mb-1">답변</p>
@@ -494,17 +821,14 @@ export default function LogDetailPage() {
             <p className="text-sm text-gray-500">아직 문의가 없습니다</p>
           </div>
         )}
-      </motion.div>
-
-      {/* 구분선 */}
-      <div className="border-t border-gray-200" />
+      </div>
 
       {/* 하단 탭 & 입력 영역 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
         {/* 탭 */}
         <div className="flex">
           <button
-            onClick={() => setActiveTab('comments')}
+            onClick={() => handleTabChange('comments')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === 'comments'
                 ? 'bg-violet-500 text-white'
@@ -514,7 +838,7 @@ export default function LogDetailPage() {
             댓글 {comments.length > 0 && `(${comments.length})`}
           </button>
           <button
-            onClick={() => setActiveTab('qa')}
+            onClick={() => handleTabChange('qa')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === 'qa'
                 ? 'bg-violet-500 text-white'
@@ -536,12 +860,12 @@ export default function LogDetailPage() {
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
-                handleCommentSubmit()
+                handleSubmit()
               }
             }}
           />
           <button
-            onClick={handleCommentSubmit}
+            onClick={handleSubmit}
             disabled={!newComment.trim() || isSubmitting}
             className="w-12 h-12 bg-violet-500 text-white rounded-full flex items-center justify-center hover:bg-violet-600 transition-colors disabled:opacity-50"
           >
@@ -549,28 +873,6 @@ export default function LogDetailPage() {
           </button>
         </div>
       </div>
-
-      {/* 댓글 목록 (탭이 comments일 때) */}
-      {activeTab === 'comments' && comments.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="px-4 pb-4"
-        >
-          <h3 className="text-lg font-bold text-gray-900 mb-3">댓글</h3>
-          <div className="space-y-3">
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-white rounded-xl p-3 border border-gray-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
-                  <span className="text-xs text-gray-400">{formatTimeAgo(comment.createdAt)}</span>
-                </div>
-                <p className="text-sm text-gray-700">{comment.content}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
     </div>
   )
 }
