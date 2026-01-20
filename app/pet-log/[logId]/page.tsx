@@ -818,9 +818,13 @@ export default function LogDetailPage() {
                     <p className="text-sm text-gray-700">{comment.content}</p>
                     
                     {/* 답글 버튼 - 부모 댓글에만 표시 */}
-                    {!comment.parentId && user && (
+                    {!comment.parentId && (
                       <button
                         onClick={() => {
+                          if (!user) {
+                            alert('로그인이 필요합니다.')
+                            return
+                          }
                           setReplyingToCommentId(replyingToCommentId === comment.id ? null : comment.id)
                           setReplyContent('')
                         }}
@@ -1048,17 +1052,19 @@ export default function LogDetailPage() {
                                 <p className="text-sm text-gray-700">{answer.content}</p>
                                 
                                 {/* 답변에 답글 달기 버튼 */}
-                                {user && (
-                                  <button
-                                    onClick={() => {
-                                      setReplyingToQAId(replyingToQAId === answer.id ? null : answer.id)
-                                      setReplyContent('')
-                                    }}
-                                    className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
-                                  >
-                                    {replyingToQAId === answer.id ? '취소' : '답글 달기'}
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => {
+                                    if (!user) {
+                                      alert('로그인이 필요합니다.')
+                                      return
+                                    }
+                                    setReplyingToQAId(replyingToQAId === answer.id ? null : answer.id)
+                                    setReplyContent('')
+                                  }}
+                                  className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                >
+                                  {replyingToQAId === answer.id ? '취소' : '답글 달기'}
+                                </button>
                               </>
                             )}
 
@@ -1113,46 +1119,48 @@ export default function LogDetailPage() {
                   )}
 
                   {/* 문의에 답변하기 버튼 */}
-                  {user && (
-                    <div className="mt-3">
-                      {replyingToQAId === question.id ? (
-                        <div className="bg-white rounded-lg p-3 border border-violet-200">
-                          <textarea
-                            value={replyContent}
-                            onChange={(e) => setReplyContent(e.target.value)}
-                            placeholder="답변을 입력하세요..."
-                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                            rows={3}
-                          />
-                          <div className="flex justify-end gap-2 mt-2">
-                            <button
-                              onClick={() => { setReplyingToQAId(null); setReplyContent(''); }}
-                              className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
-                            >
-                              취소
-                            </button>
-                            <button
-                              onClick={() => handleReplyToQA(question.threadId, question.id)}
-                              disabled={!replyContent.trim()}
-                              className="px-3 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
-                            >
-                              답변 등록
-                            </button>
-                          </div>
+                  <div className="mt-3">
+                    {replyingToQAId === question.id ? (
+                      <div className="bg-white rounded-lg p-3 border border-violet-200">
+                        <textarea
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="답변을 입력하세요..."
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                          rows={3}
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            onClick={() => { setReplyingToQAId(null); setReplyContent(''); }}
+                            className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                          >
+                            취소
+                          </button>
+                          <button
+                            onClick={() => handleReplyToQA(question.threadId, question.id)}
+                            disabled={!replyContent.trim()}
+                            className="px-3 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+                          >
+                            답변 등록
+                          </button>
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setReplyingToQAId(question.id)
-                            setReplyContent('')
-                          }}
-                          className="text-xs text-green-600 hover:text-green-700 font-medium"
-                        >
-                          답변하기
-                        </button>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          if (!user) {
+                            alert('로그인이 필요합니다.')
+                            return
+                          }
+                          setReplyingToQAId(question.id)
+                          setReplyContent('')
+                        }}
+                        className="text-xs text-green-600 hover:text-green-700 font-medium"
+                      >
+                        답변하기
+                      </button>
+                    )}
+                  </div>
                 </div>
               )
             })}
