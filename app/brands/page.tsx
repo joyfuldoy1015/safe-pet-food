@@ -165,11 +165,11 @@ export default function BrandsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-            <p className="mt-4 text-gray-600">브랜드 정보를 불러오는 중...</p>
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500"></div>
+            <p className="mt-4 text-sm text-gray-500">브랜드 정보를 불러오는 중...</p>
           </div>
         </div>
       </div>
@@ -177,50 +177,34 @@ export default function BrandsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Title Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            사료 브랜드 투명성 평가 🏆
-          </h2>
-          <p className="text-lg text-gray-600 mb-6">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            브랜드 둘러보기
+          </h1>
+          <p className="text-sm text-gray-500">
             다양한 브랜드의 투명성과 품질을 비교하고 신뢰할 수 있는 선택을 하세요
           </p>
-          
-          {/* 새로운 기능 링크 */}
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link 
-              href="/brands/compare"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>브랜드 비교하기</span>
-            </Link>
-            <Link 
-              href="/community/qa-forum"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span>Q&A 포럼</span>
-            </Link>
-          </div>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-4 gap-6">
           {/* Filter Panel */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6 border border-gray-100 sticky top-24">
+            <div className="bg-white rounded-2xl shadow-sm p-5 space-y-5 border border-gray-100 sticky top-24">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Filter className="h-5 w-5 mr-2" />
+                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Filter className="h-4 w-4 text-gray-600" />
+                  </span>
                   필터 및 정렬
                 </h3>
                 
                 {/* Search */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-5">
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
                     브랜드 검색
                   </label>
                   <div className="relative">
@@ -229,7 +213,7 @@ export default function BrandsPage() {
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                       placeholder="브랜드명 또는 제조사"
                     />
                   </div>
@@ -237,22 +221,22 @@ export default function BrandsPage() {
 
                 {/* Sort Options - 커스텀 드롭다운 */}
                 <div className="relative" ref={sortDropdownRef}>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
                     정렬 기준
                   </label>
                   <button
                     onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-xl text-sm hover:bg-gray-50 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm hover:bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors"
                   >
                     <span className="font-medium text-gray-900">
                       {sortBy === 'rating' ? '평점 높은 순' : sortBy === 'transparency' ? '투명성 높은 순' : '이름 순'}
                     </span>
-                    <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   
                   {/* 드롭다운 메뉴 */}
                   {sortDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
                       {[
                         { value: 'rating', label: '평점 높은 순' },
                         { value: 'transparency', label: '투명성 높은 순' },
@@ -264,10 +248,10 @@ export default function BrandsPage() {
                             setSortBy(option.value as 'rating' | 'name' | 'transparency')
                             setSortDropdownOpen(false)
                           }}
-                          className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors ${
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
                             sortBy === option.value 
-                              ? 'bg-yellow-50 text-yellow-700 font-medium' 
-                              : 'text-gray-700'
+                              ? 'bg-violet-50 text-violet-700 font-medium' 
+                              : 'text-gray-600'
                           }`}
                         >
                           {option.label}
@@ -278,10 +262,10 @@ export default function BrandsPage() {
                 </div>
 
                 {/* Stats */}
-                <div className="pt-6 mt-4 border-t border-gray-200">
+                <div className="pt-5 mt-4 border-t border-gray-100">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-600">{brands.length}</div>
-                    <div className="text-sm text-gray-600">등록된 브랜드</div>
+                    <div className="text-2xl font-bold text-violet-600">{brands.length}</div>
+                    <div className="text-xs text-gray-500">등록된 브랜드</div>
                   </div>
                 </div>
               </div>
@@ -292,14 +276,14 @@ export default function BrandsPage() {
           <div className="lg:col-span-3">
             {filteredAndSortedBrands.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-12 w-12 text-gray-400" />
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">검색 결과가 없습니다</h3>
-                <p className="text-gray-600">다른 검색어를 시도해보세요</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1">검색 결과가 없습니다</h3>
+                <p className="text-sm text-gray-500">다른 검색어를 시도해보세요</p>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-4">
                 {filteredAndSortedBrands.map((brand) => {
                   const transparencyBadge = getTransparencyBadge(brand)
                   const TransparencyIcon = transparencyBadge.icon
@@ -309,18 +293,18 @@ export default function BrandsPage() {
                     <Link
                       key={brand.id}
                       href={`/brands/${encodeURIComponent(brand.name)}`}
-                      className="block bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group"
+                      className="block bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 group"
                     >
-                      <div className="p-6">
+                      <div className="p-5">
                         {/* Header */}
-                        <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-yellow-600 transition-colors">
+                            <h3 className="text-base font-bold text-gray-900 mb-0.5 group-hover:text-violet-600 transition-colors">
                               {brand.name}
                             </h3>
-                            <p className="text-sm text-gray-600">{brand.manufacturer}</p>
+                            <p className="text-xs text-gray-500">{brand.manufacturer}</p>
                           </div>
-                          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${transparencyBadge.color}`}>
+                          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${transparencyBadge.color}`}>
                             <TransparencyIcon className="h-3 w-3" />
                             <span>{transparencyBadge.text}</span>
                           </div>
@@ -328,69 +312,68 @@ export default function BrandsPage() {
 
                         {/* Description */}
                         {brand.description && (
-                          <div className="mb-4">
-                            <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
-                              {brand.description}
-                            </p>
-                          </div>
+                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">
+                            {brand.description}
+                          </p>
                         )}
 
                         {/* Rating */}
-                        <div className="flex items-center space-x-2 mb-4">
+                        <div className="flex items-center gap-2 mb-3">
                           <div className="flex items-center">
                             {renderStars(brand.overall_rating)}
                           </div>
-                          <span className="text-sm font-medium text-gray-700">
+                          <span className="text-sm font-semibold text-gray-900">
                             {brand.overall_rating.toFixed(1)}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({Math.floor(Math.random() * 100) + 50}개 리뷰)
                           </span>
                         </div>
 
                         {/* Info Grid */}
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="text-xs text-gray-500 mb-1">설립년도</div>
-                            <div className="font-semibold text-gray-900">{brand.established_year}년</div>
+                        <div className="grid grid-cols-4 gap-2 mb-3">
+                          <div className="text-center p-2 bg-gray-50 rounded-xl">
+                            <div className="text-[10px] text-gray-500 mb-0.5">설립</div>
+                            <div className="text-xs font-semibold text-gray-900">{brand.established_year}</div>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="text-xs text-gray-500 mb-1">원산지</div>
-                            <div className="font-semibold text-gray-900">{brand.country}</div>
+                          <div className="text-center p-2 bg-gray-50 rounded-xl">
+                            <div className="text-[10px] text-gray-500 mb-0.5">원산지</div>
+                            <div className="text-xs font-semibold text-gray-900">{brand.country}</div>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="text-xs text-gray-500 mb-1">제품 라인</div>
-                            <div className="font-semibold text-gray-900">
+                          <div className="text-center p-2 bg-gray-50 rounded-xl">
+                            <div className="text-[10px] text-gray-500 mb-0.5">제품</div>
+                            <div className="text-xs font-semibold text-gray-900">
                               {brand.products_count !== undefined 
                                 ? `${brand.products_count}개` 
                                 : `${brand.product_lines.length}개`}
                             </div>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="text-xs text-gray-500 mb-1">투명성 점수</div>
-                            <div className="font-semibold text-gray-900">{transparencyScore}/100</div>
+                          <div className="text-center p-2 bg-gray-50 rounded-xl">
+                            <div className="text-[10px] text-gray-500 mb-0.5">투명성</div>
+                            <div className="text-xs font-semibold text-gray-900">{transparencyScore}</div>
                           </div>
                         </div>
 
                         {/* SAFI Score */}
                         {brand.safiScore && (
-                          <div className="mb-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Shield className="h-4 w-4 text-blue-600" />
-                                <span className="text-sm font-medium text-gray-700">SAFI 안전성 점수</span>
+                          <div className="mb-3 p-3 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <Shield className="h-3.5 w-3.5 text-blue-500" />
+                                <span className="text-xs font-medium text-gray-600">SAFI 점수</span>
                               </div>
-                              <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getSafiLevelColor(brand.safiScore.level)}`}>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                brand.safiScore.level === 'SAFE' ? 'bg-green-100 text-green-700' :
+                                brand.safiScore.level === 'NORMAL' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
                                 {getSafiLevelLabel(brand.safiScore.level)}
                               </span>
                             </div>
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-2xl font-bold text-gray-900">{brand.safiScore.overallScore.toFixed(1)}</span>
-                              <span className="text-sm text-gray-500">/ 100</span>
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-lg font-bold text-gray-900">{brand.safiScore.overallScore.toFixed(1)}</span>
+                              <span className="text-xs text-gray-400">/ 100</span>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1.5">
                               <div 
-                                className={`h-2 rounded-full transition-all duration-500 ${
+                                className={`h-1.5 rounded-full transition-all duration-500 ${
                                   brand.safiScore.level === 'SAFE' ? 'bg-green-500' :
                                   brand.safiScore.level === 'NORMAL' ? 'bg-yellow-500' :
                                   'bg-red-500'
@@ -401,15 +384,15 @@ export default function BrandsPage() {
                           </div>
                         )}
 
-                        {/* Recall Info */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                          <div className="flex items-center text-sm text-gray-600">
-                            <AlertTriangle className="h-4 w-4 mr-1" />
-                            <span>리콜 이력 {brand.recall_history.length}건</span>
+                        {/* Footer */}
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            <span>리콜 {brand.recall_history.length}건</span>
                           </div>
-                          <div className="flex items-center text-sm font-medium text-yellow-600 group-hover:text-yellow-700">
+                          <div className="flex items-center gap-1 text-xs font-medium text-violet-600 group-hover:text-violet-700">
                             <span>자세히 보기</span>
-                            <svg className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </div>
@@ -422,22 +405,20 @@ export default function BrandsPage() {
             )}
 
             {/* CTA Section */}
-            <div className="mt-12">
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-8 text-center border border-yellow-200">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  우리 아이 사료도 분석해보세요! 🔍
+            <div className="mt-8">
+              <div className="bg-white rounded-2xl p-6 text-center border border-gray-100 shadow-sm">
+                <h3 className="text-base font-bold text-gray-900 mb-2">
+                  우리 아이 사료도 분석해보세요!
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  현재 먹이고 있는 사료의 칼로리를 계산하고 적정 급여량을 확인하세요!
+                <p className="text-sm text-gray-500 mb-4">
+                  현재 먹이고 있는 사료의 칼로리를 계산하고 적정 급여량을 확인하세요
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    href="/calorie-calculator"
-                    className="inline-block bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-bold py-3 px-6 rounded-xl transition-all duration-200"
-                  >
-                    칼로리 계산하기
-                  </Link>
-                </div>
+                <Link
+                  href="/calorie-calculator"
+                  className="inline-block bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium py-2.5 px-5 rounded-xl transition-colors"
+                >
+                  칼로리 계산하기
+                </Link>
               </div>
             </div>
           </div>
