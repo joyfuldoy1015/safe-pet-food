@@ -44,7 +44,8 @@ export async function POST(request: Request) {
         content: comment.content,
         likes: comment.likes || 0,
         is_liked: comment.isLiked || false,
-        replies: comment.replies || []
+        replies: comment.replies || [],
+        type: comment.type || 'comment'
       }])
       .select()
       .single()
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT - 댓글 업데이트 (좋아요 등)
+// PUT - 댓글 업데이트 (좋아요, 내용 수정 등)
 export async function PUT(request: Request) {
   try {
     const supabase = getServerClient()
@@ -122,13 +123,16 @@ export async function PUT(request: Request) {
       )
     }
 
+    // 업데이트할 필드 구성
+    const updateData: any = {}
+    if (updates.likes !== undefined) updateData.likes = updates.likes
+    if (updates.isLiked !== undefined) updateData.is_liked = updates.isLiked
+    if (updates.replies !== undefined) updateData.replies = updates.replies
+    if (updates.content !== undefined) updateData.content = updates.content
+
     const { data: updatedComment, error } = await (supabase
       .from('pet_log_comments') as any)
-      .update({
-        likes: updates.likes,
-        is_liked: updates.isLiked,
-        replies: updates.replies || []
-      })
+      .update(updateData)
       .eq('id', commentId)
       .select()
       .single()
@@ -146,6 +150,86 @@ export async function PUT(request: Request) {
     console.error('Failed to update comment:', error)
     return NextResponse.json(
       { error: 'Failed to update comment' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE - 댓글 삭제
+export async function DELETE(request: Request) {
+  try {
+    const supabase = getServerClient()
+    if (!isSupabaseConfigured()) {
+      return NextResponse.json(
+        { error: 'Supabase not configured' },
+        { status: 501 }
+      )
+    }
+
+    const body = await request.json()
+    const { commentId } = body
+
+    if (!commentId) {
+      return NextResponse.json(
+        { error: 'commentId is required' },
+        { status: 400 }
+      )
+    }
+
+    // 댓글이 속한 포스트 ID 가져오기
+    const { data: comment, error: fetchError } = await supabase
+      .from('pet_log_comments')
+      .select('post_id')
+      .eq('id', commentId)
+      .single()
+
+    if (fetchError || !comment) {
+      return NextResponse.json(
+        { error: 'Comment not found' },
+        { status: 404 }
+      )
+    }
+
+    const postId = (comment as any).post_id
+
+    // 댓글 삭제
+    const { error } = await supabase
+      .from('pet_log_comments')
+      .delete()
+      .eq('id', commentId)
+
+    if (error) {
+      console.error('Failed to delete comment:', error)
+      return NextResponse.json(
+        { error: 'Failed to delete comment', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    // 포스트의 댓글 수 감소
+    try {
+      const { data: post, error: fetchError } = await supabase
+        .from('pet_log_posts')
+        .select('comments_count')
+        .eq('id', postId)
+        .single()
+      
+      if (!fetchError && post) {
+        const newCount = Math.max(0, ((post as any).comments_count || 1) - 1)
+        await (supabase
+          .from('pet_log_posts') as any)
+          .update({ comments_count: newCount })
+          .eq('id', postId)
+      }
+    } catch (error) {
+      console.warn('Failed to update comments count:', error)
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Failed to delete comment:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete comment' },
       { status: 500 }
     )
   }

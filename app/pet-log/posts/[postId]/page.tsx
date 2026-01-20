@@ -2,8 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { ArrowLeft, Clock, Star, Heart, MessageCircle, Calendar, Award, Send, User, Reply, ThumbsUp, CheckCircle, XCircle, Edit, Trash2, HelpCircle, MoreVertical, Edit2 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
 // 제품 카테고리 타입
@@ -23,6 +23,7 @@ interface Comment {
   likes: number
   replies: Reply[]
   isLiked: boolean
+  type?: 'comment' | 'inquiry' // 댓글 or 문의
 }
 
 // 답글 인터페이스
@@ -383,6 +384,16 @@ export default function PetLogPostDetail() {
   const [replyContent, setReplyContent] = useState('')
   const [showLoginModal, setShowLoginModal] = useState(false)
   
+  // 탭 관련 상태
+  const [activeTab, setActiveTab] = useState<'comment' | 'inquiry'>('comment')
+  const commentsSectionRef = useRef<HTMLDivElement>(null)
+  const inquirySectionRef = useRef<HTMLDivElement>(null)
+  
+  // 수정/삭제 관련 상태
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState('')
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  
   // 로그인 상태 관리 - Supabase Auth 사용
   const { user, profile } = useAuth()
   const isLoggedIn = !!user
@@ -391,7 +402,13 @@ export default function PetLogPostDetail() {
     name: profile?.nickname || user.email || '사용자'
   } : null
 
-  // 댓글 작성 함수
+  // 탭 변경 함수
+  const handleTabChange = (tab: 'comment' | 'inquiry') => {
+    setActiveTab(tab)
+    // 탭 변경 시 해당 섹션으로 스크롤하지 않음 (하단 고정 탭이므로)
+  }
+
+  // 댓글/문의 작성 함수
   const handleSubmitComment = async () => {
     if (!isLoggedIn) {
       setShowLoginModal(true)
@@ -401,14 +418,15 @@ export default function PetLogPostDetail() {
     if (!newComment.trim() || !post) return
     
     const comment: Comment = {
-      id: `comment-${Date.now()}`,
+      id: `${activeTab}-${Date.now()}`,
       userId: currentUser?.id || 'temp-user',
       userName: currentUser?.name || '임시사용자',
       content: newComment,
       createdAt: new Date().toISOString(),
       likes: 0,
       isLiked: false,
-      replies: []
+      replies: [],
+      type: activeTab
     }
     
     try {
@@ -425,7 +443,8 @@ export default function PetLogPostDetail() {
             content: comment.content,
             likes: comment.likes,
             isLiked: comment.isLiked,
-            replies: []
+            replies: [],
+            type: activeTab
           }
         })
       })
@@ -466,6 +485,62 @@ export default function PetLogPostDetail() {
     } catch (error) {
       console.error('댓글 저장 중 오류:', error)
       alert('댓글 저장에 실패했습니다. 다시 시도해주세요.')
+    }
+  }
+
+  // 댓글/문의 수정 함수
+  const handleEditComment = async (commentId: string) => {
+    if (!editContent.trim() || !currentUser) return
+
+    try {
+      const response = await fetch('/api/pet-log/comments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          commentId: commentId,
+          updates: {
+            content: editContent.trim()
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update comment')
+      }
+
+      // 로컬 state 업데이트
+      setComments(comments.map(c => 
+        c.id === commentId ? { ...c, content: editContent.trim() } : c
+      ))
+      setEditingCommentId(null)
+      setEditContent('')
+    } catch (error) {
+      console.error('댓글 수정 오류:', error)
+      alert('댓글 수정에 실패했습니다.')
+    }
+  }
+
+  // 댓글/문의 삭제 함수
+  const handleDeleteComment = async (commentId: string) => {
+    if (!currentUser || !confirm('정말 삭제하시겠습니까?')) return
+
+    try {
+      const response = await fetch('/api/pet-log/comments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete comment')
+      }
+
+      // 로컬 state 업데이트
+      setComments(comments.filter(c => c.id !== commentId))
+      setMenuOpenId(null)
+    } catch (error) {
+      console.error('댓글 삭제 오류:', error)
+      alert('댓글 삭제에 실패했습니다.')
     }
   }
 
@@ -1063,18 +1138,22 @@ export default function PetLogPostDetail() {
           })}
         </div>
 
-        {/* Comments Section */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 mt-6 sm:mt-8 hover:shadow-2xl transition-all duration-300">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+        {/* Comments & Inquiry Section with Tabs */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 mt-6 sm:mt-8 hover:shadow-2xl transition-all duration-300 pb-40">
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-violet-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                 <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">질문하기</h2>
-                <div className="mt-2">
-                  <span className="px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-700 text-xs sm:text-sm rounded-full font-semibold border border-gray-200">
-                    {comments.length + comments.reduce((sum, comment) => sum + comment.replies.length, 0)}개 질문
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">댓글 & 문의</h2>
+                <div className="mt-2 flex gap-2">
+                  <span className="px-2.5 sm:px-3 py-1 bg-gray-50 text-gray-700 text-xs rounded-full font-semibold border border-gray-200">
+                    댓글 {comments.filter(c => c.type !== 'inquiry').length}
+                  </span>
+                  <span className="px-2.5 sm:px-3 py-1 bg-violet-50 text-violet-700 text-xs rounded-full font-semibold border border-violet-200">
+                    문의 {comments.filter(c => c.type === 'inquiry').length}
                   </span>
                 </div>
               </div>
@@ -1086,216 +1165,385 @@ export default function PetLogPostDetail() {
             )}
           </div>
 
-          {/* Comment Form */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-start space-x-2 sm:space-x-3">
-              <div className="flex-shrink-0">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => {
-                    if (isLoggedIn) {
-                      setNewComment(e.target.value)
-                    }
-                  }}
-                  onFocus={(e) => {
-                    if (!isLoggedIn) {
-                      e.preventDefault()
-                      setShowLoginModal(true)
-                      e.currentTarget.blur()
-                    }
-                  }}
-                  onClick={(e) => {
-                    if (!isLoggedIn) {
-                      e.preventDefault()
-                      setShowLoginModal(true)
-                      e.currentTarget.blur()
-                    }
-                  }}
-                  onTouchStart={(e) => {
-                    if (!isLoggedIn) {
-                      e.preventDefault()
-                      setShowLoginModal(true)
-                    }
-                  }}
-                  placeholder={isLoggedIn ? `${post.ownerName}님에게 질문해보세요...` : "로그인 후 질문할 수 있습니다."}
-                  className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-xl resize-none transition-all duration-200 text-sm sm:text-base ${
-                    isLoggedIn 
-                      ? 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-text' 
-                      : 'cursor-pointer bg-gray-50'
-                  }`}
-                  rows={3}
-                  readOnly={!isLoggedIn}
-                />
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mt-2">
-                  <p className="text-xs text-gray-500 hidden sm:block">
-                    급여 경험이나 제품에 대해 궁금한 점을 물어보세요.
-                  </p>
-                  <button
-                    onClick={handleSubmitComment}
-                    disabled={!newComment.trim() || !isLoggedIn}
-                    className={`flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 min-h-[40px] sm:min-h-[44px] touch-manipulation w-full sm:w-auto ${
-                      isLoggedIn && newComment.trim()
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transform hover:scale-105'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>질문하기</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Comments List */}
-          <div className="space-y-4 sm:space-y-6">
-            {comments.map((comment) => (
-              <div key={comment.id} className="border-b border-gray-100 pb-4 sm:pb-6 last:border-b-0">
-                <div className="flex items-start space-x-2 sm:space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-                      <span className="font-semibold text-sm sm:text-base text-gray-900">{comment.userName}</span>
-                      {comment.userId === post.ownerId && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                          작성자
-                        </span>
-                      )}
-                      <span className="text-xs sm:text-sm text-gray-500">
-                        {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
-                      </span>
-                    </div>
-                    <p className="text-sm sm:text-base text-gray-700 mb-2 sm:mb-3 leading-relaxed break-words">{comment.content}</p>
-                    
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <button
-                        onClick={() => handleToggleLike(comment.id)}
-                        className={`flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm transition-colors border min-h-[32px] sm:min-h-[36px] touch-manipulation ${
-                          comment.isLiked 
-                            ? 'text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100' 
-                            : 'text-gray-600 bg-gray-50 border-gray-200 hover:text-blue-600 hover:bg-gray-100'
-                        }`}
-                      >
-                        <ThumbsUp className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${comment.isLiked ? 'fill-current' : ''}`} />
-                        <span className="font-medium text-xs">{comment.likes}</span>
-                      </button>
-                      
-                      <button
-                        onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm text-gray-600 bg-gray-50 border border-gray-200 hover:text-blue-600 hover:bg-gray-100 transition-colors min-h-[32px] sm:min-h-[36px] touch-manipulation"
-                      >
-                        <Reply className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        <span className="text-xs">답글</span>
-                      </button>
-                    </div>
-
-                    {/* Reply Form */}
-                    {replyingTo === comment.id && (
-                      <div className="mt-3 sm:mt-4 pl-2 sm:pl-4 border-l-2 border-gray-200">
-                        <div className="flex items-start space-x-2 sm:space-x-3">
-                          <div className="flex-shrink-0">
-                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                              <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-gray-500" />
+          {/* Comments Section */}
+          <div ref={commentsSectionRef} className="mb-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-gray-600" />
+              댓글 <span className="text-violet-500">{comments.filter(c => c.type !== 'inquiry').length}</span>
+            </h3>
+            
+            {comments.filter(c => c.type !== 'inquiry').length > 0 ? (
+              <div className="space-y-4">
+                {comments.filter(c => c.type !== 'inquiry').map((comment) => (
+                  <div key={comment.id} className="bg-gray-50 rounded-xl p-4 relative">
+                    {editingCommentId === comment.id ? (
+                      // 수정 모드
+                      <div className="space-y-2">
+                        <textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                          rows={3}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => { setEditingCommentId(null); setEditContent(''); }}
+                            className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                          >
+                            취소
+                          </button>
+                          <button
+                            onClick={() => handleEditComment(comment.id)}
+                            className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
+                          >
+                            저장
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      // 일반 모드
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center">
+                              <User className="h-3.5 w-3.5 text-gray-500" />
                             </div>
+                            <span className="font-semibold text-sm text-gray-900">{comment.userName}</span>
+                            {comment.userId === post.ownerId && (
+                              <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                                작성자
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500">
+                              {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
+                            </span>
                           </div>
-                          <div className="flex-1 min-w-0">
+                          {currentUser && currentUser.id === comment.userId && (
+                            <div className="relative">
+                              <button
+                                onClick={() => setMenuOpenId(menuOpenId === comment.id ? null : comment.id)}
+                                className="p-1 hover:bg-gray-200 rounded-full"
+                              >
+                                <MoreVertical className="h-4 w-4 text-gray-400" />
+                              </button>
+                              {menuOpenId === comment.id && (
+                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                                  <button
+                                    onClick={() => {
+                                      setEditingCommentId(comment.id)
+                                      setEditContent(comment.content)
+                                      setMenuOpenId(null)
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 w-full"
+                                  >
+                                    <Edit2 className="h-3 w-3" /> 수정
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteComment(comment.id)}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 w-full"
+                                  >
+                                    <Trash2 className="h-3 w-3" /> 삭제
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>
+                        
+                        <div className="flex items-center gap-2 mt-3">
+                          <button
+                            onClick={() => handleToggleLike(comment.id)}
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors border ${
+                              comment.isLiked 
+                                ? 'text-blue-600 bg-blue-50 border-blue-200' 
+                                : 'text-gray-600 bg-white border-gray-200 hover:text-blue-600'
+                            }`}
+                          >
+                            <ThumbsUp className={`h-3 w-3 ${comment.isLiked ? 'fill-current' : ''}`} />
+                            <span>{comment.likes}</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs text-gray-600 bg-white border border-gray-200 hover:text-blue-600"
+                          >
+                            <Reply className="h-3 w-3" />
+                            답글
+                          </button>
+                        </div>
+
+                        {/* Reply Form */}
+                        {replyingTo === comment.id && (
+                          <div className="mt-3 pl-4 border-l-2 border-gray-200">
                             <textarea
                               value={replyContent}
                               onChange={(e) => setReplyContent(e.target.value)}
                               placeholder="답글을 작성하세요..."
-                              className="w-full px-2.5 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-xs sm:text-sm"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 focus:outline-none"
                               rows={2}
                             />
                             <div className="flex justify-end gap-2 mt-2">
                               <button
                                 onClick={() => setReplyingTo(null)}
-                                className="px-2.5 sm:px-3 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700"
+                                className="px-3 py-1.5 text-xs text-gray-500"
                               >
                                 취소
                               </button>
                               <button
                                 onClick={() => handleSubmitReply(comment.id)}
                                 disabled={!replyContent.trim()}
-                                className={`px-2.5 sm:px-3 py-1 text-xs sm:text-sm rounded transition-colors ${
-                                  replyContent.trim()
-                                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                }`}
+                                className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
                               >
                                 답글 작성
                               </button>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    )}
+                        )}
 
-                    {/* Replies */}
-                    {comment.replies.length > 0 && (
-                      <div className="mt-3 sm:mt-4 pl-2 sm:pl-4 border-l-2 border-gray-200 space-y-3 sm:space-y-4">
-                        {comment.replies.map((reply) => (
-                          <div key={reply.id} className="flex items-start space-x-2 sm:space-x-3">
-                            <div className="flex-shrink-0">
-                              <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ${
-                                reply.userId === post.ownerId ? 'bg-green-100' : 'bg-gray-200'
-                              }`}>
-                                <User className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${
-                                  reply.userId === post.ownerId ? 'text-green-600' : 'text-gray-500'
-                                }`} />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-                                <span className="font-medium text-gray-900 text-xs sm:text-sm">{reply.userName}</span>
-                                {reply.userId === post.ownerId && (
-                                  <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                                    작성자
+                        {/* Replies */}
+                        {comment.replies.length > 0 && (
+                          <div className="mt-3 pl-4 border-l-2 border-gray-200 space-y-3">
+                            {comment.replies.map((reply) => (
+                              <div key={reply.id} className="bg-white rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-xs text-gray-900">{reply.userName}</span>
+                                  {reply.userId === post.ownerId && (
+                                    <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded">작성자</span>
+                                  )}
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(reply.createdAt).toLocaleDateString('ko-KR')}
                                   </span>
-                                )}
-                                <span className="text-xs text-gray-500">
-                                  {new Date(reply.createdAt).toLocaleDateString('ko-KR')}
-                                </span>
+                                </div>
+                                <p className="text-xs text-gray-700">{reply.content}</p>
                               </div>
-                              <p className="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 leading-relaxed break-words">{reply.content}</p>
-                              <button
-                                onClick={() => handleToggleLike(comment.id, true, reply.id)}
-                                className={`flex items-center gap-1 text-xs transition-colors ${
-                                  reply.isLiked ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'
-                                }`}
-                              >
-                                <ThumbsUp className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${reply.isLiked ? 'fill-current' : ''}`} />
-                                <span>{reply.likes}</span>
-                              </button>
-                            </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-xl">
+                <MessageCircle className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">아직 댓글이 없습니다</p>
+              </div>
+            )}
           </div>
 
-          {/* Empty State */}
-          {comments.length === 0 && (
-            <div className="text-center py-6 sm:py-8">
-              <MessageCircle className="h-10 w-10 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
-              <p className="text-sm sm:text-base text-gray-500 mb-2">아직 질문이 없습니다.</p>
-              <p className="text-xs sm:text-sm text-gray-400">
-                {post.ownerName}님에게 급여 경험에 대해 질문해보세요!
-              </p>
-            </div>
-          )}
+          {/* Divider */}
+          <div className="border-t border-gray-200 my-6" />
+
+          {/* Inquiry Section */}
+          <div ref={inquirySectionRef}>
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <HelpCircle className="h-5 w-5 text-violet-600" />
+              문의 <span className="text-violet-500">{comments.filter(c => c.type === 'inquiry').length}</span>
+            </h3>
+            
+            {comments.filter(c => c.type === 'inquiry').length > 0 ? (
+              <div className="space-y-4">
+                {comments.filter(c => c.type === 'inquiry').map((inquiry) => (
+                  <div key={inquiry.id} className="bg-violet-50 rounded-xl p-4 relative">
+                    {editingCommentId === inquiry.id ? (
+                      // 수정 모드
+                      <div className="space-y-2">
+                        <textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-violet-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                          rows={3}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => { setEditingCommentId(null); setEditContent(''); }}
+                            className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                          >
+                            취소
+                          </button>
+                          <button
+                            onClick={() => handleEditComment(inquiry.id)}
+                            className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
+                          >
+                            저장
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs text-violet-600 font-medium">
+                              {inquiry.userName}님의 문의
+                            </p>
+                            <span className="text-xs text-gray-400">
+                              {new Date(inquiry.createdAt).toLocaleDateString('ko-KR')}
+                            </span>
+                          </div>
+                          {currentUser && currentUser.id === inquiry.userId && (
+                            <div className="relative">
+                              <button
+                                onClick={() => setMenuOpenId(menuOpenId === `inq-${inquiry.id}` ? null : `inq-${inquiry.id}`)}
+                                className="p-1 hover:bg-violet-100 rounded-full"
+                              >
+                                <MoreVertical className="h-4 w-4 text-violet-400" />
+                              </button>
+                              {menuOpenId === `inq-${inquiry.id}` && (
+                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                                  <button
+                                    onClick={() => {
+                                      setEditingCommentId(inquiry.id)
+                                      setEditContent(inquiry.content)
+                                      setMenuOpenId(null)
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 w-full"
+                                  >
+                                    <Edit2 className="h-3 w-3" /> 수정
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteComment(inquiry.id)}
+                                    className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 w-full"
+                                  >
+                                    <Trash2 className="h-3 w-3" /> 삭제
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-800">{inquiry.content}</p>
+                        
+                        {/* Replies to inquiry */}
+                        {inquiry.replies.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-violet-200">
+                            {inquiry.replies.map((reply) => (
+                              <div key={reply.id} className="bg-white rounded-lg p-3 mt-2">
+                                <p className="text-xs text-green-600 font-medium mb-1">
+                                  {reply.userId === post.ownerId ? '작성자 답변' : reply.userName}
+                                </p>
+                                <p className="text-sm text-gray-700">{reply.content}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Reply button for inquiry */}
+                        <div className="mt-3">
+                          <button
+                            onClick={() => setReplyingTo(replyingTo === inquiry.id ? null : inquiry.id)}
+                            className="text-xs text-violet-600 hover:text-violet-700"
+                          >
+                            답변하기
+                          </button>
+                          
+                          {replyingTo === inquiry.id && (
+                            <div className="mt-2">
+                              <textarea
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                placeholder="답변을 작성하세요..."
+                                className="w-full px-3 py-2 border border-violet-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                                rows={2}
+                              />
+                              <div className="flex justify-end gap-2 mt-2">
+                                <button
+                                  onClick={() => setReplyingTo(null)}
+                                  className="px-3 py-1.5 text-xs text-gray-500"
+                                >
+                                  취소
+                                </button>
+                                <button
+                                  onClick={() => handleSubmitReply(inquiry.id)}
+                                  disabled={!replyContent.trim()}
+                                  className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
+                                >
+                                  답변 작성
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-violet-50 rounded-xl">
+                <HelpCircle className="h-8 w-8 text-violet-300 mx-auto mb-2" />
+                <p className="text-sm text-violet-500">아직 문의가 없습니다</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Fixed Bottom Tab & Input */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
+          {/* Tabs */}
+          <div className="flex">
+            <button
+              onClick={() => handleTabChange('comment')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'comment'
+                  ? 'bg-violet-500 text-white'
+                  : 'bg-white text-gray-600'
+              }`}
+            >
+              댓글 {comments.filter(c => c.type !== 'inquiry').length > 0 && `(${comments.filter(c => c.type !== 'inquiry').length})`}
+            </button>
+            <button
+              onClick={() => handleTabChange('inquiry')}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                activeTab === 'inquiry'
+                  ? 'bg-violet-500 text-white'
+                  : 'bg-white text-gray-600 border-l border-gray-200'
+              }`}
+            >
+              문의 {comments.filter(c => c.type === 'inquiry').length > 0 && `(${comments.filter(c => c.type === 'inquiry').length})`}
+            </button>
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 flex items-center gap-3">
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => {
+                if (isLoggedIn) {
+                  setNewComment(e.target.value)
+                }
+              }}
+              onFocus={() => {
+                if (!isLoggedIn) {
+                  setShowLoginModal(true)
+                }
+              }}
+              placeholder={
+                !isLoggedIn 
+                  ? '로그인 후 이용 가능합니다' 
+                  : activeTab === 'comment' 
+                    ? '응원 댓글을 남겨주세요...' 
+                    : '문의 내용을 입력해주세요...'
+              }
+              className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSubmitComment()
+                }
+              }}
+              readOnly={!isLoggedIn}
+            />
+            <button
+              onClick={handleSubmitComment}
+              disabled={!newComment.trim() || !isLoggedIn}
+              className="w-12 h-12 bg-violet-500 text-white rounded-full flex items-center justify-center hover:bg-violet-600 transition-colors disabled:opacity-50"
+            >
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Login Modal */}
