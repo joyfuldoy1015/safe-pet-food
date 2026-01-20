@@ -123,7 +123,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section (Top 20-30%) */}
       <Hero />
 
@@ -131,25 +131,25 @@ export default function Home() {
       <FeatureCards />
 
       {/* 급여/사용 기록 섹션 */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-between mb-6">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">급여/사용 기록 📝</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-bold text-gray-900 mb-0.5">급여 후기</h2>
+            <p className="text-xs text-gray-500">
               다른 집사들의 급여 및 사용 후기를 확인해보세요
             </p>
           </div>
           <Link
             href="/pet-log"
-            className="flex items-center gap-1 text-sm text-violet-600 font-medium hover:text-violet-700"
+            className="flex items-center gap-1 text-xs text-violet-600 font-medium hover:text-violet-700"
           >
             더보기
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockReviewLogs.slice(0, 3).map((review, index) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {mockReviewLogs.slice(0, 2).map((review, index) => {
             const owner = mockOwners.find((o) => o.id === review.ownerId)
             const pet = mockPets.find((p) => p.id === review.petId)
             if (!owner || !pet) return null
@@ -202,40 +202,40 @@ export default function Home() {
       </section>
 
       {/* Q&A 섹션 */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="flex items-center justify-between mb-6">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Q&A 💬</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-bold text-gray-900 mb-0.5">Q&A</h2>
+            <p className="text-xs text-gray-500">
               궁금한 점을 질문하고 답변을 받아보세요
             </p>
           </div>
           <Link
             href="/community/qa-forum"
-            className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-700"
+            className="flex items-center gap-1 text-xs text-violet-600 font-medium hover:text-violet-700"
           >
             더보기
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {isQALoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {Array.from({ length: 2 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl border border-gray-100 p-4 h-36 animate-pulse"
+                className="bg-white rounded-2xl border border-gray-100 p-4 h-32 animate-pulse"
               >
                 <div className="h-3 bg-gray-200 rounded w-3/4 mb-3"></div>
                 <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
-                <div className="h-10 bg-gray-200 rounded mb-3"></div>
+                <div className="h-8 bg-gray-200 rounded mb-3"></div>
                 <div className="h-3 bg-gray-200 rounded w-1/4"></div>
               </div>
             ))}
           </div>
         ) : qaItems.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {qaItems.slice(0, 3).map((item, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {qaItems.slice(0, 2).map((item, index) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -247,46 +247,33 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-2xl">
-            <p className="text-sm text-gray-500">아직 등록된 Q&A가 없습니다</p>
+          <div className="text-center py-8 bg-white rounded-2xl border border-gray-100">
+            <p className="text-xs text-gray-500">아직 등록된 Q&A가 없습니다</p>
           </div>
         )}
       </section>
 
-      {/* Newsletter Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200 max-w-2xl mx-auto">
-          <h3 className="font-bold text-gray-900 mb-2 text-lg text-center">뉴스레터 구독</h3>
-          <p className="text-sm text-gray-700 mb-4 text-center">
-            반려동물 건강 정보와 최신 소식을 받아보세요
-          </p>
-          <button className="w-full px-4 py-3 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors text-sm font-medium shadow-md hover:shadow-lg">
-            구독하기
-          </button>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-4xl mx-auto text-center">
-          <h2 className="text-[1.7rem] sm:text-3xl font-bold text-gray-900 mb-4">
-            지금 바로 시작해보세요!
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div className="bg-white rounded-2xl shadow-sm p-6 text-center border border-gray-100">
+          <h2 className="text-base font-bold text-gray-900 mb-2">
+            지금 바로 시작해보세요
           </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            우리 아이의 건강한 반려생활을 위한 첫 걸음을 함께 시작해요
+          <p className="text-xs text-gray-500 mb-4">
+            우리 아이의 건강한 반려생활을 위한 첫 걸음
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <Link
-              href="/health-analyzer"
-              className="inline-block bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105"
+              href="/pet-log/posts/write"
+              className="inline-block bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium py-2.5 px-5 rounded-xl transition-colors"
             >
-              건강검진표 분석하기
+              급여 후기 작성하기
             </Link>
             <Link
-              href="/pet-log"
-              className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105"
+              href="/community/qa-forum"
+              className="inline-block bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2.5 px-5 rounded-xl transition-colors"
             >
-              펫 로그 커뮤니티
+              Q&A 둘러보기
             </Link>
           </div>
         </div>
