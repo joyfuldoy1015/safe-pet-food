@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { Camera, User } from 'lucide-react'
+import { Camera, User, X } from 'lucide-react'
 
 /**
  * Signup page with OAuth and email/password
@@ -350,6 +350,18 @@ export default function SignupPage() {
                   >
                     <Camera className="w-3.5 h-3.5" />
                   </label>
+                  {avatarPreview && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarFile(null)
+                        setAvatarPreview(null)
+                      }}
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-gray-400 mt-2">프로필 사진 (선택)</p>
               </div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit, Trash2, MoreVertical, Bookmark, ArrowUp } from 'lucide-react'
+import { User, Mail, Calendar, Save, ArrowLeft, Camera, Plus, Heart, MessageCircle, Eye, PawPrint, Edit, Trash2, MoreVertical, Bookmark, ArrowUp, X } from 'lucide-react'
 import Link from 'next/link'
 
 export default function ProfilePage() {
@@ -562,6 +562,19 @@ export default function ProfilePage() {
                   >
                     <Camera className="w-4 h-4" />
                   </label>
+                  {avatarUrl && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm('프로필 사진을 삭제하시겠습니까?')) {
+                          setAvatarUrl(null)
+                        }
+                      }}
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </>
               )}
             </div>
