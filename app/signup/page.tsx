@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getBrowserClient } from '@/lib/supabase-client'
+import { Camera, User } from 'lucide-react'
 
 /**
  * Signup page with OAuth and email/password
@@ -21,8 +22,69 @@ export default function SignupPage() {
   const [nickname, setNickname] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const router = useRouter()
   const supabase = getBrowserClient()
+
+  // 프로필 이미지 선택 핸들러
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 파일 크기 제한 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('이미지 크기는 5MB 이하여야 합니다.')
+      return
+    }
+
+    // 파일 타입 확인
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.')
+      return
+    }
+
+    setAvatarFile(file)
+
+    // 미리보기 생성
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // 프로필 이미지 업로드 함수
+  const uploadAvatar = async (userId: string): Promise<string | null> => {
+    if (!avatarFile || !supabase) return null
+
+    try {
+      const fileExt = avatarFile.name.split('.').pop()
+      const fileName = `${userId}-${Date.now()}.${fileExt}`
+      const filePath = `avatars/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, avatarFile, {
+          cacheControl: '3600',
+          upsert: true
+        })
+
+      if (uploadError) {
+        console.error('Avatar upload error:', uploadError)
+        return null
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Avatar upload error:', error)
+      return null
+    }
+  }
 
   const handleGoogleSignup = async () => {
     if (!supabase) {
@@ -129,9 +191,16 @@ export default function SignupPage() {
       
       // Create profile
       try {
+        // 프로필 이미지 업로드
+        let avatarUrl = null
+        if (avatarFile) {
+          avatarUrl = await uploadAvatar(data.user.id)
+        }
+
         await (supabase.from('profiles') as any).insert({
           id: data.user.id,
-          nickname: nickname.trim()
+          nickname: nickname.trim(),
+          avatar_url: avatarUrl
         })
         
         console.log('[Signup] Profile created, redirecting...')
@@ -216,6 +285,38 @@ export default function SignupPage() {
 
             {/* Email/Password Form */}
             <form onSubmit={handleEmailSignup} className="space-y-3">
+              {/* 프로필 이미지 업로드 */}
+              <div className="flex flex-col items-center mb-2">
+                <div className="relative">
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt="프로필 미리보기"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-gray-200">
+                      <User className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarSelect}
+                    disabled={loading}
+                  />
+                  <label
+                    htmlFor="avatar-upload"
+                    className="absolute bottom-0 right-0 w-7 h-7 bg-violet-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-violet-600 transition-colors cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </label>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">프로필 사진 (선택)</p>
+              </div>
+
               <div>
                 <label htmlFor="nickname" className="block text-xs font-medium text-gray-600 mb-1.5">
                   닉네임

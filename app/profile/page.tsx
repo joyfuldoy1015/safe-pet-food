@@ -464,7 +464,7 @@ export default function ProfilePage() {
                     className="hidden"
                     onChange={async (e) => {
                       const file = e.target.files?.[0]
-                      if (!file) return
+                      if (!file || !user) return
                       
                       // 파일 크기 제한 (5MB)
                       if (file.size > 5 * 1024 * 1024) {
@@ -479,23 +479,56 @@ export default function ProfilePage() {
                       }
                       
                       try {
-                        // FileReader로 이미지를 Data URL로 변환
+                        const supabase = getBrowserClient()
+                        
+                        // 파일 확장자 추출
+                        const fileExt = file.name.split('.').pop()
+                        const fileName = `${user.id}-${Date.now()}.${fileExt}`
+                        const filePath = `avatars/${fileName}`
+                        
+                        // Supabase Storage에 업로드
+                        const { error: uploadError } = await supabase.storage
+                          .from('avatars')
+                          .upload(filePath, file, {
+                            cacheControl: '3600',
+                            upsert: true
+                          })
+                        
+                        if (uploadError) {
+                          console.error('Upload error:', uploadError)
+                          // Storage가 없으면 Data URL로 fallback
+                          const reader = new FileReader()
+                          reader.onloadend = () => {
+                            const result = reader.result as string
+                            setAvatarUrl(result)
+                          }
+                          reader.readAsDataURL(file)
+                          return
+                        }
+                        
+                        // Public URL 가져오기
+                        const { data: { publicUrl } } = supabase.storage
+                          .from('avatars')
+                          .getPublicUrl(filePath)
+                        
+                        setAvatarUrl(publicUrl)
+                      } catch (error) {
+                        console.error('Image upload error:', error)
+                        // 에러 시 Data URL로 fallback
                         const reader = new FileReader()
                         reader.onloadend = () => {
                           const result = reader.result as string
                           setAvatarUrl(result)
                         }
                         reader.readAsDataURL(file)
-                      } catch (error) {
-                        alert('이미지 업로드 중 오류가 발생했습니다.')
                       }
                     }}
                   />
                   <label
                     htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 w-7 h-7 bg-violet-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-violet-600 transition-colors cursor-pointer"
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-violet-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-violet-600 transition-colors cursor-pointer"
                   >
-                    <Camera className="w-3.5 h-3.5" />
+                    <Camera className="w-4 h-4" />
                   </label>
                 </>
               )}

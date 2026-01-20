@@ -271,6 +271,8 @@ export default function LogDetailPage() {
         }
       } else {
         // 문의 등록 - 새 스레드 생성 후 질문 포스트 추가
+        console.log('[문의 등록] 시작 - log_id:', log.id, 'user_id:', user.id)
+        
         const { data: threadData, error: threadError } = await supabase
           .from('pet_log_qa_threads')
           .insert({
@@ -281,7 +283,15 @@ export default function LogDetailPage() {
           .select()
           .single()
 
-        if (!threadError && threadData) {
+        if (threadError) {
+          console.error('[문의 등록] 스레드 생성 오류:', threadError)
+          alert(`문의 등록 실패: ${threadError.message}`)
+          return
+        }
+
+        console.log('[문의 등록] 스레드 생성 성공:', threadData)
+
+        if (threadData) {
           // 질문 포스트 추가
           const { data: postData, error: postError } = await supabase
             .from('pet_log_qa_posts')
@@ -297,7 +307,15 @@ export default function LogDetailPage() {
             `)
             .single()
 
-          if (!postError && postData) {
+          if (postError) {
+            console.error('[문의 등록] 포스트 생성 오류:', postError)
+            alert(`문의 등록 실패: ${postError.message}`)
+            return
+          }
+
+          console.log('[문의 등록] 포스트 생성 성공:', postData)
+
+          if (postData) {
             setQAThreads([...qaThreads, {
               id: threadData.id,
               logId: threadData.log_id,
@@ -327,6 +345,7 @@ export default function LogDetailPage() {
       }
     } catch (error) {
       console.error('등록 오류:', error)
+      alert('등록 중 오류가 발생했습니다.')
     } finally {
       setIsSubmitting(false)
     }
@@ -682,22 +701,22 @@ export default function LogDetailPage() {
                             <MoreVertical className="h-4 w-4 text-gray-400" />
                           </button>
                           {menuOpenId === comment.id && (
-                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden min-w-[100px]">
                               <button
                                 onClick={() => {
                                   setEditingCommentId(comment.id)
                                   setEditContent(comment.content)
                                   setMenuOpenId(null)
                                 }}
-                                className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 w-full"
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 w-full whitespace-nowrap"
                               >
-                                <Edit2 className="h-3 w-3" /> 수정
+                                <Edit2 className="h-4 w-4 flex-shrink-0" /> 수정
                               </button>
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
-                                className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 w-full"
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full whitespace-nowrap"
                               >
-                                <Trash2 className="h-3 w-3" /> 삭제
+                                <Trash2 className="h-4 w-4 flex-shrink-0" /> 삭제
                               </button>
                             </div>
                           )}
@@ -779,22 +798,22 @@ export default function LogDetailPage() {
                               <MoreVertical className="h-4 w-4 text-gray-400" />
                             </button>
                             {menuOpenId === `qa-${question.id}` && (
-                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden min-w-[100px]">
                                 <button
                                   onClick={() => {
                                     setEditingQAPostId(question.id)
                                     setEditContent(question.content)
                                     setMenuOpenId(null)
                                   }}
-                                  className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 w-full"
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 w-full whitespace-nowrap"
                                 >
-                                  <Edit2 className="h-3 w-3" /> 수정
+                                  <Edit2 className="h-4 w-4 flex-shrink-0" /> 수정
                                 </button>
                                 <button
                                   onClick={() => handleDeleteQAPost(question.id, question.threadId)}
-                                  className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 w-full"
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full whitespace-nowrap"
                                 >
-                                  <Trash2 className="h-3 w-3" /> 삭제
+                                  <Trash2 className="h-4 w-4 flex-shrink-0" /> 삭제
                                 </button>
                               </div>
                             )}
@@ -865,9 +884,24 @@ export default function LogDetailPage() {
             }}
           />
           <button
-            onClick={handleSubmit}
-            disabled={!newComment.trim() || isSubmitting}
-            className="w-12 h-12 bg-violet-500 text-white rounded-full flex items-center justify-center hover:bg-violet-600 transition-colors disabled:opacity-50"
+            onClick={() => {
+              console.log('[버튼 클릭] newComment:', newComment, 'isSubmitting:', isSubmitting, 'user:', user, 'log:', log, 'activeTab:', activeTab)
+              if (!user) {
+                alert('로그인이 필요합니다.')
+                return
+              }
+              if (!newComment.trim()) {
+                alert('내용을 입력해주세요.')
+                return
+              }
+              handleSubmit()
+            }}
+            disabled={isSubmitting}
+            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+              newComment.trim() && !isSubmitting
+                ? 'bg-violet-500 text-white hover:bg-violet-600'
+                : 'bg-gray-300 text-gray-500'
+            }`}
           >
             <Send className="h-5 w-5" />
           </button>
