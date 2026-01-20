@@ -33,6 +33,14 @@ const categories = {
       { name: '제품 검색하기', href: '/search?tab=products', icon: Search, description: '브랜드 구분 없이 모든 제품을 검색하고 비교해보세요.' }
     ]
   },
+  '커뮤니티': {
+    icon: Users,
+    color: 'from-purple-500 to-indigo-500',
+    items: [
+      { name: '펫 로그', href: '/pet-log', icon: BookOpen, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
+      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
+    ]
+  },
   '건강/케어': {
     icon: Heart,
     color: 'from-green-500 to-teal-500',
@@ -40,14 +48,6 @@ const categories = {
       { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
       { name: '건강검진표 분석기', href: '/health-analyzer', icon: ClipboardList, description: '건강검진 결과를 업로드하면 AI가 상세하게 분석해드려요.' },
       { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이의 적정 하루 물 섭취량을 계산해보세요.' }
-    ]
-  },
-  '커뮤니티': {
-    icon: Users,
-    color: 'from-purple-500 to-indigo-500',
-    items: [
-      { name: '펫 로그', href: '/pet-log', icon: BookOpen, description: '우리 아이의 사료/간식 급여 이력을 기록하고 관리해보세요.' },
-      { name: 'Q&A 포럼', href: '/community/qa-forum', icon: HelpCircle, description: '반려동물에 대한 궁금한 점을 질문하고 경험을 나눠보세요.' }
     ]
   }
 }
