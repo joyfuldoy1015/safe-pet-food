@@ -413,75 +413,75 @@ export default function CommunityQAForumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Q&A 포럼 💬
+        <div className="mb-6">
+          <h1 className="text-lg font-bold text-gray-900 mb-1">
+            Q&A 포럼
           </h1>
-          <p className="text-lg text-gray-600">
-            사료 선택 고민을 다른 보호자들과 함께 나눠보세요.
+          <p className="text-xs text-gray-500">
+            사료 선택 고민을 다른 보호자들과 함께 나눠보세요
           </p>
         </div>
 
         {/* Search and Sort Bar */}
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-4 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="질문 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
               />
             </div>
 
             {/* Sort Options */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setSortOption('hot')}
-                className={`px-4 py-3 rounded-lg transition-colors flex items-center space-x-2 ${
+                className={`px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5 ${
                   sortOption === 'hot'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <Flame className="h-4 w-4" />
-                <span className="text-sm font-medium">인기글</span>
+                <Flame className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">인기</span>
               </button>
               <button
                 onClick={() => setSortOption('recent')}
-                className={`px-4 py-3 rounded-lg transition-colors flex items-center space-x-2 ${
+                className={`px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5 ${
                   sortOption === 'recent'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <Clock className="h-4 w-4" />
-                <span className="text-sm font-medium">새 글</span>
+                <Clock className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">최신</span>
               </button>
               <button
                 onClick={() => setSortOption('unanswered')}
-                className={`px-4 py-3 rounded-lg transition-colors flex items-center space-x-2 ${
+                className={`px-3 py-2 rounded-xl transition-colors flex items-center gap-1.5 ${
                   sortOption === 'unanswered'
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <HelpCircle className="h-4 w-4" />
-                <span className="text-sm font-medium">답변 대기 중</span>
+                <HelpCircle className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">답변 대기</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Category Tabs - 주제 둘러보기 */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">주제 둘러보기</h3>
+        <div className="mb-4">
+          <h3 className="text-xs font-medium text-gray-600 mb-2">주제 둘러보기</h3>
           <CategoryTabs
             categories={categories.filter(c => c.value !== 'all')}
             selectedCategory={selectedCategory}

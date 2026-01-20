@@ -512,18 +512,18 @@ export default function PetLogPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* 히어로 섹션 */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="mb-6"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            로그 타임라인 📝
+          <h1 className="text-lg font-bold text-gray-900 mb-1">
+            급여 후기
           </h1>
-          <p className="text-lg text-gray-600">
-            급여/사용 후기를 통해 다른 집사들에게 도움을 줄 수 있어요
+          <p className="text-xs text-gray-500">
+            집사들의 급여/사용 경험을 공유하고 참고해보세요
           </p>
         </motion.div>
 
@@ -534,19 +534,19 @@ export default function PetLogPage() {
           transition={{ delay: 0.05 }}
           className="flex items-center justify-between mb-4"
         >
-          <span className="text-sm text-gray-500">총 {filteredAndSortedReviews.length}개의 로그</span>
+          <span className="text-xs text-gray-500">총 {filteredAndSortedReviews.length}개의 로그</span>
           
           {/* 정렬 드롭다운 */}
           <div className="relative" ref={sortDropdownRef}>
             <button
               onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-              className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:text-blue-700"
+              className="flex items-center gap-1 text-xs text-violet-600 font-medium hover:text-violet-700"
             >
               {getSortLabel()}
-              <ChevronDown className={`h-4 w-4 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             {sortDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-28 bg-white border border-gray-100 rounded-xl shadow-sm z-50 overflow-hidden">
                 {[
                   { value: 'recent' as SortOption, label: '최신순' },
                   { value: 'popular' as SortOption, label: '인기순' },
@@ -558,8 +558,8 @@ export default function PetLogPage() {
                       setSortOption(option.value)
                       setSortDropdownOpen(false)
                     }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 ${
-                      sortOption === option.value ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+                    className={`w-full px-3 py-2 text-left text-xs hover:bg-gray-50 ${
+                      sortOption === option.value ? 'bg-violet-50 text-violet-600 font-medium' : 'text-gray-700'
                     }`}
                   >
                     {option.label}
@@ -575,17 +575,17 @@ export default function PetLogPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="mb-6 overflow-x-auto scrollbar-hide"
+          className="mb-4 overflow-x-auto scrollbar-hide"
         >
-          <div className="flex gap-2 min-w-max pb-2">
+          <div className="flex gap-1.5 min-w-max pb-2">
             {categoryTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setCategoryFilter(tab.id)}
-                className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                className={`px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
                   categoryFilter === tab.id
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                    ? 'bg-violet-500 text-white'
+                    : 'bg-white text-gray-600 border border-gray-100 hover:border-gray-200'
                 }`}
               >
                 {tab.label}
@@ -594,21 +594,21 @@ export default function PetLogPage() {
           </div>
         </motion.div>
 
-        {/* 검색 바 (선택적) */}
+        {/* 검색 바 */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6"
+          className="mb-4"
         >
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="제품명, 브랜드로 검색..."
-              className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
             />
           </div>
         </motion.div>
