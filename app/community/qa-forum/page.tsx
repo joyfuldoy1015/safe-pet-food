@@ -416,11 +416,11 @@ export default function CommunityQAForumPage() {
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-lg font-bold text-gray-900 mb-1">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Q&A 포럼
           </h1>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             사료 선택 고민을 다른 보호자들과 함께 나눠보세요
           </p>
         </div>
