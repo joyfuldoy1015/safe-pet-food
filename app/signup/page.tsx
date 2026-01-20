@@ -27,8 +27,37 @@ export default function SignupPage() {
   const router = useRouter()
   const supabase = getBrowserClient()
 
+  // 이미지를 정사각형으로 크롭하는 함수
+  const cropToSquare = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const size = Math.min(img.width, img.height)
+        const outputSize = 400 // 출력 크기 (400x400)
+        canvas.width = outputSize
+        canvas.height = outputSize
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('Canvas context not available'))
+          return
+        }
+        // 중앙 기준으로 정사각형 크롭
+        const sx = (img.width - size) / 2
+        const sy = (img.height - size) / 2
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, outputSize, outputSize)
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('Failed to create blob'))
+        }, 'image/jpeg', 0.9)
+      }
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   // 프로필 이미지 선택 핸들러
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -44,14 +73,23 @@ export default function SignupPage() {
       return
     }
 
-    setAvatarFile(file)
+    try {
+      // 이미지를 정사각형으로 크롭
+      const croppedBlob = await cropToSquare(file)
+      const croppedFile = new File([croppedBlob], `avatar-${Date.now()}.jpg`, { type: 'image/jpeg' })
+      
+      setAvatarFile(croppedFile)
 
-    // 미리보기 생성
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result as string)
+      // 크롭된 이미지로 미리보기 생성
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string)
+      }
+      reader.readAsDataURL(croppedFile)
+    } catch (error) {
+      console.error('Image crop error:', error)
+      alert('이미지 처리 중 오류가 발생했습니다.')
     }
-    reader.readAsDataURL(file)
   }
 
   // 프로필 이미지 업로드 함수
@@ -59,8 +97,7 @@ export default function SignupPage() {
     if (!avatarFile || !supabase) return null
 
     try {
-      const fileExt = avatarFile.name.split('.').pop()
-      const fileName = `${userId}-${Date.now()}.${fileExt}`
+      const fileName = `${userId}-${Date.now()}.jpg`
       const filePath = `avatars/${fileName}`
 
       const { error: uploadError } = await supabase.storage

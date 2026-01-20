@@ -741,9 +741,13 @@ export default function PetLogPage() {
                       key={owner.id}
                       className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
                     >
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-sm font-medium text-gray-600">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-sm font-medium text-gray-600 overflow-hidden">
                         {owner.avatarUrl ? (
-                          <span>{owner.avatarUrl}</span>
+                          <img 
+                            src={owner.avatarUrl} 
+                            alt={owner.nickname}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           owner.nickname.charAt(0)
                         )}

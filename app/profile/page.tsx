@@ -479,17 +479,49 @@ export default function ProfilePage() {
                       }
                       
                       try {
+                        // 이미지를 정사각형으로 크롭하는 함수
+                        const cropToSquare = (file: File): Promise<Blob> => {
+                          return new Promise((resolve, reject) => {
+                            const img = new Image()
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas')
+                              const size = Math.min(img.width, img.height)
+                              const outputSize = 400 // 출력 크기 (400x400)
+                              canvas.width = outputSize
+                              canvas.height = outputSize
+                              const ctx = canvas.getContext('2d')
+                              if (!ctx) {
+                                reject(new Error('Canvas context not available'))
+                                return
+                              }
+                              // 중앙 기준으로 정사각형 크롭
+                              const sx = (img.width - size) / 2
+                              const sy = (img.height - size) / 2
+                              ctx.drawImage(img, sx, sy, size, size, 0, 0, outputSize, outputSize)
+                              canvas.toBlob((blob) => {
+                                if (blob) resolve(blob)
+                                else reject(new Error('Failed to create blob'))
+                              }, 'image/jpeg', 0.9)
+                            }
+                            img.onerror = reject
+                            img.src = URL.createObjectURL(file)
+                          })
+                        }
+
+                        // 이미지 크롭
+                        const croppedBlob = await cropToSquare(file)
+                        const croppedFile = new File([croppedBlob], `avatar-${Date.now()}.jpg`, { type: 'image/jpeg' })
+
                         const supabase = getBrowserClient()
                         
                         // 파일 확장자 추출
-                        const fileExt = file.name.split('.').pop()
-                        const fileName = `${user.id}-${Date.now()}.${fileExt}`
+                        const fileName = `${user.id}-${Date.now()}.jpg`
                         const filePath = `avatars/${fileName}`
                         
                         // Supabase Storage에 업로드
                         const { error: uploadError } = await supabase.storage
                           .from('avatars')
-                          .upload(filePath, file, {
+                          .upload(filePath, croppedFile, {
                             cacheControl: '3600',
                             upsert: true
                           })
@@ -502,7 +534,7 @@ export default function ProfilePage() {
                             const result = reader.result as string
                             setAvatarUrl(result)
                           }
-                          reader.readAsDataURL(file)
+                          reader.readAsDataURL(croppedFile)
                           return
                         }
                         
