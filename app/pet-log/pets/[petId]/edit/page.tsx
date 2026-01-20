@@ -209,10 +209,10 @@ export default function EditPetPage() {
   // 로딩 중
   if (isLoadingPet || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500 mx-auto mb-4"></div>
+          <p className="text-sm text-gray-500">로딩 중...</p>
         </div>
       </div>
     )
@@ -223,28 +223,25 @@ export default function EditPetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
-        <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span>돌아가기</span>
+            <ArrowLeft className="h-4 w-4 text-gray-500" />
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            반려동물 정보 수정
-          </h1>
+          <h1 className="text-lg font-bold text-gray-900">반려동물 정보 수정</h1>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sm:p-8">
-          <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div className="space-y-5">
             {/* 이름 */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-xs font-medium text-gray-600 mb-2">
                 이름 <span className="text-red-500">*</span>
               </label>
               <input
@@ -252,14 +249,14 @@ export default function EditPetPage() {
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
+                className={`w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
+                  errors.name ? 'border-red-300' : 'border-gray-200'
                 }`}
                 placeholder="반려동물 이름"
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p className="mt-1.5 text-[11px] text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
                   {errors.name}
                 </p>
               )}
@@ -267,38 +264,40 @@ export default function EditPetPage() {
 
             {/* 종류 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
                 종류 <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, species: 'dog' }))}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                  className={`p-3 rounded-xl border-2 transition-all ${
                     formData.species === 'dog'
-                      ? 'border-purple-600 bg-purple-50 text-purple-700 font-semibold'
-                      : 'border-gray-300 bg-white text-gray-700 hover:border-purple-300'
+                      ? 'border-violet-500 bg-violet-50 text-violet-700'
+                      : 'border-gray-100 hover:border-gray-200'
                   }`}
                 >
-                  🐶 강아지
+                  <span className="text-xl">🐶</span>
+                  <span className="ml-2 text-sm font-medium">강아지</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, species: 'cat' }))}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                  className={`p-3 rounded-xl border-2 transition-all ${
                     formData.species === 'cat'
-                      ? 'border-purple-600 bg-purple-50 text-purple-700 font-semibold'
-                      : 'border-gray-300 bg-white text-gray-700 hover:border-purple-300'
+                      ? 'border-violet-500 bg-violet-50 text-violet-700'
+                      : 'border-gray-100 hover:border-gray-200'
                   }`}
                 >
-                  🐱 고양이
+                  <span className="text-xl">🐱</span>
+                  <span className="ml-2 text-sm font-medium">고양이</span>
                 </button>
               </div>
             </div>
 
             {/* 생년월일 */}
             <div>
-              <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="birth_date" className="block text-xs font-medium text-gray-600 mb-2">
                 생년월일 <span className="text-red-500">*</span>
               </label>
               <input
@@ -306,14 +305,14 @@ export default function EditPetPage() {
                 id="birth_date"
                 value={formData.birth_date}
                 onChange={(e) => setFormData(prev => ({ ...prev, birth_date: e.target.value }))}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  errors.birth_date ? 'border-red-500' : 'border-gray-300'
+                className={`w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
+                  errors.birth_date ? 'border-red-300' : 'border-gray-200'
                 }`}
                 max={new Date().toISOString().split('T')[0]}
               />
               {errors.birth_date && (
-                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p className="mt-1.5 text-[11px] text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
                   {errors.birth_date}
                 </p>
               )}
@@ -321,7 +320,7 @@ export default function EditPetPage() {
 
             {/* 체중 */}
             <div>
-              <label htmlFor="weight_kg" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="weight_kg" className="block text-xs font-medium text-gray-600 mb-2">
                 체중 (kg)
               </label>
               <input
@@ -335,14 +334,14 @@ export default function EditPetPage() {
                   ...prev, 
                   weight_kg: e.target.value ? parseFloat(e.target.value) : null 
                 }))}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  errors.weight_kg ? 'border-red-500' : 'border-gray-300'
+                className={`w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
+                  errors.weight_kg ? 'border-red-300' : 'border-gray-200'
                 }`}
                 placeholder="체중 (선택사항)"
               />
               {errors.weight_kg && (
-                <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
+                <p className="mt-1.5 text-[11px] text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
                   {errors.weight_kg}
                 </p>
               )}
@@ -350,7 +349,7 @@ export default function EditPetPage() {
 
             {/* 태그 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
                 태그 (특이사항, 알레르기 등)
               </label>
               <div className="flex gap-2 mb-2">
@@ -364,29 +363,29 @@ export default function EditPetPage() {
                       addTag()
                     }
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="flex-1 p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                   placeholder="태그 입력 후 엔터"
                 />
                 <button
                   type="button"
                   onClick={addTag}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="px-4 py-2 bg-violet-500 text-white text-sm rounded-xl hover:bg-violet-600 transition-colors"
                 >
                   추가
                 </button>
               </div>
               {formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {formData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium flex items-center gap-2"
+                      className="px-2.5 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium flex items-center gap-1.5"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="hover:text-purple-900"
+                        className="hover:text-violet-900"
                       >
                         ×
                       </button>
@@ -398,19 +397,19 @@ export default function EditPetPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+          <div className="mt-6 flex gap-3">
             <button
               type="button"
               onClick={() => router.back()}
               disabled={saving || deleting}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 text-sm rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={saving || deleting}
-              className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-violet-500 text-white text-sm rounded-xl hover:bg-violet-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               <Save className="w-4 h-4" />
               {saving ? '저장 중...' : '저장'}
@@ -418,17 +417,17 @@ export default function EditPetPage() {
           </div>
 
           {/* Delete Button */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-5 pt-5 border-t border-gray-100">
             <button
               type="button"
               onClick={handleDelete}
               disabled={saving || deleting}
-              className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 py-2.5 bg-red-500 text-white text-sm rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               <Trash2 className="w-4 h-4" />
               {deleting ? '삭제 중...' : '반려동물 정보 삭제'}
             </button>
-            <p className="mt-2 text-sm text-gray-500 text-center">
+            <p className="mt-2 text-[10px] text-gray-400 text-center">
               삭제된 정보는 복구할 수 없습니다.
             </p>
           </div>
