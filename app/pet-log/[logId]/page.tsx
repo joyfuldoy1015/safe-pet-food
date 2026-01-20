@@ -34,6 +34,9 @@ export default function LogDetailPage() {
   const [editingQAPostId, setEditingQAPostId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null)
+  const [replyingToQAId, setReplyingToQAId] = useState<string | null>(null)
+  const [replyContent, setReplyContent] = useState('')
   const commentsSectionRef = useRef<HTMLDivElement>(null)
   const qaSectionRef = useRef<HTMLDivElement>(null)
 
@@ -459,6 +462,95 @@ export default function LogDetailPage() {
     setMenuOpenId(null)
   }
 
+  // 댓글 답글 등록
+  const handleReplyToComment = async (parentId: string) => {
+    if (!replyContent.trim() || !user || !log) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { data, error } = await supabase
+        .from('comments')
+        .insert({
+          log_id: log.id,
+          author_id: user.id,
+          content: replyContent.trim(),
+          parent_id: parentId
+        })
+        .select(`
+          *,
+          profiles:author_id(nickname, avatar_url)
+        `)
+        .single()
+
+      if (!error && data) {
+        setComments([...comments, {
+          id: data.id,
+          logId: data.log_id,
+          authorId: data.author_id,
+          authorName: data.profiles?.nickname || '익명',
+          avatarUrl: data.profiles?.avatar_url,
+          content: data.content,
+          createdAt: data.created_at,
+          parentId: data.parent_id
+        }])
+        setReplyContent('')
+        setReplyingToCommentId(null)
+      }
+    } catch (error) {
+      console.error('답글 등록 오류:', error)
+    }
+  }
+
+  // 문의 답변 등록
+  const handleReplyToQA = async (threadId: string, questionId: string) => {
+    if (!replyContent.trim() || !user) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { data, error } = await supabase
+        .from('pet_log_qa_posts')
+        .insert({
+          thread_id: threadId,
+          author_id: user.id,
+          content: replyContent.trim(),
+          kind: 'answer',
+          parent_id: questionId
+        })
+        .select(`
+          *,
+          profiles:author_id(nickname, avatar_url)
+        `)
+        .single()
+
+      if (!error && data) {
+        setQAPosts([...qaPosts, {
+          id: data.id,
+          threadId: data.thread_id,
+          authorId: data.author_id,
+          content: data.content,
+          kind: data.kind,
+          parentId: data.parent_id,
+          isAccepted: data.is_accepted,
+          upvotes: data.upvotes || 0,
+          createdAt: data.created_at,
+          author: {
+            id: data.author_id,
+            nickname: data.profiles?.nickname || '익명',
+            avatarUrl: data.profiles?.avatar_url
+          }
+        }])
+        setReplyContent('')
+        setReplyingToQAId(null)
+      }
+    } catch (error) {
+      console.error('답변 등록 오류:', error)
+    }
+  }
+
   // 탭 변경 시 해당 섹션으로 스크롤
   const handleTabChange = (tab: 'comments' | 'qa') => {
     setActiveTab(tab)
@@ -656,9 +748,9 @@ export default function LogDetailPage() {
         <h3 className="text-lg font-bold text-gray-900 mb-3">
           댓글 <span className="text-violet-500">{comments.length}</span>
         </h3>
-        {comments.length > 0 ? (
+        {comments.filter(c => !c.parentId).length > 0 ? (
           <div className="space-y-3">
-            {comments.map((comment) => (
+            {comments.filter(c => !c.parentId).map((comment) => (
               <div key={comment.id} className="bg-white rounded-xl p-3 border border-gray-100 relative">
                 {editingCommentId === comment.id ? (
                   // 수정 모드
@@ -724,6 +816,62 @@ export default function LogDetailPage() {
                       )}
                     </div>
                     <p className="text-sm text-gray-700">{comment.content}</p>
+                    
+                    {/* 답글 버튼 - 부모 댓글에만 표시 */}
+                    {!comment.parentId && user && (
+                      <button
+                        onClick={() => {
+                          setReplyingToCommentId(replyingToCommentId === comment.id ? null : comment.id)
+                          setReplyContent('')
+                        }}
+                        className="mt-2 text-xs text-violet-600 hover:text-violet-700 font-medium"
+                      >
+                        {replyingToCommentId === comment.id ? '취소' : '답글 달기'}
+                      </button>
+                    )}
+
+                    {/* 답글 입력 영역 */}
+                    {replyingToCommentId === comment.id && (
+                      <div className="mt-3 pl-3 border-l-2 border-violet-200">
+                        <textarea
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="답글을 입력하세요..."
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                          rows={2}
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            onClick={() => { setReplyingToCommentId(null); setReplyContent(''); }}
+                            className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                          >
+                            취소
+                          </button>
+                          <button
+                            onClick={() => handleReplyToComment(comment.id)}
+                            disabled={!replyContent.trim()}
+                            className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
+                          >
+                            답글 등록
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 대댓글(답글) 표시 */}
+                    {comments.filter(reply => reply.parentId === comment.id).length > 0 && (
+                      <div className="mt-3 space-y-2 pl-3 border-l-2 border-gray-200">
+                        {comments.filter(reply => reply.parentId === comment.id).map(reply => (
+                          <div key={reply.id} className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-gray-800">{reply.authorName}</span>
+                              <span className="text-xs text-gray-400">{formatTimeAgo(reply.createdAt)}</span>
+                            </div>
+                            <p className="text-xs text-gray-600">{reply.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -824,10 +972,62 @@ export default function LogDetailPage() {
                       <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(question.createdAt)}</p>
                     </>
                   )}
+                  {/* 답변 표시 */}
                   {answers.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-xs text-green-600 font-medium mb-1">답변</p>
-                      <p className="text-sm text-gray-700">{answers[0].content}</p>
+                    <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
+                      {answers.map(answer => (
+                        <div key={answer.id} className="bg-white rounded-lg p-3 border border-green-100">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-xs text-green-600 font-medium">
+                              {answer.author?.nickname || '익명'}님의 답변
+                            </p>
+                            <span className="text-xs text-gray-400">{formatTimeAgo(answer.createdAt)}</span>
+                          </div>
+                          <p className="text-sm text-gray-700">{answer.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 답변하기 버튼 */}
+                  {user && (
+                    <div className="mt-3">
+                      {replyingToQAId === question.id ? (
+                        <div className="bg-white rounded-lg p-3 border border-violet-200">
+                          <textarea
+                            value={replyContent}
+                            onChange={(e) => setReplyContent(e.target.value)}
+                            placeholder="답변을 입력하세요..."
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                            rows={3}
+                          />
+                          <div className="flex justify-end gap-2 mt-2">
+                            <button
+                              onClick={() => { setReplyingToQAId(null); setReplyContent(''); }}
+                              className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                            >
+                              취소
+                            </button>
+                            <button
+                              onClick={() => handleReplyToQA(question.threadId, question.id)}
+                              disabled={!replyContent.trim()}
+                              className="px-3 py-1.5 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+                            >
+                              답변 등록
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setReplyingToQAId(question.id)
+                            setReplyContent('')
+                          }}
+                          className="text-xs text-green-600 hover:text-green-700 font-medium"
+                        >
+                          답변하기
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
