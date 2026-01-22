@@ -218,6 +218,31 @@ export default function LogDetailPage() {
     loadData()
   }, [logId])
 
+  // 사용자 로그인 상태 변경 시 도움돼요 상태 확인
+  useEffect(() => {
+    const checkHelpfulStatus = async () => {
+      if (!user || !logId) return
+      
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) return
+
+        const { data: helpfulData } = await supabase
+          .from('review_log_helpful')
+          .select('id')
+          .eq('log_id', logId)
+          .eq('user_id', user.id)
+          .single()
+        
+        setHasMarkedHelpful(!!helpfulData)
+      } catch (error) {
+        // 에러 무시 (데이터 없음 등)
+      }
+    }
+
+    checkHelpfulStatus()
+  }, [user, logId])
+
   // 날짜 포맷
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString)
