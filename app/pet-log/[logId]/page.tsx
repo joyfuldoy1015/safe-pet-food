@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight, MoreVertical, Edit2, Trash2, ThumbsUp } from 'lucide-react'
+import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight, MoreVertical, Edit2, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { getBrowserClient } from '@/lib/supabase-client'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPostWithAuthor } from '@/lib/types/review-log'
@@ -672,7 +672,6 @@ export default function LogDetailPage() {
   }
 
   const daysUsed = calculateDaysUsed()
-  const totalHelpful = qaPosts.reduce((sum, p) => sum + (p.upvotes || 0), 0)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
@@ -816,16 +815,13 @@ export default function LogDetailPage() {
             disabled={isMarkingHelpful}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
               hasMarkedHelpful
-                ? 'bg-violet-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-700'
+                ? 'bg-red-100 text-red-500'
+                : 'bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500'
             } disabled:opacity-50`}
           >
-            <ThumbsUp className={`h-4 w-4 ${hasMarkedHelpful ? 'fill-current' : ''}`} />
-            도움돼요
+            <Heart className={`h-4 w-4 ${hasMarkedHelpful ? 'fill-current' : ''}`} />
+            도움돼요 {helpfulCount > 0 && helpfulCount}
           </button>
-          <span className="text-sm text-gray-500">
-            {helpfulCount > 0 && `${helpfulCount}명에게 도움이 됐어요`}
-          </span>
         </div>
       </motion.div>
 
@@ -986,12 +982,6 @@ export default function LogDetailPage() {
           <h3 className="text-lg font-bold text-gray-900">
             문의 <span className="text-violet-500">{qaThreads.length}</span>
           </h3>
-          {totalHelpful > 0 && (
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 rounded-full text-sm text-red-500">
-              <Heart className="h-4 w-4 fill-current" />
-              도움돼요 {totalHelpful}
-            </span>
-          )}
         </div>
 
         {qaPosts.filter(p => p.kind === 'question').length > 0 ? (
