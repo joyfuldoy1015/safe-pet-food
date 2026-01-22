@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight, MoreVertical, Edit2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight, MoreVertical, Edit2, Trash2, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import { getBrowserClient } from '@/lib/supabase-client'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPostWithAuthor } from '@/lib/types/review-log'
@@ -37,6 +37,9 @@ export default function LogDetailPage() {
   const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null)
   const [replyingToQAId, setReplyingToQAId] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
+  const [hasMarkedHelpful, setHasMarkedHelpful] = useState(false)
+  const [helpfulCount, setHelpfulCount] = useState(0)
+  const [isMarkingHelpful, setIsMarkingHelpful] = useState(false)
   const commentsSectionRef = useRef<HTMLDivElement>(null)
   const qaSectionRef = useRef<HTMLDivElement>(null)
 
@@ -83,6 +86,19 @@ export default function LogDetailPage() {
               updatedAt: logData.updated_at
             }
             setLog(transformedLog)
+            setHelpfulCount(logData.likes || 0)
+
+            // 사용자가 이미 도움돼요를 눌렀는지 확인
+            if (user) {
+              const { data: helpfulData } = await supabase
+                .from('review_log_helpful')
+                .select('id')
+                .eq('log_id', logId)
+                .eq('user_id', user.id)
+                .single()
+              
+              setHasMarkedHelpful(!!helpfulData)
+            }
 
             if (logData.profiles) {
               setOwner({
@@ -551,6 +567,60 @@ export default function LogDetailPage() {
     }
   }
 
+  // 도움돼요 토글
+  const handleToggleHelpful = async () => {
+    if (!user) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+    if (!log || isMarkingHelpful) return
+
+    setIsMarkingHelpful(true)
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      if (hasMarkedHelpful) {
+        // 도움돼요 취소
+        await supabase
+          .from('review_log_helpful')
+          .delete()
+          .eq('log_id', log.id)
+          .eq('user_id', user.id)
+
+        // likes 감소
+        await supabase
+          .from('review_logs')
+          .update({ likes: Math.max(0, helpfulCount - 1) })
+          .eq('id', log.id)
+
+        setHelpfulCount(prev => Math.max(0, prev - 1))
+        setHasMarkedHelpful(false)
+      } else {
+        // 도움돼요 추가
+        await supabase
+          .from('review_log_helpful')
+          .insert({
+            log_id: log.id,
+            user_id: user.id
+          })
+
+        // likes 증가
+        await supabase
+          .from('review_logs')
+          .update({ likes: helpfulCount + 1 })
+          .eq('id', log.id)
+
+        setHelpfulCount(prev => prev + 1)
+        setHasMarkedHelpful(true)
+      }
+    } catch (error) {
+      console.error('도움돼요 토글 오류:', error)
+    } finally {
+      setIsMarkingHelpful(false)
+    }
+  }
+
   // 탭 변경 시 해당 섹션으로 스크롤
   const handleTabChange = (tab: 'comments' | 'qa') => {
     setActiveTab(tab)
@@ -738,6 +808,25 @@ export default function LogDetailPage() {
             </p>
           </div>
         )}
+
+        {/* 도움돼요 버튼 */}
+        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+          <button
+            onClick={handleToggleHelpful}
+            disabled={isMarkingHelpful}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
+              hasMarkedHelpful
+                ? 'bg-violet-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-violet-100 hover:text-violet-700'
+            } disabled:opacity-50`}
+          >
+            <ThumbsUp className={`h-4 w-4 ${hasMarkedHelpful ? 'fill-current' : ''}`} />
+            도움돼요
+          </button>
+          <span className="text-sm text-gray-500">
+            {helpfulCount > 0 && `${helpfulCount}명에게 도움이 됐어요`}
+          </span>
+        </div>
       </motion.div>
 
       {/* 구분선 */}
