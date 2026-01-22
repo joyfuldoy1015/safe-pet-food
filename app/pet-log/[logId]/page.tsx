@@ -582,11 +582,16 @@ export default function LogDetailPage() {
 
       if (hasMarkedHelpful) {
         // 도움돼요 취소
-        await supabase
+        const { error: deleteError } = await supabase
           .from('review_log_helpful')
           .delete()
           .eq('log_id', log.id)
           .eq('user_id', user.id)
+
+        if (deleteError) {
+          console.error('도움돼요 취소 오류:', deleteError)
+          return
+        }
 
         // likes 감소
         await supabase
@@ -597,13 +602,36 @@ export default function LogDetailPage() {
         setHelpfulCount(prev => Math.max(0, prev - 1))
         setHasMarkedHelpful(false)
       } else {
+        // 이미 눌렀는지 먼저 확인
+        const { data: existingData } = await supabase
+          .from('review_log_helpful')
+          .select('id')
+          .eq('log_id', log.id)
+          .eq('user_id', user.id)
+          .single()
+
+        if (existingData) {
+          // 이미 눌렀으면 상태만 업데이트하고 종료
+          setHasMarkedHelpful(true)
+          return
+        }
+
         // 도움돼요 추가
-        await supabase
+        const { error: insertError } = await supabase
           .from('review_log_helpful')
           .insert({
             log_id: log.id,
             user_id: user.id
           })
+
+        if (insertError) {
+          console.error('도움돼요 추가 오류:', insertError)
+          // 이미 존재하는 경우 상태만 업데이트
+          if (insertError.code === '23505') {
+            setHasMarkedHelpful(true)
+          }
+          return
+        }
 
         // likes 증가
         await supabase
