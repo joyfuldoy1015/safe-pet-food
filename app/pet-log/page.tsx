@@ -405,11 +405,8 @@ export default function PetLogPage() {
 
   // Handle question click - navigate to detail page with Q&A tab
   const handleQuestionClick = (reviewId: string) => {
-    const review = reviews.find((r) => r.id === reviewId)
-    if (review) {
-      // Navigate to pet history page with Q&A focus
-      router.push(`/owners/${review.ownerId}/pets/${review.petId}?tab=qa`)
-    }
+    // Navigate to review detail page with Q&A focus
+    router.push(`/pet-log/${reviewId}?tab=qa`)
   }
 
   // Handle status change

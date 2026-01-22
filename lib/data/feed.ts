@@ -217,7 +217,7 @@ function reviewToFeedItem(review: ReviewLog, ownerName: string, petName: string)
     author: {
       name: ownerName
     },
-    href: `/owners/${review.ownerId}/pets/${review.petId}`
+    href: `/pet-log/${review.id}`
   }
 }
 

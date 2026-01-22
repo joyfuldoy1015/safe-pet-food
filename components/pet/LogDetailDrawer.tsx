@@ -283,7 +283,7 @@ export default function LogDetailDrawer({
             {/* 프로필 영역 */}
             <div className="bg-white px-4 py-4">
               <button
-                onClick={() => router.push(`/owners/${owner.id}/pets/${pet.id}`)}
+                onClick={() => router.push(`/pet-log/pets/${pet.id}`)}
                 className="flex items-center gap-3 hover:opacity-80 transition-opacity"
               >
                 {/* 아바타 */}

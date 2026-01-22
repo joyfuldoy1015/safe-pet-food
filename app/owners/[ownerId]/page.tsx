@@ -208,7 +208,7 @@ export default function OwnerProfilePage() {
             {pets.map((pet) => (
               <button
                 key={pet.id}
-                onClick={() => router.push(`/owners/${ownerId}/pets/${pet.id}`)}
+                onClick={() => router.push(`/pet-log/pets/${pet.id}`)}
                 className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100 hover:border-violet-200 hover:bg-violet-50 transition-colors flex-shrink-0"
               >
                 {/* 펫 아바타 (임시) */}

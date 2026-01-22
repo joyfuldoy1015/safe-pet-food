@@ -231,7 +231,7 @@ export default function PetsPage() {
                   {/* Actions */}
                   <div className="mt-4 flex gap-2">
                     <Link
-                      href={`/owners/${user.id}/pets/${pet.id}`}
+                      href={`/pet-log/pets/${pet.id}`}
                       className="flex-1 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-center text-sm font-medium"
                     >
                       상세보기

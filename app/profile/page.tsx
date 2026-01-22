@@ -309,7 +309,7 @@ export default function ProfilePage() {
       // review_logs는 해당 펫 페이지로 이동
       const post = recentPosts.find(p => p.id === postId)
       if (post && post.pet_id) {
-        router.push(`/owners/${user?.id}/pets/${post.pet_id}`)
+        router.push(`/pet-log/pets/${post.pet_id}`)
       }
     }
     setOpenMenuId(null)
