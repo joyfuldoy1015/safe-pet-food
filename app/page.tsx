@@ -31,18 +31,101 @@ import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowRight, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronRight, Loader2 } from 'lucide-react'
 import Hero from '@/components/home/Hero'
 import FeatureCards from '@/components/home/FeatureCards'
 import UnifiedCard from '@/components/home/UnifiedCard'
 import PetLogCard from '@/components/petlogs/PetLogCard'
 import { getQA, type UnifiedFeedItem } from '@/lib/data/feed'
-import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
+import { getBrowserClient } from '@/lib/supabase-client'
+
+interface ReviewLogData {
+  id: string
+  category: string
+  brand: string
+  product: string
+  status: string
+  period_start: string
+  period_end?: string
+  rating?: number
+  recommend?: boolean
+  excerpt?: string
+  likes: number
+  comments_count: number
+  views: number
+  created_at: string
+  profiles?: {
+    id: string
+    nickname: string
+    avatar_url?: string
+  }
+  pets?: {
+    id: string
+    name: string
+    species: string
+    birth_date: string
+    weight_kg?: number
+  }
+}
 
 export default function Home() {
   const router = useRouter()
   const [qaItems, setQAItems] = useState<UnifiedFeedItem[]>([])
   const [isQALoading, setIsQALoading] = useState(true)
+  const [reviewLogs, setReviewLogs] = useState<ReviewLogData[]>([])
+  const [isReviewLoading, setIsReviewLoading] = useState(true)
+
+  // Load review logs from Supabase
+  useEffect(() => {
+    const loadReviewLogs = async () => {
+      setIsReviewLoading(true)
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          setReviewLogs([])
+          return
+        }
+
+        const { data, error } = await supabase
+          .from('review_logs')
+          .select(`
+            id,
+            category,
+            brand,
+            product,
+            status,
+            period_start,
+            period_end,
+            rating,
+            recommend,
+            excerpt,
+            likes,
+            comments_count,
+            views,
+            created_at,
+            profiles:owner_id(id, nickname, avatar_url),
+            pets:pet_id(id, name, species, birth_date, weight_kg)
+          `)
+          .eq('admin_status', 'visible')
+          .order('created_at', { ascending: false })
+          .limit(4)
+
+        if (error) {
+          console.error('Failed to load review logs:', error)
+          setReviewLogs([])
+        } else {
+          setReviewLogs(data || [])
+        }
+      } catch (error) {
+        console.error('Failed to load review logs:', error)
+        setReviewLogs([])
+      } finally {
+        setIsReviewLoading(false)
+      }
+    }
+
+    loadReviewLogs()
+  }, [])
 
   // Load Q&A
   useEffect(() => {
@@ -148,57 +231,81 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {mockReviewLogs.slice(0, 2).map((review, index) => {
-            const owner = mockOwners.find((o) => o.id === review.ownerId)
-            const pet = mockPets.find((p) => p.id === review.petId)
-            if (!owner || !pet) return null
-
-            const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
-              'feeding': 'in_progress',
-              'paused': 'stopped',
-              'completed': 'completed'
-            }
-
-            const petAge = calculateAge(pet.birthDate)
-            const petAgeNumber = extractAgeNumber(petAge)
-
-            return (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+        {isReviewLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl border border-gray-100 p-4 h-48 animate-pulse"
               >
-                <PetLogCard
-                  since={formatDateForCard(review.periodStart)}
-                  until={
-                    (review.status === 'completed' || review.status === 'paused') && review.periodEnd
-                      ? formatDateForCard(review.periodEnd)
-                      : undefined
-                  }
-                  status={statusMap[review.status] || 'in_progress'}
-                  brand={review.brand}
-                  product={review.product}
-                  category={review.category}
-                  rating={review.rating || 0}
-                  recommended={review.recommend}
-                  authorName={owner.nickname}
-                  petName={pet.name}
-                  petAgeYears={petAgeNumber}
-                  petWeightKg={pet.weightKg || 0}
-                  review={review.excerpt || ''}
-                  likes={review.likes}
-                  comments={review.commentsCount}
-                  views={review.views}
-                  onAsk={() => handleQuestionClick(review.id)}
-                  onDetail={() => handleViewDetail(review.id)}
-                  avatarUrl={owner.avatarUrl}
-                />
-              </motion.div>
-            )
-          })}
-        </div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                  <div className="h-3 bg-gray-200 rounded w-20"></div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
+                <div className="h-16 bg-gray-200 rounded mb-3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            ))}
+          </div>
+        ) : reviewLogs.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {reviewLogs.slice(0, 2).map((review, index) => {
+              const owner = review.profiles
+              const pet = review.pets
+              if (!owner || !pet) return null
+
+              const statusMap: Record<string, 'in_progress' | 'stopped' | 'completed'> = {
+                'feeding': 'in_progress',
+                'paused': 'stopped',
+                'completed': 'completed'
+              }
+
+              const petAge = pet.birth_date ? calculateAge(pet.birth_date) : '0세'
+              const petAgeNumber = extractAgeNumber(petAge)
+
+              return (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <PetLogCard
+                    since={formatDateForCard(review.period_start)}
+                    until={
+                      (review.status === 'completed' || review.status === 'paused') && review.period_end
+                        ? formatDateForCard(review.period_end)
+                        : undefined
+                    }
+                    status={statusMap[review.status] || 'in_progress'}
+                    brand={review.brand}
+                    product={review.product}
+                    category={review.category}
+                    rating={review.rating || 0}
+                    recommended={review.recommend}
+                    authorName={owner.nickname}
+                    petName={pet.name}
+                    petAgeYears={petAgeNumber}
+                    petWeightKg={pet.weight_kg || 0}
+                    review={review.excerpt || ''}
+                    likes={review.likes}
+                    comments={review.comments_count}
+                    views={review.views}
+                    onAsk={() => handleQuestionClick(review.id)}
+                    onDetail={() => handleViewDetail(review.id)}
+                    avatarUrl={owner.avatar_url}
+                  />
+                </motion.div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-white rounded-2xl border border-gray-100">
+            <p className="text-xs text-gray-500">아직 등록된 급여 후기가 없습니다</p>
+          </div>
+        )}
       </section>
 
       {/* Q&A 섹션 */}
