@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Shield, Loader2, LogIn } from 'lucide-react'
+import { X, Shield, Loader2, LogIn, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 interface SafiEvaluationDialogProps {
   open: boolean
@@ -24,6 +25,7 @@ interface SafiFormData {
 /**
  * SAFI 평가 전용 다이얼로그
  * 로그인한 회원만 평가할 수 있음
+ * 동일 브랜드/제품에 대해 3개월에 1회만 평가 가능
  */
 export default function SafiEvaluationDialog({
   open,
@@ -35,6 +37,9 @@ export default function SafiEvaluationDialog({
   const { user, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false)
+  const [canEvaluate, setCanEvaluate] = useState<boolean | null>(null)
+  const [lastEvaluationDate, setLastEvaluationDate] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [allergySymptomInput, setAllergySymptomInput] = useState('')
 
@@ -44,6 +49,62 @@ export default function SafiEvaluationDialog({
     vomiting: null,
     appetiteChange: null
   })
+
+  // 중복 평가 체크
+  useEffect(() => {
+    const checkDuplicateEvaluation = async () => {
+      if (!open || !user) return
+      
+      setIsCheckingDuplicate(true)
+      try {
+        const supabase = getBrowserClient()
+        if (!supabase) {
+          setCanEvaluate(true)
+          return
+        }
+
+        const threeMonthsAgo = new Date()
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+
+        let query = supabase
+          .from('safi_evaluations')
+          .select('created_at')
+          .eq('user_id', user.id)
+          .eq('brand_name', brandName)
+          .gte('created_at', threeMonthsAgo.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        if (productName) {
+          query = query.eq('product_name', productName)
+        } else {
+          query = query.is('product_name', null)
+        }
+
+        const { data, error: queryError } = await query
+
+        if (queryError) {
+          console.error('중복 평가 체크 오류:', queryError)
+          setCanEvaluate(true) // 오류 시 평가 허용
+          return
+        }
+
+        if (data && data.length > 0) {
+          setCanEvaluate(false)
+          setLastEvaluationDate(new Date(data[0].created_at).toLocaleDateString('ko-KR'))
+        } else {
+          setCanEvaluate(true)
+        }
+      } catch (err) {
+        console.error('중복 평가 체크 오류:', err)
+        setCanEvaluate(true)
+      } finally {
+        setIsCheckingDuplicate(false)
+      }
+    }
+
+    checkDuplicateEvaluation()
+  }, [open, user, brandName, productName])
 
   const handleClose = () => {
     setFormData({
@@ -82,17 +143,41 @@ export default function SafiEvaluationDialog({
       return
     }
 
+    if (!canEvaluate) {
+      setError('3개월 내에 이미 평가하셨습니다.')
+      return
+    }
+
     setError(null)
     setIsLoading(true)
 
     try {
-      // TODO: API 호출로 SAFI 평가 데이터 저장
-      // 현재는 로컬에서만 처리
-      console.log('SAFI 평가 제출:', {
-        brandName,
-        productName,
-        ...formData
-      })
+      const supabase = getBrowserClient()
+      if (!supabase) {
+        throw new Error('Supabase 연결 실패')
+      }
+
+      // DB에 SAFI 평가 저장
+      const { error: insertError } = await supabase
+        .from('safi_evaluations')
+        .insert({
+          user_id: user.id,
+          brand_name: brandName,
+          product_name: productName || null,
+          stool_score: formData.stoolScore,
+          appetite_change: formData.appetiteChange,
+          vomiting: formData.vomiting,
+          allergy_symptoms: formData.allergySymptoms.length > 0 ? formData.allergySymptoms : null
+        })
+
+      if (insertError) {
+        // 중복 키 오류 체크
+        if (insertError.code === '23505') {
+          setError('이미 평가를 등록하셨습니다.')
+          return
+        }
+        throw insertError
+      }
 
       // 성공 처리
       if (onSuccess) {
@@ -101,7 +186,6 @@ export default function SafiEvaluationDialog({
       
       handleClose()
       
-      // 성공 메시지 (실제로는 토스트 사용)
       alert('SAFI 평가가 등록되었습니다. 감사합니다!')
     } catch (err) {
       console.error('SAFI 평가 등록 오류:', err)
@@ -150,9 +234,12 @@ export default function SafiEvaluationDialog({
             <X className="h-5 w-5 text-gray-500" />
           </button>
 
-          {authLoading ? (
+          {authLoading || isCheckingDuplicate ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-[#3056F5]" />
+              <span className="ml-3 text-gray-600">
+                {authLoading ? '인증 확인 중...' : '평가 이력 확인 중...'}
+              </span>
             </div>
           ) : showLoginRequired ? (
             // Login Required View
@@ -181,6 +268,30 @@ export default function SafiEvaluationDialog({
                   닫기
                 </button>
               </div>
+            </div>
+          ) : canEvaluate === false ? (
+            // 중복 평가 불가 View
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4">
+                <AlertCircle className="h-8 w-8 text-yellow-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                이미 평가하셨습니다
+              </h2>
+              <p className="text-sm text-gray-600 mb-2">
+                동일한 {productName ? '제품' : '브랜드'}에 대해 3개월에 1회만 평가할 수 있습니다.
+              </p>
+              {lastEvaluationDate && (
+                <p className="text-xs text-gray-500 mb-6">
+                  마지막 평가일: {lastEvaluationDate}
+                </p>
+              )}
+              <button
+                onClick={handleClose}
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+              >
+                닫기
+              </button>
             </div>
           ) : (
             // SAFI Evaluation Form
