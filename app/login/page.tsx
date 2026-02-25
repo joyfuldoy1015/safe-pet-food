@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getBrowserClient } from '@/lib/supabase-client'
 import { useAuth } from '@/hooks/useAuth'
@@ -23,6 +23,18 @@ import { useAuth } from '@/hooks/useAuth'
  * 6. Header shows logged-in state
  */
 export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-violet-500" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [email, setEmail] = useState('')
