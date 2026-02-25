@@ -92,7 +92,7 @@ const sampleData: AnalyticsData = {
     { page: '메인 페이지', views: 8950, growth: 12 },
     { page: '사료 성분 계산기', views: 3420, growth: 8 },
     { page: '브랜드 평가', views: 2890, growth: -2 },
-    { page: '건강검진표 분석기', views: 2340, growth: 25 },
+    { page: '일일 음수량 계산기', views: 2340, growth: 25 },
     { page: '리뷰 페이지', views: 1980, growth: 5 }
   ]
 }

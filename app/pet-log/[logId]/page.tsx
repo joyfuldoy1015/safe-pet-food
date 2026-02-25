@@ -728,8 +728,9 @@ export default function LogDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
+      <div className="max-w-4xl mx-auto">
       {/* 헤더 */}
-      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between z-10">
+      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between z-10">
         <button
           onClick={() => router.back()}
           className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -1305,8 +1306,11 @@ export default function LogDetailPage() {
         )}
       </div>
 
+      </div>{/* max-w-4xl 닫기 */}
+
       {/* 하단 탭 & 입력 영역 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
+      <div className="fixed bottom-0 left-0 right-0 z-20">
+      <div className="max-w-4xl mx-auto bg-white border-t border-gray-200">
         {/* 탭 */}
         <div className="flex">
           <button
@@ -1369,6 +1373,7 @@ export default function LogDetailPage() {
             <Send className="h-5 w-5" />
           </button>
         </div>
+      </div>
       </div>
     </div>
   )

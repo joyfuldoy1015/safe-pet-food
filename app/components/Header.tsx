@@ -12,7 +12,6 @@ import {
   Zap,
   ChevronDown,
   Droplet,
-  ClipboardList,
   Coffee,
   Users,
   HelpCircle,
@@ -46,7 +45,6 @@ const categories = {
     color: 'from-green-500 to-teal-500',
     items: [
       { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
-      { name: '건강검진표 분석기', href: '/health-analyzer', icon: ClipboardList, description: '건강검진 결과를 업로드하면 AI가 상세하게 분석해드려요.' },
       { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이의 적정 하루 물 섭취량을 계산해보세요.' }
     ]
   }
