@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerClient } from '@/lib/supabase-server'
+import { rateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
 // 임시 메모리 저장소 (실제로는 데이터베이스 사용)
 const evaluationsStorage: Record<string, any[]> = {
@@ -137,7 +139,20 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { brandName: string } }
 ) {
+  const ip = getClientIp(request)
+  const rl = rateLimit(ip, RATE_LIMITS.write)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
+    const supabase = getServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: '평가를 작성하려면 로그인이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
     const brandName = decodeURIComponent(params.brandName)
     const evaluationData = await request.json()
 
@@ -145,17 +160,15 @@ export async function POST(
       evaluationsStorage[brandName] = []
     }
 
-    // 평가 데이터에 메타데이터 추가
     const evaluation = {
       ...evaluationData,
       id: `eval-${Date.now()}`,
       submittedAt: new Date().toISOString(),
-      userId: `user-${Date.now()}`, // 실제로는 로그인 시스템에서 가져옴
+      userId: user.id,
       helpful_votes: 0,
-      verified_purchase: false // 실제로는 구매 이력 확인
+      verified_purchase: false
     }
 
-    // 데이터 유효성 검사
     if (!evaluation.brandName || evaluation.overall_rating < 1 || evaluation.overall_rating > 5) {
       return NextResponse.json(
         { error: '유효하지 않은 평가 데이터입니다.' },

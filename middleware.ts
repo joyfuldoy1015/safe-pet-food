@@ -31,17 +31,16 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session - this is important for keeping the session alive
-  // and for properly invalidating sessions after logout
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
 
-  // Protect /admin routes
   if (pathname.startsWith('/admin')) {
-    // Allow access - actual permission check will be done in page component
-    // This allows the page to check permissions via API and show proper UI
-    // The page component will handle redirect if user is not admin
+    if (!user) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
   }
 
   return response

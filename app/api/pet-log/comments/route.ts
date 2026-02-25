@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerClient } from '@/lib/supabase-server'
+import { rateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,10 @@ const isSupabaseConfigured = () => {
 
 // POST - 댓글 생성
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
+  const rl = rateLimit(ip, RATE_LIMITS.write)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const supabase = getServerClient()
     if (!isSupabaseConfigured()) {

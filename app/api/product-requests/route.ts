@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerClient } from '@/lib/supabase-server'
+import { rateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
 // POST: 새 제품 등록 요청 생성
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request)
+  const rl = rateLimit(ip, RATE_LIMITS.write)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const supabase = getServerClient()
     

@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerClient } from '@/lib/supabase-server'
+import { rateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function DELETE(request: NextRequest) {
+  const ip = getClientIp(request)
+  const rl = rateLimit(ip, RATE_LIMITS.deleteAccount)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     // 일반 클라이언트로 현재 사용자 확인
     const supabase = getServerClient()

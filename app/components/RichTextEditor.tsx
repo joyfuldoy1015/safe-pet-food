@@ -1,8 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react'
-import dynamic from 'next/dynamic'
-import 'react-quill/dist/quill.snow.css'
+import React from 'react'
 
 interface RichTextEditorProps {
   value: string
@@ -11,68 +9,24 @@ interface RichTextEditorProps {
   className?: string
 }
 
-// React Quill 타입 정의
-interface ReactQuillComponent {
-  (props: {
-    theme?: string
-    value: string
-    onChange: (value: string) => void
-    modules?: any
-    formats?: string[]
-    placeholder?: string
-    className?: string
-  }): JSX.Element
-}
-
-// Quill을 동적으로 import (SSR 방지)
-const ReactQuill = dynamic<any>(() => import('react-quill'), { 
-  ssr: false,
-  loading: () => <div className="h-32 bg-gray-50 rounded-lg animate-pulse" />
-})
-
-export default function RichTextEditor({ 
-  value, 
-  onChange, 
+/**
+ * Lightweight text editor replacing react-quill (removed due to XSS vulnerability in quill <=1.3.7).
+ * If rich-text editing is needed later, consider @tiptap/react or similar.
+ */
+export default function RichTextEditor({
+  value,
+  onChange,
   placeholder = '내용을 입력하세요...',
   className = ''
 }: RichTextEditorProps) {
-  // Quill 에디터 설정
-  const modules = useMemo(() => ({
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'align': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'color': [] }, { 'background': [] }],
-      ['link'],
-      ['clean']
-    ],
-    clipboard: {
-      matchVisual: false
-    }
-  }), [])
-
-  const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'align',
-    'list', 'bullet',
-    'color', 'background',
-    'link'
-  ]
-
   return (
     <div className={`rich-text-editor ${className}`}>
-      <ReactQuill
-        theme="snow"
+      <textarea
         value={value}
-        onChange={onChange}
-        modules={modules}
-        formats={formats}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="bg-white rounded-lg"
+        className="w-full min-h-[8rem] p-3 bg-white border border-gray-300 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
     </div>
   )
 }
-

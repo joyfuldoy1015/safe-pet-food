@@ -22,16 +22,26 @@ import type { Database } from '@/lib/types/database'
  * - Response must be created before supabase client
  * - Cookies are set on response object
  */
+function isValidRedirectPath(path: string): boolean {
+  if (!path || typeof path !== 'string') return false
+  if (path.startsWith('//')) return false
+  if (/^https?:\/\//i.test(path)) return false
+  if (path.includes('\\')) return false
+  if (!path.startsWith('/')) return false
+  try {
+    const url = new URL(path, 'http://dummy.com')
+    if (url.hostname !== 'dummy.com') return false
+  } catch {
+    return false
+  }
+  return true
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') || '/'
-  
-  console.log('[Auth Callback] Request received:', {
-    code: code ? `${code.substring(0, 10)}...` : 'none',
-    next,
-    url: requestUrl.href
-  })
+  const rawNext = requestUrl.searchParams.get('next') || '/'
+  const next = isValidRedirectPath(rawNext) ? rawNext : '/'
 
   // Early return if no code
   if (!code) {
@@ -62,23 +72,15 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  console.log('[Auth Callback] Exchanging code for session...')
-  
   // Exchange code for session
   const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
-    console.error('[Auth Callback] Error exchanging code:', error)
+    console.error('[Auth Callback] Error exchanging code')
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(error.message)}`, requestUrl.origin)
+      new URL('/login?error=auth_failed', requestUrl.origin)
     )
   }
-
-  console.log('[Auth Callback] Session created successfully:', {
-    userId: data?.user?.id,
-    email: data?.user?.email,
-    hasSession: !!data?.session
-  })
 
   // Create profile if it doesn't exist (non-blocking)
   if (data?.user) {
@@ -100,7 +102,7 @@ export async function GET(request: NextRequest) {
           nickname
         })
 
-        console.log('[Auth Callback] Profile created for:', data.user.email)
+        // profile created
       }
     } catch (profileError) {
       // Profile creation is non-critical - log but continue
@@ -111,8 +113,6 @@ export async function GET(request: NextRequest) {
   // Set cache headers to prevent caching
   response.headers.set('Cache-Control', 'no-store, must-revalidate')
   response.headers.set('Pragma', 'no-cache')
-  
-  console.log('[Auth Callback] Redirecting to:', next)
   
   return response
 }

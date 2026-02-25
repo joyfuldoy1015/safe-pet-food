@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
-// 실제 구현에서는 환경변수에서 가져와야 함
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
 interface PetInfo {
@@ -40,8 +40,24 @@ interface AnalysisResult {
   fullReport: any
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILES = 5
+const ALLOWED_TYPES = ['application/pdf']
+
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request)
+  const rl = rateLimit(ip, RATE_LIMITS.analyzeHealth)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
+    const contentLength = request.headers.get('content-length')
+    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE * MAX_FILES) {
+      return NextResponse.json(
+        { error: '전체 파일 크기가 제한을 초과했습니다.' },
+        { status: 413 }
+      )
+    }
+
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
     const petInfoStr = formData.get('petInfo') as string
@@ -53,7 +69,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const petInfo: PetInfo = JSON.parse(petInfoStr)
+    if (files.length > MAX_FILES) {
+      return NextResponse.json(
+        { error: `파일은 최대 ${MAX_FILES}개까지 업로드 가능합니다.` },
+        { status: 400 }
+      )
+    }
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `파일 크기는 ${MAX_FILE_SIZE / 1024 / 1024}MB를 초과할 수 없습니다: ${file.name}` },
+          { status: 413 }
+        )
+      }
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { error: `허용되지 않는 파일 형식입니다: ${file.name}. PDF 파일만 업로드 가능합니다.` },
+          { status: 400 }
+        )
+      }
+    }
+
+    let petInfo: PetInfo
+    try {
+      petInfo = JSON.parse(petInfoStr)
+    } catch {
+      return NextResponse.json(
+        { error: '반려동물 정보 형식이 올바르지 않습니다.' },
+        { status: 400 }
+      )
+    }
 
     // 1. PDF 텍스트 추출 (OCR)
     const extractedTexts = await Promise.all(
