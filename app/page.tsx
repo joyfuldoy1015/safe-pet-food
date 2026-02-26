@@ -371,7 +371,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <Link
-              href="/pet-log/posts/write"
+              href="/pet-log?write=true"
               className="inline-block bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium py-2.5 px-5 rounded-xl transition-colors"
             >
               급여 후기 작성하기

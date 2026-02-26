@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useMemo, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useMemo, useEffect, useRef, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CheckCircle, User, TrendingUp, Plus, ChevronDown, Search } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
@@ -19,7 +19,20 @@ type CategoryFilter = 'all' | 'feed' | 'supplement' | 'toilet' | 'health'
 const ITEMS_PER_PAGE = 6
 
 export default function PetLogPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-violet-500" />
+      </div>
+    }>
+      <PetLogContent />
+    </Suspense>
+  )
+}
+
+function PetLogContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [reviews, setReviews] = useState<ReviewLog[]>([])
@@ -36,6 +49,14 @@ export default function PetLogPage() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // write=true 파라미터로 진입 시 작성 다이얼로그 자동 오픈
+  useEffect(() => {
+    if (searchParams.get('write') === 'true') {
+      setIsLogFormOpen(true)
+      router.replace('/pet-log', { scroll: false })
+    }
+  }, [searchParams, router])
 
   // Fetch reviews from Supabase (review_logs and pet_log_posts)
   useEffect(() => {
