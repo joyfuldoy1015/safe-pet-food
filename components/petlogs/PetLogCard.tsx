@@ -138,10 +138,22 @@ export default function PetLogCard(props: PetLogCardProps) {
         </span>
       </div>
 
-      {/* 제품명 */}
-      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
-        {props.product}
-      </h3>
+      {/* 제품명 + 추천 배지 */}
+      <div className="flex items-center gap-2 mb-2">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+          {props.product}
+        </h3>
+        {props.recommended === true && (
+          <span className="flex-shrink-0 px-2.5 py-1 bg-green-50 text-green-600 text-xs font-medium rounded-full border border-green-100">
+            👍 추천
+          </span>
+        )}
+        {props.recommended === false && (
+          <span className="flex-shrink-0 px-2.5 py-1 bg-red-50 text-red-500 text-xs font-medium rounded-full border border-red-100">
+            👎 비추천
+          </span>
+        )}
+      </div>
 
       {/* 기능 태그 */}
       {props.functionalTag && (

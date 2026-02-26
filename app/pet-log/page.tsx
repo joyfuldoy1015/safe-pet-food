@@ -846,7 +846,7 @@ function PetLogContent() {
         {/* FAB Button */}
         <button
           onClick={() => setIsLogFormOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 bg-blue-500 text-white rounded-full shadow-strong hover:bg-blue-600 transition-all duration-200 hover:scale-110 flex items-center justify-center z-40"
+          className="fixed bottom-6 right-6 h-14 w-14 bg-blue-500 text-white rounded-full shadow-strong hover:bg-blue-600 active:bg-blue-700 transition-colors duration-200 flex items-center justify-center z-40"
           aria-label="새 로그 작성"
         >
           <Plus className="h-6 w-6" />

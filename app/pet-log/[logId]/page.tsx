@@ -863,8 +863,19 @@ export default function LogDetailPage() {
         transition={{ delay: 0.05 }}
         className="mx-4 my-4 bg-white rounded-2xl border border-gray-100 p-4 relative"
       >
-        {/* 사용 기간 배지 */}
-        <div className="absolute top-4 right-4">
+        {/* 사용 기간 배지 + 추천 배지 */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5">
+          {log.recommend !== undefined && log.recommend !== null && (
+            log.recommend ? (
+              <span className="px-3 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-full border border-green-100">
+                👍 추천
+              </span>
+            ) : (
+              <span className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-medium rounded-full border border-red-100">
+                👎 비추천
+              </span>
+            )
+          )}
           <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
             log.status === 'feeding' ? 'bg-green-50 text-green-600' :
             log.status === 'completed' ? 'bg-gray-100 text-gray-600' :
