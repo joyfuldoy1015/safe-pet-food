@@ -168,6 +168,7 @@ export default function CommunityQAForumPage() {
               content: q.content,
               author: {
                 name: q.author?.nickname || '익명',
+                avatar: q.author?.avatar_url || undefined,
                 level: 'beginner' as const
               },
               category: q.category,

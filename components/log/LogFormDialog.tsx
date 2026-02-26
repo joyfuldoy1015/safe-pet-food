@@ -6,8 +6,6 @@ import { X, LogIn, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
-import { mockPets } from '@/lib/mock/review-log'
-import type { Pet as MockPet } from '@/lib/types/review-log'
 import type { Database } from '@/lib/types/database'
 
 type Pet = Database['public']['Tables']['pets']['Row']
@@ -81,23 +79,8 @@ export default function LogFormDialog({
                            clientUrl.includes('placeholder') ||
                            !clientUrl
 
-      // If no Supabase or placeholder, use mock data
       if (!hasSupabase || isPlaceholder || !supabase || !user) {
-        console.log('[LogFormDialog] Using mock pets data')
-        // Convert mock pets to Database Pet format
-        const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
-          id: mockPet.id,
-          owner_id: 'owner-1', // Default owner for mock data
-          name: mockPet.name,
-          species: mockPet.species,
-          birth_date: mockPet.birthDate,
-          weight_kg: mockPet.weightKg ?? null,
-          tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
-          avatar_url: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }))
-        setPets(convertedPets)
+        setPets([])
         setIsLoadingPets(false)
         return
       }
@@ -110,59 +93,13 @@ export default function LogFormDialog({
 
       if (error) {
         console.error('[LogFormDialog] Error loading pets:', error)
-        // Fallback to mock data on error
-        console.log('[LogFormDialog] Falling back to mock pets data')
-        const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
-          id: mockPet.id,
-          owner_id: user.id,
-          name: mockPet.name,
-          species: mockPet.species,
-          birth_date: mockPet.birthDate,
-          weight_kg: mockPet.weightKg ?? null,
-          tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
-          avatar_url: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }))
-        setPets(convertedPets)
+        setPets([])
       } else {
-        // Use real data if available, otherwise fallback to mock
-        if (data && data.length > 0) {
-          setPets(data)
-        } else {
-          console.log('[LogFormDialog] No pets found, using mock pets data')
-          const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
-            id: mockPet.id,
-            owner_id: user.id,
-            name: mockPet.name,
-            species: mockPet.species,
-            birth_date: mockPet.birthDate,
-            weight_kg: mockPet.weightKg ?? null,
-            tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
-            avatar_url: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }))
-          setPets(convertedPets)
-        }
+        setPets(data || [])
       }
     } catch (error) {
       console.error('[LogFormDialog] Error loading pets:', error)
-      // Fallback to mock data on error
-      console.log('[LogFormDialog] Falling back to mock pets data')
-      const convertedPets: Pet[] = mockPets.map((mockPet: MockPet) => ({
-        id: mockPet.id,
-        owner_id: user?.id || 'owner-1',
-        name: mockPet.name,
-        species: mockPet.species,
-        birth_date: mockPet.birthDate,
-        weight_kg: mockPet.weightKg ?? null,
-        tags: mockPet.tags && mockPet.tags.length > 0 ? mockPet.tags : null,
-        avatar_url: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }))
-      setPets(convertedPets)
+      setPets([])
     } finally {
       setIsLoadingPets(false)
     }
@@ -682,7 +619,7 @@ function ReviewLogFormContent({
             onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
             required
             max={new Date().toISOString().split('T')[0]}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm appearance-none"
           />
         </div>
 
@@ -700,7 +637,7 @@ function ReviewLogFormContent({
             disabled={formData.status === 'feeding'}
             min={formData.period_start || undefined}
             max={new Date().toISOString().split('T')[0]}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 

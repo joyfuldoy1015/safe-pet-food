@@ -7,7 +7,6 @@ import { ArrowLeft, ChevronRight, Heart, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { getOwner, getPetsByOwner, getLogsByOwner } from '@/lib/supa/queries'
 import type { ReviewLog, Pet, Owner } from '@/lib/types/review-log'
-import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
 import { getBrowserClient } from '@/lib/supabase-client'
 
 type CategoryFilter = 'all' | 'feed' | 'supplement' | 'toilet' | 'health'
@@ -35,7 +34,6 @@ export default function OwnerProfilePage() {
       try {
         const supabase = getBrowserClient()
         if (!supabase) {
-          loadMockData()
           setIsLoading(false)
           return
         }
@@ -60,23 +58,11 @@ export default function OwnerProfilePage() {
           setOwner(ownerData as unknown as Owner)
           setPets(petsData as unknown as Pet[])
           setLogs(logsData as unknown as ReviewLog[])
-        } else {
-          loadMockData()
         }
       } catch (error) {
         console.error('[OwnerProfilePage] Error loading data:', error)
-        loadMockData()
       } finally {
         setIsLoading(false)
-      }
-    }
-
-    const loadMockData = () => {
-      const mockOwner = mockOwners.find((o) => o.id === ownerId)
-      if (mockOwner) {
-        setOwner(mockOwner)
-        setPets(mockPets.filter((p) => mockOwner.pets.includes(p.id)))
-        setLogs(mockReviewLogs.filter((l) => l.ownerId === ownerId))
       }
     }
 

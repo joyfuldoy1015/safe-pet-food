@@ -6,7 +6,6 @@
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import { ReviewLog } from '@/lib/types/review-log'
 import questionsData from '@/data/questions.json'
-import { mockReviewLogs, mockOwners, mockPets } from '@/lib/mock/review-log'
 import { getBrowserClient } from '@/lib/supabase-client'
 
 export type FeedItemKind = 'qa' | 'review'
@@ -108,7 +107,7 @@ async function fetchCommunityQuestions(): Promise<Question[]> {
 async function fetchReviewLogs(): Promise<ReviewLog[]> {
   try {
     const supabase = getBrowserClient()
-    if (!supabase) return mockReviewLogs
+    if (!supabase) return []
 
     const { data, error } = await supabase
       .from('review_logs')
@@ -121,7 +120,7 @@ async function fetchReviewLogs(): Promise<ReviewLog[]> {
       .order('created_at', { ascending: false })
       .limit(100)
 
-    if (error || !data) return mockReviewLogs
+    if (error || !data) return []
 
     return data.map((log: any) => ({
       id: log.id,
@@ -151,7 +150,7 @@ async function fetchReviewLogs(): Promise<ReviewLog[]> {
     }))
   } catch (error) {
     console.error('Failed to fetch review_logs:', error)
-    return mockReviewLogs
+    return []
   }
 }
 

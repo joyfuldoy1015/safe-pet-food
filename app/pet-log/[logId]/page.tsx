@@ -7,8 +7,9 @@ import { ArrowLeft, Share2, Heart, HelpCircle, Send, CheckCircle, ChevronRight, 
 import Image from 'next/image'
 import { getBrowserClient } from '@/lib/supabase-client'
 import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPostWithAuthor } from '@/lib/types/review-log'
-import { mockReviewLogs, mockOwners, mockPets, mockComments, mockQAThreads, mockQAPosts } from '@/lib/mock/review-log'
 import { useAuth } from '@/hooks/useAuth'
+import LogFormDialog from '@/components/log/LogFormDialog'
+import type { Database } from '@/lib/types/database'
 
 /**
  * Single Log Detail Page
@@ -40,8 +41,12 @@ export default function LogDetailPage() {
   const [hasMarkedHelpful, setHasMarkedHelpful] = useState(false)
   const [helpfulCount, setHelpfulCount] = useState(0)
   const [isMarkingHelpful, setIsMarkingHelpful] = useState(false)
+  const [isPostMenuOpen, setIsPostMenuOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [reviewLogRow, setReviewLogRow] = useState<Database['public']['Tables']['review_logs']['Row'] | null>(null)
   const commentsSectionRef = useRef<HTMLDivElement>(null)
   const qaSectionRef = useRef<HTMLDivElement>(null)
+  const postMenuRef = useRef<HTMLDivElement>(null)
 
   // 데이터 로드
   useEffect(() => {
@@ -86,6 +91,7 @@ export default function LogDetailPage() {
               updatedAt: logData.updated_at
             }
             setLog(transformedLog)
+            setReviewLogRow(logData as any)
             setHelpfulCount(logData.likes || 0)
 
             // 사용자가 이미 도움돼요를 눌렀는지 확인
@@ -193,26 +199,11 @@ export default function LogDetailPage() {
           }
         }
 
-        // Mock 데이터 fallback
-        loadMockData()
+        setIsLoading(false)
       } catch (error) {
         console.error('[LogDetailPage] Error:', error)
-        loadMockData()
+        setIsLoading(false)
       }
-    }
-
-    const loadMockData = () => {
-      const mockLog = mockReviewLogs.find((l) => l.id === logId)
-      if (mockLog) {
-        setLog(mockLog)
-        setPet(mockPets.find((p) => p.id === mockLog.petId) || null)
-        setOwner(mockOwners.find((o) => o.id === mockLog.ownerId) || null)
-        setComments(mockComments.filter((c) => c.logId === logId))
-        setQAThreads(mockQAThreads.filter((t) => t.logId === logId))
-        const threads = mockQAThreads.filter((t) => t.logId === logId)
-        setQAPosts(mockQAPosts.filter((p) => threads.some((t) => t.id === p.threadId)) as QAPostWithAuthor[])
-      }
-      setIsLoading(false)
     }
 
     loadData()
@@ -700,6 +691,57 @@ export default function LogDetailPage() {
     }
   }
 
+  const isMyPost = !!(user && log && log.ownerId === user.id)
+
+  // 글 삭제
+  const handleDeletePost = async () => {
+    if (!user || !log) return
+    if (!confirm('이 로그를 삭제하시겠습니까? 삭제된 글은 복구할 수 없습니다.')) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { error } = await supabase
+        .from('review_logs')
+        .delete()
+        .eq('id', log.id)
+        .eq('owner_id', user.id)
+
+      if (error) {
+        console.error('글 삭제 오류:', error)
+        alert('삭제에 실패했습니다.')
+        return
+      }
+
+      alert('삭제되었습니다.')
+      router.push('/pet-log')
+    } catch (error) {
+      console.error('글 삭제 오류:', error)
+      alert('삭제에 실패했습니다.')
+    }
+    setIsPostMenuOpen(false)
+  }
+
+  // 글 수정 완료 후 새로고침
+  const handleEditSuccess = () => {
+    setIsEditDialogOpen(false)
+    window.location.reload()
+  }
+
+  // 포스트 메뉴 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (postMenuRef.current && !postMenuRef.current.contains(event.target as Node)) {
+        setIsPostMenuOpen(false)
+      }
+    }
+    if (isPostMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isPostMenuOpen])
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -738,12 +780,41 @@ export default function LogDetailPage() {
           <ArrowLeft className="h-5 w-5 text-gray-700" />
         </button>
         <h1 className="text-base font-semibold text-gray-900">로그 상세보기</h1>
-        <button
-          onClick={handleShare}
-          className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <Share2 className="h-5 w-5 text-gray-700" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleShare}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <Share2 className="h-5 w-5 text-gray-700" />
+          </button>
+          {isMyPost && (
+            <div className="relative" ref={postMenuRef}>
+              <button
+                onClick={() => setIsPostMenuOpen(!isPostMenuOpen)}
+                className="p-2 -mr-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="글 메뉴"
+              >
+                <MoreVertical className="h-5 w-5 text-gray-700" />
+              </button>
+              {isPostMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden min-w-[120px]">
+                  <button
+                    onClick={() => { setIsPostMenuOpen(false); setIsEditDialogOpen(true); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 w-full whitespace-nowrap"
+                  >
+                    <Edit2 className="h-4 w-4 flex-shrink-0" /> 수정
+                  </button>
+                  <button
+                    onClick={handleDeletePost}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full whitespace-nowrap"
+                  >
+                    <Trash2 className="h-4 w-4 flex-shrink-0" /> 삭제
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 프로필 영역 */}
@@ -1375,6 +1446,18 @@ export default function LogDetailPage() {
         </div>
       </div>
       </div>
+
+      {/* 글 수정 다이얼로그 */}
+      {isMyPost && (
+        <LogFormDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          title="후기 수정"
+          editData={reviewLogRow}
+          onSuccess={handleEditSuccess}
+          userId={user?.id}
+        />
+      )}
     </div>
   )
 }

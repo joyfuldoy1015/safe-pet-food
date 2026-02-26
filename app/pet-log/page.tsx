@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CheckCircle, User, TrendingUp, Plus, ChevronDown, Search } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
-import { mockReviewLogs, mockOwners, mockPets, mockComments } from '@/lib/mock/review-log'
 import PetLogCard from '@/components/petlogs/PetLogCard'
 // FeedFilters removed - using inline filters
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
@@ -23,15 +22,15 @@ export default function PetLogPage() {
   const router = useRouter()
   const { user } = useAuth()
   const [mounted, setMounted] = useState(false)
-  const [reviews, setReviews] = useState<ReviewLog[]>(mockReviewLogs)
-  const [comments, setComments] = useState<Comment[]>(mockComments)
+  const [reviews, setReviews] = useState<ReviewLog[]>([])
+  const [comments, setComments] = useState<Comment[]>([])
   const [selectedReview, setSelectedReview] = useState<ReviewLog | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [isLogFormOpen, setIsLogFormOpen] = useState(false)
   const [isLoadingReviews, setIsLoadingReviews] = useState(true)
-  const [pets, setPets] = useState<Pet[]>(mockPets)
-  const [owners, setOwners] = useState<Owner[]>(mockOwners)
+  const [pets, setPets] = useState<Pet[]>([])
+  const [owners, setOwners] = useState<Owner[]>([])
 
   // 클라이언트 사이드 마운트 확인 (하이드레이션 에러 방지)
   useEffect(() => {
@@ -49,7 +48,6 @@ export default function PetLogPage() {
           !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
 
         if (!isSupabaseConfigured || !supabase) {
-          console.log('[PetLogPage] Supabase not configured, using mock data')
           setIsLoadingReviews(false)
           return
         }
@@ -175,15 +173,9 @@ export default function PetLogPage() {
           console.warn('[PetLogPage] Error fetching pet_log_posts:', error)
         }
 
-        // Merge with mock data if no Supabase data
-        if (allReviews.length > 0) {
-          setReviews(allReviews)
-        } else {
-          setReviews(mockReviewLogs)
-        }
+        setReviews(allReviews)
       } catch (error) {
         console.error('[PetLogPage] Error fetching reviews:', error)
-        setReviews(mockReviewLogs)
       } finally {
         setIsLoadingReviews(false)
       }

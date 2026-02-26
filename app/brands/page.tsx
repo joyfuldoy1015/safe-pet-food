@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { Star, Shield, AlertTriangle, CheckCircle, Users, ArrowLeft, Search, Filter, BarChart3, MessageSquare, ChevronDown } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
-import { mockReviewLogs } from '@/lib/mock/review-log'
 
 interface Brand {
   id: string
@@ -53,18 +52,12 @@ export default function BrandsPage() {
   // Calculate SAFI scores for each brand
   const brandsWithSafi = useMemo(() => {
     return brands.map(brand => {
-      // Get reviews for this brand
-      const brandReviews = mockReviewLogs.filter(review => review.brand === brand.name)
-      
-      // SAFI 계산을 위한 리뷰 데이터 변환
-      const safiReviews = brandReviews.map(review => ({
-        stoolScore: review.stool_score ?? null,
-        allergySymptoms: review.allergy_symptoms ? ['allergy'] : null,
-        vomiting: review.vomiting ?? null,
-        appetiteChange: review.appetite_change 
-          ? (review.appetite_change.toUpperCase() as 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED')
-          : null
-      }))
+      const safiReviews: Array<{
+        stoolScore: number | null
+        allergySymptoms: string[] | null
+        vomiting: boolean | null
+        appetiteChange: 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED' | null
+      }> = []
 
       // 브랜드 리콜 이력
       const recallHistory = brand.recall_history.map(recall => ({
