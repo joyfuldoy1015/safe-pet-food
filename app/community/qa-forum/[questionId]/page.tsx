@@ -1102,23 +1102,6 @@ export default function QuestionDetailPage() {
                       <span className="font-semibold text-gray-900 text-sm">
                         {question.author.name}
                       </span>
-                      {question.author.level && (
-                        <span
-                          className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                            question.author.level === 'expert'
-                              ? 'bg-purple-100 text-purple-700'
-                              : question.author.level === 'experienced'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}
-                        >
-                          {question.author.level === 'expert'
-                            ? '전문가'
-                            : question.author.level === 'experienced'
-                            ? '경험자'
-                            : '새싹'}
-                        </span>
-                      )}
                     </div>
                     <span className="text-xs text-gray-400">{formatTimeAgo(question.createdAt)}</span>
                   </div>

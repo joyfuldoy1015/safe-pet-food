@@ -54,21 +54,6 @@ export default function CommentThread({
   // 현재 사용자가 작성한 댓글인지 확인
   const isOwnComment = currentUserId && comment.author.id === currentUserId
 
-  const getAuthorBadge = (level?: string) => {
-    if (!level) return null
-    const badges = {
-      beginner: { label: '새싹', color: 'bg-green-100 text-green-800' },
-      experienced: { label: '경험자', color: 'bg-blue-100 text-blue-800' },
-      expert: { label: '전문가', color: 'bg-purple-100 text-purple-800' }
-    }
-    const badge = badges[level as keyof typeof badges]
-    if (!badge) return null
-    return (
-      <span className={`px-2 py-1 text-xs rounded-full ${badge.color}`}>
-        {badge.label}
-      </span>
-    )
-  }
 
   const handleReplySubmit = () => {
     if (!replyContent.trim()) return
@@ -136,7 +121,6 @@ export default function CommentThread({
                 </div>
               )}
               <span className="text-sm font-medium text-gray-900">{comment.isDeleted ? '삭제된 사용자' : comment.author.name}</span>
-              {!comment.isDeleted && getAuthorBadge(comment.author.level)}
               <span className="text-xs text-gray-500">{formatTimeAgo(comment.createdAt)}</span>
             </div>
             

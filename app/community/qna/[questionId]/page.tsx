@@ -417,7 +417,6 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-900">{question.authorName}</span>
-                    <span className="text-sm text-gray-500">{question.authorLevel}</span>
                   </div>
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <span className="flex items-center">
@@ -546,7 +545,6 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <span className="font-medium text-gray-900">{acceptedAnswer.authorName}</span>
-                        <span className="text-sm text-gray-500">{acceptedAnswer.authorLevel}</span>
                         <span className="text-sm text-gray-500">•</span>
                         <span className="text-sm text-gray-500">{formatDate(acceptedAnswer.createdAt)}</span>
                       </div>
@@ -641,7 +639,6 @@ export default function QnaDetailPage({ params }: { params: { questionId: string
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <span className="font-medium text-gray-900">{answer.authorName}</span>
-                        <span className="text-sm text-gray-500">{answer.authorLevel}</span>
                         <span className="text-sm text-gray-500">•</span>
                         <span className="text-sm text-gray-500">{formatDate(answer.createdAt)}</span>
                       </div>

@@ -44,18 +44,6 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
 
   const statusBadge = getStatusBadge()
 
-  // 작성자 레벨에 따른 배지
-  const getLevelBadge = (level?: string) => {
-    if (!level) return null
-    const badges: Record<string, { label: string; className: string }> = {
-      beginner: { label: '새싹', className: 'bg-green-100 text-green-700' },
-      experienced: { label: '경험자', className: 'bg-blue-100 text-blue-700' },
-      expert: { label: '전문가', className: 'bg-purple-100 text-purple-700' }
-    }
-    return badges[level] || null
-  }
-
-  const levelBadge = getLevelBadge(item.author?.level)
 
   return (
     <Link href={item.href}>
@@ -94,11 +82,6 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-gray-900 text-sm">{item.author?.name || '익명'}</span>
-                {levelBadge && (
-                  <span className={`px-2 py-0.5 text-xs rounded-md ${levelBadge.className}`}>
-                    {levelBadge.label}
-                  </span>
-                )}
               </div>
               <p className="text-xs text-gray-400 mt-0.5">{formatTime(item.createdAt)} 작성</p>
             </div>
