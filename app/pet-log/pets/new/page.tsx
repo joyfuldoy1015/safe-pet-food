@@ -435,12 +435,13 @@ export default function NewPetPage() {
 
           {/* Submit Buttons */}
           <div className="flex justify-end space-x-4">
-            <Link
-              href="/pet-log"
+            <button
+              type="button"
+              onClick={() => router.back()}
               className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               취소
-            </Link>
+            </button>
             <button
               type="submit"
               disabled={saving}

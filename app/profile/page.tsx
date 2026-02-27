@@ -744,7 +744,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-900">내 급여/사용 기록</h2>
             <Link
-              href="/pet-log/posts/write"
+              href="/pet-log?write=true"
               className="flex items-center gap-1 text-sm text-violet-600 hover:text-violet-700 font-medium"
             >
               <Plus className="w-4 h-4" />
@@ -846,7 +846,7 @@ export default function ProfilePage() {
             <div className="text-center py-6">
               <p className="text-gray-500 mb-3 text-sm">작성한 급여 후기가 없습니다</p>
               <Link
-                href="/pet-log/posts/write"
+                href="/pet-log?write=true"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500 text-white rounded-xl text-sm hover:bg-violet-600 transition-colors"
               >
                 <Plus className="w-4 h-4" />
