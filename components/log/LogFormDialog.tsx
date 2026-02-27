@@ -529,7 +529,7 @@ function ReviewLogFormContent({
             value={formData.pet_id || ''}
             onChange={(e) => setFormData({ ...formData, pet_id: e.target.value })}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
           >
             <option value="">선택하세요</option>
             {pets.map((pet) => (
@@ -577,7 +577,7 @@ function ReviewLogFormContent({
             value={formData.brand || ''}
             onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
             placeholder="예: 로얄캐닌"
           />
         </div>
@@ -593,7 +593,7 @@ function ReviewLogFormContent({
             value={formData.product || ''}
             onChange={(e) => setFormData({ ...formData, product: e.target.value })}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
             placeholder="예: 어덜트 라지 브리드"
           />
         </div>
@@ -635,7 +635,7 @@ function ReviewLogFormContent({
             onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
             required
             max={new Date().toISOString().split('T')[0]}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm appearance-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base appearance-none"
           />
         </div>
 
@@ -653,7 +653,7 @@ function ReviewLogFormContent({
             disabled={formData.status === 'feeding'}
             min={formData.period_start || undefined}
             max={new Date().toISOString().split('T')[0]}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
         </div>
 
@@ -670,7 +670,7 @@ function ReviewLogFormContent({
             step="0.1"
             value={formData.rating || ''}
             onChange={(e) => setFormData({ ...formData, rating: e.target.value ? Number(e.target.value) : null })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
           />
         </div>
 
@@ -823,7 +823,7 @@ function ReviewLogFormContent({
                   }
                 }
               }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
               placeholder="예: 가려움, 발진, 눈물"
             />
             <button
@@ -878,7 +878,7 @@ function ReviewLogFormContent({
                 }
               }}
               disabled={(formData.continue_reasons || []).length >= 5}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="예: 변 상태 개선"
             />
             <button
@@ -929,7 +929,7 @@ function ReviewLogFormContent({
                 }
               }}
               disabled={(formData.stop_reasons || []).length >= 5}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="예: 알러지 의심"
             />
             <button
@@ -974,7 +974,7 @@ function ReviewLogFormContent({
             onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
             required
             rows={3}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm resize-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
             placeholder="2-3줄로 간단히 요약해주세요"
           />
         </div>
@@ -989,7 +989,7 @@ function ReviewLogFormContent({
             value={formData.notes || ''}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value || null })}
             rows={5}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm resize-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
             placeholder="급여 이유, 관찰된 변화, 수의사 코멘트 등을 자세히 적어주세요"
           />
         </div>
