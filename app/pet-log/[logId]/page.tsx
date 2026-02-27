@@ -28,7 +28,7 @@ export default function LogDetailPage() {
   const [qaThreads, setQAThreads] = useState<QAThread[]>([])
   const [qaPosts, setQAPosts] = useState<QAPostWithAuthor[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'comments' | 'qa'>('comments')
+  const [activeTab, setActiveTab] = useState<'comments' | 'qa'>('qa')
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
@@ -964,159 +964,11 @@ export default function LogDetailPage() {
       {/* 구분선 */}
       <div className="border-t border-gray-200 my-4" />
 
-      {/* 댓글 섹션 */}
-      <div ref={commentsSectionRef} className="px-4 mb-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-3">
-          댓글 <span className="text-violet-500">{comments.length}</span>
-        </h3>
-        {comments.filter(c => !c.parentId).length > 0 ? (
-          <div className="space-y-3">
-            {comments.filter(c => !c.parentId).map((comment) => (
-              <div key={comment.id} className="bg-white rounded-xl p-3 border border-gray-100 relative">
-                {editingCommentId === comment.id ? (
-                  // 수정 모드
-                  <div className="space-y-2">
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
-                      rows={2}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => { setEditingCommentId(null); setEditContent(''); }}
-                        className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
-                      >
-                        취소
-                      </button>
-                      <button
-                        onClick={() => handleEditComment(comment.id)}
-                        className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
-                      >
-                        저장
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  // 일반 모드
-                  <>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
-                        <span className="text-xs text-gray-400">{formatTimeAgo(comment.createdAt)}</span>
-                      </div>
-                      {user && user.id === comment.authorId && (
-                        <div className="relative">
-                          <button
-                            onClick={() => setMenuOpenId(menuOpenId === comment.id ? null : comment.id)}
-                            className="p-1 hover:bg-gray-100 rounded-full"
-                          >
-                            <MoreVertical className="h-4 w-4 text-gray-400" />
-                          </button>
-                          {menuOpenId === comment.id && (
-                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden min-w-[100px]">
-                              <button
-                                onClick={() => {
-                                  setEditingCommentId(comment.id)
-                                  setEditContent(comment.content)
-                                  setMenuOpenId(null)
-                                }}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 w-full whitespace-nowrap"
-                              >
-                                <Edit2 className="h-4 w-4 flex-shrink-0" /> 수정
-                              </button>
-                              <button
-                                onClick={() => handleDeleteComment(comment.id)}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full whitespace-nowrap"
-                              >
-                                <Trash2 className="h-4 w-4 flex-shrink-0" /> 삭제
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-700">{comment.content}</p>
-                    
-                    {/* 답글 버튼 - 부모 댓글에만 표시 */}
-                    {!comment.parentId && (
-                      <button
-                        onClick={() => {
-                          if (!user) {
-                            alert('로그인이 필요합니다.')
-                            return
-                          }
-                          setReplyingToCommentId(replyingToCommentId === comment.id ? null : comment.id)
-                          setReplyContent('')
-                        }}
-                        className="mt-2 text-xs text-violet-600 hover:text-violet-700 font-medium"
-                      >
-                        {replyingToCommentId === comment.id ? '취소' : '답글 달기'}
-                      </button>
-                    )}
-
-                    {/* 답글 입력 영역 */}
-                    {replyingToCommentId === comment.id && (
-                      <div className="mt-3 pl-3 border-l-2 border-violet-200">
-                        <textarea
-                          value={replyContent}
-                          onChange={(e) => setReplyContent(e.target.value)}
-                          placeholder="답글을 입력하세요..."
-                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                          rows={2}
-                        />
-                        <div className="flex justify-end gap-2 mt-2">
-                          <button
-                            onClick={() => { setReplyingToCommentId(null); setReplyContent(''); }}
-                            className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
-                          >
-                            취소
-                          </button>
-                          <button
-                            onClick={() => handleReplyToComment(comment.id)}
-                            disabled={!replyContent.trim()}
-                            className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
-                          >
-                            답글 등록
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 대댓글(답글) 표시 */}
-                    {comments.filter(reply => reply.parentId === comment.id).length > 0 && (
-                      <div className="mt-3 space-y-2 pl-3 border-l-2 border-gray-200">
-                        {comments.filter(reply => reply.parentId === comment.id).map(reply => (
-                          <div key={reply.id} className="bg-gray-50 rounded-lg p-2.5">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-medium text-gray-800">{reply.authorName}</span>
-                              <span className="text-xs text-gray-400">{formatTimeAgo(reply.createdAt)}</span>
-                            </div>
-                            <p className="text-xs text-gray-600">{reply.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 bg-gray-50 rounded-2xl">
-            <p className="text-sm text-gray-500">아직 댓글이 없습니다</p>
-          </div>
-        )}
-      </div>
-
-      {/* 구분선 */}
-      <div className="border-t border-gray-200 mb-4" />
-
       {/* 문의 섹션 */}
-      <div ref={qaSectionRef} className="px-4 pb-40">
+      <div ref={qaSectionRef} className="px-4 mb-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold text-gray-900">
-            문의 <span className="text-violet-500">{qaThreads.length}</span>
+            질문 있어요 <span className="text-violet-500">{qaThreads.length}</span>
           </h3>
         </div>
 
@@ -1383,7 +1235,150 @@ export default function LogDetailPage() {
         ) : (
           <div className="text-center py-8 bg-gray-50 rounded-2xl">
             <HelpCircle className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">아직 문의가 없습니다</p>
+            <p className="text-sm text-gray-500">아직 질문이 없습니다</p>
+          </div>
+        )}
+      </div>
+
+      {/* 구분선 */}
+      <div className="border-t border-gray-200 mb-4" />
+
+      {/* 댓글 섹션 */}
+      <div ref={commentsSectionRef} className="px-4 pb-40">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">
+          응원 한마디 <span className="text-violet-500">{comments.filter(c => !c.parentId).length}</span>
+        </h3>
+        {comments.filter(c => !c.parentId).length > 0 ? (
+          <div className="space-y-3">
+            {comments.filter(c => !c.parentId).map((comment) => (
+              <div key={comment.id} className="bg-white rounded-xl p-3 border border-gray-100 relative">
+                {editingCommentId === comment.id ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      rows={2}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => { setEditingCommentId(null); setEditContent(''); }}
+                        className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={() => handleEditComment(comment.id)}
+                        className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600"
+                      >
+                        저장
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900">{comment.authorName}</span>
+                        <span className="text-xs text-gray-400">{formatTimeAgo(comment.createdAt)}</span>
+                      </div>
+                      {user && user.id === comment.authorId && (
+                        <div className="relative">
+                          <button
+                            onClick={() => setMenuOpenId(menuOpenId === comment.id ? null : comment.id)}
+                            className="p-1 hover:bg-gray-100 rounded-full"
+                          >
+                            <MoreVertical className="h-4 w-4 text-gray-400" />
+                          </button>
+                          {menuOpenId === comment.id && (
+                            <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden min-w-[100px]">
+                              <button
+                                onClick={() => {
+                                  setEditingCommentId(comment.id)
+                                  setEditContent(comment.content)
+                                  setMenuOpenId(null)
+                                }}
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 w-full whitespace-nowrap"
+                              >
+                                <Edit2 className="h-4 w-4 flex-shrink-0" /> 수정
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full whitespace-nowrap"
+                              >
+                                <Trash2 className="h-4 w-4 flex-shrink-0" /> 삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-700">{comment.content}</p>
+                    
+                    {!comment.parentId && (
+                      <button
+                        onClick={() => {
+                          if (!user) {
+                            alert('로그인이 필요합니다.')
+                            return
+                          }
+                          setReplyingToCommentId(replyingToCommentId === comment.id ? null : comment.id)
+                          setReplyContent('')
+                        }}
+                        className="mt-2 text-xs text-violet-600 hover:text-violet-700 font-medium"
+                      >
+                        {replyingToCommentId === comment.id ? '취소' : '답글 달기'}
+                      </button>
+                    )}
+
+                    {replyingToCommentId === comment.id && (
+                      <div className="mt-3 pl-3 border-l-2 border-violet-200">
+                        <textarea
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="답글을 입력하세요..."
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                          rows={2}
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button
+                            onClick={() => { setReplyingToCommentId(null); setReplyContent(''); }}
+                            className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg"
+                          >
+                            취소
+                          </button>
+                          <button
+                            onClick={() => handleReplyToComment(comment.id)}
+                            disabled={!replyContent.trim()}
+                            className="px-3 py-1.5 text-xs bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50"
+                          >
+                            답글 등록
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {comments.filter(reply => reply.parentId === comment.id).length > 0 && (
+                      <div className="mt-3 space-y-2 pl-3 border-l-2 border-gray-200">
+                        {comments.filter(reply => reply.parentId === comment.id).map(reply => (
+                          <div key={reply.id} className="bg-gray-50 rounded-lg p-2.5">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-gray-800">{reply.authorName}</span>
+                              <span className="text-xs text-gray-400">{formatTimeAgo(reply.createdAt)}</span>
+                            </div>
+                            <p className="text-xs text-gray-600">{reply.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 bg-gray-50 rounded-2xl">
+            <p className="text-sm text-gray-500">아직 응원 한마디가 없습니다</p>
           </div>
         )}
       </div>
@@ -1396,24 +1391,24 @@ export default function LogDetailPage() {
         {/* 탭 */}
         <div className="flex">
           <button
-            onClick={() => handleTabChange('comments')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'comments'
-                ? 'bg-violet-500 text-white'
-                : 'bg-white text-gray-600'
-            }`}
-          >
-            댓글 {comments.length > 0 && `(${comments.length})`}
-          </button>
-          <button
             onClick={() => handleTabChange('qa')}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === 'qa'
                 ? 'bg-violet-500 text-white'
+                : 'bg-white text-gray-600'
+            }`}
+          >
+            질문 있어요 {qaThreads.length > 0 && `(${qaThreads.length})`}
+          </button>
+          <button
+            onClick={() => handleTabChange('comments')}
+            className={`flex-1 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'comments'
+                ? 'bg-violet-500 text-white'
                 : 'bg-white text-gray-600 border-l border-gray-200'
             }`}
           >
-            문의 {qaThreads.length > 0 && `(${qaThreads.length})`}
+            응원 한마디 {comments.filter(c => !c.parentId).length > 0 && `(${comments.filter(c => !c.parentId).length})`}
           </button>
         </div>
 
@@ -1423,7 +1418,7 @@ export default function LogDetailPage() {
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder={activeTab === 'comments' ? '응원 댓글 입력...' : '문의 내용 입력...'}
+            placeholder={activeTab === 'comments' ? '응원 한마디를 남겨주세요...' : '질문을 입력해주세요...'}
             className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
