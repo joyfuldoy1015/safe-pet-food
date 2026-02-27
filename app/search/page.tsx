@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Search, Filter, ArrowLeft, ChevronDown } from 'lucide-react'
 import SearchTabs from '@/components/search/SearchTabs'
 import ProductSearchResult from '@/components/search/ProductSearchResult'
+import { useAsyncData, fetchJSON } from '@/hooks/useAsyncData'
 
 interface Brand {
   id: string
@@ -36,17 +37,31 @@ interface Product {
 export default function SearchPage() {
   const [activeTab, setActiveTab] = useState<'brands' | 'products'>('products')
   const [searchTerm, setSearchTerm] = useState('')
-  const [brands, setBrands] = useState<Brand[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+
+  const {
+    data: searchData,
+    isLoading: loading,
+    error: fetchError,
+    refetch: fetchData,
+  } = useAsyncData(async () => {
+    const [brands, products] = await Promise.all([
+      fetchJSON<Brand[]>('/api/brands'),
+      fetchJSON<Product[]>('/api/products'),
+    ])
+    return {
+      brands: Array.isArray(brands) ? brands : [],
+      products: Array.isArray(products) ? products : [],
+    }
+  })
+
+  const brands = searchData?.brands ?? []
+  const products = searchData?.products ?? []
   
-  // 🆕 필터 상태
   const [gradeFilter, setGradeFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<string>('grade')
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const sortDropdownRef = useRef<HTMLDivElement>(null)
 
-  // 드롭다운 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
@@ -56,12 +71,7 @@ export default function SearchPage() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [])
   
-  // 🆕 URL 파라미터에서 탭 읽기
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
@@ -71,29 +81,6 @@ export default function SearchPage() {
       }
     }
   }, [])
-
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      // 브랜드 데이터 가져오기
-      const brandsRes = await fetch('/api/brands')
-      if (brandsRes.ok) {
-        const brandsData = await brandsRes.json()
-        setBrands(Array.isArray(brandsData) ? brandsData : [])
-      }
-
-      // 제품 데이터 가져오기
-      const productsRes = await fetch('/api/products')
-      if (productsRes.ok) {
-        const productsData = await productsRes.json()
-        setProducts(Array.isArray(productsData) ? productsData : [])
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   // 검색 필터링
   const filteredBrands = useMemo(() => {
@@ -181,7 +168,17 @@ export default function SearchPage() {
 
         {/* 검색 결과 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-          {loading ? (
+          {fetchError ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-3 text-sm">{fetchError}</p>
+              <button
+                onClick={fetchData}
+                className="px-4 py-2 bg-violet-500 text-white rounded-lg text-sm hover:bg-violet-600 transition-colors"
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : loading ? (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500 mx-auto mb-4"></div>
               <p className="text-sm text-gray-500">데이터를 불러오는 중...</p>

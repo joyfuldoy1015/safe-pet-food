@@ -136,10 +136,14 @@ export default function BrandAdminPage() {
   const fetchBrands = async () => {
     try {
       const response = await fetch('/api/brands')
+      if (!response.ok) {
+        throw new Error(`브랜드 데이터 로드 실패 (${response.status})`)
+      }
       const data = await response.json()
-      setBrands(data)
+      setBrands(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Failed to fetch brands:', error)
+      setBrands([])
     } finally {
       setLoading(false)
     }
@@ -692,7 +696,7 @@ export default function BrandAdminPage() {
                             </span>
                           )}
                           <button
-                            onClick={() => {/* TODO: AI 요약 생성/검토 */}}
+                            onClick={() => {/* BACKLOG: AI 요약 생성/검토 기능 구현 예정 */}}
                             className="inline-flex items-center justify-center px-3 py-1 text-xs font-medium text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-all duration-200"
                             title="AI 요약 생성"
                           >

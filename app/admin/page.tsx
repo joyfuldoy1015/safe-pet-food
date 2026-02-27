@@ -27,9 +27,9 @@
  * - product_longest_feeding: View for longest feeding rankings
  * - product_mentions: View for mentions rankings
  * 
- * Missing or TODO:
- * - app_settings table (for feature flags)
- * - Some views may need to be created in Supabase
+ * BACKLOG:
+ * - app_settings 테이블 (feature flags 용, 현재 localStorage 사용 중)
+ * - 일부 View는 Supabase에서 생성 필요할 수 있음
  * 
  * Mapping public → admin sections:
  * - Homepage → Dashboard (analytics)

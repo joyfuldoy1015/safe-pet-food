@@ -154,15 +154,15 @@ export async function GET(request: NextRequest) {
         },
         qaThreads: {
           value: qaThreadsResult.count || 0,
-          change: '+5%' // TODO: 실제 변화율 계산 필요
+          change: '+5%' // BACKLOG: 전주 대비 변화율 계산 구현 예정
         },
         activeUsers: {
           value: activeUsersResult.count || 0,
-          change: '+8%' // TODO: 실제 변화율 계산 필요
+          change: '+8%' // BACKLOG: 전주 대비 변화율 계산 구현 예정
         },
         hiddenContent: {
           value: hiddenContentResult.count || 0,
-          change: '-2' // TODO: 실제 변화율 계산 필요
+          change: '-2' // BACKLOG: 전주 대비 변화율 계산 구현 예정
         }
       },
       recentModerations: recentModerationsResult.data || []

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { CheckCircle, User, TrendingUp, Plus, ChevronDown, Search } from 'lucide-react'
 import { ReviewLog, Owner, Pet, Comment } from '@/lib/types/review-log'
-import PetLogCard from '@/components/petlogs/PetLogCard'
+import PetLogCard from '@/components/pet-log/PetLogCard'
 // FeedFilters removed - using inline filters
 import LogDrawer from '@/app/components/pet-log/LogDrawer'
 import LogFormDialog from '@/components/log/LogFormDialog'

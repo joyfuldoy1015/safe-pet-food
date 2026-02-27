@@ -68,17 +68,18 @@ export async function GET() {
       return NextResponse.json([])
     }
 
-    // 각 질문의 답변 수 가져오기
+    // 각 질문의 답변 수 가져오기 (개별 실패 시 0으로 fallback)
     const questionsWithAnswerCount = await Promise.all(
       questions.map(async (q: any) => {
-        const { count } = await supabase
-          .from('community_answers')
-          .select('*', { count: 'exact', head: true })
-          .eq('question_id', q.id)
+        try {
+          const { count } = await supabase
+            .from('community_answers')
+            .select('*', { count: 'exact', head: true })
+            .eq('question_id', q.id)
 
-        return {
-          ...q,
-          answerCount: count || 0
+          return { ...q, answerCount: count || 0 }
+        } catch {
+          return { ...q, answerCount: 0 }
         }
       })
     )

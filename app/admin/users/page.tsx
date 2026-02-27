@@ -154,7 +154,7 @@ export default function AdminUsersPage() {
             data={users}
             columns={columns}
             onRowClick={(user) => {
-              // TODO: Open detail drawer
+              // BACKLOG: 사용자 상세 Drawer 구현 예정
               console.log('Open detail for:', user.id)
             }}
           />

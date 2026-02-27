@@ -35,7 +35,7 @@ import { ArrowRight, ChevronRight, Loader2 } from 'lucide-react'
 import Hero from '@/components/home/Hero'
 import FeatureCards from '@/components/home/FeatureCards'
 import UnifiedCard from '@/components/home/UnifiedCard'
-import PetLogCard from '@/components/petlogs/PetLogCard'
+import PetLogCard from '@/components/pet-log/PetLogCard'
 import { getQA, type UnifiedFeedItem } from '@/lib/data/feed'
 import { getBrowserClient } from '@/lib/supabase-client'
 

@@ -18,7 +18,7 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // TODO: 실제 문의 제출 API 연동
+    // BACKLOG: 문의 제출 API 연동 (Supabase contact_requests 테이블)
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     alert('문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.')

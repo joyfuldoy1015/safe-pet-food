@@ -74,6 +74,11 @@ export function useAuth() {
       if (process.env.NODE_ENV === 'development') {
         console.log('[useAuth] Initial session:', session?.user?.email || 'none')
       }
+    }).catch((error) => {
+      console.error('[useAuth] Failed to get session:', error)
+      setUser(null)
+      setProfile(null)
+      setLoading(false)
     })
 
     // Listen to auth state changes
