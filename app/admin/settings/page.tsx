@@ -14,12 +14,17 @@ export default function AdminSettingsPage() {
   })
   const [saving, setSaving] = useState(false)
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('spf_admin_settings')
+      if (saved) setSettings(JSON.parse(saved))
+    } catch {}
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
     try {
-      // TODO: Save to API
-      console.log('Saving settings:', settings)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      localStorage.setItem('spf_admin_settings', JSON.stringify(settings))
       alert('설정이 저장되었습니다.')
     } catch (error) {
       console.error('[AdminSettingsPage] Error saving settings:', error)

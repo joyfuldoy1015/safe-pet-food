@@ -1,303 +1,186 @@
 'use client'
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  Eye, 
-  Star, 
-  Package,
-  ArrowLeft,
-  Calendar,
-  Download,
-  RefreshCw,
-  Filter
+import React, { useState, useEffect } from 'react'
+import AdminLayout from '@/components/admin/AdminLayout'
+import { getBrowserClient } from '@/lib/supabase-client'
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  FileText,
+  MessageSquare,
+  Heart,
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react'
 
-interface AnalyticsData {
-  visitors: {
-    total: number
-    growth: string
-    data: { date: string; count: number }[]
-  }
-  popularProducts: {
-    id: string
-    name: string
-    category: string
-    views: number
-    reviews: number
-    rating: number
-  }[]
-  userActivity: {
-    newUsers: number
-    activeUsers: number
-    retention: string
-  }
-  pageViews: {
-    page: string
-    views: number
-    growth: number
-  }[]
-}
-
-const sampleData: AnalyticsData = {
-  visitors: {
-    total: 12400,
-    growth: '+15%',
-    data: [
-      { date: '2024-12-14', count: 1200 },
-      { date: '2024-12-15', count: 1350 },
-      { date: '2024-12-16', count: 1100 },
-      { date: '2024-12-17', count: 1450 },
-      { date: '2024-12-18', count: 1600 },
-      { date: '2024-12-19', count: 1800 },
-      { date: '2024-12-20', count: 1900 }
-    ]
-  },
-  popularProducts: [
-    {
-      id: '1',
-      name: '로얄캐닌 키튼 사료',
-      category: '사료',
-      views: 2840,
-      reviews: 156,
-      rating: 4.8
-    },
-    {
-      id: '2',
-      name: '힐스 프리스크립션 다이어트',
-      category: '사료',
-      views: 2156,
-      reviews: 89,
-      rating: 4.6
-    },
-    {
-      id: '3',
-      name: '베네풀 고양이 모래',
-      category: '모래',
-      views: 1923,
-      reviews: 234,
-      rating: 4.2
-    }
-  ],
-  userActivity: {
-    newUsers: 245,
-    activeUsers: 1840,
-    retention: '68%'
-  },
-  pageViews: [
-    { page: '메인 페이지', views: 8950, growth: 12 },
-    { page: '사료 성분 계산기', views: 3420, growth: 8 },
-    { page: '브랜드 평가', views: 2890, growth: -2 },
-    { page: '일일 음수량 계산기', views: 2340, growth: 25 },
-    { page: '리뷰 페이지', views: 1980, growth: 5 }
-  ]
+interface Stats {
+  totalUsers: number
+  totalPets: number
+  totalReviewLogs: number
+  totalComments: number
+  totalQAThreads: number
+  totalQAPosts: number
+  totalCommunityQuestions: number
+  recentUsers7d: number
+  recentLogs7d: number
+  recentComments7d: number
+  topBrands: { brand: string; count: number }[]
+  speciesDistribution: { dog: number; cat: number }
 }
 
 export default function AdminAnalyticsPage() {
-  const [data] = useState<AnalyticsData>(sampleData)
-  const [timeRange, setTimeRange] = useState('7days')
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const getRatingStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-      />
-    ))
+  const loadStats = async () => {
+    setLoading(true)
+    try {
+      const supabase = getBrowserClient()
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const sevenDaysAgoISO = sevenDaysAgo.toISOString()
+
+      const [
+        usersRes, petsRes, logsRes, commentsRes,
+        threadsRes, postsRes, communityRes,
+        recentUsersRes, recentLogsRes, recentCommentsRes,
+        topBrandsRes, dogsRes, catsRes
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('pets').select('*', { count: 'exact', head: true }),
+        supabase.from('review_logs').select('*', { count: 'exact', head: true }),
+        supabase.from('comments').select('*', { count: 'exact', head: true }),
+        supabase.from('qa_threads').select('*', { count: 'exact', head: true }),
+        supabase.from('qa_posts').select('*', { count: 'exact', head: true }),
+        supabase.from('community_questions').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgoISO),
+        supabase.from('review_logs').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgoISO),
+        supabase.from('comments').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgoISO),
+        supabase.from('review_logs').select('brand').not('brand', 'is', null).limit(1000),
+        supabase.from('pets').select('*', { count: 'exact', head: true }).eq('species', 'dog'),
+        supabase.from('pets').select('*', { count: 'exact', head: true }).eq('species', 'cat'),
+      ])
+
+      const brandCounts: Record<string, number> = {}
+      if (topBrandsRes.data) {
+        topBrandsRes.data.forEach((r: any) => {
+          if (r.brand) brandCounts[r.brand] = (brandCounts[r.brand] || 0) + 1
+        })
+      }
+      const topBrands = Object.entries(brandCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([brand, count]) => ({ brand, count }))
+
+      setStats({
+        totalUsers: usersRes.count || 0,
+        totalPets: petsRes.count || 0,
+        totalReviewLogs: logsRes.count || 0,
+        totalComments: commentsRes.count || 0,
+        totalQAThreads: threadsRes.count || 0,
+        totalQAPosts: postsRes.count || 0,
+        totalCommunityQuestions: communityRes.count || 0,
+        recentUsers7d: recentUsersRes.count || 0,
+        recentLogs7d: recentLogsRes.count || 0,
+        recentComments7d: recentCommentsRes.count || 0,
+        topBrands,
+        speciesDistribution: {
+          dog: dogsRes.count || 0,
+          cat: catsRes.count || 0
+        }
+      })
+    } catch (error) {
+      console.error('[AdminAnalytics] Error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/admin" className="text-gray-500 hover:text-gray-700">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <BarChart3 className="h-6 w-6 text-indigo-500" />
-                  통계 분석
-                </h1>
-                <p className="text-gray-600">사이트 이용 통계 및 인기 제품 분석</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="7days">최근 7일</option>
-                <option value="30days">최근 30일</option>
-                <option value="90days">최근 90일</option>
-              </select>
-              <button className="p-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
-                <RefreshCw className="h-4 w-4" />
-              </button>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                내보내기
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+  useEffect(() => {
+    loadStats()
+  }, [])
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">총 방문자</p>
-                <p className="text-2xl font-bold text-gray-900">{data.visitors.total.toLocaleString()}</p>
-                <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                  <TrendingUp className="h-3 w-3" />
-                  {data.visitors.growth}
-                </p>
-              </div>
-              <Eye className="h-8 w-8 text-blue-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">신규 사용자</p>
-                <p className="text-2xl font-bold text-gray-900">{data.userActivity.newUsers}</p>
-                <p className="text-sm text-blue-600 mt-1">이번 주</p>
-              </div>
-              <Users className="h-8 w-8 text-green-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">활성 사용자</p>
-                <p className="text-2xl font-bold text-gray-900">{data.userActivity.activeUsers}</p>
-                <p className="text-sm text-gray-500 mt-1">일일 평균</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">사용자 유지율</p>
-                <p className="text-2xl font-bold text-gray-900">{data.userActivity.retention}</p>
-                <p className="text-sm text-gray-500 mt-1">7일 기준</p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-500" />
-            </div>
-          </div>
+  const StatCard = ({ icon: Icon, label, value, sub, color }: { icon: any; label: string; value: number | string; sub?: string; color: string }) => (
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-500">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Visitor Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">일별 방문자 수</h3>
-            <div className="h-64 flex items-end justify-between gap-2">
-              {data.visitors.data.map((item, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div
-                    className="w-full bg-indigo-500 rounded-t"
-                    style={{
-                      height: `${(item.count / Math.max(...data.visitors.data.map(d => d.count))) * 200}px`
-                    }}
-                  ></div>
-                  <p className="text-xs text-gray-500 mt-2">{item.date.slice(-2)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Popular Products */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">인기 제품</h3>
-            <div className="space-y-4">
-              {data.popularProducts.map((product, index) => (
-                <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{product.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                          {product.category}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          {getRatingStars(product.rating)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{product.views.toLocaleString()} 조회</p>
-                    <p className="text-xs text-gray-500">{product.reviews} 리뷰</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Page Views */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">페이지별 조회수</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    페이지
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    조회수
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    성장률
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {data.pageViews.map((page, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {page.page}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {page.views.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className={`flex items-center gap-1 ${page.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {page.growth >= 0 ? (
-                          <TrendingUp className="h-4 w-4" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4" />
-                        )}
-                        {Math.abs(page.growth)}%
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Icon className={`h-8 w-8 ${color}`} />
       </div>
     </div>
   )
-}
 
+  return (
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">통계 분석</h1>
+            <p className="text-gray-600 mt-1">실시간 데이터 기반 서비스 현황</p>
+          </div>
+          <button
+            onClick={loadStats}
+            disabled={loading}
+            className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            새로고침
+          </button>
+        </div>
+
+        {loading && !stats ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-500">로딩 중...</div>
+        ) : stats && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard icon={Users} label="전체 사용자" value={stats.totalUsers} sub={`최근 7일: +${stats.recentUsers7d}`} color="text-blue-500" />
+              <StatCard icon={Heart} label="등록 반려동물" value={stats.totalPets} sub={`강아지 ${stats.speciesDistribution.dog} / 고양이 ${stats.speciesDistribution.cat}`} color="text-pink-500" />
+              <StatCard icon={FileText} label="급여 후기" value={stats.totalReviewLogs} sub={`최근 7일: +${stats.recentLogs7d}`} color="text-green-500" />
+              <StatCard icon={MessageSquare} label="댓글" value={stats.totalComments} sub={`최근 7일: +${stats.recentComments7d}`} color="text-purple-500" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard icon={HelpCircle} label="Q&A 스레드" value={stats.totalQAThreads} color="text-indigo-500" />
+              <StatCard icon={MessageSquare} label="Q&A 게시물" value={stats.totalQAPosts} color="text-cyan-500" />
+              <StatCard icon={BarChart3} label="커뮤니티 질문" value={stats.totalCommunityQuestions} color="text-orange-500" />
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">인기 브랜드 (급여 후기 기준)</h2>
+              {stats.topBrands.length > 0 ? (
+                <div className="space-y-3">
+                  {stats.topBrands.map((item, index) => {
+                    const maxCount = stats.topBrands[0].count
+                    const percentage = maxCount > 0 ? (item.count / maxCount) * 100 : 0
+                    return (
+                      <div key={item.brand} className="flex items-center gap-4">
+                        <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-900">{item.brand}</span>
+                            <span className="text-sm text-gray-500">{item.count}건</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percentage}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">데이터가 없습니다</p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </AdminLayout>
+  )
+}

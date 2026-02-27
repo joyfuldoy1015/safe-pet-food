@@ -13,7 +13,6 @@ import {
   MessageSquare,
   HelpCircle,
   Trophy,
-  Search,
   Settings,
   Download,
   Menu,
@@ -35,7 +34,6 @@ const menuItems = [
   { icon: HelpCircle, label: 'Q&A', href: '/admin/qa', badgeKey: null },
   { icon: Package, label: '제품 요청', href: '/admin/product-requests', badgeKey: 'productRequests' },
   { icon: Trophy, label: '랭킹', href: '/admin/rankings', badgeKey: null },
-  { icon: Search, label: '탐색 QA', href: '/admin/explore', badgeKey: null },
   { icon: Settings, label: '설정', href: '/admin/settings', badgeKey: null },
   { icon: Download, label: '내보내기', href: '/admin/exports', badgeKey: null }
 ]
@@ -43,15 +41,52 @@ const menuItems = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const { signOut } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [pendingProductRequests, setPendingProductRequests] = useState(0)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
 
-  // Prevent hydration mismatch by only rendering after mount
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (!mounted || authLoading) return
+    if (!user) {
+      router.push('/login?redirect=/admin')
+      return
+    }
+    const checkAdmin = async () => {
+      try {
+        const supabase = getBrowserClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          router.push('/login?redirect=/admin')
+          return
+        }
+        const res = await fetch('/api/admin/check', {
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.isAdmin) {
+            setIsAdmin(true)
+          } else {
+            router.push('/?error=403&message=관리자 권한이 필요합니다')
+          }
+        } else {
+          router.push('/?error=403&message=관리자 권한이 필요합니다')
+        }
+      } catch {
+        router.push('/?error=500&message=권한 확인 중 오류가 발생했습니다')
+      } finally {
+        setAuthChecked(true)
+      }
+    }
+    checkAdmin()
+  }, [mounted, user, authLoading, router])
 
   // 대기 중인 제품 요청 수 가져오기
   useEffect(() => {
@@ -99,6 +134,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       // 에러가 있어도 홈으로 리다이렉트
       window.location.replace('/')
     }
+  }
+
+  if (!mounted || !authChecked || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-500">관리자 권한 확인 중...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

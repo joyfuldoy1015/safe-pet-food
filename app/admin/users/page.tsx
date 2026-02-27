@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import AdminLayout from '@/components/admin/AdminLayout'
 import Table, { Column } from '@/components/admin/Table'
 import FilterBar from '@/components/admin/FilterBar'
+import { getBrowserClient } from '@/lib/supabase-client'
 import { User, Shield, Mail } from 'lucide-react'
 
 interface UserData {
@@ -20,22 +21,37 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<Record<string, string>>({})
+  const [totalCount, setTotalCount] = useState(0)
 
-  useEffect(() => {
-    loadUsers()
-  }, [filters])
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true)
     try {
-      // TODO: Fetch from API
-      setUsers([])
+      const supabase = getBrowserClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const params = new URLSearchParams({ limit: '50', offset: '0' })
+      if (filters.role && filters.role !== '') params.set('role', filters.role)
+      if (filters.nickname) params.set('nickname', filters.nickname)
+
+      const res = await fetch(`/api/admin/users/list?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      })
+      if (res.ok) {
+        const json = await res.json()
+        setUsers(json.data || [])
+        setTotalCount(json.pagination?.total || 0)
+      }
     } catch (error) {
       console.error('[AdminUsersPage] Error loading users:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
+
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
 
   const columns: Column<UserData>[] = [
     {
