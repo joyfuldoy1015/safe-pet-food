@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { Star, Shield, AlertTriangle, CheckCircle, Users, ArrowLeft, Search, Filter, BarChart3, MessageSquare, ChevronDown } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 interface Brand {
   id: string
@@ -33,6 +34,7 @@ export default function BrandsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const sortDropdownRef = useRef<HTMLDivElement>(null)
+  const [safiReviewsByBrand, setSafiReviewsByBrand] = useState<Record<string, any[]>>({})
 
   // 드롭다운 외부 클릭 감지
   useEffect(() => {
@@ -49,27 +51,56 @@ export default function BrandsPage() {
     fetchBrands()
   }, [])
 
+  // review_logs에서 SAFI 데이터 조회
+  useEffect(() => {
+    const fetchSafiReviews = async () => {
+      if (brands.length === 0) return
+      try {
+        const supabase = getBrowserClient()
+        const { data, error } = await supabase
+          .from('review_logs')
+          .select('brand, stool_score, allergy_symptoms, vomiting, appetite_change')
+
+        if (error || !data) return
+
+        const grouped: Record<string, any[]> = {}
+        data
+          .filter((r: any) => r.stool_score !== null || r.vomiting !== null || r.appetite_change !== null)
+          .forEach((r: any) => {
+            const key = (r.brand || '').toLowerCase()
+            if (!grouped[key]) grouped[key] = []
+            grouped[key].push({
+              stoolScore: r.stool_score ?? null,
+              allergySymptoms: r.allergy_symptoms && r.allergy_symptoms.length > 0 ? r.allergy_symptoms : null,
+              vomiting: r.vomiting ?? null,
+              appetiteChange: r.appetite_change
+                ? (r.appetite_change.toUpperCase() as 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED')
+                : null
+            })
+          })
+
+        setSafiReviewsByBrand(grouped)
+      } catch (err) {
+        console.error('SAFI 리뷰 데이터 조회 실패:', err)
+      }
+    }
+
+    fetchSafiReviews()
+  }, [brands])
+
   // Calculate SAFI scores for each brand
   const brandsWithSafi = useMemo(() => {
     return brands.map(brand => {
-      const safiReviews: Array<{
-        stoolScore: number | null
-        allergySymptoms: string[] | null
-        vomiting: boolean | null
-        appetiteChange: 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED' | null
-      }> = []
+      const brandKey = brand.name.toLowerCase()
+      const safiReviews = safiReviewsByBrand[brandKey] || []
 
-      // 브랜드 리콜 이력
       const recallHistory = brand.recall_history.map(recall => ({
         date: recall.date,
         severity: (recall.severity === 'high' ? 'high' : recall.severity === 'medium' ? 'medium' : 'low') as 'high' | 'medium' | 'low'
       }))
 
-      // 제품들의 원재료 정보 (현재는 product_lines만 있으므로 빈 배열로 처리)
-      // 실제로는 브랜드 상세 페이지에서 제품 정보를 가져와야 함
       const allIngredients: string[] = []
 
-      // SAFI 점수 계산
       const safiResult = calculateSafiScore({
         reviews: safiReviews,
         recallHistory,
@@ -81,7 +112,7 @@ export default function BrandsPage() {
         safiScore: safiResult
       }
     })
-  }, [brands])
+  }, [brands, safiReviewsByBrand])
 
   const fetchBrands = async () => {
     try {

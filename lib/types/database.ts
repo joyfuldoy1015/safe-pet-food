@@ -100,6 +100,10 @@ export interface Database {
           likes: number
           views: number
           comments_count: number
+          stool_score: number | null
+          allergy_symptoms: string[] | null
+          vomiting: boolean | null
+          appetite_change: string | null
           created_at: string
           updated_at: string
         }
@@ -129,6 +133,10 @@ export interface Database {
           likes?: number
           views?: number
           comments_count?: number
+          stool_score?: number | null
+          allergy_symptoms?: string[] | null
+          vomiting?: boolean | null
+          appetite_change?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -158,6 +166,10 @@ export interface Database {
           likes?: number
           views?: number
           comments_count?: number
+          stool_score?: number | null
+          allergy_symptoms?: string[] | null
+          vomiting?: boolean | null
+          appetite_change?: string | null
           updated_at?: string
         }
       }

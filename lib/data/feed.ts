@@ -36,6 +36,7 @@ export interface UnifiedFeedItem {
   updatedAt?: string
   author: {
     name: string
+    avatar?: string
     level?: 'beginner' | 'experienced' | 'expert'
   }
   category?: string
@@ -79,6 +80,7 @@ async function fetchCommunityQuestions(): Promise<Question[]> {
           content: q.content,
           author: {
             name: q.author?.nickname || '익명',
+            avatar: q.author?.avatar_url || undefined,
             level: 'beginner' as const
           },
           category: q.category,
@@ -175,6 +177,7 @@ function questionToFeedItem(question: Question): UnifiedFeedItem {
     updatedAt: question.updatedAt,
     author: {
       name: question.author.name,
+      avatar: question.author.avatar,
       level: question.author.level
     },
     category: question.category,

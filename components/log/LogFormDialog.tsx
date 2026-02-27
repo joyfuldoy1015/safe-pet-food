@@ -325,11 +325,16 @@ function ReviewLogFormContent({
     continue_reasons: [],
     stop_reasons: [],
     excerpt: '',
-    notes: null
+    notes: null,
+    stool_score: null,
+    appetite_change: null,
+    vomiting: null,
+    allergy_symptoms: []
   })
 
   const [continueReasonInput, setContinueReasonInput] = useState('')
   const [stopReasonInput, setStopReasonInput] = useState('')
+  const [allergyInput, setAllergyInput] = useState('')
 
   // Load edit data
   useEffect(() => {
@@ -347,10 +352,13 @@ function ReviewLogFormContent({
         continue_reasons: editData.continue_reasons || [],
         stop_reasons: editData.stop_reasons || [],
         excerpt: editData.excerpt,
-        notes: editData.notes || null
+        notes: editData.notes || null,
+        stool_score: editData.stool_score ?? null,
+        appetite_change: editData.appetite_change ?? null,
+        vomiting: editData.vomiting ?? null,
+        allergy_symptoms: editData.allergy_symptoms || []
       })
     } else {
-      // Reset form
       setFormData({
         pet_id: pets.length > 0 ? pets[0].id : '',
         category: 'feed',
@@ -364,7 +372,11 @@ function ReviewLogFormContent({
         continue_reasons: [],
         stop_reasons: [],
         excerpt: '',
-        notes: null
+        notes: null,
+        stool_score: null,
+        appetite_change: null,
+        vomiting: null,
+        allergy_symptoms: []
       })
     }
   }, [editData, pets])
@@ -405,7 +417,11 @@ function ReviewLogFormContent({
         notes: formData.notes || null,
         likes: editData?.likes || 0,
         views: editData?.views || 0,
-        comments_count: editData?.comments_count || 0
+        comments_count: editData?.comments_count || 0,
+        stool_score: formData.stool_score ?? null,
+        appetite_change: formData.appetite_change || null,
+        vomiting: formData.vomiting ?? null,
+        allergy_symptoms: formData.allergy_symptoms && formData.allergy_symptoms.length > 0 ? formData.allergy_symptoms : null
       }
 
       if (editData) {
@@ -689,6 +705,162 @@ function ReviewLogFormContent({
           </div>
         </div>
 
+        {/* SAFI 안전성 평가 */}
+        <div className="pt-2 pb-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-semibold text-gray-900">안전성 평가 (SAFI)</span>
+            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded-full">선택</span>
+          </div>
+          <p className="text-xs text-gray-500">급여 중 관찰한 반응을 기록하면 브랜드 안전성 점수에 반영됩니다</p>
+        </div>
+
+        {/* Stool Score */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            변 상태 점수
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {[1, 2, 3, 4, 5].map((score) => (
+              <button
+                key={score}
+                type="button"
+                onClick={() => setFormData({ ...formData, stool_score: formData.stool_score === score ? null : score })}
+                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
+                  formData.stool_score === score
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-sm font-semibold">{score}점</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  {score === 1 && '매우나쁨'}
+                  {score === 2 && '나쁨'}
+                  {score === 3 && '보통'}
+                  {score === 4 && '좋음'}
+                  {score === 5 && '매우좋음'}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Appetite Change */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            식욕 변화
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { value: 'INCREASED', label: '증가', emoji: '📈' },
+              { value: 'NORMAL', label: '정상', emoji: '✅' },
+              { value: 'DECREASED', label: '감소', emoji: '📉' },
+              { value: 'REFUSED', label: '거부', emoji: '❌' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, appetite_change: formData.appetite_change === option.value ? null : option.value })}
+                className={`px-3 py-2.5 rounded-xl border-2 transition-colors text-sm ${
+                  formData.appetite_change === option.value
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                <span className="text-base">{option.emoji}</span>
+                <div className="mt-0.5 font-medium text-xs">{option.label}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Vomiting */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            구토 발생 여부
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, vomiting: formData.vomiting === true ? null : true })}
+              className={`flex-1 px-4 py-2.5 rounded-xl border-2 transition-colors text-sm ${
+                formData.vomiting === true
+                  ? 'border-red-500 bg-red-50 text-red-700'
+                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              }`}
+            >
+              🤢 발생함
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, vomiting: formData.vomiting === false ? null : false })}
+              className={`flex-1 px-4 py-2.5 rounded-xl border-2 transition-colors text-sm ${
+                formData.vomiting === false
+                  ? 'border-green-500 bg-green-50 text-green-700'
+                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              }`}
+            >
+              ✅ 발생 안 함
+            </button>
+          </div>
+        </div>
+
+        {/* Allergy Symptoms */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            알레르기 증상
+          </label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={allergyInput}
+              onChange={(e) => setAllergyInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  if (allergyInput.trim() && !(formData.allergy_symptoms || []).includes(allergyInput.trim())) {
+                    setFormData({ ...formData, allergy_symptoms: [...(formData.allergy_symptoms || []), allergyInput.trim()] })
+                    setAllergyInput('')
+                  }
+                }
+              }}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+              placeholder="예: 가려움, 발진, 눈물"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (allergyInput.trim() && !(formData.allergy_symptoms || []).includes(allergyInput.trim())) {
+                  setFormData({ ...formData, allergy_symptoms: [...(formData.allergy_symptoms || []), allergyInput.trim()] })
+                  setAllergyInput('')
+                }
+              }}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm"
+            >
+              추가
+            </button>
+          </div>
+          {formData.allergy_symptoms && formData.allergy_symptoms.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {formData.allergy_symptoms.map((symptom) => (
+                <span
+                  key={symptom}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs border border-orange-200"
+                >
+                  {symptom}
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, allergy_symptoms: (formData.allergy_symptoms || []).filter(s => s !== symptom) })}
+                    className="hover:text-orange-900"
+                    aria-label={`${symptom} 제거`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Continue Reasons */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -730,6 +902,7 @@ function ReviewLogFormContent({
                     type="button"
                     onClick={() => handleRemoveContinueReason(reason)}
                     className="hover:text-emerald-900"
+                    aria-label={`${reason} 제거`}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -780,6 +953,7 @@ function ReviewLogFormContent({
                     type="button"
                     onClick={() => handleRemoveStopReason(reason)}
                     className="hover:text-rose-900"
+                    aria-label={`${reason} 제거`}
                   >
                     <X className="h-3 w-3" />
                   </button>

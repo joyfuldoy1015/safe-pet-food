@@ -69,11 +69,21 @@ export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
           <div className="flex items-center gap-3">
             {/* 아바타 */}
             <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                <span className="text-blue-600 text-sm font-medium">
-                  {item.author?.name?.charAt(0) || 'Q'}
-                </span>
-              </div>
+              {item.author?.avatar ? (
+                <Image
+                  src={item.author.avatar}
+                  alt={item.author.name || 'Q'}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                  <span className="text-blue-600 text-sm font-medium">
+                    {item.author?.name?.charAt(0) || 'Q'}
+                  </span>
+                </div>
+              )}
               {/* Q&A 배지 */}
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center border-2 border-white">
                 <span className="text-white text-[8px] font-bold">Q</span>

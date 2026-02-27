@@ -33,8 +33,8 @@ import {
   BarChart3
 } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
-import SafiEvaluationDialog from '@/components/safi/SafiEvaluationDialog'
 import ProductsListSection from '@/components/brand/ProductsListSection'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 interface BrandQuestion {
   id: string
@@ -203,17 +203,11 @@ export default function BrandDetailPage() {
     user_vote?: 'yes' | 'no' | null
   } | null>(null)
   const [isVoting, setIsVoting] = useState(false)
-  const [evaluationData, setEvaluationData] = useState<{
-    totalEvaluations: number
-    averageRatings: any
-    recommendationRate: number
-    recentEvaluations: any[]
-  } | null>(null)
+  
   const [expandedProducts, setExpandedProducts] = useState<Record<string, Record<string, boolean>>>({})
   const [defaultVote, setDefaultVote] = useState<'yes' | 'no'>('yes')
   const [safiScore, setSafiScore] = useState<SafiResult | null>(null)
-  const [isSafiDialogOpen, setIsSafiDialogOpen] = useState(false)
-  const [selectedProductForSafi, setSelectedProductForSafi] = useState<string | null>(null)
+  const [safiReviewCount, setSafiReviewCount] = useState(0)
   const [helpfulStates, setHelpfulStates] = useState<Record<string, boolean>>({})
   const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>({})
 
@@ -339,7 +333,6 @@ export default function BrandDetailPage() {
 
     fetchBrandData()
     fetchVoteData()
-    fetchEvaluationData()
     calculateSafiForBrand()
     
     const urlParams = new URLSearchParams(window.location.search)
@@ -369,32 +362,42 @@ export default function BrandDetailPage() {
     }
   }
 
-  const fetchEvaluationData = async () => {
-    try {
-      const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}/evaluate`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data && !data.error) {
-          setEvaluationData(data)
-        }
-      }
-    } catch (error) {
-      console.error('평가 데이터 가져오기 실패:', error)
-    }
-  }
-
   const calculateSafiForBrand = async () => {
     if (!brand) return
 
-    const brandReviews: any[] = []
-    const safiReviews = brandReviews.map(review => ({
-      stoolScore: review.stool_score ?? null,
-      allergySymptoms: review.allergy_symptoms ? ['allergy'] : null,
-      vomiting: review.vomiting ?? null,
-      appetiteChange: review.appetite_change 
-        ? (review.appetite_change.toUpperCase() as 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED')
-        : null
-    }))
+    let safiReviews: Array<{
+      stoolScore: number | null
+      allergySymptoms: string[] | null
+      vomiting: boolean | null
+      appetiteChange: 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED' | null
+    }> = []
+
+    try {
+      const supabase = getBrowserClient()
+      const { data, error } = await supabase
+        .from('review_logs')
+        .select('stool_score, allergy_symptoms, vomiting, appetite_change')
+        .ilike('brand', brand.name)
+
+      if (error) {
+        console.error('SAFI review_logs 조회 오류:', error)
+      }
+
+      safiReviews = (data || [])
+        .filter((r: any) => r.stool_score !== null || r.vomiting !== null || r.appetite_change !== null)
+        .map((r: any) => ({
+          stoolScore: r.stool_score ?? null,
+          allergySymptoms: r.allergy_symptoms && r.allergy_symptoms.length > 0 ? r.allergy_symptoms : null,
+          vomiting: r.vomiting ?? null,
+          appetiteChange: r.appetite_change
+            ? (r.appetite_change.toUpperCase() as 'INCREASED' | 'DECREASED' | 'NORMAL' | 'REFUSED')
+            : null
+        }))
+
+      setSafiReviewCount(safiReviews.length)
+    } catch (err) {
+      console.error('SAFI 데이터 조회 실패:', err)
+    }
 
     const recallHistory = brand.recall_history.map(recall => ({
       date: recall.date,
@@ -850,18 +853,14 @@ export default function BrandDetailPage() {
               </div>
             </div>
 
-            {/* 평가하기 버튼 */}
+            {/* 평가 건수 안내 */}
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <button
-                onClick={() => {
-                  setSelectedProductForSafi(null)
-                  setIsSafiDialogOpen(true)
-                }}
-                className="w-full px-5 py-3 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <Shield className="h-4 w-4" />
-                <span>SAFI 평가하기</span>
-              </button>
+              <p className="text-xs text-gray-500 text-center">
+                {safiReviewCount > 0
+                  ? `${safiReviewCount}건의 급여 후기 기반으로 산출된 점수입니다`
+                  : '아직 급여 후기가 없어 기본값으로 표시됩니다. 급여 후기 작성 시 안전성 평가가 반영됩니다.'
+                }
+              </p>
             </div>
           </div>
         )}
@@ -930,16 +929,6 @@ export default function BrandDetailPage() {
         </div>
       )}
 
-      {/* SAFI 평가 다이얼로그 */}
-      <SafiEvaluationDialog
-        open={isSafiDialogOpen}
-        onOpenChange={setIsSafiDialogOpen}
-        brandName={brandName}
-        productName={selectedProductForSafi || undefined}
-        onSuccess={() => {
-          calculateSafiForBrand()
-        }}
-      />
     </div>
   )
 }
