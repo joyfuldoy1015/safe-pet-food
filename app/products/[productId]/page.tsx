@@ -91,17 +91,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
           {/* 등급 배지 + 제품명 */}
           <div className="flex items-start gap-4 mb-4">
-            {product.grade && (
-              <div className={`flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl border ${getGradeColor(product.grade)}`}>
-                {product.grade}
-              </div>
-            )}
+            <div className={`flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl border ${product.grade ? getGradeColor(product.grade) : 'bg-gray-100 text-gray-400 border-gray-200'}`}>
+              {product.grade || '-'}
+            </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-bold text-gray-900 mb-1">
                 {product.name}
               </h1>
-              {product.grade_text && (
-                <p className="text-xs text-gray-500">{product.grade_text}</p>
+              {product.grade ? (
+                product.grade_text && (
+                  <p className="text-xs text-gray-500">{product.grade_text}</p>
+                )
+              ) : (
+                <p className="text-xs text-gray-400">등급 산정 전</p>
               )}
             </div>
           </div>
