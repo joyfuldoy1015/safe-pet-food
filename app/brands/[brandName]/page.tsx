@@ -118,6 +118,7 @@ interface Brand {
     resolved: boolean
   }>
   transparency_score: number
+  representative_product?: string
   ingredient_disclosure: {
     fully_disclosed: number
     partially_disclosed: number
@@ -262,6 +263,7 @@ export default function BrandDetailPage() {
               brand_cons: apiData.brand_cons || [],
               product_lines: apiData.product_lines || [],
               transparency_score: apiData.transparency_score || 75,
+              representative_product: apiData.representative_product || '',
               recall_history: apiData.recall_history || [],
               ingredient_disclosure: apiData.ingredient_disclosure || {
                 fully_disclosed: 0,
@@ -702,15 +704,24 @@ export default function BrandDetailPage() {
           </div>
         </div>
 
-        {/* 투명성 점수 */}
+        {/* 원료 투명성 점수 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 mb-4">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <span className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-xs">🔍</span>
-            투명성 점수
+            원료 투명성 점수
           </h2>
+          {brand.representative_product && (
+            <p className="text-xs text-gray-500 mb-4 ml-9">
+              대표 제품 <span className="font-medium text-gray-700">{brand.representative_product}</span> 기준
+            </p>
+          )}
+          {!brand.representative_product && (
+            <p className="text-xs text-gray-400 mb-4 ml-9">
+              해당 브랜드의 대표 사료를 기준으로 원료 공개 수준을 평가한 점수입니다.
+            </p>
+          )}
           
           <div className="flex items-center gap-6">
-            {/* 전체 점수 */}
             <div className="text-center flex-shrink-0">
               <div className={`text-3xl font-bold ${getTransparencyColor(brand.transparency_score)} mb-1`}>
                 {brand.transparency_score}
@@ -718,7 +729,6 @@ export default function BrandDetailPage() {
               <p className="text-xs text-gray-500">/ 100</p>
             </div>
 
-            {/* 공개 상태 분포 */}
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

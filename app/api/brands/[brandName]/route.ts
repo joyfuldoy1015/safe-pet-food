@@ -89,6 +89,7 @@ const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
     brand_pros: supabaseData.brand_pros || [],
     brand_cons: supabaseData.brand_cons || [],
     transparency_score: supabaseData.transparency_score || 75,
+    representative_product: supabaseData.representative_product || '',
     ingredient_disclosure: ingredientDisclosure,
     ingredients: ingredients || [],
     products: [] // products는 별도로 조회하여 추가됨
