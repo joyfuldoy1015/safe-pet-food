@@ -71,15 +71,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
     ? Math.round((community_feedback.recommend_yes / community_feedback.total_votes) * 100)
     : 0
 
-  // Mock 등급 신뢰도 데이터
-  const gradeCredibility = {
-    ingredient_disclosure: 85,
-    standard_compliance: 92,
-    consumer_rating: 88,
-    recall_response: 95,
-    research_backing: 78
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -423,7 +414,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
         {/* Grade Credibility Section */}
         <section className="mb-4">
-          <GradeCredibility credibility={gradeCredibility} />
+          <GradeCredibility grade={product.grade} />
         </section>
 
 
