@@ -253,7 +253,7 @@ export default function BrandsPage() {
                     className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm hover:bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors"
                   >
                     <span className="font-medium text-gray-900">
-                      {sortBy === 'rating' ? '평점 높은 순' : sortBy === 'transparency' ? '투명성 높은 순' : '이름 순'}
+                      {sortBy === 'rating' ? '평점 높은 순' : sortBy === 'transparency' ? '원료 투명성 높은 순' : '이름 순'}
                     </span>
                     <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -263,7 +263,7 @@ export default function BrandsPage() {
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
                       {[
                         { value: 'rating', label: '평점 높은 순' },
-                        { value: 'transparency', label: '투명성 높은 순' },
+                        { value: 'transparency', label: '원료 투명성 높은 순' },
                         { value: 'name', label: '이름 순' }
                       ].map((option) => (
                         <button
