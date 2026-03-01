@@ -108,8 +108,7 @@ export async function PATCH(
         .insert({
           brand_id: brandId,
           name: requestData.product_name,
-          description: requestData.description || `${requestData.brand_name} ${requestData.product_name}`,
-          image: '🍽️'
+          description: requestData.description || `${requestData.brand_name} ${requestData.product_name}`
         })
         .select()
         .single()

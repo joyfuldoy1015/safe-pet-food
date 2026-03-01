@@ -8,7 +8,6 @@ export interface Product {
   description?: string
   grade?: ProductGrade
   grade_text?: string
-  image?: string
   certifications?: string[]
   
   // 원산지 & 제조
@@ -86,5 +85,4 @@ export interface BrandBasic {
   name: string
   manufacturer?: string
   country?: string
-  image?: string
 }

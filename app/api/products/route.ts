@@ -68,7 +68,6 @@ export async function GET(request: NextRequest) {
       brand_name: product.brands?.name || '',
       brand_country: product.brands?.country || '',
       name: product.name,
-      image: product.image,
       description: product.description,
       grade: product.grade || null,
       grade_text: product.grade_text || null,

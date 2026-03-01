@@ -24,7 +24,6 @@ interface Product {
   totalReviews: number
   activeUsers: number
   price?: number
-  image?: string
 }
 
 // Mock data

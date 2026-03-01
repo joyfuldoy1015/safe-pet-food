@@ -53,7 +53,6 @@ interface BrandQuestion {
 interface ProductInfo {
   id: string
   name: string
-  image: string
   description: string
   certifications: string[]
   origin_info: {

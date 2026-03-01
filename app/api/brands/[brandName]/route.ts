@@ -246,7 +246,6 @@ export async function GET(
                 return {
                   id: product.id,
                   name: product.name,
-                  image: product.image || '📦',
                   description: product.description || '',
                   certifications: product.certifications || [],
                   origin_info: product.origin_info || {},

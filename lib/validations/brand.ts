@@ -61,11 +61,6 @@ export const brandCreateSchema = z.object({
       return uniqueCerts.size === certs.length
     }, '중복된 인증이 있습니다'),
   
-  image: z.string()
-    .url('유효한 이미지 URL을 입력해주세요')
-    .optional()
-    .or(z.literal('')),
-  
   recall_history: z.array(recallHistorySchema)
     .default([])
     .refine((recalls) => {

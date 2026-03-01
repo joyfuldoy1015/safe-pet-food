@@ -284,7 +284,7 @@ export async function getProductsByBrandId(brandId: string, limit: number = 6): 
     const supabase = getSupabase()
     const { data, error } = await supabase
       .from('products')
-      .select('id, brand_id, name, description, grade, grade_text, image, certifications')
+      .select('id, brand_id, name, description, grade, grade_text, certifications')
       .eq('brand_id', brandId)
       .limit(limit)
 
@@ -369,7 +369,6 @@ function getMockProduct(productId: string): Product {
     description: '성견을 위한 종합 영양 사료입니다.',
     grade: 'A',
     grade_text: '매우 우수',
-    image: '🍖',
     certifications: ['AAFCO 승인', 'FDA 등록', 'ISO 9001'],
     origin_info: {
       origin_country: '프랑스',
@@ -441,8 +440,7 @@ function getMockBrand(brandId: string): BrandBasic {
     id: brandId,
     name: '로얄캐닌',
     manufacturer: 'Royal Canin SAS',
-    country: '프랑스',
-    image: '🏰'
+    country: '프랑스'
   }
 }
 
@@ -455,7 +453,6 @@ function getMockProductsByBrand(brandId: string, limit: number): Product[] {
       description: '자견용 사료',
       grade: 'A',
       grade_text: '매우 우수',
-      image: '🐕',
       certifications: ['AAFCO 승인']
     },
     {
@@ -465,7 +462,6 @@ function getMockProductsByBrand(brandId: string, limit: number): Product[] {
       description: '노견용 사료',
       grade: 'A',
       grade_text: '매우 우수',
-      image: '🦴',
       certifications: ['AAFCO 승인']
     },
     {
@@ -475,7 +471,6 @@ function getMockProductsByBrand(brandId: string, limit: number): Product[] {
       description: '소형견용 사료',
       grade: 'B',
       grade_text: '우수',
-      image: '🐩',
       certifications: ['AAFCO 승인']
     }
   ]
