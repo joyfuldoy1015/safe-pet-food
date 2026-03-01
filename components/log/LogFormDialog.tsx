@@ -709,7 +709,7 @@ function ReviewLogFormContent({
                   {score === 2 && '싫어함'}
                   {score === 3 && '보통'}
                   {score === 4 && '좋아함'}
-                  {score === 5 && '아주좋아함'}
+                  {score === 5 && '환장함'}
                 </div>
               </button>
             ))}
