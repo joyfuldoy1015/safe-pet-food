@@ -12,6 +12,16 @@ type Pet = Database['public']['Tables']['pets']['Row']
 type ReviewLog = Database['public']['Tables']['review_logs']['Row']
 type ReviewLogInsert = Database['public']['Tables']['review_logs']['Insert']
 
+interface BrandOption {
+  id: string
+  name: string
+}
+
+interface ProductOption {
+  id: string
+  name: string
+}
+
 interface LogFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -339,9 +349,67 @@ function ReviewLogFormContent({
   const [stopReasonInput, setStopReasonInput] = useState('')
   const [allergyInput, setAllergyInput] = useState('')
 
+  const [brandOptions, setBrandOptions] = useState<BrandOption[]>([])
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([])
+  const [isCustomBrand, setIsCustomBrand] = useState(false)
+  const [isCustomProduct, setIsCustomProduct] = useState(false)
+
+  // 브랜드 목록 로드
+  useEffect(() => {
+    const loadBrands = async () => {
+      try {
+        const supabase = getBrowserClient()
+        const { data } = await supabase
+          .from('brands')
+          .select('id, name')
+          .order('name')
+        if (data) setBrandOptions(data)
+      } catch (err) {
+        console.error('[LogFormDialog] Failed to load brands:', err)
+      }
+    }
+    loadBrands()
+  }, [])
+
+  // 브랜드 선택 시 제품 목록 로드
+  useEffect(() => {
+    if (!formData.brand || isCustomBrand) {
+      setProductOptions([])
+      return
+    }
+    const loadProducts = async () => {
+      try {
+        const supabase = getBrowserClient()
+        const selectedBrand = brandOptions.find(b => b.name === formData.brand)
+        if (!selectedBrand) {
+          setProductOptions([])
+          return
+        }
+        const { data } = await supabase
+          .from('products')
+          .select('id, name')
+          .eq('brand_id', selectedBrand.id)
+          .order('name')
+        if (data && data.length > 0) {
+          setProductOptions(data)
+        } else {
+          setProductOptions([])
+        }
+      } catch (err) {
+        console.error('[LogFormDialog] Failed to load products:', err)
+      }
+    }
+    loadProducts()
+  }, [formData.brand, brandOptions, isCustomBrand])
+
   // Load edit data
   useEffect(() => {
     if (editData) {
+      const brandInList = brandOptions.some(b => b.name === editData.brand)
+      if (!brandInList && brandOptions.length > 0) {
+        setIsCustomBrand(true)
+        setIsCustomProduct(true)
+      }
       setFormData({
         pet_id: editData.pet_id,
         category: editData.category,
@@ -388,7 +456,7 @@ function ReviewLogFormContent({
         allergy_symptoms: []
       })
     }
-  }, [editData, pets])
+  }, [editData, pets, brandOptions])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -580,34 +648,95 @@ function ReviewLogFormContent({
 
         {/* Brand */}
         <div>
-          <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-2">
-            브랜드 <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="brand"
-            type="text"
-            value={formData.brand || ''}
-            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-            placeholder="예: 로얄캐닌"
-          />
+          <div className="flex items-center justify-between mb-2">
+            <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
+              브랜드 <span className="text-red-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCustomBrand(!isCustomBrand)
+                if (!isCustomBrand) {
+                  setIsCustomProduct(true)
+                }
+              }}
+              className="text-xs text-violet-600 hover:text-violet-700"
+            >
+              {isCustomBrand ? '목록에서 선택' : '직접 입력'}
+            </button>
+          </div>
+          {isCustomBrand ? (
+            <input
+              id="brand"
+              type="text"
+              value={formData.brand || ''}
+              onChange={(e) => setFormData({ ...formData, brand: e.target.value, product: '' })}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
+              placeholder="브랜드명을 입력하세요"
+            />
+          ) : (
+            <select
+              id="brand"
+              value={formData.brand || ''}
+              onChange={(e) => {
+                setFormData({ ...formData, brand: e.target.value, product: '' })
+                setIsCustomProduct(false)
+              }}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
+            >
+              <option value="">브랜드를 선택하세요</option>
+              {brandOptions.map((brand) => (
+                <option key={brand.id} value={brand.name}>{brand.name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Product */}
         <div>
-          <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-2">
-            제품명 <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="product"
-            type="text"
-            value={formData.product || ''}
-            onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-            placeholder="예: 어덜트 라지 브리드"
-          />
+          <div className="flex items-center justify-between mb-2">
+            <label htmlFor="product" className="block text-sm font-medium text-gray-700">
+              제품명 <span className="text-red-500">*</span>
+            </label>
+            {!isCustomBrand && productOptions.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsCustomProduct(!isCustomProduct)}
+                className="text-xs text-violet-600 hover:text-violet-700"
+              >
+                {isCustomProduct ? '목록에서 선택' : '직접 입력'}
+              </button>
+            )}
+          </div>
+          {isCustomProduct || isCustomBrand || productOptions.length === 0 ? (
+            <input
+              id="product"
+              type="text"
+              value={formData.product || ''}
+              onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
+              placeholder={formData.brand ? '제품명을 입력하세요' : '먼저 브랜드를 선택하세요'}
+            />
+          ) : (
+            <select
+              id="product"
+              value={formData.product || ''}
+              onChange={(e) => setFormData({ ...formData, product: e.target.value })}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
+            >
+              <option value="">제품을 선택하세요</option>
+              {productOptions.map((product) => (
+                <option key={product.id} value={product.name}>{product.name}</option>
+              ))}
+            </select>
+          )}
+          {!isCustomBrand && !isCustomProduct && productOptions.length === 0 && formData.brand && (
+            <p className="text-xs text-gray-400 mt-1">등록된 제품이 없습니다. 직접 입력해 주세요.</p>
+          )}
         </div>
 
         {/* Status */}
