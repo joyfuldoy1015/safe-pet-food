@@ -117,9 +117,10 @@ export async function getProductReviews(productId: string): Promise<FeedingRevie
       return []
     }
 
-    // 데이터 변환
+    // 데이터 변환 (DB 컬럼명 → 인터페이스 매핑)
     return (data || []).map((r: any) => ({
       ...r,
+      stool_quality_score: r.stool_quality_score ?? r.stool_score ?? null,
       user: r.user ? { name: r.user.nickname } : null,
       pet: r.pet ? { ...r.pet, breed: null } : null
     })) as FeedingReview[]

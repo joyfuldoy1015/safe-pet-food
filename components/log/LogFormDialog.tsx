@@ -321,6 +321,9 @@ function ReviewLogFormContent({
     period_start: new Date().toISOString().split('T')[0],
     period_end: null,
     rating: null,
+    palatability_score: null,
+    digestibility_score: null,
+    coat_quality_score: null,
     recommend: null,
     continue_reasons: [],
     stop_reasons: [],
@@ -348,6 +351,9 @@ function ReviewLogFormContent({
         period_start: editData.period_start,
         period_end: editData.period_end || null,
         rating: editData.rating || null,
+        palatability_score: (editData as any).palatability_score ?? null,
+        digestibility_score: (editData as any).digestibility_score ?? null,
+        coat_quality_score: (editData as any).coat_quality_score ?? null,
         recommend: editData.recommend ?? null,
         continue_reasons: editData.continue_reasons || [],
         stop_reasons: editData.stop_reasons || [],
@@ -368,6 +374,9 @@ function ReviewLogFormContent({
         period_start: new Date().toISOString().split('T')[0],
         period_end: null,
         rating: null,
+        palatability_score: null,
+        digestibility_score: null,
+        coat_quality_score: null,
         recommend: null,
         continue_reasons: [],
         stop_reasons: [],
@@ -410,6 +419,9 @@ function ReviewLogFormContent({
         period_end: formData.period_end || null,
         duration_days: durationDays,
         rating: formData.rating ? Number(formData.rating) : null,
+        palatability_score: formData.palatability_score ?? null,
+        digestibility_score: formData.digestibility_score ?? null,
+        coat_quality_score: formData.coat_quality_score ?? null,
         recommend: formData.recommend ?? null,
         continue_reasons: formData.continue_reasons && formData.continue_reasons.length > 0 ? formData.continue_reasons : null,
         stop_reasons: formData.stop_reasons && formData.stop_reasons.length > 0 ? formData.stop_reasons : null,
@@ -672,6 +684,96 @@ function ReviewLogFormContent({
             onChange={(e) => setFormData({ ...formData, rating: e.target.value ? Number(e.target.value) : null })}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
           />
+        </div>
+
+        {/* Palatability Score */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            기호성 (1-5)
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {[1, 2, 3, 4, 5].map((score) => (
+              <button
+                key={score}
+                type="button"
+                onClick={() => setFormData({ ...formData, palatability_score: formData.palatability_score === score ? null : score })}
+                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
+                  formData.palatability_score === score
+                    ? 'border-violet-500 bg-violet-50 text-violet-700'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-sm font-semibold">{score}점</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  {score === 1 && '거부'}
+                  {score === 2 && '싫어함'}
+                  {score === 3 && '보통'}
+                  {score === 4 && '좋아함'}
+                  {score === 5 && '아주좋아함'}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Digestibility Score */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            소화율 (1-5)
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {[1, 2, 3, 4, 5].map((score) => (
+              <button
+                key={score}
+                type="button"
+                onClick={() => setFormData({ ...formData, digestibility_score: formData.digestibility_score === score ? null : score })}
+                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
+                  formData.digestibility_score === score
+                    ? 'border-violet-500 bg-violet-50 text-violet-700'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-sm font-semibold">{score}점</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  {score === 1 && '매우나쁨'}
+                  {score === 2 && '나쁨'}
+                  {score === 3 && '보통'}
+                  {score === 4 && '좋음'}
+                  {score === 5 && '매우좋음'}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Coat Quality Score */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            털 상태 (1-5)
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {[1, 2, 3, 4, 5].map((score) => (
+              <button
+                key={score}
+                type="button"
+                onClick={() => setFormData({ ...formData, coat_quality_score: formData.coat_quality_score === score ? null : score })}
+                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
+                  formData.coat_quality_score === score
+                    ? 'border-violet-500 bg-violet-50 text-violet-700'
+                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                }`}
+              >
+                <div className="text-sm font-semibold">{score}점</div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  {score === 1 && '매우나쁨'}
+                  {score === 2 && '나쁨'}
+                  {score === 3 && '보통'}
+                  {score === 4 && '좋음'}
+                  {score === 5 && '윤기남'}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Recommend */}
