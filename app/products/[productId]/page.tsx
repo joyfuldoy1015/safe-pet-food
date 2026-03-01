@@ -445,11 +445,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     href={`/products/${relatedProduct.id}`}
                     className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group"
                   >
-                    {relatedProduct.grade && (
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm border ${getGradeColor(relatedProduct.grade)}`}>
-                        {relatedProduct.grade}
-                      </div>
-                    )}
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm border ${getGradeColor(relatedProduct.grade)}`}>
+                      {relatedProduct.grade || '-'}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium text-gray-900 truncate group-hover:text-violet-600 transition-colors">
                         {relatedProduct.name}
