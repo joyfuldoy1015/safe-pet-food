@@ -312,20 +312,33 @@ export default async function ProductDetailPage({ params }: PageProps) {
             
             {product.guaranteed_analysis ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {Object.entries(product.guaranteed_analysis).map(([key, value]) => {
+                {(() => {
                   const labelMap: Record<string, string> = {
                     protein: '조단백질', fat: '조지방', fiber: '조섬유',
                     moisture: '수분', ash: '조회분', calcium: '칼슘', phosphorus: '인'
                   }
-                  return (
+                  const displayOrder = [
+                    '조단백질', '조지방', '조섬유', '수분', '조회분', '칼슘', '인',
+                    'protein', 'fat', 'fiber', 'moisture', 'ash', 'calcium', 'phosphorus'
+                  ]
+                  const entries = Object.entries(product.guaranteed_analysis)
+                  const sorted = entries.sort(([a], [b]) => {
+                    const idxA = displayOrder.indexOf(a)
+                    const idxB = displayOrder.indexOf(b)
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB
+                    if (idxA !== -1) return -1
+                    if (idxB !== -1) return 1
+                    return 0
+                  })
+                  return sorted.map(([key, value]) => (
                     <div key={key} className="text-center p-3 bg-gray-50 rounded-xl">
                       <div className="text-[10px] text-gray-500 mb-0.5">
                         {labelMap[key] || key}
                       </div>
                       <div className="text-sm font-bold text-gray-900">{value}%</div>
                     </div>
-                  )
-                })}
+                  ))
+                })()}
               </div>
             ) : (
               <p className="text-xs text-gray-500">성분 정보가 제공되지 않습니다.</p>
