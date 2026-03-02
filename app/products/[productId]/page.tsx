@@ -312,20 +312,20 @@ export default async function ProductDetailPage({ params }: PageProps) {
             
             {product.guaranteed_analysis ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {Object.entries(product.guaranteed_analysis).map(([key, value]) => (
-                  <div key={key} className="text-center p-3 bg-gray-50 rounded-xl">
-                    <div className="text-[10px] text-gray-500 mb-0.5">
-                      {key === 'protein' ? '조단백질' :
-                       key === 'fat' ? '조지방' :
-                       key === 'fiber' ? '조섬유' :
-                       key === 'moisture' ? '수분' :
-                       key === 'ash' ? '조회분' :
-                       key === 'calcium' ? '칼슘' :
-                       key === 'phosphorus' ? '인' : key}
+                {Object.entries(product.guaranteed_analysis).map(([key, value]) => {
+                  const labelMap: Record<string, string> = {
+                    protein: '조단백질', fat: '조지방', fiber: '조섬유',
+                    moisture: '수분', ash: '조회분', calcium: '칼슘', phosphorus: '인'
+                  }
+                  return (
+                    <div key={key} className="text-center p-3 bg-gray-50 rounded-xl">
+                      <div className="text-[10px] text-gray-500 mb-0.5">
+                        {labelMap[key] || key}
+                      </div>
+                      <div className="text-sm font-bold text-gray-900">{value}%</div>
                     </div>
-                    <div className="text-sm font-bold text-gray-900">{value}%</div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <p className="text-xs text-gray-500">성분 정보가 제공되지 않습니다.</p>
