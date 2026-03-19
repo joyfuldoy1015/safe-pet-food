@@ -58,9 +58,7 @@ function PetLogContent() {
     }
   }, [searchParams, router])
 
-  // Fetch reviews from Supabase (review_logs and pet_log_posts)
-  useEffect(() => {
-    const fetchReviews = async () => {
+  const fetchReviews = React.useCallback(async () => {
       setIsLoadingReviews(true)
       try {
         const supabase = getBrowserClient()
@@ -200,10 +198,11 @@ function PetLogContent() {
       } finally {
         setIsLoadingReviews(false)
       }
-    }
-
-    fetchReviews()
   }, [])
+
+  useEffect(() => {
+    fetchReviews()
+  }, [fetchReviews])
 
   // Filters
   const [selectedSpecies, setSelectedSpecies] = useState<'all' | 'dog' | 'cat'>('all')
@@ -858,9 +857,8 @@ function PetLogContent() {
           onOpenChange={setIsLogFormOpen}
           title="새 로그 작성"
           onSuccess={() => {
-            // Refetch reviews (in a real app, this would invalidate queries)
-            // For now, we'll just close the dialog
             setIsLogFormOpen(false)
+            fetchReviews()
           }}
         />
       </main>
