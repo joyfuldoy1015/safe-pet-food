@@ -665,16 +665,9 @@ export default function LogDetailPage() {
     }
   }
 
-  // 탭 변경 시 해당 섹션으로 스크롤
+  // 탭 전환 시 모바일 키보드/viewport 점프를 피하기 위해 자동 스크롤을 제거
   const handleTabChange = (tab: 'comments' | 'qa') => {
     setActiveTab(tab)
-    setTimeout(() => {
-      if (tab === 'comments' && commentsSectionRef.current) {
-        commentsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      } else if (tab === 'qa' && qaSectionRef.current) {
-        qaSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }, 100)
   }
 
   // 공유 기능
