@@ -1244,7 +1244,7 @@ export default function LogDetailPage() {
       <div className="border-t border-gray-200 mb-4" />
 
       {/* 댓글 섹션 */}
-      <div ref={commentsSectionRef} className="px-4 pb-40 min-h-[80vh]">
+      <div ref={commentsSectionRef} className="px-4 pb-40">
         <h3 className="text-lg font-bold text-gray-900 mb-3">
           응원 한마디 <span className="text-violet-500">{comments.filter(c => !c.parentId).length}</span>
         </h3>
