@@ -925,20 +925,20 @@ export default function LogDetailPage() {
         transition={{ delay: 0.1 }}
         className="mx-4 mb-4 bg-white rounded-2xl border border-gray-100 p-5"
       >
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">사용 후기</h3>
+        <h3 className="text-base font-bold text-gray-900 mb-3">사용 후기</h3>
         {log.excerpt ? (
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+          <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
             {log.excerpt}
           </p>
         ) : (
-          <p className="text-sm text-gray-400 italic">
+          <p className="text-base text-gray-400 italic">
             아직 작성된 후기가 없습니다.
           </p>
         )}
         {log.notes && (
           <div className="mt-4 pt-4 border-t border-gray-100">
-            <h4 className="text-xs font-medium text-gray-500 mb-2">추가 메모</h4>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+            <h4 className="text-sm font-medium text-gray-500 mb-2">추가 메모</h4>
+            <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
               {log.notes}
             </p>
           </div>
