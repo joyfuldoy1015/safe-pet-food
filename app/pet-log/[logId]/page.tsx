@@ -863,54 +863,43 @@ export default function LogDetailPage() {
         transition={{ delay: 0.05 }}
         className="mx-4 my-4 bg-white rounded-2xl border border-gray-100 p-4 relative"
       >
-        {/* 사용 기간 배지 + 추천 배지 */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5">
-          {log.recommend !== undefined && log.recommend !== null && (
-            log.recommend ? (
-              <span className="px-3 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-full border border-green-100">
-                👍 추천
-              </span>
-            ) : (
-              <span className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-medium rounded-full border border-red-100">
-                👎 비추천
-              </span>
-            )
-          )}
-          <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-            log.status === 'feeding' ? 'bg-green-50 text-green-600' :
-            log.status === 'completed' ? 'bg-gray-100 text-gray-600' :
-            'bg-red-50 text-red-600'
-          }`}>
-            {log.status === 'feeding' 
-              ? `${daysUsed}일째 사용 중`
-              : log.status === 'completed' ? '사용 완료' : '사용 중지'
-            }
-          </span>
+        {/* 카테고리 레이블 + 배지 */}
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-medium text-violet-500 tracking-wider">
+            {log.category === 'feed' ? '사료 기록' :
+             log.category === 'snack' ? '간식 기록' :
+             log.category === 'supplement' ? '영양제 기록' :
+             log.category === 'toilet' ? '화장실 기록' : '기록'}
+          </p>
+          <div className="flex items-center gap-1.5">
+            {log.recommend !== undefined && log.recommend !== null && (
+              log.recommend ? (
+                <span className="px-3 py-1.5 bg-green-50 text-green-600 text-xs font-medium rounded-full border border-green-100">
+                  👍 추천
+                </span>
+              ) : (
+                <span className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-medium rounded-full border border-red-100">
+                  👎 비추천
+                </span>
+              )
+            )}
+            <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+              log.status === 'feeding' ? 'bg-green-50 text-green-600' :
+              log.status === 'completed' ? 'bg-gray-100 text-gray-600' :
+              'bg-red-50 text-red-600'
+            }`}>
+              {log.status === 'feeding' 
+                ? `${daysUsed}일째 사용 중`
+                : log.status === 'completed' ? '사용 완료' : '사용 중지'
+              }
+            </span>
+          </div>
         </div>
-
-        {/* 카테고리 레이블 */}
-        <p className="text-xs font-medium text-violet-500 uppercase tracking-wider mb-2">
-          {log.category === 'feed' ? 'FEED LOG' :
-           log.category === 'snack' ? 'SNACK LOG' :
-           log.category === 'supplement' ? 'SUPPLEMENT LOG' :
-           log.category === 'toilet' ? 'TOILET LOG' : 'PET LOG'}
-        </p>
 
         {/* 제품명 */}
         <h2 className="text-lg font-bold text-gray-900 mb-2 pr-24">
           {log.product}
         </h2>
-
-        {/* 기능 태그 */}
-        <div className="mb-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-violet-50 text-violet-600">
-            <CheckCircle className="h-3 w-3" />
-            {log.category === 'supplement' ? '건강 개선' : 
-             log.category === 'feed' ? '영양 공급' :
-             log.category === 'snack' ? '기호성 좋음' : 
-             log.category === 'toilet' ? '위생 관리' : '반려 케어'}
-          </span>
-        </div>
 
         {/* 기록 시작일 */}
         <p className="text-sm text-gray-500">
