@@ -265,28 +265,28 @@ export default function AskQuestionModal({
               <p className="text-xs text-gray-500 mb-3">
                 이 요약이 질문의 핵심을 잘 담고 있나요? 승인하면 목록에서 요약이 먼저 표시됩니다.
               </p>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={handleSubmit as any}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1.5 bg-blue-500 text-white text-[11px] rounded-md hover:bg-blue-600 transition-colors whitespace-nowrap"
                 >
-                  <Check className="h-3.5 w-3.5" />
-                  이대로 등록
+                  <Check className="h-3 w-3 flex-shrink-0" />
+                  등록
                 </button>
                 <button
                   type="button"
                   onClick={handleGenerateSummary}
                   disabled={isSummarizing}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-white text-gray-700 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1.5 bg-white text-gray-700 text-[11px] rounded-md border border-gray-300 hover:bg-gray-50 transition-colors whitespace-nowrap"
                 >
-                  <RefreshCw className={`h-3.5 w-3.5 ${isSummarizing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`h-3 w-3 flex-shrink-0 ${isSummarizing ? 'animate-spin' : ''}`} />
                   다시 생성
                 </button>
                 <button
                   type="button"
                   onClick={handleSkipSummary}
-                  className="px-3 py-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
+                  className="ml-auto px-2 py-1.5 text-gray-500 text-[11px] hover:text-gray-700 transition-colors whitespace-nowrap"
                 >
                   요약 없이 등록
                 </button>
