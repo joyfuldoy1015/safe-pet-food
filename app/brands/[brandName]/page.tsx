@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { 
   Star, 
   Calendar, 
@@ -191,8 +191,10 @@ const getDisclosureIcon = (level: string) => {
 
 export default function BrandDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const brandName = decodeURIComponent(params.brandName as string)
   const [brand, setBrand] = useState<Brand | null>(null)
+  const [loadError, setLoadError] = useState<'not_found' | 'error' | null>(null)
   const [showReportForm, setShowReportForm] = useState(false)
   const [showEvaluationSuccess, setShowEvaluationSuccess] = useState(false)
   const [voteData, setVoteData] = useState<{
@@ -318,17 +320,21 @@ export default function BrandDetailPage() {
           } else {
             console.error('브랜드 데이터를 찾을 수 없습니다:', apiData.error)
             setBrand(null)
+            setLoadError('not_found')
           }
         } else if (response.status === 404) {
           console.error('브랜드를 찾을 수 없습니다:', brandName)
           setBrand(null)
+          setLoadError('not_found')
         } else {
           console.error('브랜드 데이터 로딩 실패:', response.status)
           setBrand(null)
+          setLoadError('error')
         }
       } catch (error) {
         console.error('브랜드 데이터 로딩 오류:', error)
         setBrand(null)
+        setLoadError('error')
       }
     }
 
@@ -543,6 +549,46 @@ export default function BrandDetailPage() {
       }))
       alert('도움됨 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.')
     }
+  }
+
+  if (!brand && loadError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">{loadError === 'not_found' ? '🔍' : '⚠️'}</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            {loadError === 'not_found' ? '브랜드를 찾을 수 없습니다' : '정보를 불러올 수 없습니다'}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {loadError === 'not_found'
+              ? `"${brandName}" 브랜드가 등록되어 있지 않거나 삭제되었습니다.`
+              : '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+            >
+              이전 페이지
+            </button>
+            <button
+              onClick={() => router.push('/brands')}
+              className="px-4 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600 transition"
+            >
+              브랜드 목록
+            </button>
+            {loadError === 'error' && (
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 text-green-600 border border-green-300 rounded-lg hover:bg-green-50 transition"
+              >
+                다시 시도
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!brand) {

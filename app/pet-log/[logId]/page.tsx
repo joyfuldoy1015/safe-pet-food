@@ -269,9 +269,20 @@ export default function LogDetailPage() {
     }
   }
 
+  const requireLogin = (): boolean => {
+    if (!user) {
+      if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+        router.push(`/login?redirect=${encodeURIComponent(`/pet-log/${params.logId}`)}`)
+      }
+      return true
+    }
+    return false
+  }
+
   // 댓글/문의 제출
   const handleSubmit = async () => {
-    if (!newComment.trim() || !user || !log) return
+    if (!newComment.trim() || !log) return
+    if (requireLogin()) return
 
     setIsSubmitting(true)
     try {
@@ -388,7 +399,8 @@ export default function LogDetailPage() {
 
   // 댓글 수정
   const handleEditComment = async (commentId: string) => {
-    if (!editContent.trim() || !user) return
+    if (!editContent.trim()) return
+    if (requireLogin()) return
 
     try {
       const supabase = getBrowserClient()
@@ -414,7 +426,8 @@ export default function LogDetailPage() {
 
   // 댓글 삭제
   const handleDeleteComment = async (commentId: string) => {
-    if (!user || !confirm('댓글을 삭제하시겠습니까?')) return
+    if (requireLogin()) return
+    if (!confirm('댓글을 삭제하시겠습니까?')) return
 
     try {
       const supabase = getBrowserClient()
@@ -437,7 +450,8 @@ export default function LogDetailPage() {
 
   // 문의 수정
   const handleEditQAPost = async (postId: string) => {
-    if (!editContent.trim() || !user) return
+    if (!editContent.trim()) return
+    if (requireLogin()) return
 
     try {
       const supabase = getBrowserClient()
@@ -463,7 +477,8 @@ export default function LogDetailPage() {
 
   // 문의 삭제
   const handleDeleteQAPost = async (postId: string, threadId: string) => {
-    if (!user || !confirm('문의를 삭제하시겠습니까?')) return
+    if (requireLogin()) return
+    if (!confirm('문의를 삭제하시겠습니까?')) return
 
     try {
       const supabase = getBrowserClient()
@@ -496,7 +511,8 @@ export default function LogDetailPage() {
 
   // 댓글 답글 등록
   const handleReplyToComment = async (parentId: string) => {
-    if (!replyContent.trim() || !user || !log) return
+    if (!replyContent.trim() || !log) return
+    if (requireLogin()) return
 
     try {
       const supabase = getBrowserClient()
@@ -537,7 +553,8 @@ export default function LogDetailPage() {
 
   // 문의 답변 등록
   const handleReplyToQA = async (threadId: string, questionId: string) => {
-    if (!replyContent.trim() || !user) return
+    if (!replyContent.trim()) return
+    if (requireLogin()) return
 
     try {
       const supabase = getBrowserClient()
@@ -585,10 +602,7 @@ export default function LogDetailPage() {
 
   // 도움돼요 토글
   const handleToggleHelpful = async () => {
-    if (!user) {
-      alert('로그인이 필요합니다.')
-      return
-    }
+    if (requireLogin()) return
     if (!log || isMarkingHelpful) return
 
     setIsMarkingHelpful(true)
@@ -1110,10 +1124,7 @@ export default function LogDetailPage() {
                                 {/* 답변에 답글 달기 버튼 */}
                                 <button
                                   onClick={() => {
-                                    if (!user) {
-                                      alert('로그인이 필요합니다.')
-                                      return
-                                    }
+                                    if (requireLogin()) return
                                     setReplyingToQAId(replyingToQAId === answer.id ? null : answer.id)
                                     setReplyContent('')
                                   }}
@@ -1204,10 +1215,7 @@ export default function LogDetailPage() {
                     ) : (
                       <button
                         onClick={() => {
-                          if (!user) {
-                            alert('로그인이 필요합니다.')
-                            return
-                          }
+                          if (requireLogin()) return
                           setReplyingToQAId(question.id)
                           setReplyContent('')
                         }}
@@ -1307,10 +1315,7 @@ export default function LogDetailPage() {
                     {!comment.parentId && (
                       <button
                         onClick={() => {
-                          if (!user) {
-                            alert('로그인이 필요합니다.')
-                            return
-                          }
+                          if (requireLogin()) return
                           setReplyingToCommentId(replyingToCommentId === comment.id ? null : comment.id)
                           setReplyContent('')
                         }}
@@ -1415,10 +1420,7 @@ export default function LogDetailPage() {
           />
           <button
             onClick={() => {
-              if (!user) {
-                alert('로그인이 필요합니다.')
-                return
-              }
+              if (requireLogin()) return
               if (!newComment.trim()) {
                 alert('내용을 입력해주세요.')
                 return

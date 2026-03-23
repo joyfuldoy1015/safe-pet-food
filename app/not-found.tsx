@@ -1,7 +1,12 @@
+'use client'
+
 import Link from 'next/link'
-import { Home, Search, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Home, ArrowLeft } from 'lucide-react'
 
 export default function NotFound() {
+  const router = useRouter()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center px-4">
       <div className="max-w-2xl w-full text-center">
@@ -23,13 +28,13 @@ export default function NotFound() {
             <Home className="h-5 w-5" />
             <span>홈으로 가기</span>
           </Link>
-          <Link
-            href="/pet-log"
+          <button
+            onClick={() => router.back()}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <ArrowLeft className="h-5 w-5" />
             <span>이전 페이지</span>
-          </Link>
+          </button>
         </div>
 
         <div className="mt-12 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
@@ -64,4 +69,3 @@ export default function NotFound() {
     </div>
   )
 }
-

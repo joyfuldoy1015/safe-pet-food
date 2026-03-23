@@ -1566,7 +1566,7 @@ export default function PetLogPostDetail() {
                 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                   <Link
-                    href="/login"
+                    href={`/login?redirect=${encodeURIComponent(`/pet-log/posts/${params.postId}`)}`}
                     className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm sm:text-lg font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     로그인하기
@@ -1582,7 +1582,7 @@ export default function PetLogPostDetail() {
                 
                 <p className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6">
                   아직 계정이 없으신가요? 
-                  <Link href="/signup" className="text-purple-600 hover:text-purple-700 ml-1 font-semibold">
+                  <Link href={`/signup?redirect=${encodeURIComponent(`/pet-log/posts/${params.postId}`)}`} className="text-purple-600 hover:text-purple-700 ml-1 font-semibold">
                     회원가입
                   </Link>
                 </p>

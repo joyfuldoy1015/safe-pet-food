@@ -458,7 +458,9 @@ export default function QuestionDetailPage() {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      alert('로그인이 필요합니다.')
+      if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+        router.push(`/login?redirect=${encodeURIComponent(`/community/qa-forum/${questionId}`)}`)
+      }
       return
     }
 
@@ -562,7 +564,9 @@ export default function QuestionDetailPage() {
   // Handle reply - Supabase에 저장하고 재귀적으로 댓글 트리 업데이트
   const handleReply = async (commentId: string, content: string) => {
     if (!user || !profile) {
-      alert('로그인이 필요합니다.')
+      if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+        router.push(`/login?redirect=${encodeURIComponent(`/community/qa-forum/${questionId}`)}`)
+      }
       return
     }
 
@@ -885,7 +889,9 @@ export default function QuestionDetailPage() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        alert('로그인이 필요합니다.')
+        if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+          router.push(`/login?redirect=${encodeURIComponent(`/community/qa-forum/${questionId}`)}`)
+        }
         return
       }
 

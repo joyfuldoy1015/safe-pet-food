@@ -96,8 +96,14 @@ function WritePostContent() {
   const selectedPetId = searchParams.get('petId')
   
   // 로그인한 사용자 정보 가져오기
-  const { user, profile } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login?redirect=%2Fpet-log%2Fposts%2Fwrite')
+    }
+  }, [authLoading, user, router])
+
   // 등록된 반려동물 프로필 목록
   const [petProfiles, setPetProfiles] = useState<PetProfile[]>([])
   const [selectedPetProfile, setSelectedPetProfile] = useState<string>('')
@@ -470,7 +476,7 @@ function WritePostContent() {
     // 로그인 확인
     if (!user) {
       alert('로그인이 필요합니다.')
-      router.push('/login')
+      router.push('/login?redirect=%2Fpet-log%2Fposts%2Fwrite')
       return
     }
 
@@ -571,6 +577,14 @@ function WritePostContent() {
   // 단계별 검증
   const canProceedToStep2 = petInfo.petName && petInfo.petBreed && petInfo.petAge && petInfo.petWeight && petInfo.ownerName
   const canProceedToStep3 = feedingRecords.length > 0
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-violet-500" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

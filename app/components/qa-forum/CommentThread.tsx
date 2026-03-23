@@ -71,9 +71,10 @@ export default function CommentThread({
 
   const handleReplyClick = () => {
     if (!currentUserId) {
-      alert('답글을 작성하려면 로그인이 필요합니다.')
-      const currentPath = window.location.pathname
-      window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`
+      if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+        const currentPath = window.location.pathname
+        window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`
+      }
       return
     }
     setShowReplyForm(!showReplyForm)

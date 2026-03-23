@@ -282,7 +282,7 @@ export default function EditPostPage() {
 
     if (!user) {
       alert('로그인이 필요합니다.')
-      router.push('/login?redirect=/pet-log')
+      router.push(`/login?redirect=${encodeURIComponent(`/pet-log/posts/${postId}/edit`)}`)
       return
     }
 

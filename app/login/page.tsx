@@ -53,13 +53,15 @@ function LoginContent() {
     }
   }, [searchParams])
 
+  const redirectPath = searchParams.get('redirect') || '/'
+
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      console.log('[Login] User already logged in, redirecting to home')
-      router.push('/')
+      console.log('[Login] User already logged in, redirecting to:', redirectPath)
+      router.push(redirectPath)
     }
-  }, [authLoading, user, router])
+  }, [authLoading, user, router, redirectPath])
 
   const handleGoogleLogin = async () => {
     if (!supabase) {
@@ -72,10 +74,15 @@ function LoginContent() {
     
     console.log('[Login] Starting Google OAuth...')
     
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    if (redirectPath && redirectPath !== '/') {
+      callbackUrl.searchParams.set('next', redirectPath)
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: callbackUrl.toString()
       }
     })
     
@@ -98,10 +105,15 @@ function LoginContent() {
     
     console.log('[Login] Starting Kakao OAuth...')
     
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    if (redirectPath && redirectPath !== '/') {
+      callbackUrl.searchParams.set('next', redirectPath)
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: callbackUrl.toString()
       }
     })
     
@@ -150,9 +162,8 @@ function LoginContent() {
       setError(errorMessage)
       setLoading(false)
     } else {
-      console.log('[Login] Email login successful')
-      // Auth state will be updated by useAuth hook
-      // Page will redirect automatically via useEffect
+      console.log('[Login] Email login successful, redirecting to:', redirectPath)
+      router.push(redirectPath)
     }
   }
 

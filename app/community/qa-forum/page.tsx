@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Search, Plus, Flame, Clock, HelpCircle, ChevronDown, Loader2 } from 'lucide-react'
 import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import AskQuestionModal from '@/app/components/qa-forum/AskQuestionModal'
@@ -25,6 +26,7 @@ type SortOption = 'hot' | 'recent' | 'unanswered'
 const QUESTIONS_PER_PAGE = 5
 
 export default function CommunityQAForumPage() {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortOption, setSortOption] = useState<SortOption>('recent')
@@ -187,7 +189,12 @@ export default function CommunityQAForumPage() {
       if (!supabase) return
 
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+          router.push(`/login?redirect=${encodeURIComponent('/community/qa-forum')}`)
+        }
+        return
+      }
 
       const isCurrentlyUpvoted = userVotes[questionId]
 
@@ -263,7 +270,9 @@ export default function CommunityQAForumPage() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        alert('로그인이 필요합니다.')
+        if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+          router.push(`/login?redirect=${encodeURIComponent('/community/qa-forum')}`)
+        }
         return
       }
 
@@ -475,7 +484,18 @@ export default function CommunityQAForumPage() {
                 
         {/* Floating Ask Question Button */}
                   <button
-          onClick={() => setShowQuestionModal(true)}
+          onClick={async () => {
+            const supabase = getBrowserClient()
+            if (!supabase) return
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+              if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+                router.push(`/login?redirect=${encodeURIComponent('/community/qa-forum')}`)
+              }
+              return
+            }
+            setShowQuestionModal(true)
+          }}
           className="fixed bottom-6 right-6 h-14 w-14 bg-blue-500 text-white rounded-full shadow-strong hover:bg-blue-600 transition-all duration-200 hover:scale-110 flex items-center justify-center z-40"
           aria-label="질문하기"
                   >
