@@ -195,6 +195,8 @@ export default function QuestionDetailPage() {
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [isTogglingBookmark, setIsTogglingBookmark] = useState(false)
   
+  const [showFullContent, setShowFullContent] = useState(false)
+
   // 질문 수정 관련 상태
   const [isEditingQuestion, setIsEditingQuestion] = useState(false)
   const [editTitle, setEditTitle] = useState('')
@@ -263,6 +265,7 @@ export default function QuestionDetailPage() {
             id: questionData.id,
             title: questionData.title,
             content: questionData.content,
+            summary: questionData.summary || undefined,
             author: {
               name: questionData.author?.nickname || '익명',
               level: 'beginner' as const,
@@ -1000,6 +1003,7 @@ export default function QuestionDetailPage() {
               id: q.id,
               title: q.title,
               content: q.content,
+              summary: q.summary || undefined,
               author: {
                 name: q.author?.nickname || '익명',
                 level: 'beginner' as const
@@ -1205,9 +1209,40 @@ export default function QuestionDetailPage() {
                 </div>
               ) : (
                 <div className="mb-6">
-                  <p className="text-gray-600 text-sm sm:text-base whitespace-pre-line leading-relaxed">
-                    {question.content}
-                  </p>
+                  {question.summary && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-0.5 rounded">AI 요약</span>
+                      </div>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {question.summary}
+                      </p>
+                    </div>
+                  )}
+
+                  {question.summary && !showFullContent ? (
+                    <button
+                      onClick={() => setShowFullContent(true)}
+                      className="text-sm text-blue-500 hover:text-blue-600 font-medium mb-3"
+                    >
+                      전체 내용 보기 ▼
+                    </button>
+                  ) : (
+                    <>
+                      {question.summary && showFullContent && (
+                        <button
+                          onClick={() => setShowFullContent(false)}
+                          className="text-sm text-blue-500 hover:text-blue-600 font-medium mb-3"
+                        >
+                          접기 ▲
+                        </button>
+                      )}
+                      <p className="text-gray-600 text-sm sm:text-base whitespace-pre-line leading-relaxed">
+                        {question.content}
+                      </p>
+                    </>
+                  )}
+
                   {question.imageUrl && (
                     <img
                       src={question.imageUrl}

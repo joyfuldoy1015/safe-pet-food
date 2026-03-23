@@ -8,6 +8,7 @@ export interface Question {
   id: string
   title: string
   content: string
+  summary?: string
   author: {
     name: string
     avatar?: string
@@ -109,12 +110,21 @@ export default function QuestionCard({ question, onUpvote, formatTimeAgo }: Ques
           {question.title}
         </h3>
 
-        {/* 질문 내용 */}
-        {question.content && (
+        {/* 질문 내용 (요약이 있으면 요약 우선 표시) */}
+        {question.summary ? (
+          <div className="mb-4 flex-1">
+            <div className="flex items-center gap-1 mb-1">
+              <span className="text-[10px] font-medium text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">AI 요약</span>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+              {question.summary}
+            </p>
+          </div>
+        ) : question.content ? (
           <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2 flex-1">
             {question.content.substring(0, 100)}{question.content.length > 100 ? '...' : ''}
           </p>
-        )}
+        ) : null}
 
         {/* 하단: 좋아요 + 답변 + 조회수 + 화살표 */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">

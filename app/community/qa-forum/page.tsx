@@ -75,6 +75,7 @@ export default function CommunityQAForumPage() {
               id: q.id,
               title: q.title,
               content: q.content,
+              summary: q.summary || undefined,
               author: {
                 name: q.author?.nickname || '익명',
                 avatar: q.author?.avatar_url || undefined,
@@ -251,6 +252,7 @@ export default function CommunityQAForumPage() {
     content: string
     isAnonymous: boolean
     imageUrl?: string
+    summary?: string
   }) => {
     try {
       const supabase = getBrowserClient()
@@ -273,18 +275,23 @@ export default function CommunityQAForumPage() {
         .single()
 
       // Insert question
+      const insertData: any = {
+        title: data.title,
+        content: data.content,
+        category: data.category,
+        author_id: user.id,
+        status: 'open',
+        votes: 0,
+        views: 0,
+        admin_status: 'visible'
+      }
+      if (data.summary) {
+        insertData.summary = data.summary
+      }
+
       const { data: newQuestion, error } = await (supabase
         .from('community_questions') as any)
-        .insert({
-          title: data.title,
-          content: data.content,
-          category: data.category,
-          author_id: user.id,
-          status: 'open',
-          votes: 0,
-          views: 0,
-          admin_status: 'visible'
-        })
+        .insert(insertData)
         .select()
         .single()
 
@@ -299,6 +306,7 @@ export default function CommunityQAForumPage() {
         id: newQuestion.id,
         title: newQuestion.title,
         content: newQuestion.content,
+        summary: newQuestion.summary || undefined,
         author: {
           name: profile?.nickname || '사용자',
           avatar: profile?.avatar_url || undefined,
