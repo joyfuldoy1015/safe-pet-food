@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supa/serverAdmin'
+import { getAdminClient, isAdmin } from '@/lib/supa/serverAdmin'
 import { parsePaginationParams, parseSortParams, buildFilterQuery } from '@/lib/supa/adminQueries'
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -9,10 +10,36 @@ export const revalidate = 0
 
 /**
  * GET /api/admin/users/list
- * 사용자 목록 조회
+ * 사용자 목록 조회 (admin 전용)
  */
 export async function GET(request: NextRequest) {
   try {
+    // Bearer 토큰으로 사용자 인증
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+
+    const authHeader = request.headers.get('Authorization')
+    const accessToken = authHeader?.replace('Bearer ', '')
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    })
+    const { data: { user }, error: authError } = await authClient.auth.getUser(accessToken)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const admin = await isAdmin(user.id)
+    if (!admin) {
+      return NextResponse.json({ error: 'Forbidden: admin only' }, { status: 403 })
+    }
+
     let supabase
     try {
       supabase = getAdminClient()

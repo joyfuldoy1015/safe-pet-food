@@ -1,40 +1,52 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { isAdmin } from '@/lib/supa/serverAdmin'
+import { createClient } from '@supabase/supabase-js'
 
-// Vercel API 토큰이 필요합니다
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN
-const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID // 선택사항
+const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID
 const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'safe-pet-food'
 
-export async function GET() {
+async function verifyAdmin(request: NextRequest): Promise<{ authorized: boolean; response?: NextResponse }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { authorized: false, response: NextResponse.json({ error: 'Server configuration error' }, { status: 500 }) }
+  }
+
+  const authHeader = request.headers.get('Authorization')
+  const accessToken = authHeader?.replace('Bearer ', '')
+  if (!accessToken) {
+    return { authorized: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  })
+  const { data: { user }, error } = await supabase.auth.getUser(accessToken)
+  if (error || !user) {
+    return { authorized: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  }
+
+  const admin = await isAdmin(user.id)
+  if (!admin) {
+    return { authorized: false, response: NextResponse.json({ error: 'Forbidden: admin only' }, { status: 403 }) }
+  }
+
+  return { authorized: true }
+}
+
+export async function GET(request: NextRequest) {
+  const auth = await verifyAdmin(request)
+  if (!auth.authorized) return auth.response!
+
   try {
     if (!VERCEL_TOKEN) {
-      // 토큰이 없는 경우 샘플 데이터 반환
       return NextResponse.json({
-        deployments: [
-          {
-            uid: 'sample-1',
-            name: 'safe-pet-food',
-            url: 'safe-pet-food.vercel.app',
-            created: Date.now(),
-            state: 'READY',
-            meta: {
-              githubCommitMessage: 'fix: 모바일/웹 일관성 개선',
-              githubCommitSha: '106b0d8c',
-              githubCommitAuthorName: 'doheekong',
-              githubCommitRef: 'main'
-            },
-            target: 'production'
-          }
-        ],
-        pagination: {
-          count: 1,
-          next: null,
-          prev: null
-        }
+        deployments: [],
+        pagination: { count: 0, next: null, prev: null }
       })
     }
 
-    // Vercel API 호출
     const baseUrl = 'https://api.vercel.com'
     const endpoint = VERCEL_TEAM_ID 
       ? `/v6/deployments?teamId=${VERCEL_TEAM_ID}&projectId=${VERCEL_PROJECT_ID}&limit=20`
@@ -63,8 +75,10 @@ export async function GET() {
   }
 }
 
-// 재배포 API
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const auth = await verifyAdmin(request)
+  if (!auth.authorized) return auth.response!
+
   try {
     const { deploymentId, action } = await request.json()
 
@@ -76,7 +90,6 @@ export async function POST(request: Request) {
     }
 
     if (action === 'redeploy') {
-      // 재배포 로직
       const baseUrl = 'https://api.vercel.com'
       const endpoint = VERCEL_TEAM_ID
         ? `/v13/deployments?teamId=${VERCEL_TEAM_ID}`
@@ -92,7 +105,7 @@ export async function POST(request: Request) {
           name: VERCEL_PROJECT_ID,
           gitSource: {
             type: 'github',
-            ref: 'main', // 브랜치명
+            ref: 'main',
             repoId: process.env.GITHUB_REPO_ID
           }
         })

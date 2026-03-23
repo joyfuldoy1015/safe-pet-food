@@ -28,6 +28,11 @@ export async function POST(request: Request) {
       )
     }
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { postId, comment } = body
 
@@ -43,7 +48,7 @@ export async function POST(request: Request) {
       .insert([{
         id: comment.id,
         post_id: postId,
-        user_id: comment.userId,
+        user_id: user.id,
         user_name: comment.userName,
         user_avatar: comment.userAvatar || null,
         content: comment.content,
@@ -118,6 +123,11 @@ export async function PUT(request: Request) {
       )
     }
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { commentId, updates } = body
 
@@ -126,6 +136,19 @@ export async function PUT(request: Request) {
         { error: 'commentId and updates are required' },
         { status: 400 }
       )
+    }
+
+    // 본인 댓글인지 확인 (content 수정 시)
+    if (updates.content !== undefined) {
+      const { data: existing } = await supabase
+        .from('pet_log_comments')
+        .select('user_id')
+        .eq('id', commentId)
+        .single()
+
+      if ((existing as any)?.user_id !== user.id) {
+        return NextResponse.json({ error: 'Forbidden: not your comment' }, { status: 403 })
+      }
     }
 
     // 업데이트할 필드 구성
@@ -171,6 +194,11 @@ export async function DELETE(request: Request) {
       )
     }
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { commentId } = body
 
@@ -181,10 +209,10 @@ export async function DELETE(request: Request) {
       )
     }
 
-    // 댓글이 속한 포스트 ID 가져오기
+    // 댓글 조회 및 본인 확인
     const { data: comment, error: fetchError } = await supabase
       .from('pet_log_comments')
-      .select('post_id')
+      .select('post_id, user_id')
       .eq('id', commentId)
       .single()
 
@@ -193,6 +221,10 @@ export async function DELETE(request: Request) {
         { error: 'Comment not found' },
         { status: 404 }
       )
+    }
+
+    if ((comment as any).user_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden: not your comment' }, { status: 403 })
     }
 
     const postId = (comment as any).post_id

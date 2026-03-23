@@ -88,11 +88,15 @@ export default function BrandsPage() {
     fetchSafiReviews()
   }, [brands])
 
-  // Calculate SAFI scores for each brand
+  // Calculate SAFI scores for each brand (리뷰 데이터가 있는 경우만)
   const brandsWithSafi = useMemo(() => {
     return brands.map(brand => {
       const brandKey = brand.name.toLowerCase()
       const safiReviews = safiReviewsByBrand[brandKey] || []
+
+      if (safiReviews.length === 0) {
+        return { ...brand, safiScore: null }
+      }
 
       const recallHistory = brand.recall_history.map(recall => ({
         date: recall.date,
@@ -376,7 +380,7 @@ export default function BrandsPage() {
                         </div>
 
                         {/* SAFI Score */}
-                        {brand.safiScore && (
+                        {brand.safiScore ? (
                           <div className="mb-3 p-3 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl">
                             <div className="flex items-center justify-between mb-1.5">
                               <div className="flex items-center gap-1.5">
@@ -396,7 +400,7 @@ export default function BrandsPage() {
                               <span className="text-xs text-gray-400">/ 100</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1.5">
-                              <div 
+                              <div
                                 className={`h-1.5 rounded-full transition-all duration-500 ${
                                   brand.safiScore.level === 'SAFE' ? 'bg-green-500' :
                                   brand.safiScore.level === 'NORMAL' ? 'bg-yellow-500' :
@@ -404,6 +408,25 @@ export default function BrandsPage() {
                                 }`}
                                 style={{ width: `${brand.safiScore.overallScore}%` }}
                               ></div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mb-3 p-3 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <Shield className="h-3.5 w-3.5 text-gray-300" />
+                                <span className="text-xs font-medium text-gray-400">SAFI 점수</span>
+                              </div>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-400">
+                                평가 전
+                              </span>
+                            </div>
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-lg font-bold text-gray-300">0</span>
+                              <span className="text-xs text-gray-300">/ 100</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1.5">
+                              <div className="h-1.5 rounded-full bg-gray-300" style={{ width: '0%' }}></div>
                             </div>
                           </div>
                         )}
