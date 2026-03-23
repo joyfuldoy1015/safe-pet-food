@@ -1233,7 +1233,7 @@ export default function LogDetailPage() {
       <div className="border-t border-gray-200 mb-4" />
 
       {/* 댓글 섹션 */}
-      <div ref={commentsSectionRef} className="px-4 pb-40">
+      <div ref={commentsSectionRef} className="px-4 pb-4">
         <h3 className="text-lg font-bold text-gray-900 mb-3">
           응원 한마디 <span className="text-violet-500">{comments.filter(c => !c.parentId).length}</span>
         </h3>
@@ -1372,11 +1372,8 @@ export default function LogDetailPage() {
         )}
       </div>
 
-      </div>{/* max-w-4xl 닫기 */}
-
-      {/* 하단 탭 & 입력 영역 */}
-      <div className="fixed bottom-0 left-0 right-0 z-20">
-      <div className="max-w-4xl mx-auto bg-white border-t border-gray-200">
+      {/* 탭 & 입력 영역 (인라인) */}
+      <div className="mx-4 mb-8 bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* 탭 */}
         <div className="flex">
           <button
@@ -1408,7 +1405,7 @@ export default function LogDetailPage() {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder={activeTab === 'comments' ? '응원 한마디를 남겨주세요...' : '질문을 입력해주세요...'}
-            className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+            className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-violet-500"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -1418,7 +1415,6 @@ export default function LogDetailPage() {
           />
           <button
             onClick={() => {
-              console.log('[버튼 클릭] newComment:', newComment, 'isSubmitting:', isSubmitting, 'user:', user, 'log:', log, 'activeTab:', activeTab)
               if (!user) {
                 alert('로그인이 필요합니다.')
                 return
@@ -1440,7 +1436,8 @@ export default function LogDetailPage() {
           </button>
         </div>
       </div>
-      </div>
+
+      </div>{/* max-w-4xl 닫기 */}
 
       {/* 글 수정 다이얼로그 */}
       {isMyPost && (
