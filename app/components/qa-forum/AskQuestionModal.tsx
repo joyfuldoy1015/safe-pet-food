@@ -231,14 +231,13 @@ export default function AskQuestionModal({
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base"
               required
             />
-            <div className="mt-1 flex items-center justify-between">
+            <div className="mt-1 text-right">
               {needsSummary && !showSummaryPreview && (
-                <span className="text-xs text-blue-500 flex items-center gap-1">
+                <span className="text-xs text-blue-500 flex items-center justify-end gap-1">
                   <Sparkles className="h-3 w-3" />
-                  200자 이상일 경우, AI가 질문을 요약해 드립니다
+                  200자 이상일 경우, AI가 요약해 드립니다.
                 </span>
               )}
-              {!needsSummary && <span />}
               <span className={`text-xs ${
                 contentLength < 10 && contentLength > 0
                   ? 'text-red-500'
