@@ -18,6 +18,7 @@ interface ProductListItemProps {
       coat_quality?: number
       stool_quality?: number
       overall_satisfaction?: number
+      review_count?: number
     }
     community_feedback?: {
       recommend_yes: number
@@ -160,93 +161,47 @@ export default function ProductListItem({ product }: ProductListItemProps) {
         {/* 오른쪽: 소비자 평가 (별표 5개 항목) */}
         {product.consumer_ratings && (
           <div className="w-full sm:w-auto sm:flex-shrink-0">
-            <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-4 gap-y-1">
-              {product.consumer_ratings.palatability !== undefined && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-600 w-12">기호성</span>
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-3 w-3 ${
-                          star <= (product.consumer_ratings?.palatability || 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
+            {(product.consumer_ratings.review_count ?? 0) === 0 ? (
+              <div className="text-center sm:text-right py-2">
+                <p className="text-sm text-gray-400">아직 평가가 없습니다</p>
+                <p className="text-xs text-gray-300 mt-1">첫 리뷰를 작성해보세요</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-4 gap-y-1">
+                  {[
+                    { key: 'palatability' as const, label: '기호성' },
+                    { key: 'digestibility' as const, label: '소화율' },
+                    { key: 'coat_quality' as const, label: '털상태' },
+                    { key: 'stool_quality' as const, label: '변상태' },
+                    { key: 'overall_satisfaction' as const, label: '만족도' },
+                  ].map(({ key, label }) => {
+                    const value = product.consumer_ratings?.[key] ?? 0
+                    if (value === 0) return null
+                    return (
+                      <div key={key} className="flex items-center gap-1">
+                        <span className="text-xs text-gray-600 w-12">{label}</span>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`h-3 w-3 ${
+                                star <= Math.round(value)
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              )}
-              {product.consumer_ratings.digestibility !== undefined && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-600 w-12">소화율</span>
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-3 w-3 ${
-                          star <= (product.consumer_ratings?.digestibility || 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {product.consumer_ratings.coat_quality !== undefined && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-600 w-12">털상태</span>
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-3 w-3 ${
-                          star <= (product.consumer_ratings?.coat_quality || 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {product.consumer_ratings.stool_quality !== undefined && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-600 w-12">변상태</span>
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-3 w-3 ${
-                          star <= (product.consumer_ratings?.stool_quality || 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {product.consumer_ratings.overall_satisfaction !== undefined && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-600 w-12">만족도</span>
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-3 w-3 ${
-                          star <= (product.consumer_ratings?.overall_satisfaction || 0)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                <p className="text-[10px] text-gray-400 mt-1 text-right">
+                  리뷰 {product.consumer_ratings.review_count}건 기준
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>

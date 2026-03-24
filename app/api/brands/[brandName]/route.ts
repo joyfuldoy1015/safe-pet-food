@@ -196,18 +196,35 @@ export async function GET(
             if (!productsError && productsData && productsData.length > 0) {
               console.log('[API] Found', productsData.length, 'products for brand:', brandName)
               
-              // 각 제품에 대해 실제 사용자 리뷰 조회
+              // 각 제품에 대해 실제 사용자 리뷰 조회 + 별점 집계
               products = await Promise.all(productsData.map(async (product: any) => {
-                // review_logs에서 해당 브랜드/제품명으로 리뷰 조회
                 let userReviews: any[] = []
+                let aggregatedRatings = {
+                  palatability: 0,
+                  digestibility: 0,
+                  coat_quality: 0,
+                  stool_quality: 0,
+                  overall_satisfaction: 0,
+                  review_count: 0
+                }
+                let aggregatedFeedback = {
+                  recommend_yes: 0,
+                  recommend_no: 0,
+                  total_votes: 0
+                }
+
                 try {
                   const supabase = getServerClient()
-                  // review_logs에서 해당 브랜드/제품명으로 리뷰 조회
-                  let reviewQuery = supabase
+                  const { data: reviewLogs, error: reviewError } = await supabase
                     .from('review_logs')
                     .select(`
                       id,
                       rating,
+                      palatability_score,
+                      digestibility_score,
+                      coat_quality_score,
+                      stool_score,
+                      recommend,
                       excerpt,
                       owner_id,
                       created_at,
@@ -216,13 +233,9 @@ export async function GET(
                     `)
                     .eq('brand', brandName)
                     .eq('product', product.name)
-                    .not('rating', 'is', null) // 평점이 있는 리뷰만
+                    .not('rating', 'is', null)
                     .order('created_at', { ascending: false })
-                    .limit(10) // 최대 10개만
-                  
-                  // admin_status 필드가 있으면 필터링 (없을 수도 있음)
-                  // RLS 정책에서 이미 처리되므로 여기서는 선택적 필터링
-                  const { data: reviewLogs, error: reviewError } = await reviewQuery
+                    .limit(20)
                   
                   if (!reviewError && reviewLogs && reviewLogs.length > 0) {
                     userReviews = reviewLogs.map((log: any) => ({
@@ -233,15 +246,42 @@ export async function GET(
                       date: log.created_at ? new Date(log.created_at).toISOString().split('T')[0] : '',
                       helpful_count: log.likes || 0
                     }))
-                    console.log('[API] Found', userReviews.length, 'user reviews for product:', product.name)
+
+                    // 별점 집계
+                    let palatabilitySum = 0, palatabilityCount = 0
+                    let digestibilitySum = 0, digestibilityCount = 0
+                    let coatSum = 0, coatCount = 0
+                    let stoolSum = 0, stoolCount = 0
+                    let satisfactionSum = 0, satisfactionCount = 0
+
+                    reviewLogs.forEach((log: any) => {
+                      if (log.palatability_score) { palatabilitySum += log.palatability_score; palatabilityCount++ }
+                      if (log.digestibility_score) { digestibilitySum += log.digestibility_score; digestibilityCount++ }
+                      if (log.coat_quality_score) { coatSum += log.coat_quality_score; coatCount++ }
+                      if (log.stool_score) { stoolSum += log.stool_score; stoolCount++ }
+                      if (log.rating) { satisfactionSum += log.rating; satisfactionCount++ }
+                    })
+
+                    aggregatedRatings = {
+                      palatability: palatabilityCount > 0 ? Math.round((palatabilitySum / palatabilityCount) * 10) / 10 : 0,
+                      digestibility: digestibilityCount > 0 ? Math.round((digestibilitySum / digestibilityCount) * 10) / 10 : 0,
+                      coat_quality: coatCount > 0 ? Math.round((coatSum / coatCount) * 10) / 10 : 0,
+                      stool_quality: stoolCount > 0 ? Math.round((stoolSum / stoolCount) * 10) / 10 : 0,
+                      overall_satisfaction: satisfactionCount > 0 ? Math.round((satisfactionSum / satisfactionCount) * 10) / 10 : 0,
+                      review_count: reviewLogs.length
+                    }
+
+                    const recommendYes = reviewLogs.filter((log: any) => log.recommend === true).length
+                    const recommendNo = reviewLogs.filter((log: any) => log.recommend === false).length
+                    aggregatedFeedback = {
+                      recommend_yes: recommendYes,
+                      recommend_no: recommendNo,
+                      total_votes: reviewLogs.length
+                    }
                   }
                 } catch (reviewError: any) {
                   console.warn('[API] Error fetching reviews for product:', product.name, reviewError)
                 }
-                
-                // Supabase의 consumer_reviews와 병합 (우선순위: review_logs > Supabase)
-                const supabaseReviews = product.consumer_reviews || []
-                const mergedReviews = [...userReviews, ...supabaseReviews].slice(0, 10) // 최대 10개
                 
                 return {
                   id: product.id,
@@ -253,19 +293,16 @@ export async function GET(
                   guaranteed_analysis: product.guaranteed_analysis || {},
                   pros: product.pros || [],
                   cons: product.cons || [],
-                  consumer_ratings: product.consumer_ratings || {
-                    palatability: 0,
-                    digestibility: 0,
-                    coat_quality: 0,
-                    stool_quality: 0,
-                    overall_satisfaction: 0
+                  consumer_ratings: {
+                    palatability: aggregatedRatings.palatability,
+                    digestibility: aggregatedRatings.digestibility,
+                    coat_quality: aggregatedRatings.coat_quality,
+                    stool_quality: aggregatedRatings.stool_quality,
+                    overall_satisfaction: aggregatedRatings.overall_satisfaction,
+                    review_count: aggregatedRatings.review_count
                   },
-                  community_feedback: product.community_feedback || {
-                    recommend_yes: 0,
-                    recommend_no: 0,
-                    total_votes: 0
-                  },
-                  consumer_reviews: mergedReviews
+                  community_feedback: aggregatedFeedback,
+                  consumer_reviews: userReviews.slice(0, 10)
                 }
               }))
             } else {

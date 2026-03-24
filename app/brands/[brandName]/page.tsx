@@ -78,6 +78,7 @@ interface ProductInfo {
     coat_quality: number
     stool_quality: number
     overall_satisfaction: number
+    review_count?: number
   }
   community_feedback: {
     recommend_yes: number

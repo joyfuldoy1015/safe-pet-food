@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Shield, MapPin, Factory, Award, ThumbsUp, ThumbsDown, ArrowLeft, ChevronRight } from 'lucide-react'
+import { Shield, MapPin, Factory, Award, ThumbsUp, ThumbsDown, ChevronRight } from 'lucide-react'
+import BackButton from '@/components/common/BackButton'
 import { 
   getProductById, 
   getProductsByBrandId,
@@ -76,9 +77,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
         <div className="flex items-center gap-3">
-          <Link href="/search?tab=products" className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-            <ArrowLeft className="h-4 w-4 text-gray-500" />
-          </Link>
+          <BackButton />
           <div>
             <h1 className="text-sm font-bold text-gray-900">{product.name}</h1>
             {brand && <p className="text-xs text-gray-500">{brand.name}</p>}
