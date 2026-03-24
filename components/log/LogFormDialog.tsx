@@ -486,7 +486,10 @@ function ReviewLogFormContent({
         period_start: formData.period_start as string,
         period_end: formData.period_end || null,
         duration_days: durationDays,
-        rating: formData.rating ? Number(formData.rating) : null,
+        rating: (() => {
+          const scores = [formData.palatability_score, formData.digestibility_score, formData.coat_quality_score].filter((s): s is number => s !== null && s !== undefined)
+          return scores.length > 0 ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null
+        })(),
         palatability_score: formData.palatability_score ?? null,
         digestibility_score: formData.digestibility_score ?? null,
         coat_quality_score: formData.coat_quality_score ?? null,
@@ -798,23 +801,6 @@ function ReviewLogFormContent({
           />
         </div>
 
-        {/* Rating */}
-        <div>
-          <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-2">
-            평점 (1-5)
-          </label>
-          <input
-            id="rating"
-            type="number"
-            min="1"
-            max="5"
-            step="0.1"
-            value={formData.rating || ''}
-            onChange={(e) => setFormData({ ...formData, rating: e.target.value ? Number(e.target.value) : null })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-          />
-        </div>
-
         {/* Palatability Score */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -863,12 +849,12 @@ function ReviewLogFormContent({
                 }`}
               >
                 <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">
-                  {score === 1 && '매우나쁨'}
-                  {score === 2 && '나쁨'}
+                <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">
+                  {score === 1 && '나쁨'}
+                  {score === 2 && '아쉬움'}
                   {score === 3 && '보통'}
                   {score === 4 && '좋음'}
-                  {score === 5 && '매우좋음'}
+                  {score === 5 && '최고'}
                 </div>
               </button>
             ))}
@@ -893,17 +879,45 @@ function ReviewLogFormContent({
                 }`}
               >
                 <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">
-                  {score === 1 && '매우나쁨'}
-                  {score === 2 && '나쁨'}
+                <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">
+                  {score === 1 && '나쁨'}
+                  {score === 2 && '푸석'}
                   {score === 3 && '보통'}
                   {score === 4 && '좋음'}
-                  {score === 5 && '윤기남'}
+                  {score === 5 && '윤기'}
                 </div>
               </button>
             ))}
           </div>
         </div>
+
+        {/* Rating - 자동 계산 */}
+        {(() => {
+          const scores = [formData.palatability_score, formData.digestibility_score, formData.coat_quality_score].filter((s): s is number => s !== null && s !== undefined)
+          const avgScore = scores.length > 0 ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null
+          return (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                종합 평점
+              </label>
+              {avgScore !== null ? (
+                <div className="flex items-center gap-3 px-4 py-3 bg-violet-50 border border-violet-200 rounded-xl">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg key={star} className={`h-5 w-5 ${star <= Math.round(avgScore) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                    ))}
+                  </div>
+                  <span className="text-lg font-bold text-violet-700">{avgScore}</span>
+                  <span className="text-xs text-violet-500">({scores.length}개 항목 평균)</span>
+                </div>
+              ) : (
+                <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-400">
+                  위 항목을 평가하면 자동으로 계산됩니다
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         {/* Recommend */}
         <div>
@@ -963,12 +977,12 @@ function ReviewLogFormContent({
                 }`}
               >
                 <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">
-                  {score === 1 && '매우나쁨'}
-                  {score === 2 && '나쁨'}
+                <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">
+                  {score === 1 && '나쁨'}
+                  {score === 2 && '아쉬움'}
                   {score === 3 && '보통'}
                   {score === 4 && '좋음'}
-                  {score === 5 && '매우좋음'}
+                  {score === 5 && '최고'}
                 </div>
               </button>
             ))}
