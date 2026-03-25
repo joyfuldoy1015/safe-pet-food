@@ -382,7 +382,11 @@ export default function PetLogPostDetail() {
   const [newComment, setNewComment] = useState('')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyContent, setReplyContent] = useState('')
-  const [showLoginModal, setShowLoginModal] = useState(false)
+  const promptLogin = () => {
+    if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+      router.push(`/login?redirect=${encodeURIComponent(`/pet-log/posts/${params.postId}`)}`)
+    }
+  }
   
   // 탭 관련 상태
   const [activeTab, setActiveTab] = useState<'comment' | 'inquiry'>('comment')
@@ -411,7 +415,7 @@ export default function PetLogPostDetail() {
   // 댓글/문의 작성 함수
   const handleSubmitComment = async () => {
     if (!isLoggedIn) {
-      setShowLoginModal(true)
+      promptLogin()
       return
     }
     
@@ -547,7 +551,7 @@ export default function PetLogPostDetail() {
   // 답글 작성 함수
   const handleSubmitReply = async (commentId: string) => {
     if (!isLoggedIn) {
-      setShowLoginModal(true)
+      promptLogin()
       return
     }
     
@@ -633,7 +637,7 @@ export default function PetLogPostDetail() {
   // 좋아요 토글 함수
   const handleToggleLike = (commentId: string, isReply: boolean = false, replyId?: string) => {
     if (!isLoggedIn) {
-      setShowLoginModal(true)
+      promptLogin()
       return
     }
 
@@ -996,7 +1000,7 @@ export default function PetLogPostDetail() {
                   if (isLoggedIn) {
                     window.location.href = '/pet-log/posts/write'
                   } else {
-                    setShowLoginModal(true)
+                    promptLogin()
                   }
                 }}
                 className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex-shrink-0"
@@ -1051,7 +1055,7 @@ export default function PetLogPostDetail() {
                 if (isLoggedIn) {
                   window.location.href = '/pet-log/posts/write'
                 } else {
-                  setShowLoginModal(true)
+                  promptLogin()
                 }
               }}
               className="flex-1 flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm font-semibold justify-center"
@@ -1517,7 +1521,7 @@ export default function PetLogPostDetail() {
               }}
               onFocus={() => {
                 if (!isLoggedIn) {
-                  setShowLoginModal(true)
+                  promptLogin()
                 }
               }}
               placeholder={
@@ -1546,50 +1550,6 @@ export default function PetLogPostDetail() {
           </div>
         </div>
 
-        {/* Login Modal */}
-        {showLoginModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl">
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 mb-4 sm:mb-6 shadow-lg">
-                  <User className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                </div>
-                
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                  로그인이 필요합니다
-                </h3>
-                
-                <p className="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-                  질문하기, 좋아요, 경험 공유 등의 기능을 이용하려면<br className="hidden sm:block" />
-                  먼저 로그인해주세요.
-                </p>
-                
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                  <Link
-                    href={`/login?redirect=${encodeURIComponent(`/pet-log/posts/${params.postId}`)}`}
-                    className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm sm:text-lg font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  >
-                    로그인하기
-                  </Link>
-                  
-                  <button
-                    onClick={() => setShowLoginModal(false)}
-                    className="inline-flex items-center justify-center px-5 sm:px-6 py-3 sm:py-4 bg-gray-100 text-gray-700 text-sm sm:text-lg font-semibold rounded-xl hover:bg-gray-200 transition-all duration-200"
-                  >
-                    취소
-                  </button>
-                </div>
-                
-                <p className="text-xs sm:text-sm text-gray-500 mt-4 sm:mt-6">
-                  아직 계정이 없으신가요? 
-                  <Link href={`/signup?redirect=${encodeURIComponent(`/pet-log/posts/${params.postId}`)}`} className="text-purple-600 hover:text-purple-700 ml-1 font-semibold">
-                    회원가입
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
