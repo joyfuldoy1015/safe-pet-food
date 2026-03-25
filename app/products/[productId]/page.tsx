@@ -314,10 +314,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 {(() => {
                   const labelMap: Record<string, string> = {
                     protein: '조단백질', fat: '조지방', fiber: '조섬유',
-                    moisture: '수분', ash: '조회분', calcium: '칼슘', phosphorus: '인'
+                    moisture: '수분', ash: '조회분', calcium: '칼슘', phosphorus: '인',
+                    '조단백': '조단백질'
                   }
                   const displayOrder = [
-                    '조단백질', '조지방', '조섬유', '수분', '조회분', '칼슘', '인',
+                    '조단백질', '조단백', '조지방', '조섬유', '수분', '조회분', '칼슘', '인',
+                    'EPA+DHA', '나트륨', '오메가3', '오메가6', '칼로리(kcal/kg)',
                     'protein', 'fat', 'fiber', 'moisture', 'ash', 'calcium', 'phosphorus'
                   ]
                   const entries = Object.entries(product.guaranteed_analysis)
@@ -334,7 +336,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       <div className="text-[10px] text-gray-500 mb-0.5">
                         {labelMap[key] || key}
                       </div>
-                      <div className="text-sm font-bold text-gray-900">{value}%</div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {String(value).includes('%') || String(value).includes('kcal') ? String(value) : `${value}%`}
+                      </div>
                     </div>
                   ))
                 })()}
