@@ -26,6 +26,7 @@ interface Product {
   description?: string
   grade?: string
   grade_text?: string
+  target_species?: 'dog' | 'cat' | 'all'
   certifications?: string[]
   consumer_ratings?: {
     palatability?: number

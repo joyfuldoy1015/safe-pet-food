@@ -12,6 +12,7 @@ interface ProductSearchResultProps {
     description?: string
     grade?: string
     grade_text?: string
+    target_species?: 'dog' | 'cat' | 'all'
     certifications?: string[]
   }
 }
@@ -47,6 +48,15 @@ export default function ProductSearchResult({ product }: ProductSearchResultProp
             <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-violet-600 transition-colors">
               {product.name}
             </h3>
+            {product.target_species && product.target_species !== 'all' && (
+              <span className={`flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                product.target_species === 'cat'
+                  ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                  : 'bg-blue-50 text-blue-600 border border-blue-200'
+              }`}>
+                {product.target_species === 'cat' ? '🐱' : '🐶'}
+              </span>
+            )}
           </div>
 
           {/* 브랜드명 */}

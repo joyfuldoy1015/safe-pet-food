@@ -11,6 +11,7 @@ interface ProductListItemProps {
     description?: string
     grade?: string
     grade_text?: string
+    target_species?: 'dog' | 'cat' | 'all'
     certifications?: string[]
     consumer_ratings?: {
       palatability?: number
@@ -108,9 +109,20 @@ export default function ProductListItem({ product }: ProductListItemProps) {
       <div className="flex flex-col sm:flex-row gap-4">
         {/* 왼쪽: 제품명 & 등급 */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 truncate">
-            {product.name}
-          </h3>
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {product.name}
+            </h3>
+            {product.target_species && product.target_species !== 'all' && (
+              <span className={`flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                product.target_species === 'cat'
+                  ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                  : 'bg-blue-50 text-blue-600 border border-blue-200'
+              }`}>
+                {product.target_species === 'cat' ? '🐱 고양이' : '🐶 강아지'}
+              </span>
+            )}
+          </div>
 
           {/* 1. 등급 */}
           {product.grade && (

@@ -97,13 +97,24 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <h1 className="text-lg font-bold text-gray-900 mb-1">
                 {product.name}
               </h1>
-              {product.grade ? (
-                product.grade_text && (
-                  <p className="text-xs text-gray-500">{product.grade_text}</p>
-                )
-              ) : (
-                <p className="text-xs text-gray-400">등급 산정 전</p>
-              )}
+              <div className="flex items-center gap-2">
+                {product.grade ? (
+                  product.grade_text && (
+                    <span className="text-xs text-gray-500">{product.grade_text}</span>
+                  )
+                ) : (
+                  <span className="text-xs text-gray-400">등급 산정 전</span>
+                )}
+                {product.target_species && product.target_species !== 'all' && (
+                  <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                    product.target_species === 'cat'
+                      ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                      : 'bg-blue-50 text-blue-600 border border-blue-200'
+                  }`}>
+                    {product.target_species === 'cat' ? '🐱 고양이용' : '🐶 강아지용'}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

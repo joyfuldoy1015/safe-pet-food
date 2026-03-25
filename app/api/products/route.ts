@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
       description: product.description,
       grade: product.grade || null,
       grade_text: product.grade_text || null,
+      target_species: product.target_species || 'all',
       certifications: product.certifications || [],
       ingredients: product.ingredients || [],
       guaranteed_analysis: product.guaranteed_analysis,

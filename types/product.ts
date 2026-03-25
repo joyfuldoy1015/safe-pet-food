@@ -66,6 +66,9 @@ export interface Product {
   pros?: string[]
   cons?: string[]
   
+  // 대상 동물
+  target_species?: 'dog' | 'cat' | 'all'
+  
   created_at?: string
   updated_at?: string
 }

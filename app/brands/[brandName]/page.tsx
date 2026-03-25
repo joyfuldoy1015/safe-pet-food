@@ -95,6 +95,7 @@ interface ProductInfo {
   }>
   grade?: string
   grade_text?: string
+  target_species?: 'dog' | 'cat' | 'all'
 }
 
 interface Brand {
