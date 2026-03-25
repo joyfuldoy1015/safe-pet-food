@@ -58,7 +58,6 @@ function LoginContent() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      console.log('[Login] User already logged in, redirecting to:', redirectPath)
       router.push(redirectPath)
     }
   }, [authLoading, user, router, redirectPath])
@@ -71,8 +70,6 @@ function LoginContent() {
     
     setLoading(true)
     setError(null)
-    
-    console.log('[Login] Starting Google OAuth...')
     
     const callbackUrl = new URL('/auth/callback', window.location.origin)
     if (redirectPath && redirectPath !== '/') {
@@ -102,8 +99,6 @@ function LoginContent() {
     
     setLoading(true)
     setError(null)
-    
-    console.log('[Login] Starting Kakao OAuth...')
     
     const callbackUrl = new URL('/auth/callback', window.location.origin)
     if (redirectPath && redirectPath !== '/') {
@@ -141,8 +136,6 @@ function LoginContent() {
     setLoading(true)
     setError(null)
     
-    console.log('[Login] Starting email/password login...')
-    
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
@@ -162,7 +155,6 @@ function LoginContent() {
       setError(errorMessage)
       setLoading(false)
     } else {
-      console.log('[Login] Email login successful, redirecting to:', redirectPath)
       router.push(redirectPath)
     }
   }

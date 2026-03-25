@@ -218,28 +218,15 @@ export default function BrandDetailPage() {
   useEffect(() => {
     const fetchBrandData = async () => {
       try {
-        console.log('[Brand Page] Fetching data for brand:', brandName)
         const response = await fetch(`/api/brands/${encodeURIComponent(brandName)}`)
-        console.log('[Brand Page] API response status:', response.status, response.ok)
         
         if (response.ok) {
           const apiData = await response.json()
-          console.log('[Brand Page] API data received:', {
-            brandName: apiData.name,
-            hasProducts: !!(apiData.products && Array.isArray(apiData.products)),
-            productsLength: apiData.products?.length || 0,
-            products: apiData.products
-          })
           
           if (apiData && !apiData.error) {
             const apiProducts = apiData.products && Array.isArray(apiData.products) && apiData.products.length > 0 
               ? apiData.products 
               : null
-            
-            console.log('[Brand Page] Processing products:', {
-              hasApiProducts: !!apiProducts,
-              productsCount: apiProducts?.length || 0
-            })
             
             const initialHelpfulCounts: Record<string, number> = {}
             if (apiProducts && Array.isArray(apiProducts)) {
@@ -298,12 +285,6 @@ export default function BrandDetailPage() {
               qa_section: [],  // Q&A는 별도 API에서 가져옴
               products: apiProducts || []
             }
-
-            console.log('[Brand Page] Brand data created:', {
-              brandId: brandData.id,
-              brandName: brandData.name,
-              productsCount: brandData.products.length
-            })
 
             setBrand(brandData)
 

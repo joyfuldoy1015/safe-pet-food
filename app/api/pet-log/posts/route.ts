@@ -241,9 +241,6 @@ export async function POST(request: Request) {
 
         if (reviewLogsError) {
           console.warn('Failed to create review_logs (non-critical):', reviewLogsError)
-          // review_logs 저장 실패는 치명적이지 않으므로 계속 진행
-        } else {
-          console.log('✅ review_logs에 저장되었습니다:', reviewLogsToInsert.length, '개')
         }
       } catch (reviewLogsError) {
         console.warn('Error creating review_logs (non-critical):', reviewLogsError)

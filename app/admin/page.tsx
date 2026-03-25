@@ -91,16 +91,12 @@ export default function AdminDashboard() {
 
     // Wait for auth to load
     if (authLoading) {
-      console.log('[AdminDashboard] Waiting for auth to load...')
       return () => clearTimeout(timeoutId)
     }
 
     // Check admin access and load dashboard data
     const checkAdminAccessAndLoadData = async () => {
-      console.log('[AdminDashboard] Checking admin access...', { user: user?.id, authLoading })
-      
       if (!user) {
-        console.log('[AdminDashboard] No user, redirecting to login')
         clearTimeout(timeoutId)
         setLoading(false)
         router.push('/login?redirect=/admin')
@@ -121,14 +117,12 @@ export default function AdminDashboard() {
         }
         
         if (!session) {
-          console.log('[AdminDashboard] No session, redirecting to login')
           clearTimeout(timeoutId)
           setLoading(false)
           router.push('/login?redirect=/admin')
           return
         }
 
-        console.log('[AdminDashboard] Checking admin status via API...')
         // Check if user is admin via API with session token (with timeout)
         const controller = new AbortController()
         const fetchTimeout = setTimeout(() => controller.abort(), 3000) // 3 second timeout
@@ -163,17 +157,14 @@ export default function AdminDashboard() {
         }
 
         const data = await response.json()
-        console.log('[AdminDashboard] Admin check result:', data)
 
         if (!data.isAdmin) {
-          console.log('[AdminDashboard] User is not admin')
           clearTimeout(timeoutId)
           setLoading(false)
           router.push('/?error=403&message=관리자 권한이 필요합니다')
           return
         }
 
-        console.log('[AdminDashboard] User is admin, loading dashboard data...')
         // User is admin, load dashboard data from API
         try {
           const statsResponse = await fetch('/api/admin/stats', {
@@ -288,7 +279,6 @@ export default function AdminDashboard() {
           setRecentModerations([])
         }
         
-        console.log('[AdminDashboard] Dashboard data loaded')
         clearTimeout(timeoutId)
         setLoading(false)
       } catch (error) {

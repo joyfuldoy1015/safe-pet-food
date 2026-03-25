@@ -129,7 +129,6 @@ export default function NewPetPage() {
         const existingPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
         const updatedPets = [...existingPets, petProfile]
         localStorage.setItem('petProfiles', JSON.stringify(updatedPets))
-        console.log('반려동물 프로필이 저장되었습니다:', petProfile)
       } catch (storageError) {
         console.error('저장 중 오류:', storageError)
         alert('반려동물 정보 저장 중 오류가 발생했습니다.')

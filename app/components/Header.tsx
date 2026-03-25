@@ -58,16 +58,11 @@ export default function Header() {
   const isLoggedIn = !!user
 
   const handleLogout = async () => {
-    console.log('[Header] 로그아웃 버튼 클릭됨')
     try {
-      console.log('[Header] signOut 함수 호출 시작')
-      // 로그아웃 처리
       await signOut()
-      console.log('[Header] signOut 완료')
       
       // 세션 정리 완료 대기
       await new Promise(resolve => setTimeout(resolve, 500))
-      console.log('[Header] 리다이렉트 시작')
       
       // 페이지 완전 새로고침으로 세션 상태 동기화 (OAuth 세션 정리를 위해)
       // window.location.href 대신 window.location.replace를 사용하여 히스토리에 남기지 않음
@@ -157,7 +152,6 @@ export default function Header() {
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
-                    console.log('[Header] 로그아웃 버튼 클릭 이벤트 발생')
                     handleLogout()
                   }}
                   className="text-black hover:text-gray-700 font-medium transition-colors flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-yellow-300"
@@ -230,14 +224,11 @@ export default function Header() {
                     onClick={async (e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      console.log('[Header] 모바일 로그아웃 버튼 클릭 이벤트 발생')
-                      // 먼저 로그아웃 처리 후 메뉴 닫기
                       await handleLogout()
                     }}
                     onTouchEnd={async (e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      console.log('[Header] 모바일 로그아웃 버튼 터치 이벤트 발생')
                       await handleLogout()
                     }}
                     className="flex items-center gap-2 text-black hover:text-gray-700 font-medium py-3 text-left px-4 hover:bg-yellow-300 rounded-lg active:bg-yellow-500"

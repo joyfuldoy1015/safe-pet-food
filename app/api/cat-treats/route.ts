@@ -7,10 +7,6 @@ export const runtime = 'nodejs'
 export const revalidate = 0
 
 export async function GET(request: NextRequest) {
-  // Force runtime evaluation
-  const timestamp = new Date().getTime()
-  console.log(`[${timestamp}] Processing cat-treats request`)
-  
   try {
     const searchParams = request.nextUrl.searchParams
     const treatType = searchParams.get('treatType')

@@ -11,8 +11,7 @@ export const fetchCache = 'force-no-store'
 export async function GET(request: NextRequest) {
   // Add timestamp to prevent any caching
   const requestId = `${Date.now()}-${Math.random()}`
-  console.log(`[API-v2] Processing request ${requestId}`)
-  
+
   try {
     // Use URL constructor as backup method
     const url = new URL(request.url)

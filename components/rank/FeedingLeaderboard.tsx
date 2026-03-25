@@ -97,7 +97,6 @@ export default function FeedingLeaderboard({
       // If no data returned, use mock data for development
       if (!data || data.length === 0) {
         if (process.env.NODE_ENV === 'development') {
-          console.log('[FeedingLeaderboard] No data, using mock rankings')
           setRankings(getMockRankings(activeTab, category))
         } else {
           setRankings([])
@@ -111,7 +110,6 @@ export default function FeedingLeaderboard({
       
       // Graceful fallback: use mock data in development
       if (process.env.NODE_ENV === 'development') {
-        console.log('[FeedingLeaderboard] Using mock data due to error')
         setRankings(getMockRankings(activeTab, category))
       } else {
         setRankings([])

@@ -201,8 +201,6 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
     
-    console.log('[Signup] Starting email/password signup...')
-    
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password: password,
@@ -224,8 +222,6 @@ export default function SignupPage() {
       setError(errorMessage)
       setLoading(false)
     } else if (data.user) {
-      console.log('[Signup] Email signup successful, creating profile...')
-      
       // Create profile
       try {
         // 프로필 이미지 업로드
@@ -240,7 +236,6 @@ export default function SignupPage() {
           avatar_url: avatarUrl
         })
         
-        console.log('[Signup] Profile created, redirecting...')
         router.push('/pet-log/pets/new')
       } catch (profileError) {
         console.error('[Signup] Profile creation error:', profileError)

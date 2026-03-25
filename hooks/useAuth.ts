@@ -44,10 +44,7 @@ export function useAuth() {
           .single()
 
         if (error) {
-          if (error.code === 'PGRST116') {
-            // Profile doesn't exist - this is OK, it will be created by callback
-            console.log('[useAuth] Profile not found, will be created on next login')
-          } else {
+          if (error.code !== 'PGRST116') {
             console.error('[useAuth] Error loading profile:', error)
           }
           setProfile(null)
@@ -70,10 +67,6 @@ export function useAuth() {
         setProfile(null)
         setLoading(false)
       }
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[useAuth] Initial session:', session?.user?.email || 'none')
-      }
     }).catch((error) => {
       console.error('[useAuth] Failed to get session:', error)
       setUser(null)
@@ -92,10 +85,6 @@ export function useAuth() {
           setProfile(null)
           setLoading(false)
         }
-        
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[useAuth] Auth state changed:', event, session?.user?.email || 'none')
-        }
       }
     )
 
@@ -105,8 +94,6 @@ export function useAuth() {
   // Sign out function - uses server-side API for reliable cookie clearing
   const signOut = async () => {
     try {
-      console.log('[useAuth] Starting sign out...')
-      
       // Clear local state first
       setUser(null)
       setProfile(null)
@@ -119,8 +106,6 @@ export function useAuth() {
       
       if (!response.ok) {
         console.error('[useAuth] Logout API error:', response.status)
-      } else {
-        console.log('[useAuth] Logout API successful')
       }
 
       // Also sign out from client-side Supabase
@@ -128,8 +113,6 @@ export function useAuth() {
       if (supabase) {
         await supabase.auth.signOut({ scope: 'global' })
       }
-
-      console.log('[useAuth] Signed out successfully')
     } catch (error) {
       console.error('[useAuth] Sign out exception:', error)
     }

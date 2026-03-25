@@ -23,7 +23,6 @@ export async function getOwner(ownerId: string): Promise<any | null> {
 
   // UUID 검증: 잘못된 형식이면 쿼리하지 않고 null 반환
   if (!isValidUUID(ownerId)) {
-    console.log('[getOwner] Invalid UUID format, skipping Supabase query:', ownerId)
     return null
   }
 
@@ -58,7 +57,6 @@ export async function getPet(petId: string): Promise<Pet | null> {
 
   // UUID 검증: 잘못된 형식이면 쿼리하지 않고 null 반환
   if (!isValidUUID(petId)) {
-    console.log('[getPet] Invalid UUID format, skipping Supabase query:', petId)
     return null
   }
 
@@ -99,7 +97,6 @@ export async function getLogsByOwnerPet(
 
   // UUID 검증: 잘못된 형식이면 쿼리하지 않고 빈 배열 반환
   if (!isValidUUID(ownerId) || !isValidUUID(petId)) {
-    console.log('[getLogsByOwnerPet] Invalid UUID format, skipping Supabase query:', { ownerId, petId })
     return []
   }
 
@@ -164,7 +161,6 @@ export async function getPetsByOwner(ownerId: string): Promise<any[]> {
   if (!supabase) return []
 
   if (!isValidUUID(ownerId)) {
-    console.log('[getPetsByOwner] Invalid UUID format, skipping Supabase query:', ownerId)
     return []
   }
 
@@ -197,7 +193,6 @@ export async function getLogsByOwner(ownerId: string): Promise<ClientReviewLog[]
   if (!supabase) return []
 
   if (!isValidUUID(ownerId)) {
-    console.log('[getLogsByOwner] Invalid UUID format, skipping Supabase query:', ownerId)
     return []
   }
 
@@ -226,7 +221,6 @@ export async function getThreadsByLog(logId: string): Promise<any[]> {
 
   // UUID 검증: 잘못된 형식이면 쿼리하지 않고 빈 배열 반환
   if (!isValidUUID(logId)) {
-    console.log('[getThreadsByLog] Invalid UUID format, skipping Supabase query:', logId)
     return []
   }
 
@@ -255,7 +249,6 @@ export async function getPostsByThread(threadId: string): Promise<any[]> {
 
   // UUID 검증: 잘못된 형식이면 쿼리하지 않고 빈 배열 반환
   if (!isValidUUID(threadId)) {
-    console.log('[getPostsByThread] Invalid UUID format, skipping Supabase query:', threadId)
     return []
   }
 
@@ -283,7 +276,6 @@ export async function getBestAnswerExcerpt(logId: string): Promise<string | null
 
   // UUID 검증: 잘못된 형식이면 쿼리하지 않고 null 반환
   if (!isValidUUID(logId)) {
-    console.log('[getBestAnswerExcerpt] Invalid UUID format, skipping Supabase query:', logId)
     return null
   }
 

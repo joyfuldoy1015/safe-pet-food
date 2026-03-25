@@ -52,7 +52,5 @@ export async function POST() {
     }
   })
 
-  console.log('[Logout API] Logout successful, cookies cleared')
-  
   return response
 }

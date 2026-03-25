@@ -152,18 +152,6 @@ export default function LogFormDialog({
   // If Supabase is not configured, show form directly (dev mode)
   const bypassAuth = !hasSupabase
   
-  // Debug info (개발 환경에서만)
-  if (process.env.NODE_ENV === 'development' && open) {
-    console.log('[LogFormDialog] Auth state:', { 
-      authLoading, 
-      authTimeout, 
-      hasUser: !!user, 
-      showLoginRequired,
-      requireAuth,
-      hasSupabase
-    })
-  }
-
   if (!open) return null
 
   // Show loading spinner while checking auth status

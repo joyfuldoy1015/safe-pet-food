@@ -150,7 +150,6 @@ function WritePostContent() {
   useEffect(() => {
     const loadPets = async () => {
       if (!user) {
-        console.log('로그인된 사용자가 없습니다.')
         setUseNewPet(true)
         return
       }
@@ -170,7 +169,6 @@ function WritePostContent() {
         }
 
         if (!petsData || petsData.length === 0) {
-          console.log('등록된 반려동물이 없습니다.')
           setUseNewPet(true)
           return
         }
@@ -549,9 +547,7 @@ function WritePostContent() {
           }),
         })
 
-        if (response.ok) {
-          console.log('✅ Supabase에 포스트가 저장되었습니다:', postData.id)
-        } else {
+        if (!response.ok) {
           const errorData = await response.json()
           console.warn('⚠️ Supabase 저장 실패, localStorage로 fallback:', errorData)
         }
@@ -563,7 +559,6 @@ function WritePostContent() {
       const existingPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
       const updatedPosts = [postData, ...existingPosts]
       localStorage.setItem('petLogPosts', JSON.stringify(updatedPosts))
-      console.log('✅ localStorage에 포스트가 저장되었습니다:', postData.id)
     } catch (error) {
       console.error('❌ 포스트 저장 중 오류:', error)
       alert('포스트 저장 중 오류가 발생했습니다.')

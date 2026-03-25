@@ -73,7 +73,6 @@ export async function GET(
     
     // 브랜드가 없으면 자동으로 초기화
     if (!voteStorage[brandName]) {
-      console.log(`[Vote API] Initializing vote data for new brand: ${brandName}`)
       voteStorage[brandName] = {
         recommend_yes: 0,
         recommend_no: 0,

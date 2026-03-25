@@ -103,8 +103,6 @@ export async function GET(
   try {
     const brandName = decodeURIComponent(params.brandName)
     
-    console.log('[API brands] Request for brand:', brandName)
-    
     // Supabase에서만 가져오기 (mock fallback 제거)
     if (!isSupabaseConfigured()) {
       console.error('[API brands] Supabase not configured')
@@ -172,30 +170,17 @@ export async function GET(
           let products: any[] = []
           try {
             const supabase = getServerClient()
-            console.log('[API] Fetching products for brand_id:', (data as any).id, 'brand_name:', brandName)
             const { data: productsData, error: productsError } = await supabase
               .from('products')
               .select('*')
               .eq('brand_id', (data as any).id)
               .order('created_at', { ascending: true })
             
-            console.log('[API] Products query result:', {
-              hasData: !!productsData,
-              dataLength: productsData?.length || 0,
-              error: productsError ? {
-                message: productsError.message,
-                code: productsError.code,
-                details: productsError.details
-              } : null
-            })
-            
             if (productsError) {
               console.error('[API] Products query error:', productsError)
             }
             
             if (!productsError && productsData && productsData.length > 0) {
-              console.log('[API] Found', productsData.length, 'products for brand:', brandName)
-              
               // 각 제품에 대해 실제 사용자 리뷰 조회 + 별점 집계
               products = await Promise.all(productsData.map(async (product: any) => {
                 let userReviews: any[] = []
@@ -308,8 +293,6 @@ export async function GET(
                   consumer_reviews: userReviews.slice(0, 10)
                 }
               }))
-            } else {
-              console.log('[API] No products found for brand:', brandName, 'brand_id:', (data as any).id)
             }
           } catch (productsError: any) {
             console.error('[API] Exception while fetching products:', {
@@ -334,13 +317,6 @@ export async function GET(
             review_stats: reviewStats,
             trust_metrics: trustMetrics
           }
-          
-          console.log('[API] Response data:', {
-            brandName: brandName,
-            productsCount: responseData.products.length,
-            hasProducts: responseData.products.length > 0,
-            brandId: (data as any).id
-          })
           
           return NextResponse.json(responseData)
         }

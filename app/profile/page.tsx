@@ -204,7 +204,6 @@ export default function ProfilePage() {
           console.error('This is likely an RLS (Row Level Security) policy issue.')
           console.error('Please run: scripts/fix-community-questions-rls.sql')
         } else if (data) {
-          console.log('Successfully loaded', data.length, 'questions')
           setMyQuestions(data)
         }
       } catch (error) {

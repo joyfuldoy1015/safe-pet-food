@@ -17,18 +17,13 @@ export default function AuthButton() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
-    console.log('[AuthButton] 로그아웃 버튼 클릭됨')
     try {
       setIsMenuOpen(false)
-      console.log('[AuthButton] signOut 함수 호출 시작')
       
-      // 로그아웃 처리
       await signOut()
-      console.log('[AuthButton] signOut 완료')
       
       // 세션 정리 완료 대기
       await new Promise(resolve => setTimeout(resolve, 500))
-      console.log('[AuthButton] 리다이렉트 시작')
       
       // 페이지 완전 새로고침으로 세션 상태 동기화 (OAuth 세션 정리를 위해)
       // window.location.href 대신 window.location.replace를 사용하여 히스토리에 남기지 않음
@@ -141,7 +136,6 @@ export default function AuthButton() {
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
-                    console.log('[AuthButton] 로그아웃 버튼 클릭 이벤트 발생')
                     handleSignOut()
                   }}
                   className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"

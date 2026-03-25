@@ -317,8 +317,6 @@ export default function LogDetailPage() {
         }
       } else {
         // 문의 등록 - 새 스레드 생성 후 질문 포스트 추가
-        console.log('[문의 등록] 시작 - log_id:', log.id, 'user_id:', user.id)
-        
         const { data: threadData, error: threadError } = await supabase
           .from('pet_log_qa_threads')
           .insert({
@@ -334,8 +332,6 @@ export default function LogDetailPage() {
           alert(`문의 등록 실패: ${threadError.message}`)
           return
         }
-
-        console.log('[문의 등록] 스레드 생성 성공:', threadData)
 
         if (threadData) {
           // 질문 포스트 추가
@@ -358,8 +354,6 @@ export default function LogDetailPage() {
             alert(`문의 등록 실패: ${postError.message}`)
             return
           }
-
-          console.log('[문의 등록] 포스트 생성 성공:', postData)
 
           if (postData) {
             setQAThreads([...qaThreads, {

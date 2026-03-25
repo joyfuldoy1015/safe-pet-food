@@ -322,7 +322,6 @@ export default function AdminLogsPage() {
             onSort={handleSort}
             onRowClick={(log) => {
               // BACKLOG: 로그 상세 Drawer 구현 예정
-              console.log('Open detail for:', log.id)
             }}
           />
         )}

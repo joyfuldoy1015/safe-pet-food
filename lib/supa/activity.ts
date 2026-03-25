@@ -24,7 +24,6 @@ export async function getRecentComments(
   const validLogIds = logIds.filter(id => isValidUUID(id))
   
   if (validLogIds.length === 0) {
-    console.log('[getRecentComments] No valid UUID format IDs, skipping Supabase query')
     return []
   }
 
@@ -63,7 +62,6 @@ export async function getRecentQA(
   const validLogIds = logIds.filter(id => isValidUUID(id))
   
   if (validLogIds.length === 0) {
-    console.log('[getRecentQA] No valid UUID format IDs, skipping Supabase query')
     return []
   }
 
@@ -75,7 +73,6 @@ export async function getRecentQA(
       .in('log_id', validLogIds)
 
     if (threadsError || !threads || threads.length === 0) {
-      console.log('[getRecentQA] No threads found for logIds')
       return []
     }
 
