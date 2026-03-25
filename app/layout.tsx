@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   description: '반려동물 사료의 영양성분을 간단히 분석하고 점수로 확인해보세요. 건물기준 영양소 계산과 등급 평가를 제공합니다.',
   keywords: '반려동물, 사료, 영양분석, 건물기준, 개사료, 고양이사료',
   authors: [{ name: 'Safe Pet Food Team' }],
+  verification: {
+    google: '8-6Q9vSS3wPhYunsu-5sUibgsQ0lorLtwakcnqzKRAM',
+  },
   openGraph: {
     title: 'Safe Pet Food - 반려동물 사료 영양 계산기',
     description: '사료 영양성분을 분석하고 점수로 확인해보세요',
