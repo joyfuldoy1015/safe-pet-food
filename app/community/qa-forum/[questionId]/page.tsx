@@ -281,6 +281,7 @@ export default function QuestionDetailPage() {
             updatedAt: questionData.updated_at,
             status: questionData.status as 'open' | 'answered' | 'closed',
             isUpvoted: false,
+            imageUrl: questionData.image_url || undefined,
             author_id: questionData.author_id
           })
 
