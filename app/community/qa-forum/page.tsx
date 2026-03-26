@@ -297,6 +297,9 @@ export default function CommunityQAForumPage() {
       if (data.summary) {
         insertData.summary = data.summary
       }
+      if (data.imageUrl) {
+        insertData.image_url = data.imageUrl
+      }
 
       const { data: newQuestion, error } = await (supabase
         .from('community_questions') as any)

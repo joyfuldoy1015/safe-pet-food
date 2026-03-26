@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
-import { X, Image as ImageIcon, Sparkles, Loader2, RefreshCw, Check } from 'lucide-react'
+import React, { useState, useRef } from 'react'
+import { X, Image as ImageIcon, Sparkles, Loader2, RefreshCw, Check, Upload, Trash2 } from 'lucide-react'
+import { getBrowserClient } from '@/lib/supabase-client'
 
 interface AskQuestionModalProps {
   isOpen: boolean
@@ -18,6 +19,43 @@ interface AskQuestionModalProps {
 }
 
 const SUMMARY_THRESHOLD = 200
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_IMAGE_DIMENSION = 1200
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      if (width <= MAX_IMAGE_DIMENSION && height <= MAX_IMAGE_DIMENSION) {
+        resolve(file)
+        return
+      }
+      const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height)
+      width = Math.round(width * ratio)
+      height = Math.round(height * ratio)
+
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+          } else {
+            resolve(file)
+          }
+        },
+        'image/jpeg',
+        0.8
+      )
+    }
+    img.src = URL.createObjectURL(file)
+  })
+}
 
 export default function AskQuestionModal({
   isOpen,
@@ -28,7 +66,12 @@ export default function AskQuestionModal({
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [content, setContent] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
+
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [summary, setSummary] = useState('')
   const [isSummarizing, setIsSummarizing] = useState(false)
@@ -39,6 +82,68 @@ export default function AskQuestionModal({
 
   const contentLength = content.trim().length
   const needsSummary = contentLength >= SUMMARY_THRESHOLD
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadError('')
+
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setUploadError('JPG, PNG, WebP, GIF, HEIC 형식만 지원합니다.')
+      return
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError('파일 크기는 5MB 이하만 가능합니다.')
+      return
+    }
+
+    try {
+      const compressed = await compressImage(file)
+      setImageFile(compressed)
+      setImagePreview(URL.createObjectURL(compressed))
+    } catch {
+      setUploadError('이미지 처리 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleImageRemove = () => {
+    setImageFile(null)
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImagePreview(null)
+    setUploadError('')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const uploadImage = async (): Promise<string | undefined> => {
+    if (!imageFile) return undefined
+    setIsUploading(true)
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) throw new Error('Supabase 연결 실패')
+
+      const ext = imageFile.name.split('.').pop() || 'jpg'
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const filePath = `qa-images/${fileName}`
+
+      const { error } = await supabase.storage
+        .from('qa-images')
+        .upload(filePath, imageFile, { cacheControl: '3600', upsert: false })
+
+      if (error) throw error
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('qa-images')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (err: any) {
+      console.error('Image upload error:', err)
+      setUploadError('이미지 업로드에 실패했습니다. 질문은 이미지 없이 등록됩니다.')
+      return undefined
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const handleGenerateSummary = async () => {
     setIsSummarizing(true)
@@ -67,43 +172,39 @@ export default function AskQuestionModal({
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setTitle('')
+    setCategory('')
+    setContent('')
+    handleImageRemove()
+    setSummary('')
+    setShowSummaryPreview(false)
+    setSummaryError('')
+  }
+
+  const validateForm = (): boolean => {
+    if (!title.trim() || !category || !content.trim()) return false
+    if (title.trim().length < 5) { alert('제목은 최소 5자 이상 입력해주세요.'); return false }
+    if (title.trim().length > 200) { alert('제목은 최대 200자까지 입력 가능합니다.'); return false }
+    if (content.trim().length < 10) { alert('내용은 최소 10자 이상 입력해주세요.'); return false }
+    if (content.trim().length > 5000) { alert('내용은 최대 5000자까지 입력 가능합니다.'); return false }
+    return true
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !category || !content.trim()) return
+    if (!validateForm()) return
 
-    if (title.trim().length < 5) {
-      alert('제목은 최소 5자 이상 입력해주세요.')
-      return
-    }
-    if (title.trim().length > 200) {
-      alert('제목은 최대 200자까지 입력 가능합니다.')
-      return
-    }
-    if (content.trim().length < 10) {
-      alert('내용은 최소 10자 이상 입력해주세요.')
-      return
-    }
-    if (content.trim().length > 5000) {
-      alert('내용은 최대 5000자까지 입력 가능합니다.')
-      return
-    }
-
+    const imageUrl = await uploadImage()
     onSubmit({
       title: title.trim(),
       category,
       content: content.trim(),
       isAnonymous: false,
-      imageUrl: imageUrl.trim() || undefined,
+      imageUrl,
       summary: summary.trim() || undefined
     })
-
-    setTitle('')
-    setCategory('')
-    setContent('')
-    setImageUrl('')
-    setSummary('')
-    setShowSummaryPreview(false)
-    setSummaryError('')
+    resetForm()
   }
 
   const handleSkipSummary = () => {
@@ -112,26 +213,18 @@ export default function AskQuestionModal({
     handleSubmitDirect()
   }
 
-  const handleSubmitDirect = () => {
-    if (!title.trim() || !category || !content.trim()) return
-    if (title.trim().length < 5 || title.trim().length > 200) return
-    if (content.trim().length < 10 || content.trim().length > 5000) return
+  const handleSubmitDirect = async () => {
+    if (!validateForm()) return
 
+    const imageUrl = await uploadImage()
     onSubmit({
       title: title.trim(),
       category,
       content: content.trim(),
       isAnonymous: false,
-      imageUrl: imageUrl.trim() || undefined
+      imageUrl
     })
-
-    setTitle('')
-    setCategory('')
-    setContent('')
-    setImageUrl('')
-    setSummary('')
-    setShowSummaryPreview(false)
-    setSummaryError('')
+    resetForm()
   }
 
   const isFormValid = title.trim().length >= 5 &&
@@ -293,21 +386,48 @@ export default function AskQuestionModal({
             </div>
           )}
 
-          {/* Image URL (Optional) */}
+          {/* Image Upload (Optional) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              이미지 URL (선택사항)
+              이미지 첨부 (선택사항)
             </label>
-            <div className="relative">
-              <ImageIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
-              />
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+            {imagePreview ? (
+              <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                <img
+                  src={imagePreview}
+                  alt="미리보기"
+                  className="w-full max-h-48 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleImageRemove}
+                  aria-label="이미지 삭제"
+                  className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50/30 transition-colors"
+              >
+                <Upload className="h-6 w-6 text-gray-400" />
+                <span className="text-sm text-gray-500">클릭하여 이미지 선택</span>
+                <span className="text-xs text-gray-400">JPG, PNG, WebP, GIF, HEIC · 최대 5MB</span>
+              </button>
+            )}
+            {uploadError && (
+              <p className="mt-1.5 text-xs text-red-500">{uploadError}</p>
+            )}
           </div>
 
           {/* Actions */}
@@ -332,10 +452,15 @@ export default function AskQuestionModal({
             ) : (
               <button
                 type="submit"
-                disabled={!isFormValid || isSummarizing}
+                disabled={!isFormValid || isSummarizing || isUploading}
                 className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
               >
-                {isSummarizing ? (
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    이미지 업로드 중...
+                  </>
+                ) : isSummarizing ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     요약 생성 중...
