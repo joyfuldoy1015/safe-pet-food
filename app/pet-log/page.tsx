@@ -394,9 +394,18 @@ function PetLogContent() {
   }, [reviews, owners])
 
   const longestFeeding = useMemo(() => {
-    return reviews
+    const calcDays = (r: ReviewLog) => {
+      if (r.durationDays) return r.durationDays
+      if (!r.periodStart) return 0
+      try {
+        return Math.max(1, Math.ceil((Date.now() - new Date(r.periodStart).getTime()) / (1000 * 60 * 60 * 24)))
+      } catch { return 0 }
+    }
+    const feeding = reviews
       .filter((r) => r.status === 'feeding')
-      .sort((a, b) => (b.durationDays || 0) - (a.durationDays || 0))[0]
+      .map((r) => ({ ...r, _calcDays: calcDays(r) }))
+      .sort((a, b) => b._calcDays - a._calcDays)[0]
+    return feeding ? { ...feeding, durationDays: feeding._calcDays } : undefined
   }, [reviews])
 
   const recentStopReasons = useMemo(() => {
