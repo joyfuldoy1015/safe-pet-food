@@ -418,7 +418,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </div>
                 <div className="space-y-2">
                   {consumer_reviews.slice(0, 3).map((review) => (
-                    <div key={review.id} className="p-3 bg-gray-50 rounded-xl">
+                    <Link key={review.id} href={`/pet-log/${review.id}`} className="block p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-gray-900">{review.user_name}</span>
@@ -433,7 +433,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                         <span className="text-[10px] text-gray-400">{review.date}</span>
                       </div>
                       <p className="text-xs text-gray-600 line-clamp-2">{review.comment}</p>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
