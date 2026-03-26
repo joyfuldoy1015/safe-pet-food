@@ -208,7 +208,7 @@ export function formatReviewsForDisplay(reviews: FeedingReview[]) {
  */
 export async function getProductById(productId: string): Promise<(Product & { brand?: BrandBasic }) | null> {
   if (!isSupabaseConfigured()) {
-    return getMockProduct(productId)
+    return null
   }
 
   try {
@@ -228,11 +228,10 @@ export async function getProductById(productId: string): Promise<(Product & { br
       .single()
 
     if (error || !data) {
-      console.warn('[getProductById] Supabase error, falling back to mock:', error)
-      return getMockProduct(productId)
+      console.warn('[getProductById] Supabase error:', error)
+      return null
     }
 
-    // 브랜드 정보를 별도 필드로 추출
     const { brands, ...productData } = data as any
     return {
       ...productData,
@@ -240,7 +239,7 @@ export async function getProductById(productId: string): Promise<(Product & { br
     } as Product & { brand?: BrandBasic }
   } catch (error) {
     console.error('[getProductById] Error:', error)
-    return getMockProduct(productId)
+    return null
   }
 }
 
@@ -361,119 +360,3 @@ function getMockReviews(productId: string): FeedingReview[] {
   ]
 }
 
-function getMockProduct(productId: string): Product {
-  return {
-    id: productId,
-    brand_id: 'brand-royal-canin',
-    name: '로얄캐닌 독 어덜트',
-    description: '성견을 위한 종합 영양 사료입니다.',
-    grade: 'A',
-    grade_text: '매우 우수',
-    certifications: ['AAFCO 승인', 'FDA 등록', 'ISO 9001'],
-    origin_info: {
-      origin_country: '프랑스',
-      manufacturing_country: '한국',
-      factory_location: '경기도 평택시'
-    },
-    ingredients: [
-      { name: '닭고기', percentage: 28, source: '프랑스산' },
-      { name: '쌀', percentage: 22, source: '국내산' },
-      { name: '옥수수', percentage: 15, source: '미국산' },
-      { name: '치킨 부산물', percentage: 12, source: '프랑스산' },
-      { name: '비트펄프', percentage: 8, source: '독일산' }
-    ],
-    guaranteed_analysis: {
-      protein: 25.0,
-      fat: 14.0,
-      fiber: 3.5,
-      moisture: 10.0,
-      ash: 6.8,
-      calcium: 1.2,
-      phosphorus: 1.0
-    },
-    consumer_ratings: {
-      palatability: 4.5,
-      digestibility: 4.2,
-      coat_quality: 4.3,
-      stool_quality: 4.1,
-      overall_satisfaction: 4.4
-    },
-    community_feedback: {
-      recommend_yes: 842,
-      recommend_no: 158,
-      total_votes: 1000
-    },
-    consumer_reviews: [
-      {
-        id: 'review-1',
-        user_name: '행복한집사',
-        rating: 5,
-        comment: '우리 강아지가 정말 잘 먹어요! 털도 윤기가 나고 변 상태도 좋아졌습니다.',
-        date: '2024-01-15',
-        helpful_count: 24
-      },
-      {
-        id: 'review-2',
-        user_name: '초보집사',
-        rating: 4,
-        comment: '가격은 조금 비싸지만 품질이 좋은 것 같아요. 기호성도 좋습니다.',
-        date: '2024-01-10',
-        helpful_count: 18
-      }
-    ],
-    pros: [
-      '높은 기호성과 소화율',
-      '프리미엄 원료 사용',
-      '국제 인증 획득',
-      '일관된 품질 관리'
-    ],
-    cons: [
-      '상대적으로 높은 가격',
-      '일부 부산물 포함',
-      '곡물 함량이 다소 높음'
-    ]
-  }
-}
-
-function getMockBrand(brandId: string): BrandBasic {
-  return {
-    id: brandId,
-    name: '로얄캐닌',
-    manufacturer: 'Royal Canin SAS',
-    country: '프랑스'
-  }
-}
-
-function getMockProductsByBrand(brandId: string, limit: number): Product[] {
-  const products: Product[] = [
-    {
-      id: 'product-royal-canin-puppy',
-      brand_id: brandId,
-      name: '로얄캐닌 퍼피',
-      description: '자견용 사료',
-      grade: 'A',
-      grade_text: '매우 우수',
-      certifications: ['AAFCO 승인']
-    },
-    {
-      id: 'product-royal-canin-senior',
-      brand_id: brandId,
-      name: '로얄캐닌 시니어',
-      description: '노견용 사료',
-      grade: 'A',
-      grade_text: '매우 우수',
-      certifications: ['AAFCO 승인']
-    },
-    {
-      id: 'product-royal-canin-mini',
-      brand_id: brandId,
-      name: '로얄캐닌 미니',
-      description: '소형견용 사료',
-      grade: 'B',
-      grade_text: '우수',
-      certifications: ['AAFCO 승인']
-    }
-  ]
-
-  return products.slice(0, limit)
-}

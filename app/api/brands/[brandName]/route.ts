@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import brandsData from '../../../../data/brands.json'
-import reviewsData from '../../../../data/reviews.json'
 import { getServerClient } from '@/lib/supabase-server'
 
 // Supabase 사용 여부 확인

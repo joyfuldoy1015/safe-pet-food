@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import brandsData from '../../../data/brands.json'
 import { getServerClient } from '@/lib/supabase-server'
 
 // Force dynamic rendering
@@ -232,47 +231,23 @@ export async function GET(request: NextRequest) {
           })
         }
 
-        // Supabase에 데이터가 없으면 fallback
-        console.warn('Supabase returned no data, falling back to JSON')
+        return NextResponse.json([], {
+          status: 200,
+          headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
+        })
       } catch (supabaseError) {
-        console.warn('Supabase error, falling back to JSON:', supabaseError)
+        console.error('Supabase error:', supabaseError)
+        return NextResponse.json(
+          { error: '브랜드 데이터를 불러올 수 없습니다.' },
+          { status: 500 }
+        )
       }
     }
 
-    // Fallback: JSON 파일에서 브랜드 데이터 가져오기
-    let brands = brandsData as any[]
-
-    // 검색 필터
-    if (search) {
-      brands = brands.filter((brand: any) => 
-        brand.name.toLowerCase().includes(search.toLowerCase()) ||
-        brand.manufacturer.toLowerCase().includes(search.toLowerCase())
-      )
-    }
-
-    // 국가 필터
-    if (country) {
-      brands = brands.filter((brand: any) => brand.country === country)
-    }
-
-    // 정렬
-    brands.sort((a: any, b: any) => {
-      const aValue = a[sortBy]
-      const bValue = b[sortBy]
-      
-      if (order === 'desc') {
-        return bValue > aValue ? 1 : -1
-      } else {
-        return aValue > bValue ? 1 : -1
-      }
-    })
-
-    return NextResponse.json(brands, {
-      status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
-      }
-    })
+    return NextResponse.json(
+      { error: '데이터베이스가 설정되지 않았습니다.' },
+      { status: 500 }
+    )
   } catch (error) {
     console.error('Failed to fetch brands:', error)
     return NextResponse.json(
