@@ -12,6 +12,38 @@ const isSupabaseConfigured = () => {
   )
 }
 
+// 모호한 원료명 패턴 (미공개로 분류)
+const VAGUE_INGREDIENT_PATTERNS = [
+  /부산물/,
+  /동물성\s*(유지|단백|지방)/,
+  /식물성\s*(유지|단백|지방)/,
+  /가금류/,
+  /육류/,
+  /어류/,
+  /곡류/,
+  /기타/,
+  /혼합/,
+  /향료/,
+  /착색료/,
+  /보존료/,
+]
+
+// 원료의 공개 수준 자동 추정
+function estimateDisclosureLevel(ing: {
+  name: string
+  percentage?: number
+  disclosure_level?: 'full' | 'partial' | 'none'
+}): 'full' | 'partial' | 'none' {
+  if (ing.disclosure_level) return ing.disclosure_level
+
+  if (ing.percentage && ing.percentage > 0) return 'full'
+
+  const isVague = VAGUE_INGREDIENT_PATTERNS.some(p => p.test(ing.name))
+  if (isVague) return 'none'
+
+  return 'partial'
+}
+
 // 성분 공개 상태 자동 계산 함수
 function calculateIngredientDisclosure(ingredients: Array<{
   name: string
@@ -32,11 +64,10 @@ function calculateIngredientDisclosure(ingredients: Array<{
   let notDisclosed = 0
 
   ingredients.forEach(ing => {
-    // percentage가 있으면 사용, 없으면 균등 분배
     const percentage = ing.percentage || (100 / ingredients.length)
     totalPercentage += percentage
 
-    const disclosureLevel = ing.disclosure_level || 'none'
+    const disclosureLevel = estimateDisclosureLevel(ing)
     switch (disclosureLevel) {
       case 'full':
         fullyDisclosed += percentage
@@ -50,7 +81,6 @@ function calculateIngredientDisclosure(ingredients: Array<{
     }
   })
 
-  // 정규화 (총합이 100%가 되도록)
   const normalizer = totalPercentage > 0 ? 100 / totalPercentage : 1
 
   return {
@@ -76,8 +106,8 @@ const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
     name: supabaseData.name,
     manufacturer: supabaseData.manufacturer,
     country: supabaseData.country,
-    description: supabaseData.brand_description,
-    brand_description: supabaseData.brand_description,
+    description: supabaseData.brand_description || supabaseData.description || '',
+    brand_description: supabaseData.brand_description || supabaseData.description || '',
     manufacturing_info: supabaseData.manufacturing_info || '',
     manufacturing_locations: supabaseData.manufacturing_locations || [],
     recall_history: supabaseData.recall_history,
@@ -91,7 +121,10 @@ const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
     transparency_score: supabaseData.transparency_score || 75,
     representative_product: supabaseData.representative_product || '',
     ingredient_disclosure: ingredientDisclosure,
-    ingredients: ingredients || [],
+    ingredients: (ingredients || []).map(ing => ({
+      ...ing,
+      disclosure_level: estimateDisclosureLevel(ing)
+    })),
     products: [] // products는 별도로 조회하여 추가됨
   }
 }
@@ -138,32 +171,56 @@ export async function GET(
 
       // 브랜드 데이터 변환
       if (data) {
-          // Supabase에서 ingredients 데이터 가져오기
-          // JSONB 필드를 파싱하여 배열로 변환
           let ingredients: Array<{
             name: string
             percentage?: number
             source?: string
             disclosure_level?: 'full' | 'partial' | 'none'
           }> | null = null
-          
-          if ((data as any).ingredients) {
+
+          let representativeProductName = (data as any).representative_product || ''
+
+          // 대표 제품 ID가 있으면 해당 제품의 ingredients 사용
+          if ((data as any).representative_product_id) {
             try {
-              // JSONB 필드가 이미 파싱된 객체/배열인 경우
+              const { data: repProduct } = await supabase
+                .from('products')
+                .select('name, ingredients')
+                .eq('id', (data as any).representative_product_id)
+                .single() as { data: { name: string; ingredients: any } | null }
+
+              if (repProduct) {
+                representativeProductName = repProduct.name
+                if (Array.isArray(repProduct.ingredients)) {
+                  ingredients = repProduct.ingredients
+                } else if (typeof repProduct.ingredients === 'string') {
+                  ingredients = JSON.parse(repProduct.ingredients)
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to fetch representative product ingredients:', e)
+            }
+          }
+
+          // 대표 제품 ID가 없으면 브랜드 테이블의 ingredients fallback
+          if (!ingredients && (data as any).ingredients) {
+            try {
               if (Array.isArray((data as any).ingredients)) {
                 ingredients = (data as any).ingredients
               } else if (typeof (data as any).ingredients === 'string') {
-                // 문자열인 경우 JSON 파싱
                 ingredients = JSON.parse((data as any).ingredients)
               } else {
                 ingredients = []
               }
             } catch (e) {
-              console.warn('Failed to parse ingredients:', e)
+              console.warn('Failed to parse brand ingredients:', e)
               ingredients = []
             }
           }
-          
+
+          // 대표 제품명 업데이트
+          ;(data as any).representative_product = representativeProductName
+
           const brand = transformSupabaseToJsonFormat(data, ingredients || undefined)
           
           // Get products for this brand from Supabase

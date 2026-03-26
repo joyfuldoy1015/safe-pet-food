@@ -98,7 +98,7 @@ export default function BrandsPage() {
         return { ...brand, safiScore: null }
       }
 
-      const recallHistory = brand.recall_history.map(recall => ({
+      const recallHistory = (brand.recall_history || []).map(recall => ({
         date: recall.date,
         severity: (recall.severity === 'high' ? 'high' : recall.severity === 'medium' ? 'medium' : 'low') as 'high' | 'medium' | 'low'
       }))
@@ -370,7 +370,7 @@ export default function BrandsPage() {
                             <div className="text-xs font-semibold text-gray-900">
                               {brand.products_count !== undefined 
                                 ? `${brand.products_count}개` 
-                                : `${brand.product_lines.length}개`}
+                                : `${(brand.product_lines || []).length}개`}
                             </div>
                           </div>
                           <div className="text-center p-2 bg-gray-50 rounded-xl">
@@ -435,7 +435,7 @@ export default function BrandsPage() {
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             <AlertTriangle className="h-3.5 w-3.5" />
-                            <span>리콜 {brand.recall_history.length}건</span>
+                            <span>리콜 {(brand.recall_history || []).length}건</span>
                           </div>
                           <div className="flex items-center gap-1 text-xs font-medium text-violet-600 group-hover:text-violet-700">
                             <span>자세히 보기</span>

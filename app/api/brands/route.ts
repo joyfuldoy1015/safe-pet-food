@@ -134,11 +134,11 @@ const transformSupabaseToJsonFormat = (supabaseData: any) => {
     name: supabaseData.name,
     manufacturer: supabaseData.manufacturer,
     country: supabaseData.country,
-    description: supabaseData.brand_description,
-    brand_description: supabaseData.brand_description,
+    description: supabaseData.brand_description || supabaseData.description || '',
+    brand_description: supabaseData.brand_description || supabaseData.description || '',
     manufacturing_info: supabaseData.manufacturing_info || '',
     manufacturing_locations: supabaseData.manufacturing_locations || [],
-    recall_history: supabaseData.recall_history,
+    recall_history: supabaseData.recall_history || [],
     overall_rating: parseFloat(supabaseData.overall_rating) || 0,
     product_lines: productLines,
     established_year: supabaseData.established_year,
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
           .from('brands')
           .select(`
             *,
-            products(id)
+            products:products!brand_id(id)
           `)
 
         // 검색 필터
