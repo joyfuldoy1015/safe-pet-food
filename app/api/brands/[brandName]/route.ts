@@ -13,6 +13,24 @@ const isSupabaseConfigured = () => {
 }
 
 // 모호한 원료명 패턴 (미공개로 분류)
+// 문자열 배열/혼합 배열을 정규화된 객체 배열로 변환
+function normalizeIngredients(raw: any[]): Array<{
+  name: string
+  percentage?: number
+  source?: string
+  disclosure_level?: 'full' | 'partial' | 'none'
+}> {
+  return raw.map(item => {
+    if (typeof item === 'string') {
+      return { name: item }
+    }
+    if (item && typeof item === 'object' && item.name) {
+      return item
+    }
+    return null
+  }).filter(Boolean)
+}
+
 const VAGUE_INGREDIENT_PATTERNS = [
   /부산물/,
   /동물성\s*(유지|단백|지방)/,
@@ -29,20 +47,28 @@ const VAGUE_INGREDIENT_PATTERNS = [
 ]
 
 // 원료의 공개 수준 자동 추정
+// 1. 모호한 표현 → none (미공개)
+// 2. 괄호 포함 (원산지 등 추가 정보) → full (완전 공개)
+// 3. 구체적 원료명 → partial (부분 공개)
 function estimateDisclosureLevel(ing: {
   name: string
   percentage?: number
   disclosure_level?: 'full' | 'partial' | 'none'
 }): 'full' | 'partial' | 'none' {
   if (ing.disclosure_level) return ing.disclosure_level
-
-  if (ing.percentage && ing.percentage > 0) return 'full'
+  if (!ing.name) return 'none'
 
   const isVague = VAGUE_INGREDIENT_PATTERNS.some(p => p.test(ing.name))
   if (isVague) return 'none'
 
+  const hasParentheses = /\(.+\)/.test(ing.name)
+  if (hasParentheses) return 'full'
+
   return 'partial'
 }
+
+// 투명성 점수 산정: full=100, partial=80, none=0
+const DISCLOSURE_SCORE = { full: 100, partial: 80, none: 0 }
 
 // 성분 공개 상태 자동 계산 함수
 function calculateIngredientDisclosure(ingredients: Array<{
@@ -53,40 +79,37 @@ function calculateIngredientDisclosure(ingredients: Array<{
   fully_disclosed: number
   partially_disclosed: number
   not_disclosed: number
+  transparency_score: number
 } {
   if (!ingredients || ingredients.length === 0) {
-    return { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0 }
+    return { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0, transparency_score: 0 }
   }
 
-  let totalPercentage = 0
-  let fullyDisclosed = 0
-  let partiallyDisclosed = 0
-  let notDisclosed = 0
+  let fullCount = 0
+  let partialCount = 0
+  let noneCount = 0
 
   ingredients.forEach(ing => {
-    const percentage = ing.percentage || (100 / ingredients.length)
-    totalPercentage += percentage
-
-    const disclosureLevel = estimateDisclosureLevel(ing)
-    switch (disclosureLevel) {
-      case 'full':
-        fullyDisclosed += percentage
-        break
-      case 'partial':
-        partiallyDisclosed += percentage
-        break
-      case 'none':
-        notDisclosed += percentage
-        break
+    const level = estimateDisclosureLevel(ing)
+    switch (level) {
+      case 'full': fullCount++; break
+      case 'partial': partialCount++; break
+      case 'none': noneCount++; break
     }
   })
 
-  const normalizer = totalPercentage > 0 ? 100 / totalPercentage : 1
+  const total = ingredients.length
+  const score = Math.round(
+    (fullCount * DISCLOSURE_SCORE.full +
+     partialCount * DISCLOSURE_SCORE.partial +
+     noneCount * DISCLOSURE_SCORE.none) / total
+  )
 
   return {
-    fully_disclosed: Math.round(fullyDisclosed * normalizer),
-    partially_disclosed: Math.round(partiallyDisclosed * normalizer),
-    not_disclosed: Math.round(notDisclosed * normalizer)
+    fully_disclosed: Math.round((fullCount / total) * 100),
+    partially_disclosed: Math.round((partialCount / total) * 100),
+    not_disclosed: Math.round((noneCount / total) * 100),
+    transparency_score: score
   }
 }
 
@@ -99,7 +122,7 @@ const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
   // ingredients 배열이 있으면 자동 계산, 없으면 기본값
   const ingredientDisclosure = ingredients && ingredients.length > 0
     ? calculateIngredientDisclosure(ingredients)
-    : { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0 }
+    : { fully_disclosed: 0, partially_disclosed: 0, not_disclosed: 0, transparency_score: 0 }
 
   return {
     id: supabaseData.id,
@@ -118,7 +141,7 @@ const transformSupabaseToJsonFormat = (supabaseData: any, ingredients?: Array<{
     image: supabaseData.image,
     brand_pros: supabaseData.brand_pros || [],
     brand_cons: supabaseData.brand_cons || [],
-    transparency_score: supabaseData.transparency_score || 75,
+    transparency_score: ingredientDisclosure.transparency_score || supabaseData.transparency_score || 0,
     representative_product: supabaseData.representative_product || '',
     ingredient_disclosure: ingredientDisclosure,
     ingredients: (ingredients || []).map(ing => ({
@@ -191,10 +214,14 @@ export async function GET(
 
               if (repProduct) {
                 representativeProductName = repProduct.name
+                let rawIngs: any[] = []
                 if (Array.isArray(repProduct.ingredients)) {
-                  ingredients = repProduct.ingredients
+                  rawIngs = repProduct.ingredients
                 } else if (typeof repProduct.ingredients === 'string') {
-                  ingredients = JSON.parse(repProduct.ingredients)
+                  rawIngs = JSON.parse(repProduct.ingredients)
+                }
+                if (rawIngs.length > 0) {
+                  ingredients = normalizeIngredients(rawIngs)
                 }
               }
             } catch (e) {
@@ -205,13 +232,13 @@ export async function GET(
           // 대표 제품 ID가 없으면 브랜드 테이블의 ingredients fallback
           if (!ingredients && (data as any).ingredients) {
             try {
+              let rawIngs: any[] = []
               if (Array.isArray((data as any).ingredients)) {
-                ingredients = (data as any).ingredients
+                rawIngs = (data as any).ingredients
               } else if (typeof (data as any).ingredients === 'string') {
-                ingredients = JSON.parse((data as any).ingredients)
-              } else {
-                ingredients = []
+                rawIngs = JSON.parse((data as any).ingredients)
               }
+              ingredients = normalizeIngredients(rawIngs)
             } catch (e) {
               console.warn('Failed to parse brand ingredients:', e)
               ingredients = []

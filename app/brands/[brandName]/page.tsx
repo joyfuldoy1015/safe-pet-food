@@ -317,26 +317,29 @@ function IngredientTransparencySection({ brand }: { brand: Brand }) {
               <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-400 mt-1" />
               <div>
                 <span className="font-medium text-gray-700">완전 공개</span>
+                <span className="text-green-500 ml-1 text-[10px]">100점</span>
                 <span className="mx-1">—</span>
-                원료명 + 함량(%) 모두 표기
-                <span className="text-gray-400 ml-1">예: &quot;닭고기 30%&quot;</span>
+                구체적 원료명 + 원산지 등 추가 정보 표기
+                <span className="text-gray-400 ml-1">예: &quot;닭고기(국내산)&quot;</span>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <span className="flex-shrink-0 w-2 h-2 rounded-full bg-yellow-400 mt-1" />
               <div>
                 <span className="font-medium text-gray-700">부분 공개</span>
+                <span className="text-yellow-500 ml-1 text-[10px]">80점</span>
                 <span className="mx-1">—</span>
-                구체적 원료명만 표기, 함량 미공개
-                <span className="text-gray-400 ml-1">예: &quot;닭고기&quot;</span>
+                구체적 원료명만 표기
+                <span className="text-gray-400 ml-1">예: &quot;닭고기&quot;, &quot;현미&quot;</span>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <span className="flex-shrink-0 w-2 h-2 rounded-full bg-red-400 mt-1" />
               <div>
                 <span className="font-medium text-gray-700">미공개</span>
+                <span className="text-red-500 ml-1 text-[10px]">0점</span>
                 <span className="mx-1">—</span>
-                모호한 표현 또는 출처 불분명
+                모호하거나 포괄적 표현
                 <span className="text-gray-400 ml-1">예: &quot;가금류 부산물&quot;, &quot;동물성 유지&quot;</span>
               </div>
             </div>
