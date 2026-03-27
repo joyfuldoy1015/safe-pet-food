@@ -3,6 +3,12 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["icn1"],
+  "crons": [
+    {
+      "path": "/api/products/batch-grade",
+      "schedule": "0 15 * * *"
+    }
+  ],
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
