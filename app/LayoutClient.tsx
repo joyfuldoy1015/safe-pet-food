@@ -1,15 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import { usePathname } from 'next/navigation'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import SessionProvider from './providers/SessionProvider'
+import PostHogProvider from './providers/PostHogProvider'
 
-/**
- * Client component that conditionally renders Header and Footer
- * based on the current route pathname
- */
 export default function LayoutClient({
   children,
 }: {
@@ -20,9 +17,13 @@ export default function LayoutClient({
 
   return (
     <SessionProvider>
-      {!isAdminPage && <Header />}
-      {children}
-      {!isAdminPage && <Footer isAdmin={false} />}
+      <Suspense fallback={null}>
+        <PostHogProvider>
+          {!isAdminPage && <Header />}
+          {children}
+          {!isAdminPage && <Footer isAdmin={false} />}
+        </PostHogProvider>
+      </Suspense>
     </SessionProvider>
   )
 }
