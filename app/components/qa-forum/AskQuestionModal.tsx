@@ -28,13 +28,12 @@ async function compressImage(file: File): Promise<File> {
     const img = new Image()
     img.onload = () => {
       let { width, height } = img
-      if (width <= MAX_IMAGE_DIMENSION && height <= MAX_IMAGE_DIMENSION) {
-        resolve(file)
-        return
+      const needsResize = width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION
+      if (needsResize) {
+        const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height)
+        width = Math.round(width * ratio)
+        height = Math.round(height * ratio)
       }
-      const ratio = Math.min(MAX_IMAGE_DIMENSION / width, MAX_IMAGE_DIMENSION / height)
-      width = Math.round(width * ratio)
-      height = Math.round(height * ratio)
 
       const canvas = document.createElement('canvas')
       canvas.width = width
