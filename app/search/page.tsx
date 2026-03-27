@@ -112,7 +112,7 @@ export default function SearchPage() {
     }
     
     // 정렬
-    const gradeOrder = ['A', 'B', 'C', 'D', 'F', null, undefined]
+    const gradeOrder = ['S', 'A', 'B', 'C', 'D', 'F', null, undefined]
     result = [...result].sort((a, b) => {
       switch (sortBy) {
         case 'grade':
@@ -256,7 +256,7 @@ export default function SearchPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-gray-500">등급:</span>
                       <div className="flex gap-1">
-                        {['all', 'A', 'B', 'C', 'D', 'F'].map((grade) => (
+                        {['all', 'S', 'A', 'B', 'C', 'D', 'F'].map((grade) => (
                           <button
                             key={grade}
                             onClick={() => setGradeFilter(grade)}
