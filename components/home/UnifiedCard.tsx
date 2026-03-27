@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Heart, MessageSquare, Eye, CheckCircle, Clock, ChevronRight } from 'lucide-react'
 import type { UnifiedFeedItem } from '@/lib/data/feed'
+import { formatTimeAgo } from '@/lib/utils/format'
 
 interface UnifiedCardProps {
   item: UnifiedFeedItem
@@ -15,20 +16,10 @@ interface UnifiedCardProps {
  * Unified card component for Q&A items
  * Redesigned to match PetLogCard's tone and manner
  */
-export default function UnifiedCard({ item, formatTimeAgo }: UnifiedCardProps) {
+export default function UnifiedCard({ item, formatTimeAgo: formatTimeAgoProp }: UnifiedCardProps) {
   const formatTime = (dateString: string): string => {
-    if (formatTimeAgo) return formatTimeAgo(dateString)
-    
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-    if (diffInSeconds < 60) return '방금 전'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}일 전`
-    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}개월 전`
-    return `${Math.floor(diffInSeconds / 31536000)}년 전`
+    if (formatTimeAgoProp) return formatTimeAgoProp(dateString)
+    return formatTimeAgo(dateString)
   }
 
   // 상태 배지 (답변됨/미답변)

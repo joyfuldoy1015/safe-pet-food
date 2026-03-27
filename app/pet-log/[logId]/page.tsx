@@ -10,6 +10,7 @@ import type { ReviewLog, Pet, Owner, Comment, QAThread, QAPostWithAuthor } from 
 import { useAuth } from '@/hooks/useAuth'
 import LogFormDialog from '@/components/log/LogFormDialog'
 import type { Database } from '@/lib/types/database'
+import { formatTimeAgo } from '@/lib/utils/format'
 
 /**
  * Single Log Detail Page
@@ -242,19 +243,6 @@ export default function LogDetailPage() {
       month: 'numeric',
       day: 'numeric'
     })
-  }
-
-  // 시간 경과 포맷
-  const formatTimeAgo = (dateString: string): string => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-    if (diffInSeconds < 60) return '방금 전'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}일 전`
-    return formatDate(dateString)
   }
 
   // 사용 일수 계산

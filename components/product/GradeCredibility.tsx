@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Shield, ChevronDown, ChevronUp, CheckCircle, AlertCircle, MinusCircle } from 'lucide-react'
 import type { AutoGradeResult, GradeBreakdownItem } from '@/lib/auto-grade-calculator'
+import { getGradeColor } from '@/lib/grade-style'
 
 interface GradeCredibilityProps {
   autoGrade: AutoGradeResult
@@ -22,17 +23,6 @@ function getScoreBarColor(score: number | null): string {
   if (score >= 60) return 'bg-yellow-500'
   if (score >= 40) return 'bg-orange-500'
   return 'bg-red-500'
-}
-
-function getGradeColor(grade: string): string {
-  switch (grade) {
-    case 'S': return 'text-violet-600 bg-violet-50 border-violet-200'
-    case 'A': return 'text-green-600 bg-green-50 border-green-200'
-    case 'B': return 'text-blue-600 bg-blue-50 border-blue-200'
-    case 'C': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-    case 'D': return 'text-orange-600 bg-orange-50 border-orange-200'
-    default: return 'text-red-600 bg-red-50 border-red-200'
-  }
 }
 
 function ScoreIcon({ item }: { item: GradeBreakdownItem }) {
@@ -59,7 +49,7 @@ export default function GradeCredibility({ autoGrade }: GradeCredibilityProps) {
         <>
           {/* 종합 점수 */}
           <div className="flex items-center gap-3 mb-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg border ${getGradeColor(autoGrade.grade)}`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg border ${getGradeColor(autoGrade.grade, 'subtle')}`}>
               {autoGrade.grade}
             </div>
             <div>

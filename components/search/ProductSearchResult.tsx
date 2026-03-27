@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Shield, ChevronRight } from 'lucide-react'
+import { getGradeStyle } from '@/lib/grade-style'
 
 interface ProductSearchResultProps {
   product: {
@@ -14,18 +15,6 @@ interface ProductSearchResultProps {
     grade_text?: string
     target_species?: 'dog' | 'cat' | 'all'
     certifications?: string[]
-  }
-}
-
-const getGradeStyle = (grade?: string) => {
-  switch (grade) {
-    case 'S': return { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-200', label: 'S' }
-    case 'A': return { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', label: 'A' }
-    case 'B': return { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', label: 'B' }
-    case 'C': return { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200', label: 'C' }
-    case 'D': return { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', label: 'D' }
-    case 'F': return { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', label: 'F' }
-    default: return { bg: 'bg-gray-100', text: 'text-gray-500', border: 'border-gray-200', label: '-' }
   }
 }
 
