@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
 import { getBrowserClient } from '@/lib/supabase-client'
 import type { Database } from '@/lib/types/database'
+import posthog from 'posthog-js'
 
 type Profile = Database['public']['Tables']['profiles']['Row'] | null
 
@@ -80,8 +81,13 @@ export function useAuth() {
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          posthog.identify(session.user.id, {
+            email: session.user.email,
+            provider: session.user.app_metadata?.provider,
+          })
           loadProfile(session.user.id).finally(() => setLoading(false))
         } else {
+          posthog.reset()
           setProfile(null)
           setLoading(false)
         }
