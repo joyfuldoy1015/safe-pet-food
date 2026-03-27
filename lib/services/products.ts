@@ -309,6 +309,35 @@ export async function getBrandGradeData(brandId: string): Promise<{
 }
 
 /**
+ * 자동 등급을 DB에 캐싱 (기존 값과 다를 때만 업데이트)
+ */
+export async function cacheProductGrade(
+  productId: string,
+  grade: string,
+  gradeText: string,
+  totalScore: number
+): Promise<void> {
+  if (!isSupabaseConfigured()) return
+  try {
+    const supabase = getSupabase()
+    const { data: current } = await supabase
+      .from('products')
+      .select('grade, grade_text')
+      .eq('id', productId)
+      .single() as { data: { grade: string | null; grade_text: string | null } | null }
+
+    const newGradeText = `${gradeText} (${totalScore}점)`
+    if (current && current.grade === grade && current.grade_text === newGradeText) return
+
+    await (supabase.from('products') as any)
+      .update({ grade, grade_text: newGradeText })
+      .eq('id', productId)
+  } catch {
+    // 캐싱 실패는 무시 (다음 조회 시 재시도)
+  }
+}
+
+/**
  * 브랜드 ID로 해당 브랜드의 다른 제품들 조회
  */
 export async function getProductsByBrandId(brandId: string, limit: number = 6): Promise<Product[]> {

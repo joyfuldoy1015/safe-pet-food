@@ -8,7 +8,8 @@ import {
   aggregateProductRatings,
   aggregateCommunityFeedback,
   formatReviewsForDisplay,
-  getBrandGradeData
+  getBrandGradeData,
+  cacheProductGrade
 } from '@/lib/services/products'
 import GradeCredibility from '@/components/product/GradeCredibility'
 import { calculateAutoGrade, type AutoGradeResult } from '@/lib/auto-grade-calculator'
@@ -74,6 +75,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
     guaranteedAnalysis: product.guaranteed_analysis,
     targetSpecies: product.target_species,
   })
+
+  if (autoGrade.evaluatedCount >= 2) {
+    cacheProductGrade(productId, autoGrade.grade, autoGrade.gradeText, autoGrade.totalScore)
+  }
 
   // 실시간 데이터 우선, 없으면 mock 사용
   const consumer_ratings = realRatings || product.consumer_ratings
