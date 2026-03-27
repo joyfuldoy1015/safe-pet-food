@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
@@ -18,7 +18,9 @@ import {
   Edit,
   X,
   Save,
-  Trash2
+  Trash2,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import CommentThread, { Comment } from '@/app/components/qa-forum/CommentThread'
@@ -204,6 +206,13 @@ export default function QuestionDetailPage() {
   const [editContent, setEditContent] = useState('')
   const [editCategory, setEditCategory] = useState('')
   const [isSavingEdit, setIsSavingEdit] = useState(false)
+
+  const [editImageUrl, setEditImageUrl] = useState<string | null>(null)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null)
+  const [editImageRemoved, setEditImageRemoved] = useState(false)
+  const [editUploadError, setEditUploadError] = useState('')
+  const editFileInputRef = useRef<HTMLInputElement>(null)
 
   // Format time ago helper
   const formatTimeAgo = (dateString: string): string => {
@@ -798,11 +807,87 @@ export default function QuestionDetailPage() {
   ]
 
   // 질문 수정 모드 시작
+  const MAX_EDIT_FILE_SIZE = 5 * 1024 * 1024
+  const MAX_EDIT_IMAGE_DIM = 1200
+  const EDIT_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+
+  const compressEditImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const img = new window.Image()
+      img.onload = () => {
+        let { width, height } = img
+        if (width > MAX_EDIT_IMAGE_DIM || height > MAX_EDIT_IMAGE_DIM) {
+          const ratio = Math.min(MAX_EDIT_IMAGE_DIM / width, MAX_EDIT_IMAGE_DIM / height)
+          width = Math.round(width * ratio)
+          height = Math.round(height * ratio)
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(
+          (blob) => resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file),
+          'image/jpeg',
+          0.8
+        )
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleEditImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setEditUploadError('')
+    if (!EDIT_ACCEPTED_TYPES.includes(file.type)) {
+      setEditUploadError('JPG, PNG, WebP, GIF, HEIC 형식만 지원합니다.')
+      return
+    }
+    if (file.size > MAX_EDIT_FILE_SIZE) {
+      setEditUploadError('파일 크기는 5MB 이하만 가능합니다.')
+      return
+    }
+    try {
+      const compressed = await compressEditImage(file)
+      setEditImageFile(compressed)
+      setEditImagePreview(URL.createObjectURL(compressed))
+      setEditImageRemoved(false)
+    } catch {
+      setEditUploadError('이미지 처리 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleEditImageRemove = () => {
+    setEditImageFile(null)
+    if (editImagePreview) URL.revokeObjectURL(editImagePreview)
+    setEditImagePreview(null)
+    setEditImageUrl(null)
+    setEditImageRemoved(true)
+    setEditUploadError('')
+    if (editFileInputRef.current) editFileInputRef.current.value = ''
+  }
+
+  const resetEditImageState = () => {
+    setEditImageFile(null)
+    if (editImagePreview) URL.revokeObjectURL(editImagePreview)
+    setEditImagePreview(null)
+    setEditImageUrl(null)
+    setEditImageRemoved(false)
+    setEditUploadError('')
+    if (editFileInputRef.current) editFileInputRef.current.value = ''
+  }
+
   const handleStartEditQuestion = () => {
     if (!question) return
     setEditTitle(question.title)
     setEditContent(question.content)
     setEditCategory(question.category)
+    setEditImageUrl(question.imageUrl || null)
+    setEditImageFile(null)
+    setEditImagePreview(null)
+    setEditImageRemoved(false)
+    setEditUploadError('')
     setIsEditingQuestion(true)
   }
 
@@ -812,6 +897,7 @@ export default function QuestionDetailPage() {
     setEditTitle('')
     setEditContent('')
     setEditCategory('')
+    resetEditImageState()
   }
 
   // 질문 수정 저장
@@ -829,14 +915,39 @@ export default function QuestionDetailPage() {
         return
       }
 
+      let newImageUrl: string | null | undefined = undefined
+      if (editImageFile) {
+        const ext = editImageFile.name.split('.').pop() || 'jpg'
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const filePath = `qa-images/${fileName}`
+        const { error: uploadErr } = await supabase.storage
+          .from('qa-images')
+          .upload(filePath, editImageFile, { cacheControl: '3600', upsert: false })
+        if (uploadErr) {
+          console.error('Image upload error:', uploadErr)
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('qa-images')
+            .getPublicUrl(filePath)
+          newImageUrl = publicUrl
+        }
+      } else if (editImageRemoved) {
+        newImageUrl = null
+      }
+
+      const updateData: any = {
+        title: editTitle.trim(),
+        content: editContent.trim(),
+        category: editCategory,
+        updated_at: new Date().toISOString()
+      }
+      if (newImageUrl !== undefined) {
+        updateData.image_url = newImageUrl
+      }
+
       const { error } = await (supabase
         .from('community_questions') as any)
-        .update({
-          title: editTitle.trim(),
-          content: editContent.trim(),
-          category: editCategory,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', questionId)
         .eq('author_id', user?.id)
 
@@ -846,17 +957,22 @@ export default function QuestionDetailPage() {
         return
       }
 
-      // 로컬 상태 업데이트
+      const finalImageUrl = newImageUrl !== undefined
+        ? (newImageUrl || undefined)
+        : question.imageUrl
+
       setQuestion({
         ...question,
         title: editTitle.trim(),
         content: editContent.trim(),
         category: editCategory,
         categoryEmoji: editCategory.split(' ')[0],
+        imageUrl: finalImageUrl,
         updatedAt: new Date().toISOString()
       })
 
       setIsEditingQuestion(false)
+      resetEditImageState()
       alert('질문이 수정되었습니다.')
     } catch (error) {
       console.error('Failed to save question edit:', error)
@@ -1232,6 +1348,76 @@ export default function QuestionDetailPage() {
                       placeholder="질문 내용을 입력하세요"
                     />
                   </div>
+                  {/* 이미지 편집 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">이미지 첨부 (선택사항)</label>
+                    <input
+                      ref={editFileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
+                      onChange={handleEditImageSelect}
+                      className="hidden"
+                    />
+                    {editImagePreview ? (
+                      <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                        <img src={editImagePreview} alt="미리보기" className="w-full max-h-48 object-cover" />
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => editFileInputRef.current?.click()}
+                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                            title="이미지 교체"
+                          >
+                            <Upload className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleEditImageRemove}
+                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                            title="이미지 삭제"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : editImageUrl && !editImageRemoved ? (
+                      <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                        <img src={editImageUrl} alt="기존 이미지" className="w-full max-h-48 object-cover" />
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => editFileInputRef.current?.click()}
+                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                            title="이미지 교체"
+                          >
+                            <Upload className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleEditImageRemove}
+                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                            title="이미지 삭제"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => editFileInputRef.current?.click()}
+                        className="w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50/30 transition-colors"
+                      >
+                        <Upload className="h-6 w-6 text-gray-400" />
+                        <span className="text-sm text-gray-500">클릭하여 이미지 선택</span>
+                        <span className="text-xs text-gray-400">JPG, PNG, WebP, GIF, HEIC · 최대 5MB</span>
+                      </button>
+                    )}
+                    {editUploadError && (
+                      <p className="mt-1.5 text-xs text-red-500">{editUploadError}</p>
+                    )}
+                  </div>
+
                   {/* 저장/취소 버튼 */}
                   <div className="flex justify-end gap-3">
                     <button
