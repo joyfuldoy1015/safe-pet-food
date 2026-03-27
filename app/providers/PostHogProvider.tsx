@@ -6,11 +6,11 @@ import { useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 const POSTHOG_KEY = 'phc_PA4b4pghIfL4rKeGFCIX1wAY1JihOLSsMU437PO5HsD'
-const POSTHOG_HOST = 'https://us.i.posthog.com'
 
 if (typeof window !== 'undefined') {
   posthog.init(POSTHOG_KEY, {
-    api_host: POSTHOG_HOST,
+    api_host: '/ingest',
+    ui_host: 'https://us.posthog.com',
     person_profiles: 'identified_only',
     capture_pageview: false,
     capture_pageleave: true,

@@ -28,7 +28,16 @@ const nextConfig = {
     serverComponentsExternalPackages: [],
   },
   async rewrites() {
-    return []
+    return [
+      {
+        source: '/ingest/static/:path*',
+        destination: 'https://us-assets.i.posthog.com/static/:path*',
+      },
+      {
+        source: '/ingest/:path*',
+        destination: 'https://us.i.posthog.com/:path*',
+      },
+    ]
   },
   async headers() {
     const cspDirectives = [
