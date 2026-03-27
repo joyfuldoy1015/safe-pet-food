@@ -41,6 +41,17 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set('next', pathname)
       return NextResponse.redirect(loginUrl)
     }
+
+    const { data: role } = await supabase
+      .from('roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .single()
+
+    if (!role) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
   return response
