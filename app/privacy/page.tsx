@@ -93,7 +93,7 @@ export default function PrivacyPage() {
               </p>
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <p className="font-medium">개인정보 보호책임자</p>
-                <p className="text-sm text-gray-600 mt-1">이메일: privacy@safepetfood.com</p>
+                <p className="text-sm text-gray-600 mt-1">이메일: safepetfood.kr@gmail.com</p>
               </div>
             </section>
 

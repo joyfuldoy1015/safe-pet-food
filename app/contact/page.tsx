@@ -16,14 +16,10 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    
-    // BACKLOG: 문의 제출 API 연동 (Supabase contact_requests 테이블)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    alert('문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.')
-    setFormData({ name: '', email: '', subject: '', message: '' })
-    setIsSubmitting(false)
+    const { name, email, subject, message } = formData
+    const body = `이름: ${name}\n이메일: ${email}\n\n${message}`
+    const mailto = `mailto:safepetfood.kr@gmail.com?subject=${encodeURIComponent(`[문의] ${subject}`)}&body=${encodeURIComponent(body)}`
+    window.location.href = mailto
   }
 
   return (
@@ -55,7 +51,7 @@ export default function ContactPage() {
                 <Mail className="h-5 w-5 text-blue-600" />
                 <h3 className="font-semibold text-gray-900">이메일</h3>
               </div>
-              <p className="text-sm text-gray-600">contact@safepetfood.com</p>
+              <p className="text-sm text-gray-600">safepetfood.kr@gmail.com</p>
             </div>
             <div className="p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3 mb-2">

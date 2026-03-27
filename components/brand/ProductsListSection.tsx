@@ -97,8 +97,9 @@ export default function ProductsListSection({ products, brandName: propBrandName
           <p className="text-sm text-gray-500 mb-6">이 브랜드의 제품 정보를 요청해주시면 운영자가 검토 후 등록해드립니다.</p>
           
           {requestSubmitted ? (
-            <div className="py-3 px-4 bg-green-50 text-green-700 rounded-xl text-sm">
-              ✅ 제품 등록 요청이 접수되었습니다. 운영자 검토 후 등록됩니다.
+            <div className="py-3 px-4 bg-green-50 text-green-700 rounded-xl text-sm space-y-1">
+              <p>✅ 제품 등록 요청이 접수되었습니다.</p>
+              <p className="text-xs text-green-600">운영자(safepetfood.kr@gmail.com) 검토 후 등록됩니다.</p>
             </div>
           ) : showRequestForm ? (
             <div className="max-w-md mx-auto p-4 bg-gray-50 rounded-xl border border-gray-200 text-left space-y-3">
