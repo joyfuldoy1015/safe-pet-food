@@ -17,7 +17,8 @@ import {
   Bookmark,
   Edit,
   X,
-  Save
+  Save,
+  Trash2
 } from 'lucide-react'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import CommentThread, { Comment } from '@/app/components/qa-forum/CommentThread'
@@ -865,6 +866,34 @@ export default function QuestionDetailPage() {
     }
   }
 
+  const handleDeleteQuestion = async () => {
+    if (!question || !user || question.author_id !== user.id) return
+    if (!confirm('질문을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
+
+    try {
+      const supabase = getBrowserClient()
+      if (!supabase) return
+
+      const { error } = await (supabase
+        .from('community_questions') as any)
+        .update({ admin_status: 'deleted' })
+        .eq('id', question.id)
+        .eq('author_id', user.id)
+
+      if (error) {
+        console.error('Failed to delete question:', error)
+        alert('질문 삭제에 실패했습니다.')
+        return
+      }
+
+      alert('질문이 삭제되었습니다.')
+      router.push('/community/qa-forum')
+    } catch (error) {
+      console.error('Failed to delete question:', error)
+      alert('질문 삭제 중 오류가 발생했습니다.')
+    }
+  }
+
   // Handle new comment submit
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -1152,15 +1181,24 @@ export default function QuestionDetailPage() {
                   <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">
                     {question.title}
                   </h1>
-                  {/* 수정 버튼 - 본인 글일 경우에만 표시 */}
+                  {/* 수정/삭제 버튼 - 본인 글일 경우에만 표시 */}
                   {user && question.author_id === user.id && (
-                    <button
-                      onClick={handleStartEditQuestion}
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"
-                      title="질문 수정"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        onClick={handleStartEditQuestion}
+                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"
+                        title="질문 수정"
+                      >
+                        <Edit className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={handleDeleteQuestion}
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                        title="질문 삭제"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
