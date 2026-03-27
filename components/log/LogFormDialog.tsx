@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getBrowserClient } from '@/lib/supabase-client'
 import type { Database } from '@/lib/types/database'
+import ScoreGrid from '@/components/log/ScoreGrid'
+import BrandProductPicker from '@/components/log/BrandProductPicker'
+import ReasonTagsInput from '@/components/log/ReasonTagsInput'
+import SAFIInputSection from '@/components/log/SAFIInputSection'
 
 type Pet = Database['public']['Tables']['pets']['Row']
 type ReviewLog = Database['public']['Tables']['review_logs']['Row']
@@ -572,6 +576,17 @@ function ReviewLogFormContent({
     })
   }
 
+  const handleAddAllergy = () => {
+    if (allergyInput.trim() && !(formData.allergy_symptoms || []).includes(allergyInput.trim())) {
+      setFormData({ ...formData, allergy_symptoms: [...(formData.allergy_symptoms || []), allergyInput.trim()] })
+      setAllergyInput('')
+    }
+  }
+
+  const handleRemoveAllergy = (symptom: string) => {
+    setFormData({ ...formData, allergy_symptoms: (formData.allergy_symptoms || []).filter(s => s !== symptom) })
+  }
+
   if (isLoadingPets) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -637,98 +652,19 @@ function ReviewLogFormContent({
           </div>
         </div>
 
-        {/* Brand */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
-              브랜드 <span className="text-red-500">*</span>
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                setIsCustomBrand(!isCustomBrand)
-                if (!isCustomBrand) {
-                  setIsCustomProduct(true)
-                }
-              }}
-              className="text-xs text-violet-600 hover:text-violet-700"
-            >
-              {isCustomBrand ? '목록에서 선택' : '직접 입력'}
-            </button>
-          </div>
-          {isCustomBrand ? (
-            <input
-              id="brand"
-              type="text"
-              value={formData.brand || ''}
-              onChange={(e) => setFormData({ ...formData, brand: e.target.value, product: '' })}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-              placeholder="브랜드명을 입력하세요"
-            />
-          ) : (
-            <select
-              id="brand"
-              value={formData.brand || ''}
-              onChange={(e) => {
-                setFormData({ ...formData, brand: e.target.value, product: '' })
-                setIsCustomProduct(false)
-              }}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-            >
-              <option value="">브랜드를 선택하세요</option>
-              {brandOptions.map((brand) => (
-                <option key={brand.id} value={brand.name}>{brand.name}</option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Product */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="product" className="block text-sm font-medium text-gray-700">
-              제품명 <span className="text-red-500">*</span>
-            </label>
-            {!isCustomBrand && productOptions.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsCustomProduct(!isCustomProduct)}
-                className="text-xs text-violet-600 hover:text-violet-700"
-              >
-                {isCustomProduct ? '목록에서 선택' : '직접 입력'}
-              </button>
-            )}
-          </div>
-          {isCustomProduct || isCustomBrand || productOptions.length === 0 ? (
-            <input
-              id="product"
-              type="text"
-              value={formData.product || ''}
-              onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-              placeholder={formData.brand ? '제품명을 입력하세요' : '먼저 브랜드를 선택하세요'}
-            />
-          ) : (
-            <select
-              id="product"
-              value={formData.product || ''}
-              onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-            >
-              <option value="">제품을 선택하세요</option>
-              {productOptions.map((product) => (
-                <option key={product.id} value={product.name}>{product.name}</option>
-              ))}
-            </select>
-          )}
-          {!isCustomBrand && !isCustomProduct && productOptions.length === 0 && formData.brand && (
-            <p className="text-xs text-gray-400 mt-1">등록된 제품이 없습니다. 직접 입력해 주세요.</p>
-          )}
-        </div>
+        {/* Brand & Product */}
+        <BrandProductPicker
+          brand={formData.brand || ''}
+          product={formData.product || ''}
+          onBrandChange={(v) => setFormData({ ...formData, brand: v, product: '' })}
+          onProductChange={(v) => setFormData({ ...formData, product: v })}
+          brandOptions={brandOptions}
+          productOptions={productOptions}
+          isCustomBrand={isCustomBrand}
+          setIsCustomBrand={setIsCustomBrand}
+          isCustomProduct={isCustomProduct}
+          setIsCustomProduct={setIsCustomProduct}
+        />
 
         {/* Status */}
         <div>
@@ -790,94 +726,28 @@ function ReviewLogFormContent({
         </div>
 
         {/* Palatability Score */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            기호성 (1-5)
-          </label>
-          <div className="grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((score) => (
-              <button
-                key={score}
-                type="button"
-                onClick={() => setFormData({ ...formData, palatability_score: formData.palatability_score === score ? null : score })}
-                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
-                  formData.palatability_score === score
-                    ? 'border-violet-500 bg-violet-50 text-violet-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5">
-                  {score === 1 && '거부'}
-                  {score === 2 && '싫어함'}
-                  {score === 3 && '보통'}
-                  {score === 4 && '좋아함'}
-                  {score === 5 && '환장함'}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <ScoreGrid
+          label="기호성 (1-5)"
+          value={formData.palatability_score}
+          onChange={(v) => setFormData({ ...formData, palatability_score: v })}
+          descriptions={['거부', '싫어함', '보통', '좋아함', '환장함']}
+        />
 
         {/* Digestibility Score */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            소화율 (1-5)
-          </label>
-          <div className="grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((score) => (
-              <button
-                key={score}
-                type="button"
-                onClick={() => setFormData({ ...formData, digestibility_score: formData.digestibility_score === score ? null : score })}
-                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
-                  formData.digestibility_score === score
-                    ? 'border-violet-500 bg-violet-50 text-violet-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">
-                  {score === 1 && '나쁨'}
-                  {score === 2 && '아쉬움'}
-                  {score === 3 && '보통'}
-                  {score === 4 && '좋음'}
-                  {score === 5 && '최고'}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <ScoreGrid
+          label="소화율 (1-5)"
+          value={formData.digestibility_score}
+          onChange={(v) => setFormData({ ...formData, digestibility_score: v })}
+          descriptions={['나쁨', '아쉬움', '보통', '좋음', '최고']}
+        />
 
         {/* Coat Quality Score */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            털 상태 (1-5)
-          </label>
-          <div className="grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((score) => (
-              <button
-                key={score}
-                type="button"
-                onClick={() => setFormData({ ...formData, coat_quality_score: formData.coat_quality_score === score ? null : score })}
-                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
-                  formData.coat_quality_score === score
-                    ? 'border-violet-500 bg-violet-50 text-violet-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">
-                  {score === 1 && '나쁨'}
-                  {score === 2 && '푸석'}
-                  {score === 3 && '보통'}
-                  {score === 4 && '좋음'}
-                  {score === 5 && '윤기'}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        <ScoreGrid
+          label="털 상태 (1-5)"
+          value={formData.coat_quality_score}
+          onChange={(v) => setFormData({ ...formData, coat_quality_score: v })}
+          descriptions={['나쁨', '푸석', '보통', '좋음', '윤기']}
+        />
 
         {/* Rating - 자동 계산 */}
         {(() => {
@@ -939,262 +809,45 @@ function ReviewLogFormContent({
         </div>
 
         {/* SAFI 안전성 평가 */}
-        <div className="pt-2 pb-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-semibold text-gray-900">안전성 평가 (SAFI)</span>
-            <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded-full">선택</span>
-          </div>
-          <p className="text-xs text-gray-500">급여 중 관찰한 반응을 기록하면 브랜드 안전성 점수에 반영됩니다</p>
-        </div>
-
-        {/* Stool Score */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            변 상태 점수
-          </label>
-          <div className="grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((score) => (
-              <button
-                key={score}
-                type="button"
-                onClick={() => setFormData({ ...formData, stool_score: formData.stool_score === score ? null : score })}
-                className={`px-2 py-2.5 rounded-xl border-2 transition-colors text-center ${
-                  formData.stool_score === score
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <div className="text-sm font-semibold">{score}점</div>
-                <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">
-                  {score === 1 && '나쁨'}
-                  {score === 2 && '아쉬움'}
-                  {score === 3 && '보통'}
-                  {score === 4 && '좋음'}
-                  {score === 5 && '최고'}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Appetite Change */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            식욕 변화
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {[
-              { value: 'INCREASED', label: '증가', emoji: '📈' },
-              { value: 'NORMAL', label: '정상', emoji: '✅' },
-              { value: 'DECREASED', label: '감소', emoji: '📉' },
-              { value: 'REFUSED', label: '거부', emoji: '❌' }
-            ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setFormData({ ...formData, appetite_change: formData.appetite_change === option.value ? null : option.value })}
-                className={`px-3 py-2.5 rounded-xl border-2 transition-colors text-sm ${
-                  formData.appetite_change === option.value
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                }`}
-              >
-                <span className="text-base">{option.emoji}</span>
-                <div className="mt-0.5 font-medium text-xs">{option.label}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Vomiting */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            구토 발생 여부
-          </label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, vomiting: formData.vomiting === true ? null : true })}
-              className={`flex-1 px-4 py-2.5 rounded-xl border-2 transition-colors text-sm ${
-                formData.vomiting === true
-                  ? 'border-red-500 bg-red-50 text-red-700'
-                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
-              }`}
-            >
-              🤢 발생함
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, vomiting: formData.vomiting === false ? null : false })}
-              className={`flex-1 px-4 py-2.5 rounded-xl border-2 transition-colors text-sm ${
-                formData.vomiting === false
-                  ? 'border-green-500 bg-green-50 text-green-700'
-                  : 'border-gray-300 text-gray-700 hover:border-gray-400'
-              }`}
-            >
-              ✅ 발생 안 함
-            </button>
-          </div>
-        </div>
-
-        {/* Allergy Symptoms */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            알레르기 증상
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={allergyInput}
-              onChange={(e) => setAllergyInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  if (allergyInput.trim() && !(formData.allergy_symptoms || []).includes(allergyInput.trim())) {
-                    setFormData({ ...formData, allergy_symptoms: [...(formData.allergy_symptoms || []), allergyInput.trim()] })
-                    setAllergyInput('')
-                  }
-                }
-              }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
-              placeholder="예: 가려움, 발진, 눈물"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (allergyInput.trim() && !(formData.allergy_symptoms || []).includes(allergyInput.trim())) {
-                  setFormData({ ...formData, allergy_symptoms: [...(formData.allergy_symptoms || []), allergyInput.trim()] })
-                  setAllergyInput('')
-                }
-              }}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm"
-            >
-              추가
-            </button>
-          </div>
-          {formData.allergy_symptoms && formData.allergy_symptoms.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.allergy_symptoms.map((symptom) => (
-                <span
-                  key={symptom}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs border border-orange-200"
-                >
-                  {symptom}
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, allergy_symptoms: (formData.allergy_symptoms || []).filter(s => s !== symptom) })}
-                    className="hover:text-orange-900"
-                    aria-label={`${symptom} 제거`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        <SAFIInputSection
+          stoolScore={formData.stool_score}
+          onStoolScoreChange={(v) => setFormData({ ...formData, stool_score: v })}
+          appetiteChange={formData.appetite_change}
+          onAppetiteChange={(v) => setFormData({ ...formData, appetite_change: v })}
+          vomiting={formData.vomiting}
+          onVomitingChange={(v) => setFormData({ ...formData, vomiting: v })}
+          allergySymptoms={formData.allergy_symptoms || []}
+          allergyInput={allergyInput}
+          setAllergyInput={setAllergyInput}
+          onAddAllergy={handleAddAllergy}
+          onRemoveAllergy={handleRemoveAllergy}
+        />
 
         {/* Continue Reasons */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            계속하는 이유
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={continueReasonInput}
-              onChange={(e) => setContinueReasonInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleAddContinueReason()
-                }
-              }}
-              disabled={(formData.continue_reasons || []).length >= 5}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="예: 변 상태 개선"
-            />
-            <button
-              type="button"
-              onClick={handleAddContinueReason}
-              disabled={(formData.continue_reasons || []).length >= 5}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              추가
-            </button>
-          </div>
-          {formData.continue_reasons && formData.continue_reasons.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.continue_reasons.map((reason) => (
-                <span
-                  key={reason}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs"
-                >
-                  {reason}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveContinueReason(reason)}
-                    className="hover:text-emerald-900"
-                    aria-label={`${reason} 제거`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        <ReasonTagsInput
+          label="계속하는 이유"
+          reasons={formData.continue_reasons || []}
+          inputValue={continueReasonInput}
+          setInputValue={setContinueReasonInput}
+          onAdd={handleAddContinueReason}
+          onRemove={handleRemoveContinueReason}
+          maxCount={5}
+          placeholder="예: 변 상태 개선"
+          tagColor="emerald"
+        />
 
         {/* Stop Reasons */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            중지하는 이유
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={stopReasonInput}
-              onChange={(e) => setStopReasonInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleAddStopReason()
-                }
-              }}
-              disabled={(formData.stop_reasons || []).length >= 5}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="예: 알러지 의심"
-            />
-            <button
-              type="button"
-              onClick={handleAddStopReason}
-              disabled={(formData.stop_reasons || []).length >= 5}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              추가
-            </button>
-          </div>
-          {formData.stop_reasons && formData.stop_reasons.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {formData.stop_reasons.map((reason) => (
-                <span
-                  key={reason}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs"
-                >
-                  {reason}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveStopReason(reason)}
-                    className="hover:text-rose-900"
-                    aria-label={`${reason} 제거`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        <ReasonTagsInput
+          label="중지하는 이유"
+          reasons={formData.stop_reasons || []}
+          inputValue={stopReasonInput}
+          setInputValue={setStopReasonInput}
+          onAdd={handleAddStopReason}
+          onRemove={handleRemoveStopReason}
+          maxCount={5}
+          placeholder="예: 알러지 의심"
+          tagColor="rose"
+        />
 
         {/* Excerpt */}
         <div>

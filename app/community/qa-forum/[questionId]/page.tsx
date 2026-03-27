@@ -22,6 +22,9 @@ import {
   Upload,
   Image as ImageIcon
 } from 'lucide-react'
+import QuestionEditForm from './QuestionEditForm'
+import QuestionAnswersSection from './QuestionAnswersSection'
+import RelatedQuestionsList from './RelatedQuestionsList'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 import CommentThread, { Comment } from '@/app/components/qa-forum/CommentThread'
 import { getBrowserClient } from '@/lib/supabase-client'
@@ -1115,21 +1118,33 @@ export default function QuestionDetailPage() {
                 </span>
               </div>
 
-              {/* Title */}
+              {/* Title & Content */}
               {isEditingQuestion ? (
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full text-xl font-bold text-gray-900 mb-4 px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="질문 제목"
+                <QuestionEditForm
+                  editTitle={editTitle}
+                  setEditTitle={setEditTitle}
+                  editContent={editContent}
+                  setEditContent={setEditContent}
+                  editCategory={editCategory}
+                  setEditCategory={setEditCategory}
+                  editImagePreview={editImagePreview}
+                  editImageUrl={editImageUrl}
+                  editImageRemoved={editImageRemoved}
+                  editUploadError={editUploadError}
+                  isSavingEdit={isSavingEdit}
+                  editFileInputRef={editFileInputRef}
+                  questionCategories={questionCategories}
+                  onImageSelect={handleEditImageSelect}
+                  onImageRemove={handleEditImageRemove}
+                  onSave={handleSaveEditQuestion}
+                  onCancel={handleCancelEditQuestion}
                 />
               ) : (
+                <>
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">
                     {question.title}
                   </h1>
-                  {/* 수정/삭제 버튼 - 본인 글일 경우에만 표시 */}
                   {user && question.author_id === user.id && (
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
@@ -1149,128 +1164,6 @@ export default function QuestionDetailPage() {
                     </div>
                   )}
                 </div>
-              )}
-
-              {/* Content */}
-              {isEditingQuestion ? (
-                <div className="space-y-4 mb-6">
-                  {/* 카테고리 선택 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
-                    <select
-                      value={editCategory}
-                      onChange={(e) => setEditCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {questionCategories.map((cat) => (
-                        <option key={cat.value} value={cat.value}>
-                          {cat.emoji} {cat.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* 내용 입력 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      rows={8}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      placeholder="질문 내용을 입력하세요"
-                    />
-                  </div>
-                  {/* 이미지 편집 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">이미지 첨부 (선택사항)</label>
-                    <input
-                      ref={editFileInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
-                      onChange={handleEditImageSelect}
-                      className="hidden"
-                    />
-                    {editImagePreview ? (
-                      <div className="relative rounded-xl overflow-hidden border border-gray-200">
-                        <img src={editImagePreview} alt="미리보기" className="w-full max-h-48 object-cover" />
-                        <div className="absolute top-2 right-2 flex gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => editFileInputRef.current?.click()}
-                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-                            title="이미지 교체"
-                          >
-                            <Upload className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleEditImageRemove}
-                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-                            title="이미지 삭제"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : editImageUrl && !editImageRemoved ? (
-                      <div className="relative rounded-xl overflow-hidden border border-gray-200">
-                        <img src={editImageUrl} alt="기존 이미지" className="w-full max-h-48 object-cover" />
-                        <div className="absolute top-2 right-2 flex gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => editFileInputRef.current?.click()}
-                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-                            title="이미지 교체"
-                          >
-                            <Upload className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleEditImageRemove}
-                            className="p-1.5 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-                            title="이미지 삭제"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => editFileInputRef.current?.click()}
-                        className="w-full flex flex-col items-center gap-2 py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50/30 transition-colors"
-                      >
-                        <Upload className="h-6 w-6 text-gray-400" />
-                        <span className="text-sm text-gray-500">클릭하여 이미지 선택</span>
-                        <span className="text-xs text-gray-400">JPG, PNG, WebP, GIF, HEIC · 최대 5MB</span>
-                      </button>
-                    )}
-                    {editUploadError && (
-                      <p className="mt-1.5 text-xs text-red-500">{editUploadError}</p>
-                    )}
-                  </div>
-
-                  {/* 저장/취소 버튼 */}
-                  <div className="flex justify-end gap-3">
-                    <button
-                      onClick={handleCancelEditQuestion}
-                      disabled={isSavingEdit}
-                      className="px-4 py-2 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      취소
-                    </button>
-                    <button
-                      onClick={handleSaveEditQuestion}
-                      disabled={isSavingEdit || !editTitle.trim() || !editContent.trim()}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <Save className="h-4 w-4" />
-                      {isSavingEdit ? '저장 중...' : '저장'}
-                    </button>
-                  </div>
-                </div>
-              ) : (
                 <div className="mb-6">
                   {question.summary && (
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl">
@@ -1314,6 +1207,7 @@ export default function QuestionDetailPage() {
                     />
                   )}
                 </div>
+                </>
               )}
 
               {/* Actions - 하단 통계 및 액션 */}
@@ -1372,119 +1266,26 @@ export default function QuestionDetailPage() {
             </div>
 
             {/* Comments Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center">
-                  <MessageCircle className="h-4 w-4 text-blue-500" />
-                </span>
-                {comments.length}개의 답변
-              </h2>
-
-              <div className="space-y-3 mb-6">
-                {comments.map((comment) => (
-                  <CommentThread
-                    key={comment.id}
-                    comment={comment}
-                    onUpvote={handleCommentUpvote}
-                    onReply={handleReply}
-                    onEdit={handleEditComment}
-                    onDelete={handleDeleteComment}
-                    formatTimeAgo={formatTimeAgo}
-                    currentUserId={user?.id}
-                  />
-                ))}
-              </div>
-
-              {/* New Comment Form */}
-              <div className="pt-4 border-t border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                  답변 작성하기
-                </h3>
-                {user ? (
-                  <form onSubmit={handleCommentSubmit} className="space-y-4">
-                    <div>
-                      <textarea
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="도움이 되는 답변을 작성해주세요... (최소 10자 이상)"
-                        rows={5}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
-                        required
-                      />
-                      <div className="flex justify-between items-center mt-2">
-                        <span className={`text-xs ${
-                          newComment.trim().length < 10 
-                            ? 'text-red-500' 
-                            : newComment.trim().length > 5000
-                            ? 'text-red-500'
-                            : 'text-gray-400'
-                        }`}>
-                          {newComment.trim().length} / 5000자
-                          {newComment.trim().length < 10 && newComment.trim().length > 0 && (
-                            <span className="ml-2">(최소 10자 필요)</span>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={!newComment.trim() || newComment.trim().length < 10}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <Send className="h-4 w-4" />
-                        <span>답변 등록</span>
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-6 text-center">
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                        <User className="h-6 w-6 text-gray-400" />
-                      </div>
-                      <p className="text-sm text-gray-500">답변을 작성하려면 로그인이 필요합니다.</p>
-                      <Link
-                        href={`/login?redirect=${encodeURIComponent(`/community/qa-forum/${questionId}`)}`}
-                        className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors"
-                      >
-                        로그인하기
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <QuestionAnswersSection
+              answerCount={question.answerCount}
+              comments={comments}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              user={user}
+              questionId={questionId}
+              onSubmit={handleCommentSubmit}
+              onUpvote={handleCommentUpvote}
+              onReply={handleReply}
+              onEdit={handleEditComment}
+              onDelete={handleDeleteComment}
+              formatTimeAgo={formatTimeAgo}
+            />
 
             {/* Related Questions */}
-            {relatedQuestions.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
-                <h3 className="text-base font-bold text-gray-900 mb-4">관련 질문</h3>
-                <div className="space-y-3">
-                  {relatedQuestions.map((q) => (
-                    <Link
-                      key={q.id}
-                      href={`/community/qa-forum/${q.id}`}
-                      className="block p-3 rounded-xl hover:bg-gray-50 transition-colors group border border-gray-100"
-                    >
-                      <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
-                        {q.title}
-                      </h4>
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <ArrowUp className="h-3 w-3" />
-                          <span>{q.votes}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageCircle className="h-3 w-3" />
-                          <span>{q.answerCount || 0}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
+            <RelatedQuestionsList
+              relatedQuestions={relatedQuestions}
+              formatTimeAgo={formatTimeAgo}
+            />
           </div>
         </div>
       </div>
