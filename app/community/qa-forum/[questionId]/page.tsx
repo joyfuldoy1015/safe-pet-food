@@ -295,11 +295,12 @@ export default function QuestionDetailPage() {
             author_id: questionData.author_id
           })
 
-          // Increment view count
-          await (supabase
-            .from('community_questions') as any)
-            .update({ views: (questionData.views || 0) + 1 })
-            .eq('id', questionId)
+          // Increment view count via server API (bypasses RLS)
+          fetch('/api/community/views', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId })
+          }).catch(() => {})
         }
       } catch (error) {
         console.error('Failed to load question:', error)
