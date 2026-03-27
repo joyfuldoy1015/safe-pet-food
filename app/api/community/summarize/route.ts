@@ -6,7 +6,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request)
-  const rl = rateLimit(ip, RATE_LIMITS.analyzeHealth)
+  const rl = rateLimit(ip, RATE_LIMITS.aiCall)
   if (!rl.success) return rateLimitResponse(rl)
 
   try {

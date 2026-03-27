@@ -101,14 +101,14 @@ export function rateLimitResponse(result: RateLimitResult): NextResponse {
 }
 
 export const RATE_LIMITS = {
-  /** OpenAI API calls — expensive, strict limit */
-  analyzeHealth: { key: 'analyze-health', limit: 5, windowSeconds: 60 },
   /** Auth attempts */
   auth: { key: 'auth', limit: 10, windowSeconds: 60 },
   /** Write operations (post, comment, evaluate) */
   write: { key: 'write', limit: 20, windowSeconds: 60 },
   /** Read/search operations */
   read: { key: 'read', limit: 60, windowSeconds: 60 },
+  /** OpenAI API calls (Q&A summarize etc.) */
+  aiCall: { key: 'ai-call', limit: 5, windowSeconds: 60 },
   /** Account deletion — very strict */
   deleteAccount: { key: 'delete-account', limit: 3, windowSeconds: 3600 },
 } as const
