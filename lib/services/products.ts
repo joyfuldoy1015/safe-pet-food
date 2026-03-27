@@ -1,4 +1,5 @@
 import { getServerClient } from '@/lib/supabase-server'
+import { getAdminClient } from '@/lib/supa/serverAdmin'
 import { Product, BrandBasic } from '@/types/product'
 
 // Supabase 사용 여부 확인
@@ -319,8 +320,8 @@ export async function cacheProductGrade(
 ): Promise<void> {
   if (!isSupabaseConfigured()) return
   try {
-    const supabase = getSupabase()
-    const { data: current } = await supabase
+    const admin = getAdminClient()
+    const { data: current } = await admin
       .from('products')
       .select('grade, grade_text')
       .eq('id', productId)
@@ -329,7 +330,7 @@ export async function cacheProductGrade(
     const newGradeText = `${gradeText} (${totalScore}점)`
     if (current && current.grade === grade && current.grade_text === newGradeText) return
 
-    await (supabase.from('products') as any)
+    await (admin.from('products') as any)
       .update({ grade, grade_text: newGradeText })
       .eq('id', productId)
   } catch {

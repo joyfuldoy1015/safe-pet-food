@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerClient } from '@/lib/supabase-server'
+import { getAdminClient } from '@/lib/supa/serverAdmin'
 import { calculateAutoGrade } from '@/lib/auto-grade-calculator'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST() {
   try {
-    const supabase = getServerClient()
+    const supabase = getAdminClient()
 
     const { data: products, error: pErr } = await supabase
       .from('products')
