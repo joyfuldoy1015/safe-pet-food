@@ -457,7 +457,7 @@ export default function AskQuestionModal({
                 {isUploading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    이미지 업로드 중...
+                    업로드 중...
                   </>
                 ) : isSummarizing ? (
                   <>
