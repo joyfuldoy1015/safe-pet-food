@@ -33,11 +33,11 @@ const nextConfig = {
   async headers() {
     const cspDirectives = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://us.i.posthog.com",
-      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://us.i.posthog.com https://us-assets.i.posthog.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://images.unsplash.com https://developers.google.com https://*.supabase.co https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co https://api.openai.com https://api.vercel.com https://us.i.posthog.com https://us.posthog.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co https://api.openai.com https://api.vercel.com https://us.i.posthog.com https://us.posthog.com https://us-assets.i.posthog.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
