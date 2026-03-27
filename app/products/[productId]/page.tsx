@@ -68,13 +68,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
     cacheProductGrade(productId, autoGrade.grade, autoGrade.gradeText, autoGrade.totalScore)
   }
 
-  // 실시간 데이터 우선, 없으면 mock 사용
-  const consumer_ratings = realRatings || product.consumer_ratings
-  const community_feedback = realFeedback.total_votes > 0 ? realFeedback : product.community_feedback
-  const consumer_reviews = formattedReviews.length > 0 ? formattedReviews : product.consumer_reviews
+  const consumer_ratings = realRatings
+  const community_feedback = realFeedback.total_votes > 0 ? realFeedback : null
+  const consumer_reviews = formattedReviews.length > 0 ? formattedReviews : null
 
-  // 추천률 계산
-  const recommendRate = community_feedback
+  const recommendRate = community_feedback && community_feedback.total_votes > 0
     ? Math.round((community_feedback.recommend_yes / community_feedback.total_votes) * 100)
     : 0
 

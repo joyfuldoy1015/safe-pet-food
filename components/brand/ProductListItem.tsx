@@ -124,7 +124,7 @@ export default function ProductListItem({ product }: ProductListItemProps) {
           )}
 
           {/* 2. 추천/비추천 */}
-          {product.community_feedback && (
+          {product.community_feedback && product.community_feedback.total_votes > 0 && (
             <div className="flex items-center gap-4 mb-3">
               <div className="flex items-center gap-1">
                 <ThumbsUp className="h-4 w-4 text-green-600" />
