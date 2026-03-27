@@ -244,33 +244,6 @@ export async function getProductById(productId: string): Promise<(Product & { br
   }
 }
 
-/**
- * 브랜드 ID로 기본 정보 조회
- */
-export async function getBrandById(brandId: string): Promise<BrandBasic | null> {
-  if (!isSupabaseConfigured()) {
-    return null
-  }
-
-  try {
-    const supabase = getSupabase()
-    const { data, error } = await supabase
-      .from('brands')
-      .select('id, name, manufacturer, country')
-      .eq('id', brandId)
-      .single()
-
-    if (error || !data) {
-      console.warn('[getBrandById] Supabase error:', error)
-      return null
-    }
-
-    return data as BrandBasic
-  } catch (error) {
-    console.error('[getBrandById] Error:', error)
-    return null
-  }
-}
 
 export async function getBrandGradeData(brandId: string): Promise<{
   recallHistory: any[] | null
@@ -366,64 +339,4 @@ export async function getProductsByBrandId(brandId: string, limit: number = 6): 
   }
 }
 
-// ============================================
-// Mock 데이터
-// ============================================
-
-function getMockReviews(productId: string): FeedingReview[] {
-  return [
-    {
-      id: 'review-1',
-      user_id: 'user-1',
-      pet_id: 'pet-1',
-      product_id: productId,
-      brand: '로얄캐닌',
-      product: '로얄캐닌 독 어덜트',
-      rating: 5,
-      palatability_score: 5,
-      digestibility_score: 4,
-      coat_quality_score: 5,
-      stool_quality_score: 4,
-      recommend: true,
-      excerpt: '우리 강아지가 정말 잘 먹어요! 털도 윤기가 나고 변 상태도 좋아졌습니다.',
-      notes: null,
-      helpful_count: 24,
-      created_at: '2024-01-15T00:00:00Z',
-      pet: {
-        name: '뽀삐',
-        species: '강아지',
-        breed: '골든 리트리버'
-      },
-      user: {
-        name: '행복한집사'
-      }
-    },
-    {
-      id: 'review-2',
-      user_id: 'user-2',
-      pet_id: 'pet-2',
-      product_id: productId,
-      brand: '로얄캐닌',
-      product: '로얄캐닌 독 어덜트',
-      rating: 4,
-      palatability_score: 4,
-      digestibility_score: 4,
-      coat_quality_score: 4,
-      stool_quality_score: 4,
-      recommend: true,
-      excerpt: '가격은 조금 비싸지만 품질이 좋은 것 같아요. 기호성도 좋습니다.',
-      notes: null,
-      helpful_count: 18,
-      created_at: '2024-01-10T00:00:00Z',
-      pet: {
-        name: '초코',
-        species: '강아지',
-        breed: '시츄'
-      },
-      user: {
-        name: '초보집사'
-      }
-    }
-  ]
-}
 

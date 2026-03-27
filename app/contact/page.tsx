@@ -12,9 +12,7 @@ export default function ContactPage() {
     subject: '',
     message: ''
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const { name, email, subject, message } = formData
     const body = `이름: ${name}\n이메일: ${email}\n\n${message}`
@@ -125,20 +123,10 @@ export default function ContactPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
             >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>전송 중...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="h-5 w-5" />
-                  <span>문의 보내기</span>
-                </>
-              )}
+              <Send className="h-5 w-5" />
+              <span>문의 보내기</span>
             </button>
           </form>
         </div>

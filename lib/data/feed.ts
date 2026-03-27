@@ -224,76 +224,6 @@ function reviewToFeedItem(review: ReviewLog, ownerName: string, petName: string)
 }
 
 /**
- * Get popular feed items (sorted by engagement)
- */
-export async function getPopular(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  const items: UnifiedFeedItem[] = []
-
-  // Add Q&A items from Supabase
-  const questions = await fetchCommunityQuestions()
-  const qaItems = questions
-    .map(questionToFeedItem)
-    .sort((a, b) => {
-      const scoreA = a.stats.likes * 2 + a.stats.comments + a.stats.views / 10
-      const scoreB = b.stats.likes * 2 + b.stats.comments + b.stats.views / 10
-      return scoreB - scoreA
-    })
-    .slice(0, Math.floor(limit / 2))
-
-  items.push(...qaItems)
-
-  // Add Review items from Supabase
-  const reviewLogs = await fetchReviewLogs()
-  const reviewItems = reviewLogs
-    .slice(0, Math.floor(limit / 2))
-    .map((review: any) => 
-      reviewToFeedItem(review, review.ownerName || '익명', review.petName || '펫')
-    )
-    .sort((a, b) => {
-      const scoreA = a.stats.likes * 2 + a.stats.comments + a.stats.views / 10
-      const scoreB = b.stats.likes * 2 + b.stats.comments + b.stats.views / 10
-      return scoreB - scoreA
-    })
-
-  items.push(...reviewItems)
-
-  // Sort all items by engagement score
-  return items.sort((a, b) => {
-    const scoreA = a.stats.likes * 2 + a.stats.comments + a.stats.views / 10
-    const scoreB = b.stats.likes * 2 + b.stats.comments + b.stats.views / 10
-    return scoreB - scoreA
-  }).slice(0, limit)
-}
-
-/**
- * Get recent feed items (sorted by createdAt desc)
- */
-export async function getRecent(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  const items: UnifiedFeedItem[] = []
-
-  // Add Q&A items from Supabase
-  const questions = await fetchCommunityQuestions()
-  const qaItems = questions
-    .map(questionToFeedItem)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-  items.push(...qaItems)
-
-  // Add Review items from Supabase
-  const reviewLogs = await fetchReviewLogs()
-  const reviewItems = reviewLogs.map((review: any) => 
-    reviewToFeedItem(review, review.ownerName || '익명', review.petName || '펫')
-  )
-
-  items.push(...reviewItems)
-
-  // Sort all by createdAt desc
-  return items
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, limit)
-}
-
-/**
  * Get Q&A items only
  */
 export async function getQA(limit: number = 20): Promise<UnifiedFeedItem[]> {
@@ -304,16 +234,5 @@ export async function getQA(limit: number = 20): Promise<UnifiedFeedItem[]> {
     .slice(0, limit)
 }
 
-/**
- * Get Review/Log items only
- */
-export async function getReviews(limit: number = 20): Promise<UnifiedFeedItem[]> {
-  const reviewLogs = await fetchReviewLogs()
-  return reviewLogs
-    .map((review: any) => 
-      reviewToFeedItem(review, review.ownerName || '익명', review.petName || '펫')
-    )
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, limit)
-}
+
 
