@@ -32,6 +32,7 @@ interface ProductListItemProps {
 // 등급 색상
 const getGradeColor = (grade?: string) => {
   switch (grade) {
+    case 'S': return 'bg-violet-100 text-violet-800 border-violet-300'
     case 'A': return 'bg-green-100 text-green-800 border-green-300'
     case 'B': return 'bg-blue-100 text-blue-800 border-blue-300'
     case 'C': return 'bg-yellow-100 text-yellow-800 border-yellow-300'

@@ -271,6 +271,43 @@ export async function getBrandById(brandId: string): Promise<BrandBasic | null> 
   }
 }
 
+export async function getBrandGradeData(brandId: string): Promise<{
+  recallHistory: any[] | null
+  ingredients: any[] | null
+} | null> {
+  if (!isSupabaseConfigured()) return null
+  try {
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+      .from('brands')
+      .select('recall_history, ingredients, representative_product_id')
+      .eq('id', brandId)
+      .single()
+
+    if (error || !data) return null
+
+    let ingredients = (data as any).ingredients || null
+
+    if ((data as any).representative_product_id) {
+      const { data: repProduct } = await supabase
+        .from('products')
+        .select('ingredients')
+        .eq('id', (data as any).representative_product_id)
+        .single() as { data: { ingredients: any } | null }
+      if (repProduct?.ingredients) {
+        ingredients = repProduct.ingredients
+      }
+    }
+
+    return {
+      recallHistory: (data as any).recall_history || null,
+      ingredients,
+    }
+  } catch {
+    return null
+  }
+}
+
 /**
  * 브랜드 ID로 해당 브랜드의 다른 제품들 조회
  */

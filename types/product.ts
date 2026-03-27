@@ -1,5 +1,5 @@
 // 제품 상세 타입 정의
-export type ProductGrade = 'A' | 'B' | 'C' | 'D' | 'F'
+export type ProductGrade = 'S' | 'A' | 'B' | 'C' | 'D' | 'F'
 
 export interface Product {
   id: string

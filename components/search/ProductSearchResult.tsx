@@ -19,6 +19,7 @@ interface ProductSearchResultProps {
 
 const getGradeStyle = (grade?: string) => {
   switch (grade) {
+    case 'S': return { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-200', label: 'S' }
     case 'A': return { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', label: 'A' }
     case 'B': return { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', label: 'B' }
     case 'C': return { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-200', label: 'C' }

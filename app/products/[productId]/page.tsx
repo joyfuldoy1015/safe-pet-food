@@ -7,9 +7,11 @@ import {
   getProductReviews,
   aggregateProductRatings,
   aggregateCommunityFeedback,
-  formatReviewsForDisplay
+  formatReviewsForDisplay,
+  getBrandGradeData
 } from '@/lib/services/products'
 import GradeCredibility from '@/components/product/GradeCredibility'
+import { calculateAutoGrade, type AutoGradeResult } from '@/lib/auto-grade-calculator'
 
 interface PageProps {
   params: {
@@ -20,6 +22,7 @@ interface PageProps {
 // 등급 배지 색상
 const getGradeColor = (grade?: string) => {
   switch (grade) {
+    case 'S': return 'bg-violet-100 text-violet-700 border-violet-200'
     case 'A': return 'bg-green-100 text-green-700 border-green-200'
     case 'B': return 'bg-blue-100 text-blue-700 border-blue-200'
     case 'C': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
@@ -51,16 +54,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
     )
   }
 
-  // 브랜드 정보는 제품과 함께 가져온 데이터 사용
   const brand = (product as any).brand || null
-  const relatedProducts = await getProductsByBrandId(product.brand_id, 6)
+  const [relatedProducts, feedingReviews, brandGradeData] = await Promise.all([
+    getProductsByBrandId(product.brand_id, 6),
+    getProductReviews(productId),
+    getBrandGradeData(product.brand_id),
+  ])
   const otherProducts = relatedProducts.filter(p => p.id !== product.id).slice(0, 5)
 
-  // 🆕 실시간 급여 후기 데이터 가져오기
-  const feedingReviews = await getProductReviews(productId)
   const realRatings = aggregateProductRatings(feedingReviews)
   const realFeedback = aggregateCommunityFeedback(feedingReviews)
   const formattedReviews = formatReviewsForDisplay(feedingReviews)
+
+  const autoGrade = calculateAutoGrade({
+    recallHistory: brandGradeData?.recallHistory,
+    ingredients: brandGradeData?.ingredients || product.ingredients,
+    ratings: realRatings,
+    reviewCount: feedingReviews.length,
+    guaranteedAnalysis: product.guaranteed_analysis,
+    targetSpecies: product.target_species,
+  })
 
   // 실시간 데이터 우선, 없으면 mock 사용
   const consumer_ratings = realRatings || product.consumer_ratings
@@ -90,20 +103,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
           {/* 등급 배지 + 제품명 */}
           <div className="flex items-start gap-4 mb-4">
-            <div className={`flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl border ${product.grade ? getGradeColor(product.grade) : 'bg-gray-100 text-gray-400 border-gray-200'}`}>
-              {product.grade || '-'}
+            <div className={`flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl border ${autoGrade.evaluatedCount >= 2 ? getGradeColor(autoGrade.grade) : 'bg-gray-100 text-gray-400 border-gray-200'}`}>
+              {autoGrade.evaluatedCount >= 2 ? autoGrade.grade : '-'}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-bold text-gray-900 mb-1">
                 {product.name}
               </h1>
               <div className="flex items-center gap-2">
-                {product.grade ? (
-                  product.grade_text && (
-                    <span className="text-xs text-gray-500">{product.grade_text}</span>
-                  )
+                {autoGrade.evaluatedCount >= 2 ? (
+                  <span className="text-xs text-gray-500">{autoGrade.gradeText} ({autoGrade.totalScore}점)</span>
                 ) : (
-                  <span className="text-xs text-gray-400">등급 산정 전</span>
+                  <span className="text-xs text-gray-400">평가 데이터 부족</span>
                 )}
                 {product.target_species && product.target_species !== 'all' && (
                   <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
@@ -443,7 +454,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
         {/* Grade Credibility Section */}
         <section className="mb-4">
-          <GradeCredibility grade={product.grade} />
+          <GradeCredibility autoGrade={autoGrade} />
         </section>
 
 
