@@ -141,7 +141,12 @@ export function calculateTransparencyScore(
     const isVague = VAGUE_PATTERNS.some(p => p.test(name))
     if (isVague) {
       noneCount++
-    } else if (/\(.+\)/.test(name)) {
+    } else if (
+      /\(.+\)/.test(name) ||
+      ing.disclosure_level === 'full' ||
+      ing.percentage != null ||
+      ing.source
+    ) {
       fullCount++
     } else {
       partialCount++

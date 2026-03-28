@@ -74,10 +74,14 @@ async function runBatchGrade() {
 
   for (const product of products) {
     const brand = brandMap.get(product.brand_id)
-    let ingredients = brand?.ingredients || product.ingredients
-    if (brand?.representative_product_id) {
-      const repProd = repProductMap.get(brand.representative_product_id)
-      if (repProd?.ingredients) ingredients = repProd.ingredients
+    let ingredients = product.ingredients && Array.isArray(product.ingredients) && product.ingredients.length > 0
+      ? product.ingredients
+      : brand?.ingredients
+    if (!ingredients || (Array.isArray(ingredients) && ingredients.length === 0)) {
+      if (brand?.representative_product_id) {
+        const repProd = repProductMap.get(brand.representative_product_id)
+        if (repProd?.ingredients) ingredients = repProd.ingredients
+      }
     }
 
     const reviews = reviewsByProduct.get(product.id) || []

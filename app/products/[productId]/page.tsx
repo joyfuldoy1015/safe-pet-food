@@ -55,9 +55,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const realFeedback = aggregateCommunityFeedback(feedingReviews)
   const formattedReviews = formatReviewsForDisplay(feedingReviews)
 
+  const productIngredients = product.ingredients && Array.isArray(product.ingredients) && product.ingredients.length > 0
+    ? product.ingredients
+    : brandGradeData?.ingredients
+
   const autoGrade = calculateAutoGrade({
     recallHistory: brandGradeData?.recallHistory,
-    ingredients: brandGradeData?.ingredients || product.ingredients,
+    ingredients: productIngredients,
     ratings: realRatings,
     reviewCount: feedingReviews.length,
     guaranteedAnalysis: product.guaranteed_analysis,
