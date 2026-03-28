@@ -6,8 +6,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import {
   ArrowLeft,
-  ArrowUp,
-  MessageCircle,
+  Heart,
+  MessageSquare,
   User,
   Clock,
   CheckCircle,
@@ -1219,21 +1219,21 @@ export default function QuestionDetailPage() {
                     className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-500 transition-colors"
                   >
                     <span className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                      question.isUpvoted ? 'bg-red-50' : 'bg-gray-50'
+                      question.isUpvoted ? 'bg-red-50' : 'bg-red-50'
                     }`}>
-                      <ArrowUp className={`h-4 w-4 ${question.isUpvoted ? 'text-red-500' : 'text-gray-400'}`} />
+                      <Heart className={`h-4 w-4 ${question.isUpvoted ? 'text-red-500 fill-current' : 'text-red-400'}`} />
                     </span>
                     <span className="font-medium text-gray-600">{question.votes}</span>
                   </button>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     <span className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center">
-                      <MessageCircle className="h-4 w-4 text-blue-400" />
+                      <MessageSquare className="h-4 w-4 text-blue-400" />
                     </span>
                     <span className="font-medium text-gray-600">{question.answerCount}</span>
                   </div>
                   {question.views !== undefined && (
                     <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <span className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center">
+                      <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
                         <Eye className="h-4 w-4 text-gray-400" />
                       </span>
                       <span className="font-medium text-gray-600">{question.views}</span>
