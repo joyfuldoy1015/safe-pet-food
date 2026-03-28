@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowUp, MessageCircle } from 'lucide-react'
+import { Heart, MessageSquare, Eye } from 'lucide-react'
 import { Question } from '@/app/components/qa-forum/QuestionCard'
 
 interface RelatedQuestionsListProps {
@@ -27,14 +27,26 @@ export default function RelatedQuestionsList({
               {q.title}
             </h4>
             <div className="flex items-center gap-3 text-xs text-gray-400">
-              <div className="flex items-center gap-1">
-                <ArrowUp className="h-3 w-3" />
-                <span>{q.votes}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <MessageCircle className="h-3 w-3" />
-                <span>{q.answerCount || 0}</span>
-              </div>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center">
+                  <Heart className="h-3 w-3 text-red-400" />
+                </span>
+                <span className="text-gray-600">{q.votes}</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center">
+                  <MessageSquare className="h-3 w-3 text-blue-400" />
+                </span>
+                <span className="text-gray-600">{q.answerCount || 0}</span>
+              </span>
+              {q.views !== undefined && (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Eye className="h-3 w-3 text-gray-400" />
+                  </span>
+                  <span className="text-gray-600">{q.views}</span>
+                </span>
+              )}
             </div>
           </Link>
         ))}
