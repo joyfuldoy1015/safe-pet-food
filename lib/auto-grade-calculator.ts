@@ -215,6 +215,14 @@ function parseNumericValue(val: any): number | null {
   return null
 }
 
+function resolveField(ga: Record<string, any>, ...keys: string[]): number | null {
+  for (const key of keys) {
+    const val = parseNumericValue(ga[key])
+    if (val !== null) return val
+  }
+  return null
+}
+
 export function calculateNutritionScore(
   guaranteedAnalysis: Record<string, any> | null | undefined,
   targetSpecies?: 'dog' | 'cat' | 'all'
@@ -223,8 +231,8 @@ export function calculateNutritionScore(
     return { score: null, detail: '성분 정보 없음' }
   }
 
-  const protein = parseNumericValue(guaranteedAnalysis.protein)
-  const fat = parseNumericValue(guaranteedAnalysis.fat)
+  const protein = resolveField(guaranteedAnalysis, 'protein', '조단백', 'crude_protein')
+  const fat = resolveField(guaranteedAnalysis, 'fat', '조지방', 'crude_fat')
 
   if (protein === null && fat === null) {
     return { score: null, detail: '성분 정보 부족' }
@@ -266,7 +274,7 @@ export function calculateNutritionScore(
     }
   }
 
-  const fiber = parseNumericValue(guaranteedAnalysis.fiber)
+  const fiber = resolveField(guaranteedAnalysis, 'fiber', '조섬유', 'crude_fiber')
   if (fiber !== null) {
     totalChecks++
     if (fiber <= 7) {
