@@ -262,11 +262,47 @@ export default function QuestionDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionId]) // Only reload when questionId changes
 
+  // Load user's existing votes from DB
+  useEffect(() => {
+    const loadUserVotes = async () => {
+      if (!question) return
+      const allIds = [questionId]
+      const collectIds = (items: Comment[]) => {
+        items.forEach((c) => {
+          allIds.push(c.id)
+          if (c.replies) collectIds(c.replies)
+        })
+      }
+      collectIds(comments)
+
+      try {
+        const res = await fetch(`/api/community/votes?targetIds=${allIds.join(',')}`)
+        const { votes } = await res.json()
+        if (votes && typeof votes === 'object') {
+          setUserVotes(votes)
+          if (votes[questionId]) {
+            setQuestion((prev) => prev ? { ...prev, isUpvoted: true } : prev)
+          }
+          setComments((prev) =>
+            prev.map((c) => ({
+              ...c,
+              isUpvoted: !!votes[c.id],
+              replies: c.replies?.map((r) => ({ ...r, isUpvoted: !!votes[r.id] }))
+            }))
+          )
+        }
+      } catch {
+        // User might not be logged in
+      }
+    }
+    loadUserVotes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question?.id, comments.length])
+
   // Handle question upvote
-  const handleQuestionUpvote = () => {
+  const handleQuestionUpvote = async () => {
     if (!question) return
 
-    // 로그인 체크
     if (!user) {
       if (confirm('로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?')) {
         router.push(`/login?redirect=/community/qa-forum/${questionId}`)
@@ -276,12 +312,12 @@ export default function QuestionDetailPage() {
 
     const isCurrentlyUpvoted = userVotes[questionId]
 
+    // Optimistic UI update
     setQuestion({
       ...question,
       votes: isCurrentlyUpvoted ? question.votes - 1 : question.votes + 1,
       isUpvoted: !isCurrentlyUpvoted
     })
-
     setUserVotes((prev) => {
       if (isCurrentlyUpvoted) {
         const newVotes = { ...prev }
@@ -290,6 +326,32 @@ export default function QuestionDetailPage() {
       }
       return { ...prev, [questionId]: true }
     })
+
+    try {
+      const res = await fetch('/api/community/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetType: 'question', targetId: questionId })
+      })
+      const result = await res.json()
+      if (result.success) {
+        setQuestion((prev) => prev ? { ...prev, votes: result.votes, isUpvoted: result.voted } : prev)
+        setUserVotes((prev) => {
+          if (result.voted) return { ...prev, [questionId]: true }
+          const newVotes = { ...prev }
+          delete newVotes[questionId]
+          return newVotes
+        })
+      }
+    } catch (error) {
+      console.error('Failed to save vote:', error)
+      // Revert on failure
+      setQuestion({
+        ...question,
+        votes: question.votes,
+        isUpvoted: isCurrentlyUpvoted || false
+      })
+    }
   }
 
   // Handle bookmark toggle
@@ -358,8 +420,7 @@ export default function QuestionDetailPage() {
   }
 
   // Handle comment upvote
-  const handleCommentUpvote = (commentId: string) => {
-    // 로그인 체크
+  const handleCommentUpvote = async (commentId: string) => {
     if (!user) {
       if (confirm('로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?')) {
         router.push(`/login?redirect=/community/qa-forum/${questionId}`)
@@ -369,34 +430,19 @@ export default function QuestionDetailPage() {
 
     const isCurrentlyUpvoted = userVotes[commentId]
 
-    setComments((prev) =>
-      prev.map((c) => {
+    // Optimistic UI update
+    const updateComment = (items: Comment[]): Comment[] =>
+      items.map((c) => {
         if (c.id === commentId) {
-          return {
-            ...c,
-            votes: isCurrentlyUpvoted ? c.votes - 1 : c.votes + 1,
-            isUpvoted: !isCurrentlyUpvoted
-          }
+          return { ...c, votes: isCurrentlyUpvoted ? c.votes - 1 : c.votes + 1, isUpvoted: !isCurrentlyUpvoted }
         }
-        // Handle nested replies
         if (c.replies) {
-          return {
-            ...c,
-            replies: c.replies.map((r) =>
-              r.id === commentId
-                ? {
-                    ...r,
-                    votes: isCurrentlyUpvoted ? r.votes - 1 : r.votes + 1,
-                    isUpvoted: !isCurrentlyUpvoted
-                  }
-                : r
-            )
-          }
+          return { ...c, replies: updateComment(c.replies) }
         }
         return c
       })
-    )
 
+    setComments(updateComment)
     setUserVotes((prev) => {
       if (isCurrentlyUpvoted) {
         const newVotes = { ...prev }
@@ -405,6 +451,32 @@ export default function QuestionDetailPage() {
       }
       return { ...prev, [commentId]: true }
     })
+
+    try {
+      const res = await fetch('/api/community/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetType: 'answer', targetId: commentId })
+      })
+      const result = await res.json()
+      if (result.success) {
+        const applyServerResult = (items: Comment[]): Comment[] =>
+          items.map((c) => {
+            if (c.id === commentId) return { ...c, votes: result.votes, isUpvoted: result.voted }
+            if (c.replies) return { ...c, replies: applyServerResult(c.replies) }
+            return c
+          })
+        setComments(applyServerResult)
+        setUserVotes((prev) => {
+          if (result.voted) return { ...prev, [commentId]: true }
+          const newVotes = { ...prev }
+          delete newVotes[commentId]
+          return newVotes
+        })
+      }
+    } catch (error) {
+      console.error('Failed to save comment vote:', error)
+    }
   }
 
   // Handle reply - Supabase에 저장하고 재귀적으로 댓글 트리 업데이트

@@ -7,6 +7,7 @@ import QuestionCard, { Question } from '@/app/components/qa-forum/QuestionCard'
 import AskQuestionModal from '@/app/components/qa-forum/AskQuestionModal'
 import CategoryTabs from '@/app/components/qa-forum/CategoryTabs'
 import { getBrowserClient } from '@/lib/supabase-client'
+import { useAuth } from '@/hooks/useAuth'
 import { formatTimeAgo } from '@/lib/utils/format'
 
 // Categories configuration
@@ -28,6 +29,7 @@ const QUESTIONS_PER_PAGE = 5
 
 export default function CommunityQAForumPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [sortOption, setSortOption] = useState<SortOption>('recent')
@@ -98,6 +100,21 @@ export default function CommunityQAForumPage() {
         )
 
         setQuestions(questionsWithAnswers)
+
+        // Load user's existing votes
+        const ids = questionsWithAnswers.map((q: Question) => q.id)
+        if (ids.length > 0) {
+          try {
+            const res = await fetch(`/api/community/votes?targetIds=${ids.join(',')}`)
+            const { votes } = await res.json()
+            if (votes && typeof votes === 'object') {
+              setUserVotes(votes)
+              setQuestions((prev) => prev.map((q) => ({ ...q, isUpvoted: !!votes[q.id] })))
+            }
+          } catch {
+            // User might not be logged in
+          }
+        }
       } catch (error) {
         console.error('Failed to load questions:', error)
       } finally {
@@ -171,69 +188,50 @@ export default function CommunityQAForumPage() {
 
   // Handle upvote
   const handleUpvote = async (questionId: string) => {
-    try {
-      const supabase = getBrowserClient()
-      if (!supabase) return
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
-          router.push(`/login?redirect=${encodeURIComponent('/community/qa-forum')}`)
-        }
-        return
+    if (!user) {
+      if (confirm('로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+        router.push(`/login?redirect=${encodeURIComponent('/community/qa-forum')}`)
       }
+      return
+    }
 
-      const isCurrentlyUpvoted = userVotes[questionId]
+    const isCurrentlyUpvoted = userVotes[questionId]
 
-      if (isCurrentlyUpvoted) {
-        // Remove vote
-        await supabase
-          .from('community_votes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('target_type', 'question')
-          .eq('target_id', questionId)
-
-        // Decrement vote count
-        await supabase
-          .from('community_questions')
-          .update({ votes: supabase.rpc('decrement', { row_id: questionId }) } as any)
-          .eq('id', questionId)
-      } else {
-        // Add vote
-        await supabase
-          .from('community_votes')
-          .insert({
-            user_id: user.id,
-            target_type: 'question',
-            target_id: questionId,
-            vote_value: 1
-          } as any)
-
-        // Increment vote count
-        await supabase
-          .from('community_questions')
-          .update({ votes: supabase.rpc('increment', { row_id: questionId }) } as any)
-          .eq('id', questionId)
-      }
-
-      // Update local state
-      setQuestions((prev) =>
-        prev.map((q) =>
-          q.id === questionId
-            ? { ...q, votes: isCurrentlyUpvoted ? q.votes - 1 : q.votes + 1 }
-            : q
-        )
+    // Optimistic UI update
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === questionId
+          ? { ...q, votes: isCurrentlyUpvoted ? q.votes - 1 : q.votes + 1 }
+          : q
       )
+    )
+    setUserVotes((prev) => {
+      if (isCurrentlyUpvoted) {
+        const newVotes = { ...prev }
+        delete newVotes[questionId]
+        return newVotes
+      }
+      return { ...prev, [questionId]: true }
+    })
 
-      setUserVotes((prev) => {
-        if (isCurrentlyUpvoted) {
+    try {
+      const res = await fetch('/api/community/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetType: 'question', targetId: questionId })
+      })
+      const result = await res.json()
+      if (result.success) {
+        setQuestions((prev) =>
+          prev.map((q) => q.id === questionId ? { ...q, votes: result.votes } : q)
+        )
+        setUserVotes((prev) => {
+          if (result.voted) return { ...prev, [questionId]: true }
           const newVotes = { ...prev }
           delete newVotes[questionId]
           return newVotes
-        }
-        return { ...prev, [questionId]: true }
-      })
+        })
+      }
     } catch (error) {
       console.error('Failed to update vote:', error)
     }
