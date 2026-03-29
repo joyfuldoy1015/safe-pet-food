@@ -339,8 +339,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     'EPA+DHA', '나트륨', '오메가3', '오메가6', '칼로리(kcal/kg)',
                     'protein', 'fat', 'fiber', 'moisture', 'ash', 'calcium', 'phosphorus'
                   ]
+                  const isCalorieKey = (k: string) => /칼로리|calorie|kcal|열량/i.test(k)
                   const entries = Object.entries(product.guaranteed_analysis)
                   const sorted = entries.sort(([a], [b]) => {
+                    const aIsCal = isCalorieKey(a)
+                    const bIsCal = isCalorieKey(b)
+                    if (aIsCal && !bIsCal) return 1
+                    if (!aIsCal && bIsCal) return -1
                     const idxA = displayOrder.indexOf(a)
                     const idxB = displayOrder.indexOf(b)
                     if (idxA !== -1 && idxB !== -1) return idxA - idxB
