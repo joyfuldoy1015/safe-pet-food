@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, HelpCircle, ChevronRight } from "lucide-react";
+import { Heart, MessageSquare, ChevronRight } from "lucide-react";
 import React from "react";
 import Image from "next/image";
 
@@ -21,7 +21,7 @@ export interface PetLogCardProps {
   petWeightKg?: number;          // 28 - optional
   review: string;                // 본문
   likes: number;                 // 89
-  comments: number;              // 23 (질문 수로 사용)
+  comments: number;              // 응원 한마디 등 댓글 수 (review_logs.comments_count)
   views?: number;                // 1247 - optional
   category?: PetLogCategory;     // feed | snack | supplement | toilet
   functionalTag?: string;        // "눈물 자국 개선", "고단백 식단 관리" 등
@@ -175,7 +175,7 @@ export default function PetLogCard(props: PetLogCardProps) {
         </p>
       )}
 
-      {/* 하단: 좋아요 + 질문 + 화살표 */}
+      {/* 하단: 좋아요 + 댓글(응원 한마디) + 화살표 */}
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
         <div className="flex items-center gap-4">
           {/* 좋아요 */}
@@ -186,10 +186,10 @@ export default function PetLogCard(props: PetLogCardProps) {
             <span className="font-medium text-gray-600">{props.likes}</span>
           </span>
           
-          {/* 질문 */}
+          {/* 댓글 */}
           <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-            <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
-              <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
+            <span className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center">
+              <MessageSquare className="h-3.5 w-3.5 text-blue-400" />
             </span>
             <span className="font-medium text-gray-600">{props.comments}</span>
           </span>
