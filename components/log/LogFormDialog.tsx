@@ -346,24 +346,37 @@ function ReviewLogFormContent({
   const [isCustomBrand, setIsCustomBrand] = useState(false)
   const [isCustomProduct, setIsCustomProduct] = useState(false)
 
-  // 브랜드 목록 로드
+  // 카테고리에 맞는 브랜드 목록 로드
   useEffect(() => {
     const loadBrands = async () => {
       try {
         const supabase = getBrowserClient()
-        const { data } = await supabase
-          .from('brands')
-          .select('id, name')
-          .order('name')
-        if (data) setBrandOptions(data)
+        const category = formData.category || 'feed'
+
+        const { data: products } = await supabase
+          .from('products')
+          .select('brand_id')
+          .eq('category', category)
+
+        if (products && products.length > 0) {
+          const brandIds = Array.from(new Set(products.map((p: any) => p.brand_id)))
+          const { data: brands } = await supabase
+            .from('brands')
+            .select('id, name')
+            .in('id', brandIds)
+            .order('name')
+          setBrandOptions(brands || [])
+        } else {
+          setBrandOptions([])
+        }
       } catch (err) {
         console.error('[LogFormDialog] Failed to load brands:', err)
       }
     }
     loadBrands()
-  }, [])
+  }, [formData.category])
 
-  // 브랜드 선택 시 제품 목록 로드
+  // 브랜드 선택 시 해당 카테고리의 제품 목록 로드
   useEffect(() => {
     if (!formData.brand || isCustomBrand) {
       setProductOptions([])
@@ -377,11 +390,17 @@ function ReviewLogFormContent({
           setProductOptions([])
           return
         }
-        const { data } = await supabase
+        let query = supabase
           .from('products')
           .select('id, name')
           .eq('brand_id', selectedBrand.id)
           .order('name')
+
+        if (formData.category) {
+          query = query.eq('category', formData.category)
+        }
+
+        const { data } = await query
         if (data && data.length > 0) {
           setProductOptions(data)
         } else {
@@ -392,7 +411,7 @@ function ReviewLogFormContent({
       }
     }
     loadProducts()
-  }, [formData.brand, brandOptions, isCustomBrand])
+  }, [formData.brand, brandOptions, isCustomBrand, formData.category])
 
   // Load edit data
   useEffect(() => {
@@ -636,7 +655,13 @@ function ReviewLogFormContent({
               <button
                 key={cat}
                 type="button"
-                onClick={() => setFormData({ ...formData, category: cat })}
+                onClick={() => {
+                  if (formData.category !== cat) {
+                    setFormData({ ...formData, category: cat, brand: '', product: '' })
+                    setIsCustomBrand(false)
+                    setIsCustomProduct(false)
+                  }
+                }}
                 className={`px-4 py-3 rounded-xl border-2 transition-colors text-sm ${
                   formData.category === cat
                     ? 'border-[#3056F5] bg-blue-50 text-[#3056F5]'

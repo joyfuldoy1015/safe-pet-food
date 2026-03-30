@@ -58,7 +58,7 @@ export default function BrandProductPicker({
             {isCustomBrand ? '목록에서 선택' : '직접 입력'}
           </button>
         </div>
-        {isCustomBrand ? (
+        {isCustomBrand || brandOptions.length === 0 ? (
           <input
             id="brand"
             type="text"
@@ -84,6 +84,9 @@ export default function BrandProductPicker({
               <option key={b.id} value={b.name}>{b.name}</option>
             ))}
           </select>
+        )}
+        {!isCustomBrand && brandOptions.length === 0 && (
+          <p className="text-xs text-gray-400 mt-1">해당 카테고리에 등록된 브랜드가 없습니다. 직접 입력해 주세요.</p>
         )}
       </div>
 
