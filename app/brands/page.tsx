@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
-import { Star, Shield, AlertTriangle, CheckCircle, Users, ArrowLeft, Search, Filter, BarChart3, MessageSquare, ChevronDown } from 'lucide-react'
+import { Shield, AlertTriangle, CheckCircle, Search, Filter, ChevronDown } from 'lucide-react'
 import { calculateSafiScore, getSafiLevelColor, getSafiLevelLabel, type SafiResult } from '@/lib/safi-calculator'
 import { getBrowserClient } from '@/lib/supabase-client'
 
@@ -17,7 +17,6 @@ interface Brand {
     severity: string
     resolved: boolean
   }>
-  overall_rating: number
   product_lines: string[]
   products_count?: number // products 테이블의 실제 제품 개수
   established_year: number
@@ -30,7 +29,7 @@ interface Brand {
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState<'rating' | 'name' | 'transparency'>('rating')
+  const [sortBy, setSortBy] = useState<'safi' | 'name' | 'transparency'>('safi')
   const [searchTerm, setSearchTerm] = useState('')
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const sortDropdownRef = useRef<HTMLDivElement>(null)
@@ -154,8 +153,10 @@ export default function BrandsPage() {
     )
     .sort((a, b) => {
       switch (sortBy) {
-        case 'rating':
-          return b.overall_rating - a.overall_rating
+        case 'safi':
+          const aScore = a.safiScore?.overallScore ?? -1
+          const bScore = b.safiScore?.overallScore ?? -1
+          return bScore - aScore
         case 'name':
           return a.name.localeCompare(b.name)
         case 'transparency':
@@ -164,21 +165,6 @@ export default function BrandsPage() {
           return 0
       }
     })
-
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${
-          i < Math.floor(rating) 
-            ? 'text-yellow-400 fill-current' 
-            : i < rating 
-              ? 'text-yellow-400 fill-current opacity-50'
-              : 'text-gray-300'
-        }`}
-      />
-    ))
-  }
 
   const getTransparencyBadge = (brand: Brand) => {
     const transparencyScore = brand.transparency_score || 75 // 100점 만점 기준
@@ -257,7 +243,7 @@ export default function BrandsPage() {
                     className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm hover:bg-gray-50 focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors"
                   >
                     <span className="font-medium text-gray-900">
-                      {sortBy === 'rating' ? '평점 높은 순' : sortBy === 'transparency' ? '원료 투명성 높은 순' : '이름 순'}
+                      {sortBy === 'safi' ? 'SAFI 점수 높은 순' : sortBy === 'transparency' ? '원료 투명성 높은 순' : '이름 순'}
                     </span>
                     <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -266,14 +252,14 @@ export default function BrandsPage() {
                   {sortDropdownOpen && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
                       {[
-                        { value: 'rating', label: '평점 높은 순' },
+                        { value: 'safi', label: 'SAFI 점수 높은 순' },
                         { value: 'transparency', label: '원료 투명성 높은 순' },
                         { value: 'name', label: '이름 순' }
                       ].map((option) => (
                         <button
                           key={option.value}
                           onClick={() => {
-                            setSortBy(option.value as 'rating' | 'name' | 'transparency')
+                            setSortBy(option.value as 'safi' | 'name' | 'transparency')
                             setSortDropdownOpen(false)
                           }}
                           className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
@@ -344,16 +330,6 @@ export default function BrandsPage() {
                             {brand.description}
                           </p>
                         )}
-
-                        {/* Rating */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex items-center">
-                            {renderStars(brand.overall_rating)}
-                          </div>
-                          <span className="text-sm font-semibold text-gray-900">
-                            {brand.overall_rating.toFixed(1)}
-                          </span>
-                        </div>
 
                         {/* Info Grid */}
                         <div className="grid grid-cols-4 gap-2 mb-3">
