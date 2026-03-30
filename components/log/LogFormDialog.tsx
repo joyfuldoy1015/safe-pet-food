@@ -416,11 +416,6 @@ function ReviewLogFormContent({
   // Load edit data
   useEffect(() => {
     if (editData) {
-      const brandInList = brandOptions.some(b => b.name === editData.brand)
-      if (!brandInList && brandOptions.length > 0) {
-        setIsCustomBrand(true)
-        setIsCustomProduct(true)
-      }
       setFormData({
         pet_id: editData.pet_id,
         category: editData.category,
@@ -467,7 +462,18 @@ function ReviewLogFormContent({
         allergy_symptoms: []
       })
     }
-  }, [editData, pets, brandOptions])
+  }, [editData, pets])
+
+  // 수정 모드: 브랜드 목록 로드 후 기존 브랜드가 목록에 없으면 직접 입력 모드 전환
+  useEffect(() => {
+    if (editData && brandOptions.length > 0) {
+      const brandInList = brandOptions.some(b => b.name === editData.brand)
+      if (!brandInList) {
+        setIsCustomBrand(true)
+        setIsCustomProduct(true)
+      }
+    }
+  }, [editData, brandOptions])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
