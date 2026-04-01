@@ -936,31 +936,31 @@ function ReviewLogFormContent({
         {/* Excerpt */}
         <div>
           <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-2">
-            후기 요약 <span className="text-red-500">*</span>
+            급여 후기 <span className="text-red-500">*</span>
           </label>
           <textarea
             id="excerpt"
             value={formData.excerpt || ''}
             onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
             required
-            rows={3}
+            rows={5}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
-            placeholder="2-3줄로 간단히 요약해주세요"
+            placeholder="급여 경험을 자유롭게 작성해주세요 (기호성, 소화, 변 상태, 추천 여부 등)"
           />
         </div>
 
         {/* Notes */}
         <div>
           <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
-            상세 메모 (선택사항)
+            추가 메모 (선택사항)
           </label>
           <textarea
             id="notes"
             value={formData.notes || ''}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value || null })}
-            rows={5}
+            rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
-            placeholder="급여 이유, 관찰된 변화, 수의사 코멘트 등을 자세히 적어주세요"
+            placeholder="수의사 코멘트, 참고 사항 등"
           />
         </div>
 
