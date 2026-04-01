@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, LogIn, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -314,6 +314,7 @@ function ReviewLogFormContent({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const formDataRef = useRef<Partial<ReviewLogInsert> | null>(null)
   const [formData, setFormData] = useState<Partial<ReviewLogInsert>>({
     pet_id: '',
     category: 'feed',
@@ -348,6 +349,10 @@ function ReviewLogFormContent({
 
   const DRAFT_KEY = 'logFormDraft'
   const [draftLoaded, setDraftLoaded] = useState(false)
+
+  useEffect(() => {
+    formDataRef.current = formData
+  }, [formData])
 
   // 작성 중 내용 임시저장 (신규 작성 모드, 초기 로드 완료 후)
   useEffect(() => {
@@ -431,8 +436,13 @@ function ReviewLogFormContent({
     loadProducts()
   }, [formData.brand, brandOptions, isCustomBrand, formData.category])
 
-  // Load edit data or restore draft
+  const initializedRef = useRef(false)
+
+  // Load edit data or restore draft - only once
   useEffect(() => {
+    if (initializedRef.current) return
+    initializedRef.current = true
+
     if (editData) {
       setFormData({
         pet_id: editData.pet_id,
@@ -457,51 +467,33 @@ function ReviewLogFormContent({
         allergy_symptoms: editData.allergy_symptoms || []
       })
     } else {
-      let restored = false
       try {
         const saved = localStorage.getItem(DRAFT_KEY)
         if (saved) {
           const draft = JSON.parse(saved)
           if (draft.formData && (draft.formData.brand || draft.formData.product || draft.formData.excerpt)) {
-            setFormData(prev => ({
-              ...prev,
-              pet_id: pets.length > 0 ? pets[0].id : '',
-              ...draft.formData
-            }))
+            setFormData(prev => ({ ...prev, ...draft.formData }))
             if (draft.isCustomBrand) setIsCustomBrand(true)
             if (draft.isCustomProduct) setIsCustomProduct(true)
-            restored = true
           }
         }
       } catch {}
-
-      if (!restored) {
-        setFormData({
-          pet_id: pets.length > 0 ? pets[0].id : '',
-          category: 'feed',
-          brand: '',
-          product: '',
-          status: 'feeding',
-          period_start: new Date().toISOString().split('T')[0],
-          period_end: null,
-          rating: null,
-          palatability_score: null,
-          digestibility_score: null,
-          coat_quality_score: null,
-          recommend: null,
-          continue_reasons: [],
-          stop_reasons: [],
-          excerpt: '',
-          notes: null,
-          stool_score: null,
-          appetite_change: null,
-          vomiting: null,
-          allergy_symptoms: []
-        })
-      }
     }
     setDraftLoaded(true)
-  }, [editData, pets])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Set pet_id when pets load (without resetting other fields)
+  useEffect(() => {
+    if (pets.length > 0) {
+      setFormData(prev => {
+        if (!prev.pet_id) {
+          return { ...prev, pet_id: pets[0].id }
+        }
+        return prev
+      })
+    }
+  }, [pets])
 
   // 수정 모드: 브랜드 목록 로드 후 기존 브랜드가 목록에 없으면 직접 입력 모드 전환
   useEffect(() => {
@@ -518,8 +510,10 @@ function ReviewLogFormContent({
     e.preventDefault()
     if (!user) return
 
-    if (!formData.excerpt?.trim()) {
-      setError('후기 요약을 입력해주세요.')
+    const fd = formDataRef.current || formData
+
+    if (!(fd.excerpt || '').toString().trim()) {
+      setError('급여 후기를 입력해주세요.')
       return
     }
 
@@ -529,43 +523,42 @@ function ReviewLogFormContent({
     try {
       const supabase = getBrowserClient()
 
-      // Calculate duration_days if period_end exists
       let durationDays: number | null = null
-      if (formData.period_start && formData.period_end) {
-        const start = new Date(formData.period_start)
-        const end = new Date(formData.period_end)
+      if (fd.period_start && fd.period_end) {
+        const start = new Date(fd.period_start)
+        const end = new Date(fd.period_end)
         durationDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
       }
 
       const data: ReviewLogInsert = {
-        pet_id: formData.pet_id as string,
+        pet_id: fd.pet_id as string,
         owner_id: user.id,
-        category: formData.category as 'feed' | 'snack' | 'supplement' | 'toilet',
-        brand: formData.brand as string,
-        product: formData.product as string,
-        status: formData.status as 'feeding' | 'paused' | 'completed',
-        period_start: formData.period_start as string,
-        period_end: formData.period_end || null,
+        category: fd.category as 'feed' | 'snack' | 'supplement' | 'toilet',
+        brand: fd.brand as string,
+        product: fd.product as string,
+        status: fd.status as 'feeding' | 'paused' | 'completed',
+        period_start: fd.period_start as string,
+        period_end: fd.period_end || null,
         duration_days: durationDays,
         rating: (() => {
-          const scores = [formData.palatability_score, formData.digestibility_score, formData.coat_quality_score].filter((s): s is number => s !== null && s !== undefined)
+          const scores = [fd.palatability_score, fd.digestibility_score, fd.coat_quality_score].filter((s): s is number => s !== null && s !== undefined)
           return scores.length > 0 ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null
         })(),
-        palatability_score: formData.palatability_score ?? null,
-        digestibility_score: formData.digestibility_score ?? null,
-        coat_quality_score: formData.coat_quality_score ?? null,
-        recommend: formData.recommend ?? null,
-        continue_reasons: formData.continue_reasons && formData.continue_reasons.length > 0 ? formData.continue_reasons : null,
-        stop_reasons: formData.stop_reasons && formData.stop_reasons.length > 0 ? formData.stop_reasons : null,
-        excerpt: (formData.excerpt || '').toString().trim(),
-        notes: formData.notes || null,
+        palatability_score: fd.palatability_score ?? null,
+        digestibility_score: fd.digestibility_score ?? null,
+        coat_quality_score: fd.coat_quality_score ?? null,
+        recommend: fd.recommend ?? null,
+        continue_reasons: fd.continue_reasons && fd.continue_reasons.length > 0 ? fd.continue_reasons : null,
+        stop_reasons: fd.stop_reasons && fd.stop_reasons.length > 0 ? fd.stop_reasons : null,
+        excerpt: (fd.excerpt || '').toString().trim(),
+        notes: fd.notes || null,
         likes: editData?.likes || 0,
         views: editData?.views || 0,
         comments_count: editData?.comments_count || 0,
-        stool_score: formData.stool_score ?? null,
-        appetite_change: formData.appetite_change || null,
-        vomiting: formData.vomiting ?? null,
-        allergy_symptoms: formData.allergy_symptoms && formData.allergy_symptoms.length > 0 ? formData.allergy_symptoms : null
+        stool_score: fd.stool_score ?? null,
+        appetite_change: fd.appetite_change || null,
+        vomiting: fd.vomiting ?? null,
+        allergy_symptoms: fd.allergy_symptoms && fd.allergy_symptoms.length > 0 ? fd.allergy_symptoms : null
       }
 
       if (editData) {
