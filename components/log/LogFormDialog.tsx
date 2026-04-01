@@ -347,24 +347,11 @@ function ReviewLogFormContent({
   const [isCustomProduct, setIsCustomProduct] = useState(false)
 
   const DRAFT_KEY = 'logFormDraft'
+  const [draftLoaded, setDraftLoaded] = useState(false)
 
-  // 임시저장 복원 (신규 작성 모드일 때만)
+  // 작성 중 내용 임시저장 (신규 작성 모드, 초기 로드 완료 후)
   useEffect(() => {
-    if (editData) return
-    try {
-      const saved = localStorage.getItem(DRAFT_KEY)
-      if (saved) {
-        const draft = JSON.parse(saved)
-        setFormData(prev => ({ ...prev, ...draft.formData }))
-        if (draft.isCustomBrand) setIsCustomBrand(true)
-        if (draft.isCustomProduct) setIsCustomProduct(true)
-      }
-    } catch {}
-  }, [editData])
-
-  // 작성 중 내용 임시저장 (신규 작성 모드일 때만)
-  useEffect(() => {
-    if (editData) return
+    if (editData || !draftLoaded) return
     const hasContent = formData.brand || formData.product || formData.excerpt || formData.notes
     if (hasContent) {
       try {
@@ -375,7 +362,7 @@ function ReviewLogFormContent({
         }))
       } catch {}
     }
-  }, [formData, isCustomBrand, isCustomProduct, editData])
+  }, [formData, isCustomBrand, isCustomProduct, editData, draftLoaded])
 
   // 카테고리에 맞는 브랜드 목록 로드
   useEffect(() => {
@@ -444,7 +431,7 @@ function ReviewLogFormContent({
     loadProducts()
   }, [formData.brand, brandOptions, isCustomBrand, formData.category])
 
-  // Load edit data
+  // Load edit data or restore draft
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -470,29 +457,50 @@ function ReviewLogFormContent({
         allergy_symptoms: editData.allergy_symptoms || []
       })
     } else {
-      setFormData({
-        pet_id: pets.length > 0 ? pets[0].id : '',
-        category: 'feed',
-        brand: '',
-        product: '',
-        status: 'feeding',
-        period_start: new Date().toISOString().split('T')[0],
-        period_end: null,
-        rating: null,
-        palatability_score: null,
-        digestibility_score: null,
-        coat_quality_score: null,
-        recommend: null,
-        continue_reasons: [],
-        stop_reasons: [],
-        excerpt: '',
-        notes: null,
-        stool_score: null,
-        appetite_change: null,
-        vomiting: null,
-        allergy_symptoms: []
-      })
+      let restored = false
+      try {
+        const saved = localStorage.getItem(DRAFT_KEY)
+        if (saved) {
+          const draft = JSON.parse(saved)
+          if (draft.formData && (draft.formData.brand || draft.formData.product || draft.formData.excerpt)) {
+            setFormData(prev => ({
+              ...prev,
+              pet_id: pets.length > 0 ? pets[0].id : '',
+              ...draft.formData
+            }))
+            if (draft.isCustomBrand) setIsCustomBrand(true)
+            if (draft.isCustomProduct) setIsCustomProduct(true)
+            restored = true
+          }
+        }
+      } catch {}
+
+      if (!restored) {
+        setFormData({
+          pet_id: pets.length > 0 ? pets[0].id : '',
+          category: 'feed',
+          brand: '',
+          product: '',
+          status: 'feeding',
+          period_start: new Date().toISOString().split('T')[0],
+          period_end: null,
+          rating: null,
+          palatability_score: null,
+          digestibility_score: null,
+          coat_quality_score: null,
+          recommend: null,
+          continue_reasons: [],
+          stop_reasons: [],
+          excerpt: '',
+          notes: null,
+          stool_score: null,
+          appetite_change: null,
+          vomiting: null,
+          allergy_symptoms: []
+        })
+      }
     }
+    setDraftLoaded(true)
   }, [editData, pets])
 
   // 수정 모드: 브랜드 목록 로드 후 기존 브랜드가 목록에 없으면 직접 입력 모드 전환
