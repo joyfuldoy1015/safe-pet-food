@@ -557,7 +557,7 @@ function ReviewLogFormContent({
         recommend: formData.recommend ?? null,
         continue_reasons: formData.continue_reasons && formData.continue_reasons.length > 0 ? formData.continue_reasons : null,
         stop_reasons: formData.stop_reasons && formData.stop_reasons.length > 0 ? formData.stop_reasons : null,
-        excerpt: (formData.excerpt as string).trim(),
+        excerpt: (formData.excerpt || '').toString().trim(),
         notes: formData.notes || null,
         likes: editData?.likes || 0,
         views: editData?.views || 0,
@@ -576,7 +576,11 @@ function ReviewLogFormContent({
           .eq('id', editData.id)
 
         if (updateError) {
-          setError(updateError.message || '수정에 실패했습니다.')
+          if (updateError.message?.includes('check_excerpt_length')) {
+            setError('후기 요약을 1자 이상 입력해주세요.')
+          } else {
+            setError(updateError.message || '수정에 실패했습니다.')
+          }
           setIsLoading(false)
           return
         }
@@ -589,7 +593,11 @@ function ReviewLogFormContent({
           .single()
 
         if (insertError) {
-          setError(insertError.message || '작성에 실패했습니다.')
+          if (insertError.message?.includes('check_excerpt_length')) {
+            setError('후기 요약을 1자 이상 입력해주세요.')
+          } else {
+            setError(insertError.message || '작성에 실패했습니다.')
+          }
           setIsLoading(false)
           return
         }
