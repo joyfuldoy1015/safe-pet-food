@@ -136,8 +136,7 @@ export default function NewPetPage() {
         return
       }
       
-      // 성공 시 급여 기록 작성 페이지로 리다이렉트 (선택한 반려동물과 함께)
-      router.push(`/pet-log/posts/write?petId=${petId}`)
+      router.push('/')
     } catch (error) {
       console.error('Error saving pet:', error)
       alert('반려동물 등록 중 오류가 발생했습니다.')
