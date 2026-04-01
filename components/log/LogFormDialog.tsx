@@ -518,6 +518,11 @@ function ReviewLogFormContent({
     e.preventDefault()
     if (!user) return
 
+    if (!formData.excerpt?.trim()) {
+      setError('후기 요약을 입력해주세요.')
+      return
+    }
+
     setError(null)
     setIsLoading(true)
 
@@ -552,7 +557,7 @@ function ReviewLogFormContent({
         recommend: formData.recommend ?? null,
         continue_reasons: formData.continue_reasons && formData.continue_reasons.length > 0 ? formData.continue_reasons : null,
         stop_reasons: formData.stop_reasons && formData.stop_reasons.length > 0 ? formData.stop_reasons : null,
-        excerpt: formData.excerpt as string,
+        excerpt: (formData.excerpt as string).trim(),
         notes: formData.notes || null,
         likes: editData?.likes || 0,
         views: editData?.views || 0,
