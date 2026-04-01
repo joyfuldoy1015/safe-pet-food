@@ -569,7 +569,6 @@ function ReviewLogFormContent({
       }
 
       if (editData) {
-        // Update
         const { error: updateError } = await (supabase
           .from('review_logs') as any)
           .update(data)
@@ -581,16 +580,12 @@ function ReviewLogFormContent({
           } else {
             setError(updateError.message || '수정에 실패했습니다.')
           }
-          setIsLoading(false)
           return
         }
       } else {
-        // Insert
         const { error: insertError } = await (supabase
           .from('review_logs') as any)
           .insert(data)
-          .select()
-          .single()
 
         if (insertError) {
           if (insertError.message?.includes('check_excerpt_length')) {
@@ -598,7 +593,6 @@ function ReviewLogFormContent({
           } else {
             setError(insertError.message || '작성에 실패했습니다.')
           }
-          setIsLoading(false)
           return
         }
       }
@@ -608,6 +602,7 @@ function ReviewLogFormContent({
       onClose()
     } catch (err) {
       setError('예상치 못한 오류가 발생했습니다.')
+    } finally {
       setIsLoading(false)
     }
   }
