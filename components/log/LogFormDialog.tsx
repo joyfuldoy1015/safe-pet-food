@@ -346,6 +346,37 @@ function ReviewLogFormContent({
   const [isCustomBrand, setIsCustomBrand] = useState(false)
   const [isCustomProduct, setIsCustomProduct] = useState(false)
 
+  const DRAFT_KEY = 'logFormDraft'
+
+  // 임시저장 복원 (신규 작성 모드일 때만)
+  useEffect(() => {
+    if (editData) return
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY)
+      if (saved) {
+        const draft = JSON.parse(saved)
+        setFormData(prev => ({ ...prev, ...draft.formData }))
+        if (draft.isCustomBrand) setIsCustomBrand(true)
+        if (draft.isCustomProduct) setIsCustomProduct(true)
+      }
+    } catch {}
+  }, [editData])
+
+  // 작성 중 내용 임시저장 (신규 작성 모드일 때만)
+  useEffect(() => {
+    if (editData) return
+    const hasContent = formData.brand || formData.product || formData.excerpt || formData.notes
+    if (hasContent) {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          formData,
+          isCustomBrand,
+          isCustomProduct
+        }))
+      } catch {}
+    }
+  }, [formData, isCustomBrand, isCustomProduct, editData])
+
   // 카테고리에 맞는 브랜드 목록 로드
   useEffect(() => {
     const loadBrands = async () => {
@@ -551,6 +582,7 @@ function ReviewLogFormContent({
         }
       }
 
+      localStorage.removeItem(DRAFT_KEY)
       onSuccess()
       onClose()
     } catch (err) {
