@@ -12,6 +12,8 @@ import {
   Heart,
   AlertCircle
 } from 'lucide-react'
+import { getBrowserClient } from '@/lib/supabase-client'
+import { useAuth } from '@/hooks/useAuth'
 
 interface PetFormData {
   name: string
@@ -28,6 +30,7 @@ interface PetFormData {
 
 export default function NewPetPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [formData, setFormData] = useState<PetFormData>({
     name: '',
     species: '',
@@ -93,49 +96,50 @@ export default function NewPetPage() {
       return
     }
 
+    if (!user) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+
     setSaving(true)
 
     try {
-      // 반려동물 프로필 ID 생성
-      const petId = `pet-${Date.now()}`
-      const now = new Date().toISOString().split('T')[0]
-      
-      // 나이 계산 (출생연도 기준)
-      const age = formData.birthYear ? (new Date().getFullYear() - formData.birthYear) : 0
-      const ageString = age > 0 ? `${age}세` : '0세'
-      
-      // 반려동물 프로필 데이터 구성
-      const petProfile = {
-        id: petId,
-        name: formData.name,
-        species: formData.species,
-        birthYear: formData.birthYear,
-        age: ageString,
-        gender: formData.gender,
-        neutered: formData.neutered,
-        breed: formData.breed || '미상',
-        weight: formData.weight ? `${formData.weight}kg` : '',
-        allergies: formData.allergies,
-        healthConditions: formData.healthConditions,
-        specialNotes: formData.specialNotes,
-        createdAt: now,
-        updatedAt: now,
-        ownerId: 'current-user', // 실제로는 세션에서 가져옴
-        ownerName: '현재 사용자' // 실제로는 세션에서 가져옴
+      const supabase = getBrowserClient()
+
+      const birthDate = formData.birthYear
+        ? `${formData.birthYear}-01-01`
+        : null
+
+      const tags: string[] = []
+      if (formData.gender) tags.push(formData.gender === 'male' ? '수컷' : '암컷')
+      if (formData.neutered) tags.push('중성화')
+      if (formData.breed) tags.push(formData.breed)
+      if (formData.allergies.length > 0 && !formData.allergies.includes('없음')) {
+        formData.allergies.forEach(a => tags.push(`${a} 알러지`))
       }
-      
-      // 로컬 스토리지에 저장
-      try {
-        const existingPets = JSON.parse(localStorage.getItem('petProfiles') || '[]')
-        const updatedPets = [...existingPets, petProfile]
-        localStorage.setItem('petProfiles', JSON.stringify(updatedPets))
-      } catch (storageError) {
-        console.error('저장 중 오류:', storageError)
-        alert('반려동물 정보 저장 중 오류가 발생했습니다.')
+      if (formData.healthConditions.length > 0 && !formData.healthConditions.includes('없음')) {
+        formData.healthConditions.forEach(c => tags.push(c))
+      }
+      if (formData.specialNotes) tags.push(formData.specialNotes)
+
+      const { error } = await supabase
+        .from('pets')
+        .insert({
+          owner_id: user.id,
+          name: formData.name,
+          species: formData.species,
+          birth_date: birthDate,
+          weight_kg: formData.weight || null,
+          tags: tags.length > 0 ? tags : null,
+        })
+
+      if (error) {
+        console.error('Supabase insert error:', error)
+        alert('반려동물 등록에 실패했습니다. 다시 시도해주세요.')
         setSaving(false)
         return
       }
-      
+
       router.push('/')
     } catch (error) {
       console.error('Error saving pet:', error)
