@@ -614,55 +614,61 @@ function ReviewLogFormContent({
 
   const handleAddContinueReason = () => {
     if (continueReasonInput.trim()) {
-      const reasons = formData.continue_reasons || []
-      if (!reasons.includes(continueReasonInput.trim()) && reasons.length < 5) {
-        setFormData({
-          ...formData,
-          continue_reasons: [...reasons, continueReasonInput.trim()]
-        })
-        setContinueReasonInput('')
-      }
+      setFormData(prev => {
+        const reasons = prev.continue_reasons || []
+        if (!reasons.includes(continueReasonInput.trim()) && reasons.length < 5) {
+          return { ...prev, continue_reasons: [...reasons, continueReasonInput.trim()] }
+        }
+        return prev
+      })
+      setContinueReasonInput('')
     }
   }
 
   const handleRemoveContinueReason = (reason: string) => {
-    const reasons = formData.continue_reasons || []
-    setFormData({
-      ...formData,
-      continue_reasons: reasons.filter(r => r !== reason)
-    })
+    setFormData(prev => ({
+      ...prev,
+      continue_reasons: (prev.continue_reasons || []).filter(r => r !== reason)
+    }))
   }
 
   const handleAddStopReason = () => {
     if (stopReasonInput.trim()) {
-      const reasons = formData.stop_reasons || []
-      if (!reasons.includes(stopReasonInput.trim()) && reasons.length < 5) {
-        setFormData({
-          ...formData,
-          stop_reasons: [...reasons, stopReasonInput.trim()]
-        })
-        setStopReasonInput('')
-      }
+      setFormData(prev => {
+        const reasons = prev.stop_reasons || []
+        if (!reasons.includes(stopReasonInput.trim()) && reasons.length < 5) {
+          return { ...prev, stop_reasons: [...reasons, stopReasonInput.trim()] }
+        }
+        return prev
+      })
+      setStopReasonInput('')
     }
   }
 
   const handleRemoveStopReason = (reason: string) => {
-    const reasons = formData.stop_reasons || []
-    setFormData({
-      ...formData,
-      stop_reasons: reasons.filter(r => r !== reason)
-    })
+    setFormData(prev => ({
+      ...prev,
+      stop_reasons: (prev.stop_reasons || []).filter(r => r !== reason)
+    }))
   }
 
   const handleAddAllergy = () => {
-    if (allergyInput.trim() && !(formData.allergy_symptoms || []).includes(allergyInput.trim())) {
-      setFormData({ ...formData, allergy_symptoms: [...(formData.allergy_symptoms || []), allergyInput.trim()] })
+    if (allergyInput.trim()) {
+      setFormData(prev => {
+        if (!(prev.allergy_symptoms || []).includes(allergyInput.trim())) {
+          return { ...prev, allergy_symptoms: [...(prev.allergy_symptoms || []), allergyInput.trim()] }
+        }
+        return prev
+      })
       setAllergyInput('')
     }
   }
 
   const handleRemoveAllergy = (symptom: string) => {
-    setFormData({ ...formData, allergy_symptoms: (formData.allergy_symptoms || []).filter(s => s !== symptom) })
+    setFormData(prev => ({
+      ...prev,
+      allergy_symptoms: (prev.allergy_symptoms || []).filter(s => s !== symptom)
+    }))
   }
 
   if (isLoadingPets) {
@@ -691,7 +697,7 @@ function ReviewLogFormContent({
           <select
             id="pet_id"
             value={formData.pet_id || ''}
-            onChange={(e) => setFormData({ ...formData, pet_id: e.target.value })}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, pet_id: v })) }}
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
           >
@@ -716,7 +722,7 @@ function ReviewLogFormContent({
                 type="button"
                 onClick={() => {
                   if (formData.category !== cat) {
-                    setFormData({ ...formData, category: cat, brand: '', product: '' })
+                    setFormData(prev => ({ ...prev, category: cat, brand: '', product: '' }))
                     setIsCustomBrand(false)
                     setIsCustomProduct(false)
                   }
@@ -740,8 +746,8 @@ function ReviewLogFormContent({
         <BrandProductPicker
           brand={formData.brand || ''}
           product={formData.product || ''}
-          onBrandChange={(v) => setFormData({ ...formData, brand: v, product: '' })}
-          onProductChange={(v) => setFormData({ ...formData, product: v })}
+          onBrandChange={(v) => setFormData(prev => ({ ...prev, brand: v, product: '' }))}
+          onProductChange={(v) => setFormData(prev => ({ ...prev, product: v }))}
           brandOptions={brandOptions}
           productOptions={productOptions}
           isCustomBrand={isCustomBrand}
@@ -760,7 +766,7 @@ function ReviewLogFormContent({
               <button
                 key={status}
                 type="button"
-                onClick={() => setFormData({ ...formData, status })}
+                onClick={() => setFormData(prev => ({ ...prev, status }))}
                 className={`px-4 py-3 rounded-xl border-2 transition-colors text-sm ${
                   formData.status === status
                     ? 'border-[#3056F5] bg-blue-50 text-[#3056F5]'
@@ -784,7 +790,7 @@ function ReviewLogFormContent({
             id="period_start"
             type="date"
             value={formData.period_start || ''}
-            onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, period_start: v })) }}
             required
             max={new Date().toISOString().split('T')[0]}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base appearance-none"
@@ -800,7 +806,7 @@ function ReviewLogFormContent({
             id="period_end"
             type="date"
             value={formData.period_end || ''}
-            onChange={(e) => setFormData({ ...formData, period_end: e.target.value || null })}
+            onChange={(e) => { const v = e.target.value || null; setFormData(prev => ({ ...prev, period_end: v })) }}
             required={formData.status === 'completed'}
             disabled={formData.status === 'feeding'}
             min={formData.period_start || undefined}
@@ -813,7 +819,7 @@ function ReviewLogFormContent({
         <ScoreGrid
           label="기호성 (1-5)"
           value={formData.palatability_score}
-          onChange={(v) => setFormData({ ...formData, palatability_score: v })}
+          onChange={(v) => setFormData(prev => ({ ...prev, palatability_score: v }))}
           descriptions={['거부', '싫어함', '보통', '좋아함', '환장함']}
         />
 
@@ -821,7 +827,7 @@ function ReviewLogFormContent({
         <ScoreGrid
           label="소화율 (1-5)"
           value={formData.digestibility_score}
-          onChange={(v) => setFormData({ ...formData, digestibility_score: v })}
+          onChange={(v) => setFormData(prev => ({ ...prev, digestibility_score: v }))}
           descriptions={['나쁨', '아쉬움', '보통', '좋음', '최고']}
         />
 
@@ -829,7 +835,7 @@ function ReviewLogFormContent({
         <ScoreGrid
           label="털 상태 (1-5)"
           value={formData.coat_quality_score}
-          onChange={(v) => setFormData({ ...formData, coat_quality_score: v })}
+          onChange={(v) => setFormData(prev => ({ ...prev, coat_quality_score: v }))}
           descriptions={['나쁨', '푸석', '보통', '좋음', '윤기']}
         />
 
@@ -869,7 +875,7 @@ function ReviewLogFormContent({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, recommend: true })}
+              onClick={() => setFormData(prev => ({ ...prev, recommend: true }))}
               className={`flex-1 px-4 py-3 rounded-xl border-2 transition-colors ${
                 formData.recommend === true
                   ? 'border-green-500 bg-green-50 text-green-700'
@@ -880,7 +886,7 @@ function ReviewLogFormContent({
             </button>
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, recommend: false })}
+              onClick={() => setFormData(prev => ({ ...prev, recommend: false }))}
               className={`flex-1 px-4 py-3 rounded-xl border-2 transition-colors ${
                 formData.recommend === false
                   ? 'border-red-500 bg-red-50 text-red-700'
@@ -895,11 +901,11 @@ function ReviewLogFormContent({
         {/* SAFI 안전성 평가 */}
         <SAFIInputSection
           stoolScore={formData.stool_score}
-          onStoolScoreChange={(v) => setFormData({ ...formData, stool_score: v })}
+          onStoolScoreChange={(v) => setFormData(prev => ({ ...prev, stool_score: v }))}
           appetiteChange={formData.appetite_change}
-          onAppetiteChange={(v) => setFormData({ ...formData, appetite_change: v })}
+          onAppetiteChange={(v) => setFormData(prev => ({ ...prev, appetite_change: v }))}
           vomiting={formData.vomiting}
-          onVomitingChange={(v) => setFormData({ ...formData, vomiting: v })}
+          onVomitingChange={(v) => setFormData(prev => ({ ...prev, vomiting: v }))}
           allergySymptoms={formData.allergy_symptoms || []}
           allergyInput={allergyInput}
           setAllergyInput={setAllergyInput}
@@ -941,7 +947,7 @@ function ReviewLogFormContent({
           <textarea
             id="excerpt"
             value={formData.excerpt || ''}
-            onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+            onChange={(e) => { const v = e.target.value; setFormData(prev => ({ ...prev, excerpt: v })) }}
             required
             rows={5}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
@@ -957,7 +963,7 @@ function ReviewLogFormContent({
           <textarea
             id="notes"
             value={formData.notes || ''}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value || null })}
+            onChange={(e) => { const v = e.target.value || null; setFormData(prev => ({ ...prev, notes: v })) }}
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
             placeholder="수의사 코멘트, 참고 사항 등"
