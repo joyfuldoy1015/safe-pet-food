@@ -269,7 +269,7 @@ export default function PetDetailPage() {
             </h2>
             {isOwner && (
               <Link
-                href={`/pet-log/posts/write?petId=${petId}`}
+                href="/pet-log?write=true"
                 className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -327,7 +327,7 @@ export default function PetDetailPage() {
               </p>
               {isOwner && (
                 <Link
-                  href={`/pet-log/posts/write?petId=${petId}`}
+                  href="/pet-log?write=true"
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-violet-500 text-white text-sm rounded-xl hover:bg-violet-600 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
@@ -342,7 +342,7 @@ export default function PetDetailPage() {
         {isOwner && (
           <div className="grid grid-cols-2 gap-3">
             <Link
-              href={`/pet-log/posts/write?petId=${petId}`}
+              href="/pet-log?write=true"
               className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow group"
             >
               <div className="flex items-center gap-3">
