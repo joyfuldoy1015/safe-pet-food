@@ -469,11 +469,11 @@ function ReviewLogFormContent({
     e.preventDefault()
     if (!user) return
 
-    // Read values directly from DOM to avoid any stale state issues
+    // Read text values directly from DOM - bypasses all React state issues
     const excerptEl = document.getElementById('excerpt') as HTMLTextAreaElement | null
     const notesEl = document.getElementById('notes') as HTMLTextAreaElement | null
     const excerptValue = (excerptEl?.value || '').trim()
-    const notesValue = notesEl?.value || null
+    const notesValue = (notesEl?.value || '').trim() || null
 
     if (!excerptValue) {
       setError('급여 후기를 입력해주세요.')
@@ -484,71 +484,55 @@ function ReviewLogFormContent({
     setIsLoading(true)
 
     try {
-      const supabase = getBrowserClient()
+      const scores = [formData.palatability_score, formData.digestibility_score, formData.coat_quality_score]
+        .filter((s): s is number => s !== null && s !== undefined)
+      const rating = scores.length > 0
+        ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
+        : null
 
-      let durationDays: number | null = null
-      if (formData.period_start && formData.period_end) {
-        const start = new Date(formData.period_start)
-        const end = new Date(formData.period_end)
-        durationDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-      }
-
-      const data: ReviewLogInsert = {
-        pet_id: formData.pet_id as string,
-        owner_id: user.id,
-        category: formData.category as 'feed' | 'snack' | 'supplement' | 'toilet',
-        brand: formData.brand as string,
-        product: formData.product as string,
-        status: formData.status as 'feeding' | 'paused' | 'completed',
-        period_start: formData.period_start as string,
+      const body = {
+        pet_id: formData.pet_id,
+        category: formData.category || 'feed',
+        brand: formData.brand || '',
+        product: formData.product || '',
+        status: formData.status || 'feeding',
+        period_start: formData.period_start,
         period_end: formData.period_end || null,
-        duration_days: durationDays,
-        rating: (() => {
-          const scores = [formData.palatability_score, formData.digestibility_score, formData.coat_quality_score].filter((s): s is number => s !== null && s !== undefined)
-          return scores.length > 0 ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null
-        })(),
+        rating,
         palatability_score: formData.palatability_score ?? null,
         digestibility_score: formData.digestibility_score ?? null,
         coat_quality_score: formData.coat_quality_score ?? null,
         recommend: formData.recommend ?? null,
-        continue_reasons: formData.continue_reasons && formData.continue_reasons.length > 0 ? formData.continue_reasons : null,
-        stop_reasons: formData.stop_reasons && formData.stop_reasons.length > 0 ? formData.stop_reasons : null,
+        continue_reasons: formData.continue_reasons,
+        stop_reasons: formData.stop_reasons,
         excerpt: excerptValue,
-        notes: notesValue || null,
-        likes: editData?.likes || 0,
-        views: editData?.views || 0,
-        comments_count: editData?.comments_count || 0,
+        notes: notesValue,
         stool_score: formData.stool_score ?? null,
         appetite_change: formData.appetite_change || null,
         vomiting: formData.vomiting ?? null,
-        allergy_symptoms: formData.allergy_symptoms && formData.allergy_symptoms.length > 0 ? formData.allergy_symptoms : null
+        allergy_symptoms: formData.allergy_symptoms,
       }
 
       if (editData) {
-        const { error: updateError } = await (supabase
-          .from('review_logs') as any)
-          .update(data)
-          .eq('id', editData.id)
-
-        if (updateError) {
-          if (updateError.message?.includes('check_excerpt_length')) {
-            setError('후기 요약을 1자 이상 입력해주세요.')
-          } else {
-            setError(updateError.message || '수정에 실패했습니다.')
-          }
+        const res = await fetch(`/api/review-logs/${editData.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...body, excerpt: excerptValue, notes: notesValue }),
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          setError(err.error || '수정에 실패했습니다.')
           return
         }
       } else {
-        const { error: insertError } = await (supabase
-          .from('review_logs') as any)
-          .insert(data)
-
-        if (insertError) {
-          if (insertError.message?.includes('check_excerpt_length')) {
-            setError('후기 요약을 1자 이상 입력해주세요.')
-          } else {
-            setError(insertError.message || '작성에 실패했습니다.')
-          }
+        const res = await fetch('/api/review-logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          setError(err.error || '작성에 실패했습니다.')
           return
         }
       }
