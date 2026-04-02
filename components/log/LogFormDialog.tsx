@@ -532,7 +532,10 @@ function ReviewLogFormContent({
         })
         if (!res.ok) {
           const err = await res.json()
-          setError(err.error || '작성에 실패했습니다.')
+          const debugInfo = err.debug_excerpt_length != null
+            ? ` [서버 수신 excerpt: ${err.debug_excerpt_length}자 "${err.debug_excerpt_preview}"]`
+            : ''
+          setError((err.error || '작성에 실패했습니다.') + debugInfo)
           return
         }
       }

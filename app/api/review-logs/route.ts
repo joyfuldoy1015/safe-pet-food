@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
       comments_count: 0,
     }
 
+    console.error('[API review-logs POST] excerpt received:', JSON.stringify(excerpt), 'length:', excerpt.length)
+    console.error('[API review-logs POST] data.excerpt:', JSON.stringify(data.excerpt), 'length:', data.excerpt.length)
+
     const adminSupabase = getAdminClient()
     const { error: insertError } = await (adminSupabase
       .from('review_logs') as any)
@@ -62,8 +65,9 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('[API review-logs POST] Insert error:', insertError)
+      console.error('[API review-logs POST] Full data sent:', JSON.stringify(data))
       return NextResponse.json(
-        { error: insertError.message || '작성에 실패했습니다.' },
+        { error: insertError.message || '작성에 실패했습니다.', debug_excerpt_length: excerpt.length, debug_excerpt_preview: excerpt.substring(0, 50) },
         { status: 500 }
       )
     }
