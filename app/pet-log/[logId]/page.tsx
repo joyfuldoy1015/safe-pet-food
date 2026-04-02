@@ -214,6 +214,16 @@ export default function LogDetailPage() {
     loadData()
   }, [logId])
 
+  // 조회수 증가
+  useEffect(() => {
+    if (!logId) return
+    fetch('/api/review-logs/views', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ logId }),
+    }).catch(() => {})
+  }, [logId])
+
   // 사용자 로그인 상태 변경 시 도움돼요 상태 확인
   useEffect(() => {
     const checkHelpfulStatus = async () => {
