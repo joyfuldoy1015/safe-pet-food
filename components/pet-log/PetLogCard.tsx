@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, MessageSquare, ChevronRight } from "lucide-react";
+import { Heart, MessageSquare, Eye, ChevronRight } from "lucide-react";
 import React from "react";
 import Image from "next/image";
 
@@ -193,6 +193,16 @@ export default function PetLogCard(props: PetLogCardProps) {
             </span>
             <span className="font-medium text-gray-600">{props.comments}</span>
           </span>
+
+          {/* 조회수 */}
+          {props.views != null && (
+            <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+              <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                <Eye className="h-3.5 w-3.5 text-gray-400" />
+              </span>
+              <span className="font-medium text-gray-600">{props.views}</span>
+            </span>
+          )}
         </div>
         
         {/* 화살표 */}

@@ -675,6 +675,7 @@ function PetLogContent() {
                           review={review.excerpt || ''}
                           likes={review.likes}
                           comments={review.commentsCount}
+                          views={review.views}
                           createdAt={formatDateForCard(review.createdAt)}
                           onAsk={() => handleQuestionClick(review.id)}
                           onDetail={() => handleViewDetail(review.id)}
