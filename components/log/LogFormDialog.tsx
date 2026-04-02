@@ -887,7 +887,6 @@ function ReviewLogFormContent({
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
             placeholder="급여 경험을 자유롭게 작성해주세요 (기호성, 소화, 변 상태, 추천 여부 등)"
           />
-          <p className="text-xs text-gray-400 mt-1">80자를 초과하면 요약이 자동 생성되고, 전문은 상세 내용으로 저장됩니다.</p>
         </div>
 
         {/* Notes */}

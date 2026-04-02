@@ -15,16 +15,12 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    const fullExcerpt = (body.excerpt || '').toString().trim()
-    if (!fullExcerpt) {
+    const excerpt = (body.excerpt || '').toString().trim()
+    if (!excerpt) {
       return NextResponse.json({ error: '급여 후기를 입력해주세요.' }, { status: 400 })
     }
 
-    // DB check_excerpt_length 제약: 최대 80자
-    const excerpt = fullExcerpt.length > 80 ? fullExcerpt.substring(0, 77) + '...' : fullExcerpt
-    const notes = fullExcerpt.length > 80
-      ? (body.notes ? fullExcerpt + '\n\n' + body.notes : fullExcerpt)
-      : (body.notes || null)
+    const notes = body.notes || null
 
     let durationDays: number | null = null
     if (body.period_start && body.period_end) {
