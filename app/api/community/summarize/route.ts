@@ -25,6 +25,9 @@ export async function POST(request: NextRequest) {
     if (!content || typeof content !== 'string' || content.trim().length < 200) {
       return NextResponse.json({ error: '요약 대상 내용이 부족합니다.' }, { status: 400 })
     }
+    if (content.trim().length > 5000) {
+      return NextResponse.json({ error: '내용이 너무 깁니다. 5000자 이하로 입력해주세요.' }, { status: 400 })
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

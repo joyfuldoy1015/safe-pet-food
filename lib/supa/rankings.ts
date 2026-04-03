@@ -1,4 +1,4 @@
-import { getSupabaseClient } from './client'
+import { getBrowserClient as getSupabaseClient } from '@/lib/supabase-client'
 
 export type Species = 'dog' | 'cat' | 'all'
 export type Category = 'feed' | 'snack' | 'supplement' | 'toilet' | 'all'

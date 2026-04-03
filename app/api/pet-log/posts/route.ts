@@ -105,12 +105,17 @@ export async function POST(request: Request) {
     const supabase = getServerClient()
     if (!isSupabaseConfigured()) {
       return NextResponse.json(
-        { 
+        {
           error: 'Supabase not configured',
           message: 'Supabase가 설정되지 않았습니다. 환경 변수를 확인해주세요.'
         },
         { status: 501 }
       )
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -128,7 +133,7 @@ export async function POST(request: Request) {
       .from('pet_log_posts') as any)
       .insert([{
         id: post.id,
-        user_id: post.ownerId || post.user_id || '',
+        user_id: user.id,
         pet_name: post.petName,
         pet_breed: post.petBreed,
         pet_age: post.petAge,
@@ -218,7 +223,7 @@ export async function POST(request: Request) {
 
           return {
             pet_id: post.petProfileId || null,
-            owner_id: post.ownerId || post.user_id || '',
+            owner_id: user.id,
             category: categoryMap[record.category] || 'feed',
             brand: record.brand || '',
             product: record.productName || '',

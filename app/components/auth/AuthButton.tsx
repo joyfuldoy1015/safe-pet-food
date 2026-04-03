@@ -114,7 +114,7 @@ export default function AuthButton() {
                   내 프로필
                 </Link>
                 <Link
-                  href="/pets"
+                  href="/pet-log/pets"
                   className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >

@@ -29,7 +29,6 @@ import { Question } from '@/app/components/qa-forum/QuestionCard'
 import CommentThread, { Comment } from '@/app/components/qa-forum/CommentThread'
 import { getBrowserClient } from '@/lib/supabase-client'
 import { formatTimeAgo } from '@/lib/utils/format'
-import { mockQuestionsData, mockComments } from './mock-data'
 
 export default function QuestionDetailPage() {
   const params = useParams()
@@ -67,18 +66,6 @@ export default function QuestionDetailPage() {
       setIsLoadingQuestion(true)
       try {
         const supabase = getBrowserClient()
-        if (!supabase) {
-          // Fallback to mock data
-          const questionData = mockQuestionsData.find((q) => q.id === questionId)
-          if (questionData) {
-            setQuestion({
-              ...questionData,
-              isUpvoted: userVotes[questionId] || false
-            } as Question)
-          }
-          setIsLoadingQuestion(false)
-          return
-        }
 
         // Fetch question from Supabase
         const { data: questionData, error } = await supabase
@@ -147,13 +134,6 @@ export default function QuestionDetailPage() {
       setIsLoadingComments(true)
       try {
         const supabase = getBrowserClient()
-        if (!supabase) {
-          // Fallback to mock data
-          const questionComments = mockComments[questionId] || []
-          setComments(questionComments.map((c) => ({ ...c, isUpvoted: false })))
-          setIsLoadingComments(false)
-          return
-        }
 
         // Fetch all answers from Supabase (including nested replies)
         const { data: answersData, error } = await supabase
@@ -1023,14 +1003,6 @@ export default function QuestionDetailPage() {
 
       try {
         const supabase = getBrowserClient()
-        if (!supabase) {
-          // Fallback to mock data
-          const related = mockQuestionsData
-            .filter((q) => q.id !== questionId && q.category === question.category)
-            .slice(0, 3)
-          setRelatedQuestions(related)
-          return
-        }
 
         // Fetch related questions from Supabase
         const { data: questionsData, error } = await supabase

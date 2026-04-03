@@ -35,7 +35,10 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  if (pathname.startsWith('/admin')) {
+  const isAdminPath = pathname.startsWith('/admin') ||
+    (pathname.startsWith('/api/admin') && pathname !== '/api/admin/check')
+
+  if (isAdminPath) {
     if (!user) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('next', pathname)

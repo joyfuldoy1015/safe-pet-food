@@ -6,7 +6,6 @@ import { ArrowLeft, MessageCircle, Send, User, Reply, ThumbsUp, Trash2, HelpCirc
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { ProductCategory, FeedingRecord, DetailedPetLogPost, Comment, Reply as ReplyType, categoryConfig } from './types'
-import { mockDetailedPosts } from './mock-data'
 import FeedingRecordCard from './FeedingRecordCard'
 import PostHeaderCard from './PostHeaderCard'
 
@@ -15,69 +14,74 @@ export default function PetLogPostDetail() {
   const router = useRouter()
   const postId = params.postId as string
 
-  const [post, setPost] = useState<DetailedPetLogPost | null>(mockDetailedPosts[postId as keyof typeof mockDetailedPosts] || null)
+  const [post, setPost] = useState<DetailedPetLogPost | null>(null)
 
-  // 로컬 스토리지에서 포스트 불러오기 및 Supabase에서 댓글 불러오기
+  // Supabase API에서 포스트 + 댓글 로드
   useEffect(() => {
     const loadPost = async () => {
       try {
-        // 1. 포스트 데이터 로드 (localStorage 또는 mock)
-        const savedPosts = JSON.parse(localStorage.getItem('petLogPosts') || '[]')
-        const savedPost = savedPosts.find((p: any) => p.id === postId)
-        
-        let currentPost: DetailedPetLogPost | null = null
-        
-        if (savedPost) {
-          currentPost = {
-            ...savedPost,
-            comments: savedPost.comments || [],
-            totalComments: savedPost.totalComments || (savedPost.comments?.length || 0)
-          }
-        } else if (mockDetailedPosts[postId as keyof typeof mockDetailedPosts]) {
-          currentPost = mockDetailedPosts[postId as keyof typeof mockDetailedPosts]
+        const response = await fetch(`/api/pet-log/posts/${postId}`)
+        if (!response.ok) {
+          console.error('포스트를 불러올 수 없습니다.', response.status)
+          return
         }
-        
-        setPost(currentPost)
-        
-        // 2. Supabase에서 댓글 데이터 로드
-        if (currentPost) {
-          try {
-            const response = await fetch(`/api/pet-log/posts/${postId}`)
-            if (response.ok) {
-              const data = await response.json()
-              if (data.comments && Array.isArray(data.comments)) {
-                setComments(data.comments)
-                // localStorage 업데이트
-                if (savedPost) {
-                  savedPost.comments = data.comments
-                  savedPost.totalComments = data.comments.length
-                  localStorage.setItem('petLogPosts', JSON.stringify(savedPosts))
-                }
-              }
-            }
-          } catch (error) {
-            console.error('댓글 로드 중 오류:', error)
-            // 실패 시 localStorage의 댓글 사용
-            if (currentPost.comments) {
-              setComments(currentPost.comments)
-            }
-          }
+        const data = await response.json()
+
+        // API 응답(snake_case)을 컴포넌트 타입(camelCase)으로 변환
+        const mapped: DetailedPetLogPost = {
+          id: data.id,
+          petName: data.pet_name,
+          petBreed: data.pet_breed,
+          petAge: data.pet_age,
+          petWeight: data.pet_weight,
+          ownerName: data.owner_name,
+          ownerId: data.user_id,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+          totalRecords: data.total_records || 0,
+          feedingRecords: (data.feedingRecords || []).map((r: any) => ({
+            id: r.id,
+            productName: r.product_name,
+            category: r.category,
+            brand: r.brand || '',
+            startDate: r.start_date,
+            endDate: r.end_date || undefined,
+            status: r.status,
+            duration: r.duration || '',
+            palatability: r.palatability || 0,
+            satisfaction: r.satisfaction || 0,
+            repurchaseIntent: r.repurchase_intent || false,
+            comment: r.comment || undefined,
+            price: r.price || undefined,
+            purchaseLocation: r.purchase_location || undefined,
+            sideEffects: r.side_effects || [],
+            benefits: r.benefits || [],
+          })),
+          comments: (data.comments || []).map((c: any) => ({
+            id: c.id,
+            userId: c.user_id,
+            userName: c.user_name || '익명',
+            userAvatar: c.user_avatar || undefined,
+            content: c.content,
+            createdAt: c.created_at,
+            likes: c.likes || 0,
+            isLiked: false,
+            replies: [],
+            type: c.type || 'comment',
+          })),
+          totalComments: data.totalComments || 0,
         }
+
+        setPost(mapped)
+        setComments(mapped.comments)
       } catch (error) {
         console.error('포스트 로드 중 오류:', error)
       }
     }
-    
+
     loadPost()
   }, [postId])
 
-  // post가 변경될 때 comments 초기화
-  useEffect(() => {
-    if (post) {
-      setComments(post.comments || [])
-    }
-  }, [post])
-  
   // 댓글 관련 상태
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')

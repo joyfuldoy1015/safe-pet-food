@@ -1,4 +1,4 @@
-import { getSupabaseClient } from './client'
+import { getBrowserClient as getSupabaseClient } from '@/lib/supabase-client'
 import type { Database } from '@/lib/types/database'
 import type { ReviewLog as ClientReviewLog } from '@/lib/types/review-log'
 

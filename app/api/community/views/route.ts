@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supa/serverAdmin'
+import { rateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request)
+  const rl = rateLimit(ip, RATE_LIMITS.read)
+  if (!rl.success) return rateLimitResponse(rl)
+
   try {
     const { questionId } = await request.json()
     if (!questionId) {
@@ -10,21 +15,17 @@ export async function POST(request: NextRequest) {
 
     const supabase = getAdminClient()
 
-    const { data } = await supabase
-      .from('community_questions')
-      .select('views')
-      .eq('id', questionId)
-      .single() as { data: { views: number } | null }
+    // 원자적 증가 (docs/migrations/001_brand_votes.sql 의 RPC 함수 필요)
+    const { error } = await (supabase.rpc as any)('increment_question_views', {
+      question_id: questionId,
+    })
 
-    if (!data) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (error) {
+      console.error('[community/views] rpc error:', error)
+      return NextResponse.json({ error: 'Failed' }, { status: 500 })
     }
 
-    await (supabase.from('community_questions') as any)
-      .update({ views: (data.views || 0) + 1 })
-      .eq('id', questionId)
-
-    return NextResponse.json({ success: true, views: (data.views || 0) + 1 })
+    return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 })
   }
