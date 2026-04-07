@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import StepHeader from './StepHeader'
+import { colors, radii } from '@/lib/design-tokens'
 
 const PET_TYPES = [
   { value: '강아지', label: '강아지', emoji: '🐕' },
@@ -47,22 +48,22 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
   }
 
   return (
-    <div style={{ minHeight: 'calc(100vh - 64px)', background: '#F7F5FF', padding: '0 0 32px' }}>
+    <div style={{ minHeight: 'calc(100vh - 64px)', background: colors.primaryBg, padding: '0 0 32px' }}>
       <StepHeader step={1} totalSteps={3} onBack={onBack} title="반려동물 정보" />
 
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 20px' }}>
         <div
           style={{
-            background: '#fff',
-            borderRadius: '24px',
+            background: colors.white,
+            borderRadius: radii.card,
             padding: '24px 20px',
             boxShadow: '0 8px 32px rgba(124,92,252,0.10)',
           }}
         >
           {/* 종류 선택 */}
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#6B6B8A', marginBottom: '12px' }}>
-              종류 선택 <span style={{ color: '#7C5CFC' }}>*</span>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: colors.textSecondary, marginBottom: '12px' }}>
+              종류 선택 <span style={{ color: colors.primary }}>*</span>
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {PET_TYPES.map(pt => (
@@ -78,14 +79,14 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
                     justifyContent: 'center',
                     gap: '6px',
                     padding: '14px 8px',
-                    borderRadius: '16px',
-                    border: `2px solid ${petType === pt.value ? '#7C5CFC' : '#E8E4F8'}`,
-                    background: petType === pt.value ? '#EDE8FF' : '#fff',
+                    borderRadius: radii.lg,
+                    border: `2px solid ${petType === pt.value ? colors.primary : colors.primaryBorder}`,
+                    background: petType === pt.value ? colors.primaryXLight : colors.white,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                     fontSize: '13px',
                     fontWeight: 600,
-                    color: petType === pt.value ? '#7C5CFC' : '#6B6B8A',
+                    color: petType === pt.value ? colors.primary : colors.textSecondary,
                   }}
                 >
                   <span style={{ fontSize: '28px', lineHeight: 1 }}>{pt.emoji}</span>
@@ -93,8 +94,8 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
                   {petType === pt.value && (
                     <span style={{
                       position: 'absolute', top: '6px', right: '6px',
-                      background: '#7C5CFC', color: '#fff',
-                      borderRadius: '99px', fontSize: '10px', padding: '1px 5px',
+                      background: colors.primary, color: colors.white,
+                      borderRadius: radii.full, fontSize: '10px', padding: '1px 5px',
                     }}>✓</span>
                   )}
                 </button>
@@ -104,8 +105,8 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
 
           {/* 이름 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#6B6B8A', marginBottom: '8px' }}>
-              이름 <span style={{ color: '#7C5CFC' }}>*</span>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: colors.textSecondary, marginBottom: '8px' }}>
+              이름 <span style={{ color: colors.primary }}>*</span>
             </label>
             <input
               type="text"
@@ -116,23 +117,23 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
               style={{
                 width: '100%',
                 padding: '14px 16px',
-                borderRadius: '14px',
-                border: '1.5px solid #E8E4F8',
+                borderRadius: radii.md,
+                border: `1.5px solid ${colors.primaryBorder}`,
                 fontSize: '15px',
-                color: '#1A1A2E',
+                color: colors.textPrimary,
                 outline: 'none',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.15s',
               }}
-              onFocus={e => (e.target.style.borderColor = '#7C5CFC')}
-              onBlur={e => (e.target.style.borderColor = '#E8E4F8')}
+              onFocus={e => (e.target.style.borderColor = colors.primary)}
+              onBlur={e => (e.target.style.borderColor = colors.primaryBorder)}
             />
           </div>
 
           {/* 나이 */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#6B6B8A', marginBottom: '8px' }}>
-              나이 <span style={{ color: '#9B9BB8', fontWeight: 400 }}>(선택)</span>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: colors.textSecondary, marginBottom: '8px' }}>
+              나이 <span style={{ color: colors.textTertiary, fontWeight: 400 }}>(선택)</span>
             </label>
             <div style={{ display: 'flex', gap: '10px' }}>
               <input
@@ -145,17 +146,17 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
                 style={{
                   flex: 1,
                   padding: '14px 16px',
-                  borderRadius: '14px',
-                  border: '1.5px solid #E8E4F8',
+                  borderRadius: radii.md,
+                  border: `1.5px solid ${colors.primaryBorder}`,
                   fontSize: '15px',
-                  color: '#1A1A2E',
+                  color: colors.textPrimary,
                   outline: 'none',
                   boxSizing: 'border-box',
                 }}
-                onFocus={e => (e.target.style.borderColor = '#7C5CFC')}
-                onBlur={e => (e.target.style.borderColor = '#E8E4F8')}
+                onFocus={e => (e.target.style.borderColor = colors.primary)}
+                onBlur={e => (e.target.style.borderColor = colors.primaryBorder)}
               />
-              <div style={{ display: 'flex', borderRadius: '14px', border: '1.5px solid #E8E4F8', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', borderRadius: radii.md, border: `1.5px solid ${colors.primaryBorder}`, overflow: 'hidden' }}>
                 {(['살', '개월'] as const).map(unit => (
                   <button
                     key={unit}
@@ -164,8 +165,8 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
                     style={{
                       padding: '14px 16px',
                       border: 'none',
-                      background: ageUnit === unit ? '#EDE8FF' : '#fff',
-                      color: ageUnit === unit ? '#7C5CFC' : '#9B9BB8',
+                      background: ageUnit === unit ? colors.primaryXLight : colors.white,
+                      color: ageUnit === unit ? colors.primary : colors.textTertiary,
                       fontWeight: 600,
                       fontSize: '14px',
                       cursor: 'pointer',
@@ -180,8 +181,8 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
 
           {/* 건강 상태 */}
           <div style={{ marginBottom: '8px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#6B6B8A', marginBottom: '10px' }}>
-              건강 상태 <span style={{ color: '#9B9BB8', fontWeight: 400 }}>(선택)</span>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: colors.textSecondary, marginBottom: '10px' }}>
+              건강 상태 <span style={{ color: colors.textTertiary, fontWeight: 400 }}>(선택)</span>
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {HEALTH_OPTIONS.map(opt => (
@@ -191,10 +192,10 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
                   onClick={() => setHealthStatus(healthStatus === opt.value ? '' : opt.value)}
                   style={{
                     padding: '9px 14px',
-                    borderRadius: '99px',
-                    border: `1.5px solid ${healthStatus === opt.value ? '#7C5CFC' : '#E8E4F8'}`,
-                    background: healthStatus === opt.value ? '#EDE8FF' : '#fff',
-                    color: healthStatus === opt.value ? '#7C5CFC' : '#6B6B8A',
+                    borderRadius: radii.full,
+                    border: `1.5px solid ${healthStatus === opt.value ? colors.primary : colors.primaryBorder}`,
+                    background: healthStatus === opt.value ? colors.primaryXLight : colors.white,
+                    color: healthStatus === opt.value ? colors.primary : colors.textSecondary,
                     fontSize: '13px',
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -209,7 +210,7 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
         </div>
 
         {error && (
-          <div style={{ marginTop: '12px', padding: '12px 16px', borderRadius: '12px', background: '#FFF0F0', color: '#D94F4F', fontSize: '14px' }}>
+          <div style={{ marginTop: '12px', padding: '12px 16px', borderRadius: radii.sm, background: colors.errorBg, color: colors.errorText, fontSize: '14px' }}>
             {error}
           </div>
         )}
@@ -220,10 +221,10 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
             marginTop: '20px',
             width: '100%',
             padding: '16px',
-            borderRadius: '16px',
+            borderRadius: radii.lg,
             border: 'none',
-            background: 'linear-gradient(135deg, #7C5CFC, #A78BFA)',
-            color: '#fff',
+            background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`,
+            color: colors.white,
             fontSize: '16px',
             fontWeight: 700,
             cursor: 'pointer',

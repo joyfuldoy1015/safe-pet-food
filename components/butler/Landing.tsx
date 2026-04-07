@@ -1,5 +1,7 @@
 'use client'
 
+import { colors, radii } from '@/lib/design-tokens'
+
 const FLOATING_PETS = ['🐕', '🐱', '🐰', '🐹', '🐦', '🐾', '🐶', '🐈']
 
 export default function Landing({ onStart }: { onStart: () => void }) {
@@ -7,7 +9,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
     <div
       style={{
         minHeight: 'calc(100vh - 64px)',
-        background: 'linear-gradient(160deg, #EDE8FF 0%, #F7F5FF 40%, #FFF0E8 100%)',
+        background: `linear-gradient(160deg, ${colors.primaryXLight} 0%, ${colors.primaryBg} 40%, #FFF0E8 100%)`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -45,7 +47,7 @@ export default function Landing({ onStart }: { onStart: () => void }) {
           style={{
             fontSize: '28px',
             fontWeight: 800,
-            color: '#1A1A2E',
+            color: colors.textPrimary,
             lineHeight: 1.3,
             marginBottom: '12px',
             letterSpacing: '-0.5px',
@@ -59,14 +61,14 @@ export default function Landing({ onStart }: { onStart: () => void }) {
         <p
           style={{
             fontSize: '16px',
-            color: '#6B6B8A',
+            color: colors.textSecondary,
             marginBottom: '8px',
             lineHeight: 1.5,
           }}
         >
           내 반려동물이 직접 채점한다면?
         </p>
-        <p style={{ fontSize: '14px', color: '#9B9BB8', marginBottom: '40px' }}>
+        <p style={{ fontSize: '14px', color: colors.textTertiary, marginBottom: '40px' }}>
           약 2분 · 5단계 테스트
         </p>
 
@@ -77,10 +79,10 @@ export default function Landing({ onStart }: { onStart: () => void }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'linear-gradient(135deg, #7C5CFC, #A78BFA)',
-            color: '#fff',
+            background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`,
+            color: colors.white,
             border: 'none',
-            borderRadius: '99px',
+            borderRadius: radii.full,
             padding: '16px 36px',
             fontSize: '17px',
             fontWeight: 700,

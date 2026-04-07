@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { QUESTIONS } from '@/lib/butler/questions'
+import { colors, radii } from '@/lib/design-tokens'
 
 interface Props {
   onComplete: (answers: Record<string, string>) => void
@@ -38,7 +39,7 @@ export default function Survey({ onComplete, onBack, initial }: Props) {
   }
 
   return (
-    <div style={{ minHeight: 'calc(100vh - 64px)', background: '#F7F5FF', padding: '0 0 32px' }}>
+    <div style={{ minHeight: 'calc(100vh - 64px)', background: colors.primaryBg, padding: '0 0 32px' }}>
       {/* 헤더 */}
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '16px 20px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
@@ -47,27 +48,27 @@ export default function Survey({ onComplete, onBack, initial }: Props) {
             aria-label="이전으로"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: '36px', height: '36px', borderRadius: '12px',
-              border: 'none', background: '#EDE8FF', color: '#7C5CFC', cursor: 'pointer',
+              width: '36px', height: '36px', borderRadius: radii.sm,
+              border: 'none', background: colors.primaryXLight, color: colors.primary, cursor: 'pointer',
             }}
           >
             <ArrowLeft size={18} />
           </button>
-          <span style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E', flex: 1 }}>집사 마음 설문</span>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: colors.textPrimary, flex: 1 }}>집사 마음 설문</span>
           <span style={{
-            background: '#EDE8FF', color: '#7C5CFC',
-            borderRadius: '99px', padding: '4px 12px', fontSize: '12px', fontWeight: 700,
+            background: colors.primaryXLight, color: colors.primary,
+            borderRadius: radii.full, padding: '4px 12px', fontSize: '12px', fontWeight: 700,
           }}>
             {qIndex + 1} / {QUESTIONS.length}
           </span>
         </div>
         {/* 프로그레스 */}
-        <div style={{ height: '4px', borderRadius: '99px', background: '#E8E4F8', overflow: 'hidden' }}>
+        <div style={{ height: '4px', borderRadius: radii.full, background: colors.primaryBorder, overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             width: `${progress}%`,
-            borderRadius: '99px',
-            background: 'linear-gradient(90deg, #7C5CFC, #A78BFA)',
+            borderRadius: radii.full,
+            background: `linear-gradient(90deg, ${colors.primary}, ${colors.primaryLight})`,
             transition: 'width 0.4s ease',
           }} />
         </div>
@@ -83,7 +84,7 @@ export default function Survey({ onComplete, onBack, initial }: Props) {
           }}
         >
           <h2 style={{
-            fontSize: '19px', fontWeight: 700, color: '#1A1A2E',
+            fontSize: '19px', fontWeight: 700, color: colors.textPrimary,
             lineHeight: 1.45, marginBottom: '20px', textAlign: 'center',
           }}>
             {q.text}
@@ -104,8 +105,8 @@ export default function Survey({ onComplete, onBack, initial }: Props) {
                     gap: '14px',
                     padding: '16px 18px',
                     borderRadius: '18px',
-                    border: `2px solid ${isSelected ? '#7C5CFC' : '#E8E4F8'}`,
-                    background: isSelected ? '#EDE8FF' : '#fff',
+                    border: `2px solid ${isSelected ? colors.primary : colors.primaryBorder}`,
+                    background: isSelected ? colors.primaryXLight : colors.white,
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.15s ease',
@@ -122,14 +123,14 @@ export default function Survey({ onComplete, onBack, initial }: Props) {
                   <span style={{ fontSize: '28px', lineHeight: 1, flexShrink: 0 }}>{opt.emoji}</span>
                   <span style={{
                     fontSize: '15px', fontWeight: 600,
-                    color: isSelected ? '#7C5CFC' : '#1A1A2E', flex: 1,
+                    color: isSelected ? colors.primary : colors.textPrimary, flex: 1,
                   }}>
                     {opt.label}
                   </span>
                   {isSelected && (
                     <span style={{
                       width: '22px', height: '22px', borderRadius: '50%',
-                      background: '#7C5CFC', color: '#fff',
+                      background: colors.primary, color: colors.white,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', fontWeight: 700, flexShrink: 0,
                     }}>✓</span>

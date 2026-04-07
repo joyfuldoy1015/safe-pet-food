@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowLeft } from 'lucide-react'
+import { colors, radii } from '@/lib/design-tokens'
 
 interface Props {
   step: number
@@ -23,22 +24,22 @@ export default function StepHeader({ step, totalSteps, onBack, title }: Props) {
             justifyContent: 'center',
             width: '36px',
             height: '36px',
-            borderRadius: '12px',
+            borderRadius: radii.sm,
             border: 'none',
-            background: '#EDE8FF',
-            color: '#7C5CFC',
+            background: colors.primaryXLight,
+            color: colors.primary,
             cursor: 'pointer',
             flexShrink: 0,
           }}
         >
           <ArrowLeft size={18} />
         </button>
-        <span style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E', flex: 1 }}>{title}</span>
+        <span style={{ fontSize: '15px', fontWeight: 700, color: colors.textPrimary, flex: 1 }}>{title}</span>
         <span
           style={{
-            background: '#EDE8FF',
-            color: '#7C5CFC',
-            borderRadius: '99px',
+            background: colors.primaryXLight,
+            color: colors.primary,
+            borderRadius: radii.full,
             padding: '4px 12px',
             fontSize: '12px',
             fontWeight: 700,
@@ -49,13 +50,13 @@ export default function StepHeader({ step, totalSteps, onBack, title }: Props) {
       </div>
 
       {/* 프로그레스 바 */}
-      <div style={{ height: '4px', borderRadius: '99px', background: '#E8E4F8', overflow: 'hidden' }}>
+      <div style={{ height: '4px', borderRadius: radii.full, background: colors.primaryBorder, overflow: 'hidden' }}>
         <div
           style={{
             height: '100%',
             width: `${(step / totalSteps) * 100}%`,
-            borderRadius: '99px',
-            background: 'linear-gradient(90deg, #7C5CFC, #A78BFA)',
+            borderRadius: radii.full,
+            background: `linear-gradient(90deg, ${colors.primary}, ${colors.primaryLight})`,
             transition: 'width 0.4s ease',
           }}
         />

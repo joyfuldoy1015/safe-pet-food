@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { colors } from '@/lib/design-tokens'
 
 const MESSAGES = [
   '반려동물이 채점 중이에요...',
@@ -26,7 +27,7 @@ export default function LoadingPaws({ petName }: { petName: string }) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'linear-gradient(135deg, #F7F5FF 0%, #EDE8FF 100%)',
+        background: `linear-gradient(135deg, ${colors.primaryBg} 0%, ${colors.primaryXLight} 100%)`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -58,7 +59,7 @@ export default function LoadingPaws({ petName }: { petName: string }) {
         style={{
           fontSize: '17px',
           fontWeight: 600,
-          color: '#1A1A2E',
+          color: colors.textPrimary,
           textAlign: 'center',
           animation: 'fadeIn 0.4s ease',
           padding: '0 24px',
@@ -67,7 +68,7 @@ export default function LoadingPaws({ petName }: { petName: string }) {
         {message}
       </p>
 
-      <p style={{ marginTop: '8px', fontSize: '13px', color: '#6B6B8A' }}>
+      <p style={{ marginTop: '8px', fontSize: '13px', color: colors.textSecondary }}>
         AI가 분석하는 중이에요
       </p>
 
