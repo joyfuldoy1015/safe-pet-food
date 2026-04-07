@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Calculator, 
-  Star, 
-  Heart, 
+  Calculator,
+  Star,
+  Heart,
   Shield,
   Zap,
   ChevronDown,
@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   BookOpen,
+  Sparkles,
   LogOut,
   Search,
   User
@@ -44,6 +45,7 @@ const categories = {
     icon: Heart,
     color: 'from-green-500 to-teal-500',
     items: [
+      { name: '집사력 테스트', href: '/butler-test', icon: Sparkles, description: '급여 중인 사료로 나의 집사력 점수를 확인해보세요!' },
       { name: '사료 칼로리&급여량 계산기', href: '/calorie-calculator', icon: Zap, description: '우리 아이에게 맞는 적정 칼로리와 급여량을 계산해보세요.' },
       { name: '일일 음수량 계산기', href: '/water-calculator', icon: Droplet, description: '우리 아이의 적정 하루 물 섭취량을 계산해보세요.' }
     ]
