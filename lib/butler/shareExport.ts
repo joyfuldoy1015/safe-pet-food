@@ -44,18 +44,17 @@ export async function shareResult(params: {
   score: number
   jipsaType: string
   filename: string
-}) {
+}): Promise<{ clipboardCopied: boolean }> {
   const { elementId, petName, score, jipsaType, filename } = params
   const shareText = `나는 ${score}점짜리 ${jipsaType} 집사! ${petName}이/가 인정한 집사력 테스트 해보기 → https://safe-pet-food.vercel.app/butler-test`
 
   const blob = await exportCardAsImage(elementId)
   if (!blob) {
-    // 이미지 생성 실패 시 텍스트만 공유
     try {
       if (navigator.share) await navigator.share({ text: shareText })
       else await navigator.clipboard.writeText(shareText)
     } catch { /* ignore */ }
-    return
+    return { clipboardCopied: false }
   }
 
   const file = new File([blob], filename, { type: 'image/png' })
@@ -63,7 +62,7 @@ export async function shareResult(params: {
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
     try {
       await navigator.share({ files: [file], text: shareText })
-      return
+      return { clipboardCopied: false }
     } catch { /* fallthrough */ }
   }
 
@@ -77,6 +76,8 @@ export async function shareResult(params: {
 
   try {
     await navigator.clipboard.writeText(shareText)
-    alert('이미지가 저장됐어요! 공유 텍스트도 클립보드에 복사됐습니다 🐾')
-  } catch { /* ignore */ }
+    return { clipboardCopied: true }
+  } catch {
+    return { clipboardCopied: false }
+  }
 }

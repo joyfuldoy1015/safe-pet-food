@@ -42,18 +42,20 @@ export default function ProductsListSection({ products, brandName: propBrandName
   const [description, setDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requestSubmitted, setRequestSubmitted] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
   const handleSubmitRequest = async () => {
     if (!user) {
-      alert('로그인이 필요합니다.')
+      setFormError('로그인이 필요합니다.')
       return
     }
 
     if (!productName.trim()) {
-      alert('제품명을 입력해주세요.')
+      setFormError('제품명을 입력해주세요.')
       return
     }
 
+    setFormError(null)
     setIsSubmitting(true)
     try {
       const response = await fetch('/api/product-requests', {
@@ -74,13 +76,12 @@ export default function ProductsListSection({ products, brandName: propBrandName
         setShowRequestForm(false)
         setProductName('')
         setDescription('')
-        alert(result.message || '제품 등록 요청이 접수되었습니다.')
       } else {
-        alert(result.error || '요청 처리 중 오류가 발생했습니다.')
+        setFormError(result.error || '요청 처리 중 오류가 발생했습니다.')
       }
     } catch (error) {
       console.error('제품 등록 요청 오류:', error)
-      alert('요청 처리 중 오류가 발생했습니다.')
+      setFormError('요청 처리 중 오류가 발생했습니다.')
     } finally {
       setIsSubmitting(false)
     }
@@ -123,12 +124,16 @@ export default function ProductsListSection({ products, brandName: propBrandName
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] resize-none"
               />
+              {formError && (
+                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</p>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={() => {
                     setShowRequestForm(false)
                     setProductName('')
                     setDescription('')
+                    setFormError(null)
                   }}
                   className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
                 >
@@ -154,7 +159,6 @@ export default function ProductsListSection({ products, brandName: propBrandName
             <button
               onClick={() => {
                 if (!user) {
-                  alert('로그인이 필요합니다.')
                   window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
                   return
                 }

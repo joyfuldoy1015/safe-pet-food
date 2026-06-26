@@ -47,11 +47,17 @@ interface Props {
 export default function Result({ result, petName, onRestart }: Props) {
   const [barsVisible, setBarsVisible] = useState(false)
   const [isBusy, setIsBusy] = useState(false)
+  const [shareMessage, setShareMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setBarsVisible(true), 300)
     return () => clearTimeout(t)
   }, [])
+
+  const showMessage = (msg: string) => {
+    setShareMessage(msg)
+    setTimeout(() => setShareMessage(null), 3000)
+  }
 
   const filename = `집사력테스트_${petName}_${result.jipsaScore}점.png`
 
@@ -59,11 +65,12 @@ export default function Result({ result, petName, onRestart }: Props) {
     setIsBusy(true)
     await downloadCard('result-card-export', filename)
     setIsBusy(false)
+    showMessage('이미지가 저장됐어요! 📸')
   }
 
   const handleShare = async () => {
     setIsBusy(true)
-    await shareResult({
+    const { clipboardCopied } = await shareResult({
       elementId: 'result-card-export',
       petName,
       score: result.jipsaScore,
@@ -71,6 +78,9 @@ export default function Result({ result, petName, onRestart }: Props) {
       filename,
     })
     setIsBusy(false)
+    if (clipboardCopied) {
+      showMessage('이미지가 저장됐어요! 공유 텍스트도 클립보드에 복사됐습니다 🐾')
+    }
   }
 
   return (
@@ -285,6 +295,21 @@ export default function Result({ result, petName, onRestart }: Props) {
             🐾 집사력 자랑하기
           </button>
         </div>
+
+        {shareMessage && (
+          <div style={{
+            marginTop: '12px',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            background: '#EDE8FF',
+            color: '#5B3FC8',
+            fontSize: '13px',
+            fontWeight: 600,
+            textAlign: 'center',
+          }}>
+            {shareMessage}
+          </div>
+        )}
 
         <button
           onClick={onRestart}
