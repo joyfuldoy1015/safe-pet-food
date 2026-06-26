@@ -70,23 +70,22 @@ GROUP BY rl.category, rl.brand, rl.product;
 -- ============================================
 -- 3. Product Longest Feeding with Species
 -- ============================================
--- Adds species filter support by joining with pets
+-- max_days / logs_count are computed per (category, brand, product, species)
+-- so species-filtered rankings reflect only that species' data
 CREATE OR REPLACE VIEW public.product_longest_feeding_with_species AS
-SELECT DISTINCT
-  plf.category,
-  plf.brand,
-  plf.product,
-  plf.max_days,
-  plf.logs_count,
-  plf.last_updated,
+SELECT
+  rl.category,
+  rl.brand,
+  rl.product,
+  MAX(v.duration_days)::INTEGER AS max_days,
+  COUNT(*)::INTEGER AS logs_count,
+  MAX(rl.updated_at) AS last_updated,
   p.species
-FROM public.product_longest_feeding plf
-JOIN public.review_logs rl ON 
-  rl.category = plf.category AND 
-  rl.brand = plf.brand AND 
-  rl.product = plf.product
+FROM public.review_logs rl
+JOIN public.review_logs_with_duration v ON v.id = rl.id
 JOIN public.pets p ON p.id = rl.pet_id
-GROUP BY plf.category, plf.brand, plf.product, plf.max_days, plf.logs_count, plf.last_updated, p.species;
+WHERE v.duration_days IS NOT NULL
+GROUP BY rl.category, rl.brand, rl.product, p.species;
 
 -- ============================================
 -- Indexes for Performance
