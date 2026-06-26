@@ -7,10 +7,6 @@ import { colors, radii } from '@/lib/design-tokens'
 const PET_TYPES = [
   { value: '강아지', label: '강아지', emoji: '🐕' },
   { value: '고양이', label: '고양이', emoji: '🐱' },
-  { value: '토끼', label: '토끼', emoji: '🐰' },
-  { value: '햄스터', label: '햄스터', emoji: '🐹' },
-  { value: '새', label: '새', emoji: '🐦' },
-  { value: '기타', label: '기타', emoji: '🐾' },
 ]
 
 const HEALTH_OPTIONS = [
@@ -65,7 +61,7 @@ export default function PetInfo({ onNext, onBack, initial }: Props) {
             <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: colors.textSecondary, marginBottom: '12px' }}>
               종류 선택 <span style={{ color: colors.primary }}>*</span>
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               {PET_TYPES.map(pt => (
                 <button
                   key={pt.value}

@@ -3,10 +3,9 @@ export async function exportCardAsImage(elementId: string): Promise<Blob | null>
   if (!el) return null
   try {
     const html2canvas = (await import('html2canvas')).default
-    // 실제 렌더링된 너비를 읽어 캔버스 크기로 사용
     const rect = el.getBoundingClientRect()
     const w = Math.round(rect.width)
-    const h = el.scrollHeight
+    const h = Math.round(rect.height)
 
     const canvas = await html2canvas(el, {
       useCORS: true,
@@ -15,8 +14,12 @@ export async function exportCardAsImage(elementId: string): Promise<Blob | null>
       backgroundColor: '#ffffff',
       width: w,
       height: h,
+      x: 0,
+      y: 0,
+      scrollX: 0,
+      scrollY: 0,
       windowWidth: document.documentElement.clientWidth,
-      windowHeight: document.documentElement.clientHeight,
+      windowHeight: h,
     })
     return new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
   } catch {

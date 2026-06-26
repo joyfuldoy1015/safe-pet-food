@@ -6,6 +6,22 @@ import { downloadCard, shareResult } from '@/lib/butler/shareExport'
 
 const HAPPINESS_EMOJIS = ['😢', '😐', '🙂', '😊', '🥰']
 
+function getScoreBadgeGradient(score: number): string {
+  if (score >= 85) return 'linear-gradient(135deg, #F59E0B, #FCD34D)'
+  if (score >= 70) return 'linear-gradient(135deg, #6B48F0, #C4B5FD)'
+  if (score >= 55) return 'linear-gradient(135deg, #10B981, #6EE7B7)'
+  if (score >= 40) return 'linear-gradient(135deg, #3B82F6, #93C5FD)'
+  return 'linear-gradient(135deg, #9CA3AF, #D1D5DB)'
+}
+
+function getScoreBadgeShadow(score: number): string {
+  if (score >= 85) return '0 6px 20px rgba(245,158,11,0.40)'
+  if (score >= 70) return '0 6px 20px rgba(80,50,200,0.35)'
+  if (score >= 55) return '0 6px 20px rgba(16,185,129,0.35)'
+  if (score >= 40) return '0 6px 20px rgba(59,130,246,0.35)'
+  return '0 6px 20px rgba(156,163,175,0.35)'
+}
+
 function getIllustration(score: number): string {
   if (score >= 85) return '/illustrations/result-s-grade.png'
   if (score >= 70) return '/illustrations/result-perfect.png'
@@ -87,13 +103,12 @@ export default function Result({ result, petName, onRestart }: Props) {
               position: 'absolute',
               top: 0, left: 0, right: 0,
               padding: '16px 20px',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.38) 0%, transparent 100%)',
               textAlign: 'center',
             }}>
               <div style={{
                 display: 'inline-block',
                 maxWidth: '82%',
-                background: 'rgba(255,255,255,0.55)',
+                background: 'rgba(255,255,255,0.75)',
                 borderRadius: '20px',
                 padding: '6px 14px',
                 fontSize: '12px',
@@ -108,10 +123,12 @@ export default function Result({ result, petName, onRestart }: Props) {
             {/* 하단 집사 타입명 오버레이 — 배지(44px 겹침) 위로 올라오도록 padding-bottom 확보 */}
             <div style={{
               position: 'absolute',
-              bottom: 0, left: 0, right: 0,
+              top: 0, bottom: 0, left: 0, right: 0,
               padding: '0 20px 44px',
-              background: 'linear-gradient(to top, rgba(40,20,90,0.65) 0%, transparent 100%)',
-              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              background: 'linear-gradient(to top, rgba(40,20,90,0.65) 0%, transparent 55%)',
             }}>
               <h2 style={{
                 fontSize: '24px', fontWeight: 800, color: '#fff',
@@ -131,8 +148,8 @@ export default function Result({ result, petName, onRestart }: Props) {
                 display: 'inline-block',
                 width: '88px', height: '88px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #6B48F0, #C4B5FD)',
-                boxShadow: '0 6px 20px rgba(80,50,200,0.35)',
+                background: getScoreBadgeGradient(result.jipsaScore),
+                boxShadow: getScoreBadgeShadow(result.jipsaScore),
                 border: '4px solid #fff',
                 boxSizing: 'border-box',
               }}>
@@ -146,15 +163,20 @@ export default function Result({ result, petName, onRestart }: Props) {
               </div>
             </div>
             {/* 능력치 바 */}
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {Object.entries(result.stats).map(([label, value], i) => (
-                <div key={label} style={{ marginBottom: '12px' }}>
+                <div key={label} style={{
+                  background: '#F7F5FF',
+                  borderRadius: '14px',
+                  padding: '12px 14px',
+                  border: `1.5px solid ${STAT_COLORS[label] || '#7C5CFC'}22`,
+                }}>
                   {/* table-cell로 html2canvas 호환 좌우 정렬 */}
-                  <div style={{ display: 'table', width: '100%', marginBottom: '3px' }}>
-                    <span style={{ display: 'table-cell', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: '#6B6B8A' }}>{label}</span>
-                    <span style={{ display: 'table-cell', textAlign: 'right', fontSize: '13px', fontWeight: 700, color: STAT_COLORS[label] || '#7C5CFC' }}>{value}</span>
+                  <div style={{ display: 'table', width: '100%', marginBottom: '8px' }}>
+                    <span style={{ display: 'table-cell', textAlign: 'left', fontSize: '13px', fontWeight: 700, color: '#1A1A2E' }}>{label}</span>
+                    <span style={{ display: 'table-cell', textAlign: 'right', fontSize: '14px', fontWeight: 800, color: STAT_COLORS[label] || '#7C5CFC' }}>{value}</span>
                   </div>
-                  <div style={{ height: '10px', borderRadius: '99px', background: '#EDE8FF', overflow: 'hidden' }}>
+                  <div style={{ height: '10px', borderRadius: '99px', background: `${STAT_COLORS[label] || '#7C5CFC'}22`, overflow: 'hidden' }}>
                     <div style={{
                       height: '100%',
                       borderRadius: '99px',
@@ -219,12 +241,12 @@ export default function Result({ result, petName, onRestart }: Props) {
             {/* 워터마크 */}
             <div style={{ textAlign: 'right', marginTop: '12px', paddingBottom: '4px' }}>
               <span style={{ fontSize: '11px', color: '#A0A0B8', fontWeight: 600 }}>
-                🐾 집사력 테스트
+                🐾 세펫푸 집사력 테스트
               </span>
             </div>
           </div>
           {/* 하단 여백 — 클리핑 방지 */}
-          <div style={{ height: '1px' }} />
+          <div style={{ height: '8px', background: '#fff' }} />
         </div>
 
         {/* 액션 버튼 */}
