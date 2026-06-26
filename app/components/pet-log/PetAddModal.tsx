@@ -139,7 +139,7 @@ export default function PetAddModal({ isOpen, onClose, onSuccess }: PetAddModalP
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
                 placeholder="예: 뽀미"
               />
             </div>
@@ -187,7 +187,7 @@ export default function PetAddModal({ isOpen, onClose, onSuccess }: PetAddModalP
                 onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                 required
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
               />
             </div>
 
@@ -203,7 +203,7 @@ export default function PetAddModal({ isOpen, onClose, onSuccess }: PetAddModalP
                 min="0"
                 value={formData.weightKg}
                 onChange={(e) => setFormData({ ...formData, weightKg: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
                 placeholder="예: 6.5"
               />
             </div>
@@ -225,7 +225,7 @@ export default function PetAddModal({ isOpen, onClose, onSuccess }: PetAddModalP
                       handleAddTag()
                     }
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-sm"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base"
                   placeholder="예: 알러지-닭고기"
                 />
                 <button
