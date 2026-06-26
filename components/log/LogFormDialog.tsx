@@ -613,13 +613,15 @@ function ReviewLogFormContent({
     )
   }
 
+  const isToilet = formData.category === 'toilet'
+
   return (
     <div className="py-4">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {editData ? '후기 수정' : '후기 작성'}
         </h2>
-        <p className="text-sm text-gray-600">급여 경험을 공유해주세요</p>
+        <p className="text-sm text-gray-600">{isToilet ? '사용 경험을 공유해주세요' : '급여 경험을 공유해주세요'}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -707,9 +709,9 @@ function ReviewLogFormContent({
                     : 'border-gray-300 text-gray-700 hover:border-gray-400'
                 }`}
               >
-                {status === 'feeding' && '급여 중'}
-                {status === 'paused' && '급여 중지'}
-                {status === 'completed' && '급여 완료'}
+                {status === 'feeding' && (isToilet ? '사용 중' : '급여 중')}
+                {status === 'paused' && (isToilet ? '사용 중지' : '급여 중지')}
+                {status === 'completed' && (isToilet ? '사용 완료' : '급여 완료')}
               </button>
             ))}
           </div>
@@ -749,28 +751,28 @@ function ReviewLogFormContent({
           />
         </div>
 
-        {/* Palatability Score */}
+        {/* Score 1 */}
         <ScoreGrid
-          label="기호성 (1-5)"
+          label={isToilet ? '응고력 (1-5)' : '기호성 (1-5)'}
           value={formData.palatability_score}
           onChange={(v) => setFormData(prev => ({ ...prev, palatability_score: v }))}
-          descriptions={['거부', '싫어함', '보통', '좋아함', '환장함']}
+          descriptions={isToilet ? ['나쁨', '아쉬움', '보통', '좋음', '최고'] : ['거부', '싫어함', '보통', '좋아함', '환장함']}
         />
 
-        {/* Digestibility Score */}
+        {/* Score 2 */}
         <ScoreGrid
-          label="소화율 (1-5)"
+          label={isToilet ? '탈취력 (1-5)' : '소화율 (1-5)'}
           value={formData.digestibility_score}
           onChange={(v) => setFormData(prev => ({ ...prev, digestibility_score: v }))}
-          descriptions={['나쁨', '아쉬움', '보통', '좋음', '최고']}
+          descriptions={isToilet ? ['없음', '약함', '보통', '좋음', '탁월'] : ['나쁨', '아쉬움', '보통', '좋음', '최고']}
         />
 
-        {/* Coat Quality Score */}
+        {/* Score 3 */}
         <ScoreGrid
-          label="털 상태 (1-5)"
+          label={isToilet ? '먼지/사막화 (1-5)' : '털 상태 (1-5)'}
           value={formData.coat_quality_score}
           onChange={(v) => setFormData(prev => ({ ...prev, coat_quality_score: v }))}
-          descriptions={['나쁨', '푸석', '보통', '좋음', '윤기']}
+          descriptions={isToilet ? ['많음', '있음', '보통', '적음', '없음'] : ['나쁨', '푸석', '보통', '좋음', '윤기']}
         />
 
         {/* Rating - 자동 계산 */}
@@ -832,8 +834,8 @@ function ReviewLogFormContent({
           </div>
         </div>
 
-        {/* SAFI 안전성 평가 */}
-        <SAFIInputSection
+        {/* SAFI 안전성 평가 — 화장실 카테고리는 해당 없음 */}
+        {!isToilet && <SAFIInputSection
           stoolScore={formData.stool_score}
           onStoolScoreChange={(v) => setFormData(prev => ({ ...prev, stool_score: v }))}
           appetiteChange={formData.appetite_change}
@@ -845,7 +847,7 @@ function ReviewLogFormContent({
           setAllergyInput={setAllergyInput}
           onAddAllergy={handleAddAllergy}
           onRemoveAllergy={handleRemoveAllergy}
-        />
+        />}
 
         {/* Continue Reasons */}
         <ReasonTagsInput
@@ -885,7 +887,9 @@ function ReviewLogFormContent({
             required
             rows={5}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3056F5] focus:border-[#3056F5] text-base resize-none"
-            placeholder="급여 경험을 자유롭게 작성해주세요 (기호성, 소화, 변 상태, 추천 여부 등)"
+            placeholder={isToilet
+              ? '사용 경험을 자유롭게 작성해주세요 (응고력, 탈취력, 먼지 발생, 추천 여부 등)'
+              : '급여 경험을 자유롭게 작성해주세요 (기호성, 소화, 변 상태, 추천 여부 등)'}
           />
         </div>
 
