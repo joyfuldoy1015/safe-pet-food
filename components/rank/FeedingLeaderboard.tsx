@@ -85,7 +85,7 @@ export default function FeedingLeaderboard({
             data = await getTopMentions({ limit: 10, species, category })
             break
           case 'recommended':
-            data = await getBlended({ limit: 10, species, category, minLogs: 2 })
+            data = await getBlended({ limit: 10, species, category, minLogs: 1 })
             break
         }
 
