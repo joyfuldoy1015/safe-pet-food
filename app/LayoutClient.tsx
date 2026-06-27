@@ -14,14 +14,16 @@ export default function LayoutClient({
 }) {
   const pathname = usePathname()
   const isAdminPage = pathname?.startsWith('/admin')
+  const isBetaPage = pathname?.startsWith('/beta')
+  const isFullscreenPage = isAdminPage || isBetaPage
 
   return (
     <SessionProvider>
       <Suspense fallback={null}>
         <PostHogProvider>
-          {!isAdminPage && <Header />}
+          {!isFullscreenPage && <Header />}
           {children}
-          {!isAdminPage && <Footer isAdmin={false} />}
+          {!isFullscreenPage && <Footer isAdmin={false} />}
         </PostHogProvider>
       </Suspense>
     </SessionProvider>
