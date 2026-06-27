@@ -40,7 +40,7 @@ export default function BetaLandingPage() {
       {/* 미니 내비 */}
       <nav className="sticky top-0 z-50 bg-yellow-400">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="text-base font-bold text-black tracking-tight">세펫푸</span>
+          <span className="text-base font-bold text-black tracking-tight">SafePetFood</span>
           <button
             onClick={scrollToSignup}
             className="px-4 py-1.5 text-sm font-semibold bg-black text-yellow-400 rounded-full hover:bg-gray-800 transition-colors"
@@ -62,7 +62,7 @@ export default function BetaLandingPage() {
           </h1>
           <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-8">
             사료·간식·영양제를 오래 먹여본 반려인들의 실제 경험이 모이면,<br className="hidden sm:block" />
-            새로운 반려인도 겁 없이 시작할 수 있어요.
+            새로운 반려인도 걱정 없이 시작할 수 있어요.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
@@ -79,7 +79,7 @@ export default function BetaLandingPage() {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">
-            어떤 사료가 진짜 안전한지,<br />사실 모르잖아요.
+            어떤 사료가 진짜 안전한지,<br />사실 먹여보기 전에는 모르잖아요.
           </h2>
           <p className="text-center text-gray-500 mb-12">반려인이라면 누구나 한 번쯤 느끼는 불안함이에요.</p>
           <div className="grid sm:grid-cols-3 gap-4">
@@ -92,7 +92,7 @@ export default function BetaLandingPage() {
               {
                 icon: '⏱️',
                 title: '장기 후기는 찾기 어려워요',
-                desc: '온라인 리뷰 대부분은 1~2주 단기 경험이에요. 3개월·6개월 데이터는 거의 없죠.',
+                desc: '온라인 리뷰 대부분은 1~2주 단기 경험이에요. 6개월·1년 이상의 데이터는 거의 없죠.',
               },
               {
                 icon: '🐾',
