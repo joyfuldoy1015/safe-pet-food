@@ -71,13 +71,6 @@ export default function BetaLandingPage() {
             >
               베타테스터 신청하기
             </button>
-            <Link
-              href="https://safe-pet-food.vercel.app"
-              target="_blank"
-              className="px-7 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-[#3056F5] hover:text-[#3056F5] transition-colors"
-            >
-              서비스 먼저 둘러보기
-            </Link>
           </div>
         </div>
       </section>
@@ -283,8 +276,6 @@ export default function BetaLandingPage() {
       <footer className="py-8 px-6 bg-gray-900 text-center">
         <p className="text-sm text-gray-500">
           © 2025 safe petfood ·{' '}
-          <a href="https://safepetfood.kr" className="hover:text-gray-400 transition-colors">safepetfood.kr</a>
-          {' · '}
           <Link href="/privacy" className="hover:text-gray-400 transition-colors">개인정보처리방침</Link>
         </p>
       </footer>
