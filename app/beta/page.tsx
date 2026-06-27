@@ -38,12 +38,12 @@ export default function BetaLandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans">
       {/* 미니 내비 */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <nav className="sticky top-0 z-50 bg-yellow-400">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="text-base font-bold text-[#3056F5] tracking-tight">safe petfood</span>
+          <span className="text-base font-bold text-black tracking-tight">세펫푸</span>
           <button
             onClick={scrollToSignup}
-            className="px-4 py-1.5 text-sm font-semibold bg-[#3056F5] text-white rounded-full hover:bg-[#2648e6] transition-colors"
+            className="px-4 py-1.5 text-sm font-semibold bg-black text-yellow-400 rounded-full hover:bg-gray-800 transition-colors"
           >
             베타 신청하기
           </button>
@@ -51,14 +51,14 @@ export default function BetaLandingPage() {
       </nav>
 
       {/* 1. Hero */}
-      <section className="bg-gradient-to-b from-[#f0f4ff] to-white pt-20 pb-24 px-6 text-center">
+      <section className="bg-gradient-to-b from-yellow-50 to-white pt-20 pb-24 px-6 text-center">
         <div className="max-w-2xl mx-auto">
-          <span className="inline-block mb-4 px-3 py-1 text-xs font-semibold bg-[#3056F5]/10 text-[#3056F5] rounded-full">
+          <span className="inline-block mb-4 px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-700 rounded-full">
             베타테스터 모집 중
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-5">
             우리 아이에게 정말 괜찮은 제품,<br />
-            <span className="text-[#3056F5]">함께 기록하고 함께 안심해요.</span>
+            <span className="text-yellow-500">함께 기록하고 함께 안심해요.</span>
           </h1>
           <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-8">
             사료·간식·영양제를 오래 먹여본 반려인들의 실제 경험이 모이면,<br className="hidden sm:block" />
@@ -67,7 +67,7 @@ export default function BetaLandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={scrollToSignup}
-              className="px-7 py-3.5 bg-[#3056F5] text-white font-semibold rounded-xl hover:bg-[#2648e6] transition-all hover:scale-105 shadow-md shadow-[#3056F5]/25"
+              className="px-7 py-3.5 bg-yellow-400 text-black font-semibold rounded-xl hover:bg-yellow-500 transition-all hover:scale-105 shadow-md shadow-yellow-400/40"
             >
               베타테스터 신청하기
             </button>
@@ -111,7 +111,7 @@ export default function BetaLandingPage() {
       </section>
 
       {/* 3. 솔루션 */}
-      <section className="py-20 px-6 bg-[#f8faff]">
+      <section className="py-20 px-6 bg-yellow-50">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">
             직접 기록하고, 함께 나눠요.
@@ -138,9 +138,9 @@ export default function BetaLandingPage() {
                 desc: '누적된 실제 데이터로 새로운 반려인이 믿고 선택할 수 있어요. 함께 만드는 신뢰예요.',
               },
             ].map((item) => (
-              <div key={item.step} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+              <div key={item.step} className="bg-white rounded-2xl p-6 border border-yellow-100 shadow-sm text-center">
                 <div className="text-3xl mb-2">{item.icon}</div>
-                <div className="text-xs font-bold text-[#3056F5] mb-1">{item.step}</div>
+                <div className="text-xs font-bold text-yellow-600 mb-1">{item.step}</div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
@@ -163,7 +163,7 @@ export default function BetaLandingPage() {
               { icon: '🐾', title: '반려동물 프로필 우선 등록', desc: '사료·용품 DB에 우리 아이 관련 정보를 우선 등록해드려요.' },
               { icon: '💬', title: '전용 채널 초대', desc: '운영자와 직접 소통하는 베타 채널에 초대돼요.' },
             ].map((item) => (
-              <div key={item.title} className="flex gap-4 p-5 bg-[#f8faff] rounded-2xl border border-[#e8eeff]">
+              <div key={item.title} className="flex gap-4 p-5 bg-yellow-50 rounded-2xl border border-yellow-100">
                 <div className="text-2xl flex-shrink-0">{item.icon}</div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
@@ -176,7 +176,7 @@ export default function BetaLandingPage() {
       </section>
 
       {/* 5. 대상 */}
-      <section className="py-20 px-6 bg-[#f8faff]">
+      <section className="py-20 px-6 bg-yellow-50">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">이런 분을 찾고 있어요.</h2>
           <p className="text-gray-500 mb-10">많은 조건이 필요하지 않아요. 관심과 의지면 충분해요.</p>
@@ -187,8 +187,8 @@ export default function BetaLandingPage() {
               '실제 사용 경험을 기록하고 나누는 것에 거부감이 없는 분',
               '서비스 초기 성장에 함께하고 싶은 분',
             ].map((text) => (
-              <li key={text} className="flex items-start gap-3 bg-white rounded-xl px-5 py-4 border border-gray-100 shadow-sm">
-                <span className="text-[#3056F5] mt-0.5 flex-shrink-0">✓</span>
+              <li key={text} className="flex items-start gap-3 bg-white rounded-xl px-5 py-4 border border-yellow-100 shadow-sm">
+                <span className="text-yellow-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
                 <span className="text-gray-800 text-sm sm:text-base">{text}</span>
               </li>
             ))}
@@ -197,48 +197,48 @@ export default function BetaLandingPage() {
       </section>
 
       {/* 6. 신청 폼 */}
-      <section id="signup" className="py-24 px-6 bg-[#3056F5]">
+      <section id="signup" className="py-24 px-6 bg-yellow-400">
         <div className="max-w-md mx-auto text-center">
           {status === 'success' ? (
             <div className="py-8">
               <div className="text-5xl mb-4">🎉</div>
-              <h2 className="text-2xl font-bold text-white mb-3">신청 완료!</h2>
-              <p className="text-blue-100 text-base">
+              <h2 className="text-2xl font-bold text-black mb-3">신청 완료!</h2>
+              <p className="text-yellow-800 text-base">
                 베타 초대 이메일로 가장 먼저 연락드릴게요.<br />
                 함께해주셔서 감사해요 🐾
               </p>
             </div>
           ) : (
             <>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-2">
                 지금 신청하면 가장 먼저 초대드려요.
               </h2>
-              <p className="text-blue-200 mb-10 text-sm">소수 정예 베타테스터를 모집하고 있어요.</p>
+              <p className="text-yellow-800 mb-10 text-sm">소수 정예 베타테스터를 모집하고 있어요.</p>
               <form onSubmit={handleSubmit} className="space-y-4 text-left">
                 <div>
-                  <label className="block text-xs font-semibold text-blue-200 mb-1.5">이름</label>
+                  <label className="block text-xs font-semibold text-yellow-900 mb-1.5">이름</label>
                   <input
                     type="text"
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="홍길동"
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-300 text-base focus:outline-none focus:border-white focus:bg-white/20 transition"
+                    className="w-full px-4 py-3 rounded-xl bg-white/60 border border-yellow-600/30 text-black placeholder-yellow-700 text-base focus:outline-none focus:border-yellow-700 focus:bg-white/80 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-blue-200 mb-1.5">이메일</label>
+                  <label className="block text-xs font-semibold text-yellow-900 mb-1.5">이메일</label>
                   <input
                     type="email"
                     required
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="hello@example.com"
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-300 text-base focus:outline-none focus:border-white focus:bg-white/20 transition"
+                    className="w-full px-4 py-3 rounded-xl bg-white/60 border border-yellow-600/30 text-black placeholder-yellow-700 text-base focus:outline-none focus:border-yellow-700 focus:bg-white/80 transition"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-blue-200 mb-1.5">반려동물 종류</label>
+                  <label className="block text-xs font-semibold text-yellow-900 mb-1.5">반려동물 종류</label>
                   <div className="flex gap-3">
                     {([['dog', '🐕 강아지'], ['cat', '🐱 고양이'], ['both', '둘 다']] as const).map(([val, label]) => (
                       <button
@@ -247,8 +247,8 @@ export default function BetaLandingPage() {
                         onClick={() => setForm({ ...form, petType: val })}
                         className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
                           form.petType === val
-                            ? 'bg-white text-[#3056F5] border-white'
-                            : 'bg-transparent text-white border-white/30 hover:border-white/60'
+                            ? 'bg-black text-yellow-400 border-black'
+                            : 'bg-transparent text-black border-black/30 hover:border-black/60'
                         }`}
                       >
                         {label}
@@ -257,12 +257,12 @@ export default function BetaLandingPage() {
                   </div>
                 </div>
                 {errorMsg && (
-                  <p className="text-sm text-red-300 bg-red-500/20 rounded-lg px-4 py-2">{errorMsg}</p>
+                  <p className="text-sm text-red-700 bg-red-100 rounded-lg px-4 py-2">{errorMsg}</p>
                 )}
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="w-full py-4 bg-white text-[#3056F5] font-bold rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-60 text-base mt-2"
+                  className="w-full py-4 bg-black text-yellow-400 font-bold rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-60 text-base mt-2"
                 >
                   {status === 'loading' ? '신청 중...' : '베타 신청하기'}
                 </button>
