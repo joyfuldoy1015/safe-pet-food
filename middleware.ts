@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const BETA_ONLY_MODE = true // 서비스 오픈 시 false로 변경
+const BETA_ONLY_MODE = false // 서비스 오픈 시 false로 변경
 const BETA_ALLOWED = ['/beta', '/api/beta-signup', '/privacy']
 
 export async function middleware(request: NextRequest) {
