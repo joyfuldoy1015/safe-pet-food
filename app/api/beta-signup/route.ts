@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { name, email, petType } = body
+    const { name, email, petType, interestedProducts } = body
 
     if (!name?.trim() || !email?.trim() || !petType) {
       return NextResponse.json({ error: '이름, 이메일, 반려동물 종류를 모두 입력해주세요.' }, { status: 400 })
@@ -29,7 +29,12 @@ export async function POST(request: NextRequest) {
 
     const { error } = await supabase
       .from('beta_signups' as any)
-      .insert({ name: name.trim(), email: email.trim().toLowerCase(), pet_type: petType } as any)
+      .insert({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        pet_type: petType,
+        interested_products: Array.isArray(interestedProducts) ? interestedProducts : [],
+      } as any)
 
     if (error) {
       if (error.code === '23505') {

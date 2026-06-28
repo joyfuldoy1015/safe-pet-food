@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS public.beta_signups (
   name text NOT NULL,
   email text NOT NULL UNIQUE,
   pet_type text NOT NULL CHECK (pet_type IN ('dog', 'cat', 'both')),
+  interested_products text[] DEFAULT '{}',
   created_at timestamptz DEFAULT now()
 );
 

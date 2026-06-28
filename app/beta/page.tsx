@@ -6,7 +6,16 @@ import Link from 'next/link'
 type PetType = 'dog' | 'cat' | 'both'
 
 export default function BetaLandingPage() {
-  const [form, setForm] = useState({ name: '', email: '', petType: '' as PetType | '' })
+  const [form, setForm] = useState({ name: '', email: '', petType: '' as PetType | '', interestedProducts: [] as string[] })
+
+  const toggleProduct = (product: string) => {
+    setForm(prev => ({
+      ...prev,
+      interestedProducts: prev.interestedProducts.includes(product)
+        ? prev.interestedProducts.filter(p => p !== product)
+        : [...prev.interestedProducts, product]
+    }))
+  }
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -19,7 +28,7 @@ export default function BetaLandingPage() {
     const res = await fetch('/api/beta-signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: form.name, email: form.email, petType: form.petType }),
+      body: JSON.stringify({ name: form.name, email: form.email, petType: form.petType, interestedProducts: form.interestedProducts }),
     })
     const data = await res.json()
 
@@ -162,7 +171,7 @@ export default function BetaLandingPage() {
               { icon: '📣', title: '피드백 반영 우선권', desc: '개선 요청·의견을 직접 전달하고 반려인들을 위한 서비스에 반영할 수 있어요.' },
               { icon: '🐾', title: '반려동물 사용 제품 우선 등록', desc: '사료·용품 DB에 우리 아이가 급여/사용하는 제품 관련 정보를 우선 등록해드려요.' },
               { icon: '💬', title: '전용 채널 초대', desc: '운영자와 직접 소통하는 베타 채널에 초대돼요.' },
-              { icon: '🎁', title: '소정의 기념품', desc: '베타테스터로 참여해주신 분들께 감사의 마음을 담아 소정의 기념품을 보내드려요.' },
+              { icon: '🎁', title: '소정의 선물', desc: '베타테스터로 참여해주신 분들께 감사의 마음을 담아 소정의 선물을 보내드려요.' },
             ].map((item) => (
               <div key={item.title} className="flex gap-4 p-5 bg-yellow-50 rounded-2xl border border-yellow-100">
                 <div className="text-2xl flex-shrink-0">{item.icon}</div>
@@ -237,6 +246,25 @@ export default function BetaLandingPage() {
                     placeholder="hello@example.com"
                     className="w-full px-4 py-3 rounded-xl bg-white/60 border border-yellow-600/30 text-black placeholder-yellow-700 text-base focus:outline-none focus:border-yellow-700 focus:bg-white/80 transition"
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-yellow-900 mb-1.5">관심 제품 <span className="font-normal">(복수 선택 가능)</span></label>
+                  <div className="flex gap-3 flex-wrap">
+                    {(['사료', '간식', '영양제', '모래'] as const).map((product) => (
+                      <button
+                        key={product}
+                        type="button"
+                        onClick={() => toggleProduct(product)}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
+                          form.interestedProducts.includes(product)
+                            ? 'bg-black text-yellow-400 border-black'
+                            : 'bg-transparent text-black border-black/30 hover:border-black/60'
+                        }`}
+                      >
+                        {product}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-yellow-900 mb-1.5">반려동물 종류</label>
