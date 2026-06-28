@@ -2,7 +2,18 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+const BETA_ONLY_MODE = true // 서비스 오픈 시 false로 변경
+const BETA_ALLOWED = ['/beta', '/api/beta-signup', '/privacy']
+
 export async function middleware(request: NextRequest) {
+  if (BETA_ONLY_MODE) {
+    const { pathname } = request.nextUrl
+    const isAllowed = BETA_ALLOWED.some(p => pathname === p || pathname.startsWith(p + '/'))
+    if (!isAllowed) {
+      return NextResponse.redirect(new URL('/beta', request.url))
+    }
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
