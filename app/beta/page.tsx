@@ -159,9 +159,10 @@ export default function BetaLandingPage() {
           <p className="text-center text-gray-500 mb-12">서비스 초기를 함께하는 분들께 특별한 혜택을 드려요.</p>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { icon: '📣', title: '피드백 반영 우선권', desc: '개선 요청·의견을 직접 전달하고 가장 먼저 반영받을 수 있어요.' },
-              { icon: '🐾', title: '반려동물 프로필 우선 등록', desc: '사료·용품 DB에 우리 아이 관련 정보를 우선 등록해드려요.' },
+              { icon: '📣', title: '피드백 반영 우선권', desc: '개선 요청·의견을 직접 전달하고 반려인들을 위한 서비스에 반영할 수 있어요.' },
+              { icon: '🐾', title: '반려동물 사용 제품 우선 등록', desc: '사료·용품 DB에 우리 아이가 급여/사용하는 제품 관련 정보를 우선 등록해드려요.' },
               { icon: '💬', title: '전용 채널 초대', desc: '운영자와 직접 소통하는 베타 채널에 초대돼요.' },
+              { icon: '🎁', title: '소정의 기념품', desc: '베타테스터로 참여해주신 분들께 감사의 마음을 담아 소정의 기념품을 보내드려요.' },
             ].map((item) => (
               <div key={item.title} className="flex gap-4 p-5 bg-yellow-50 rounded-2xl border border-yellow-100">
                 <div className="text-2xl flex-shrink-0">{item.icon}</div>
