@@ -40,10 +40,10 @@ export default function BetaLandingPage() {
       {/* 미니 내비 */}
       <nav className="sticky top-0 z-50 bg-yellow-400">
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="text-base font-bold text-black tracking-tight">SafePetFood</span>
+          <span className="text-lg font-bold text-black tracking-tight">Safe Pet Food</span>
           <button
             onClick={scrollToSignup}
-            className="px-4 py-1.5 text-sm font-semibold bg-black text-yellow-400 rounded-full hover:bg-gray-800 transition-colors"
+            className="px-4 py-1.5 text-base font-semibold bg-black text-yellow-400 rounded-full hover:bg-gray-800 transition-colors"
           >
             베타 신청하기
           </button>
@@ -92,7 +92,7 @@ export default function BetaLandingPage() {
               {
                 icon: '⏱️',
                 title: '장기 후기는 찾기 어려워요',
-                desc: '온라인 리뷰 대부분은 1~2주 단기 경험이에요. 6개월·1년 이상의 데이터는 거의 없죠.',
+                desc: '온라인 리뷰 대부분은 1~2주 구매 후기 위주의 단기 경험이에요. 6개월·1년 이상의 데이터는 거의 없죠.',
               },
               {
                 icon: '🐾',
@@ -275,7 +275,7 @@ export default function BetaLandingPage() {
       {/* 7. 미니 푸터 */}
       <footer className="py-8 px-6 bg-gray-900 text-center">
         <p className="text-sm text-gray-500">
-          © 2025 safe petfood ·{' '}
+          © 2026 SafePetFood ·{' '}
           <Link href="/privacy" className="hover:text-gray-400 transition-colors">개인정보처리방침</Link>
         </p>
       </footer>
