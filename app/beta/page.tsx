@@ -57,12 +57,13 @@ export default function BetaLandingPage() {
             베타테스터 모집 중
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-5">
-            우리 아이에게 정말 괜찮은 제품,<br />
+            우리 아이에게<br />
+            정말 괜찮은 제품,<br />
             <span className="text-yellow-500">함께 기록하고 함께 안심해요.</span>
           </h1>
           <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-8">
-            사료·간식·영양제를 오래 먹여본 반려인들의 실제 경험이 모이면,<br className="hidden sm:block" />
-            새로운 반려인도 걱정 없이 시작할 수 있어요.
+            반려인들의 실제 장기 급여 후기를 통해<br />
+            걱정 없이 안심하고 사료, 간식 등을 선택해 보세요.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
