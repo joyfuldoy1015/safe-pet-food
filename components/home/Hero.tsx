@@ -16,14 +16,12 @@ export default function Hero({ onCTAClick }: HeroProps) {
     <section className="bg-gradient-to-b from-yellow-50 to-white py-12 sm:py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-          반려동물과 함께하는 시간<br />
-          가장 따뜻한 순간
+          우리 아이에게 정말 괜찮은 제품,<br />
+          <span className="text-yellow-500">함께 기록하고 함께 안심해요.</span>
         </h1>
-        <div className="text-6xl mb-6">
-          🐱❤️🐶
-        </div>
-        <p className="text-lg md:text-xl text-gray-600 font-medium mb-8">
-          With you, every day is a happy day!
+        <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+          사료·간식·영양제를 오래 먹여본 반려인들의 실제 경험이 모이면,<br className="hidden sm:block" />
+          새로운 반려인도 걱정 없이 시작할 수 있어요.
         </p>
         
         {/* CTAs */}
