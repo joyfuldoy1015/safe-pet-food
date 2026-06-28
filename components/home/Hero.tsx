@@ -21,8 +21,7 @@ export default function Hero({ onCTAClick }: HeroProps) {
           <span className="text-yellow-500">함께 기록하고 함께 안심해요.</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-          사료·간식·영양제를 오래 먹여본 반려인들의 실제 경험이 모이면,<br className="hidden sm:block" />
-          새로운 반려인도 걱정 없이 시작할 수 있어요.
+          실제 반려인의 장기 급여 데이터로 안심하고 선택하세요.
         </p>
         
         {/* CTAs */}
